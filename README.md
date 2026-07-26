@@ -1,4 +1,24 @@
-# Randhawa (v3.0, space)
+# Randhawa & Bhullar
+
+Two deliberately minimal iOS apps that share one idea: your life leaves a
+shape, in space and in time, and both are worth keeping.
+
+- **Randhawa** (this directory) maps your places: one dot each time you open
+  it. [App Store](https://apps.apple.com/app/id6742061604)
+- **Bhullar** ([`Bhullar/`](Bhullar/README.md)) telescopes your time: one
+  grid of dots, from the months of the year to the minutes of today.
+  [App Store](https://apps.apple.com/app/id6787122959)
+- **MemoryKit** ([`MemoryKit/`](MemoryKit/)) is the shared layer: memories
+  (a thought, a photo, a place, a time) made in either app and shown in
+  both, synced only through the user's own private iCloud.
+
+This is the complete source for both shipping apps, MIT licensed. The apps'
+whole promise is privacy by architecture: no accounts, no analytics, no
+servers of ours, and data we cannot read. Open code is the strongest form of
+that promise. Don't take our word for it; read it. The plan lives in
+[`ROADMAP.md`](ROADMAP.md).
+
+## Randhawa (v3.0, space)
 
 A deliberately minimal iOS app: each time you open it, it marks a dot where you
 are. Over weeks and years, your places draw a map only you can read: dense

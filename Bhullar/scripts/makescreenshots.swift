@@ -286,6 +286,7 @@ func render(W: Int, H: Int, outDir: String) {
     shot1(); shot2(); shot3(); shot4(); shot5()
 }
 
-render(W: 1284, H: 2778, outDir: "/Users/prabrandhawa/Desktop/Randhawa/Bhullar/AppStore/screenshots")
-render(W: 2048, H: 2732, outDir: "/Users/prabrandhawa/Desktop/Randhawa/Bhullar/AppStore/screenshots/ipad")
+// Run from the repo root: swift Bhullar/scripts/makescreenshots.swift
+render(W: 1284, H: 2778, outDir: "Bhullar/AppStore/screenshots")
+render(W: 2048, H: 2732, outDir: "Bhullar/AppStore/screenshots/ipad")
 print("done")

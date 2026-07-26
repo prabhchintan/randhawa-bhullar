@@ -277,6 +277,7 @@ func render(W: Int, H: Int, outDir: String) {
     shot1(); shot2(); shot3(); shot4()
 }
 
-render(W: 1284, H: 2778, outDir: "/Users/prabrandhawa/Desktop/Randhawa/AppStore/screenshots")
-render(W: 2048, H: 2732, outDir: "/Users/prabrandhawa/Desktop/Randhawa/AppStore/screenshots/ipad")
+// Run from the repo root: swift scripts/makescreenshots_v2.swift
+render(W: 1284, H: 2778, outDir: "AppStore/screenshots")
+render(W: 2048, H: 2732, outDir: "AppStore/screenshots/ipad")
 print("done")

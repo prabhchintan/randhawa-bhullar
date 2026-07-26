@@ -9,7 +9,8 @@ import Foundation
 // glow where places repeat (the home cluster); the single orange dot is the
 // newest moment. Same near-black ground as the v1 icon, so the family reads.
 let size = 1024
-let outPath = "/Users/prabrandhawa/Desktop/Randhawa/Randhawa/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
+// Run from the repo root: swift scripts/makeicon.swift
+let outPath = "Randhawa/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
 
 let colorSpace = CGColorSpaceCreateDeviceRGB()
 guard let ctx = CGContext(

@@ -7,8 +7,9 @@ import Foundation
 // must be exactly 1024x1024 with no alpha. The pairing is deliberate: Randhawa
 // is cream ink on deep green; Bhullar is dark ink on cream paper.
 let size = 1024
-let srcPath = "/Users/prabrandhawa/Desktop/Randhawa/Bhullar/Bhullar.png"
-let outPath = "/Users/prabrandhawa/Desktop/Randhawa/Bhullar/Bhullar/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
+// Run from the Bhullar directory: swift scripts/makeicon.swift
+let srcPath = "Bhullar.png"
+let outPath = "Bhullar/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
 
 let colorSpace = CGColorSpaceCreateDeviceRGB()
 guard let src = CGImageSourceCreateWithURL(URL(fileURLWithPath: srcPath) as CFURL, nil),
