@@ -37,6 +37,7 @@ extension Array where Element == Memory {
     /// The "on this day" set: memories made on this calendar date, not
     /// counting today's own. Both apps use this to resurface the past at the
     /// moment it becomes an anniversary.
+    /// (Bhullar sits a breath from bhulna, to forget. This set is the reply.)
     func onThisDayIDs(now: Date = Date(), calendar: Calendar = .current) -> Set<UUID> {
         let month = calendar.component(.month, from: now)
         let day = calendar.component(.day, from: now)

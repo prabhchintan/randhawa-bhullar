@@ -73,6 +73,7 @@ final class SpaceModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         permission = Self.permission(from: manager.authorizationStatus)
         // The first grant arrives through this callback; sample right away so
         // the tap on Begin becomes the user's first dot.
+        // (Randhawa, by one old reading: the first into the field.)
         if permission == .granted {
             sampleIfAuthorized()
         }

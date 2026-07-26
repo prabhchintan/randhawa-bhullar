@@ -8,7 +8,9 @@ repository? See the note at the end.)
 
 Work is tracked as GitHub issues labeled `randhawa`, `bhullar`, and
 `memorykit`, with milestones per app release. This file is the readable
-summary; the issues are the working truth.
+summary; the issues are the working truth. The names, the story behind
+them, and the rule that keeps that story quiet live in
+[VISION.md](VISION.md).
 
 ## MemoryKit, the substrate
 
