@@ -1,0 +1,20 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  simulator-builds:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Randhawa (app + widget)
+        run: |
+          xcodebuild -project Randhawa.xcodeproj -target Randhawa \
+            -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
+      - name: Build Bhullar (app + widget)
+        run: |
+          xcodebuild -project Bhullar/Bhullar.xcodeproj -target Bhullar \
+            -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
