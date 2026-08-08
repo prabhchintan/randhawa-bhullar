@@ -11,8 +11,11 @@ process once the machine is set up.
   Distribution signing is cloud managed by that session; no local
   distribution certificate is needed, and `-allowProvisioningUpdates`
   handles profiles and new capabilities from the command line.
-- If `xcode-select -p` points at CommandLineTools, prefix every xcodebuild
-  call with `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
+- `xcode-select -p` must point at `/Applications/Xcode.app/Contents/Developer`,
+  not CommandLineTools. Fixed on this machine 2026-08-08; on a fresh one run
+  `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`. Check with
+  `swift --version`: anything reporting 5.x means the wrong toolchain is active
+  and builds will reject modern syntax.
 - Browser sessions signed into App Store Connect and the CloudKit Console.
 - `gh` authenticated, for tags and the repo.
 

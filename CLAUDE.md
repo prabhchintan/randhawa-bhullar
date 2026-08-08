@@ -17,10 +17,11 @@ Read before changing anything, in this order:
 3. VISION.md: the voice, and the rule that the names story stays quiet.
 4. RELEASING.md: the end to end ship process.
 
-Build checks, from the repo root. The DEVELOPER_DIR prefix is kept because
-xcode-select still points at CommandLineTools (whose Swift is 5.3 from 2020);
-~/.zshrc exports the same variable, so interactive shells are already correct
-and the prefix is only insurance for shells that skip the profile:
+Build checks, from the repo root. No toolchain prefix is needed: as of
+2026-08-08 xcode-select points at Xcode (Swift 6.2), not CommandLineTools. If
+a fresh machine ever reports Swift 5.x from `swift --version`, fix the machine
+rather than prefixing the commands:
+`sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
 
     xcodebuild -project Randhawa.xcodeproj -target Randhawa \
       -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
