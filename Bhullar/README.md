@@ -96,7 +96,7 @@ by test, so the day scales do their own midnight-to-midnight arithmetic.
    there are three, so several scales can sit on the Home Screen at once.
 
 Deployment target is **iOS 17.0**. Bundle IDs `Prabhchintan.Bhullar` /
-`Prabhchintan.Bhullar.BhullarWidget`, team preset, version **2.1 (build 5)**.
+`Prabhchintan.Bhullar.BhullarWidget`, team preset, version **2.1 (build 6)**.
 
 ## CloudKit: one manual step before release
 

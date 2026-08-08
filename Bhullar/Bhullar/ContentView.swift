@@ -9,6 +9,11 @@ struct ContentView: View {
     @State private var showingMemories = false
     @State private var opened: OpenedDot?
 
+    /// Randhawa's moments, read once when the app comes forward rather than
+    /// again on every dot tapped. Bhullar never writes them, so a snapshot per
+    /// foreground is as fresh as the data can be.
+    @State private var moments: [Moment] = []
+
     private var scale: TimeScale { TimeScale(rawValue: scaleRaw) ?? .days }
 
     var body: some View {
@@ -26,7 +31,8 @@ struct ContentView: View {
                     selected: opened?.unit,
                     onSelectUnit: { unit in
                         opened = OpenedDot(unit: unit, scale: scale, reference: timeline.date)
-                    }
+                    },
+                    unitName: scale.unitName
                 )
                 .id(scaleRaw)
                 .transition(.opacity)
@@ -100,17 +106,24 @@ struct ContentView: View {
             )
         }
         .sheet(item: $opened) { dot in
-            DotDetailSheet(dot: dot, store: memoryStore)
+            DotDetailSheet(dot: dot, store: memoryStore, moments: moments)
         }
         .onAppear {
             CloudSync.startIfEnabled()
             CloudSync.shared?.fetchNow()
+            moments = MomentPersistence.load()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 memoryStore.reloadFromDisk()
                 CloudSync.shared?.fetchNow()
+                moments = MomentPersistence.load()
             }
+        }
+        // Randhawa's trail, or a fetch from iCloud, can add dots while Bhullar
+        // is on screen. Pick them up when it does.
+        .onReceive(NotificationCenter.default.publisher(for: MomentSync.didChangeExternally)) { _ in
+            moments = MomentPersistence.load()
         }
     }
 
@@ -262,6 +275,8 @@ private final class PlaceNames: ObservableObject {
 private struct DotDetailSheet: View {
     let dot: OpenedDot
     @ObservedObject var store: MemoryStore
+    /// Handed in already loaded, so tapping a dot never touches the disk.
+    let moments: [Moment]
     @ObservedObject private var placeNames = PlaceNames.shared
     @Environment(\.dismiss) private var dismiss
 
@@ -352,7 +367,7 @@ private struct DotDetailSheet: View {
 
     private func load() {
         guard let interval = dot.interval else { return }
-        stays = visits(in: MomentPersistence.load().within(interval))
+        stays = visits(in: moments.within(interval))
         memories = store.memories.within(interval)
     }
 }

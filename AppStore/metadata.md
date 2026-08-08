@@ -148,7 +148,7 @@ developer account), which is submitting version 2.1 alongside this one.
       so no Production deploy gates this release
 - [x] Hosted privacy and support pages updated and deployed for the trail
 - [x] Screenshots regenerated (5 iPhone + 5 iPad), old 03/04 names deleted
-- [x] Build 3.1 (11) archived and uploaded to App Store Connect
+- [x] Build 3.1 (12) archived and uploaded to App Store Connect
 - [ ] New version 3.1 created on the ASC distribution page
 - [ ] Promo text, keywords, description, What's New updated
 - [ ] Screenshots replaced (iPhone + iPad); note there are 5 now, not 4

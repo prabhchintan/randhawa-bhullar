@@ -98,7 +98,8 @@ Randhawa/
   RandhawaApp.swift        App entry point
   ContentView.swift        Map/constellation screens, memory capture, sync
                            offer, erase, captions
-  SpaceModel.swift         CoreLocation one-shot sampling + moment list
+  SpaceModel.swift         CoreLocation one-shot sampling + moment list, and
+                           LocationTrail, the opt-in background sampler
   Randhawa.entitlements    App Group + iCloud (CloudKit)
   Assets.xcassets          App icon (1024 square, no alpha) + accent color
 RandhawaWidget/
@@ -111,8 +112,11 @@ Archive/randhawa-time-v1/  The v1.0 year-grid sources (now living on in Bhullar)
 
 Both apps and the widget share the moment and memory files through the App
 Group `group.Prabhchintan.Randhawa`. The app reloads widget timelines whenever
-data changes. Sampling rules: When-In-Use authorization only, one location fix
-per foreground activation, activations within 60 seconds ignored.
+data changes. Sampling rules: one location fix per foreground activation, with
+activations within 60 seconds ignored. That is the whole story until the user
+turns the trail on, at which point Always authorization is requested and
+significant-change and visit callbacks add dots too, never closer together than
+the chosen cadence.
 
 Sync design in one paragraph: the JSON files in the App Group stay the source
 of truth, and `CloudSync` (one instance per app process, only when the user
@@ -126,7 +130,8 @@ immediately.
 ## Build & run
 
 1. Open `Randhawa.xcodeproj` in **Xcode 16 or later**.
-2. First build after 3.0: automatic signing must provision two capabilities
+2. First build after 3.0 (already done, kept for a fresh machine): automatic
+   signing must provision two capabilities
    for the app target, the **App Group** (`group.Prabhchintan.Randhawa`) and
    **iCloud (CloudKit)** with container `iCloud.Prabhchintan.Randhawa`. If
    signing complains, open each target's *Signing & Capabilities* tab once and
@@ -135,7 +140,7 @@ immediately.
    location when asked; your first dot appears immediately.
 
 Deployment target is **iOS 17.0** (CKSyncEngine needs 17). Version is **3.1
-(build 11)** on both targets; this ships as an update to the existing App
+(build 12)** on both targets; this ships as an update to the existing App
 Store record (Apple App ID 6742061604).
 
 ## CloudKit: one manual step before release

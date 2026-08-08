@@ -95,7 +95,7 @@ and where all location permission lives.
 ## Pre-submit checklist (v2.1)
 - [x] CloudKit: no schema change in 2.1
 - [x] Screenshots regenerated (6 iPhone + 6 iPad), old 03/04/05 names deleted
-- [x] Build 2.1 (5) archived and uploaded to App Store Connect
+- [x] Build 2.1 (6) archived and uploaded to App Store Connect
 - [ ] New version 2.1 created on the ASC distribution page
 - [ ] Promo text, keywords, description, What's New updated
 - [ ] Screenshots replaced (iPhone + iPad); note there are 6 now, not 5

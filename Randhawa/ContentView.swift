@@ -180,9 +180,15 @@ struct ContentView: View {
     }
 
     private var eraseMessage: String {
-        CloudSync.isEnabled
+        var message = CloudSync.isEnabled
             ? "Every moment and memory is deleted from this device and from your iCloud. This cannot be undone."
             : "Every moment and memory is deleted from this device. There is no copy anywhere else, so this cannot be undone."
+        // Erasing does not answer the trail question, so say so rather than
+        // let a fresh dot appear a mile down the road and look like a bug.
+        if TrailSettings.cadence.isOn {
+            message += " The trail stays on, so it will begin a new map from wherever you go next. Turn it off first if you would rather it did not."
+        }
+        return message
     }
 
     /// Offer iCloud sync once the map is worth keeping, and only until the
@@ -221,16 +227,17 @@ struct ContentView: View {
 /// honour, and how to take it all back.
 private struct TrailSheet: View {
     @ObservedObject var model: SpaceModel
+    @ObservedObject private var trail = LocationTrail.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
-    /// Mirrors the stored cadence so the rows update the instant one is tapped.
-    @State private var cadence = TrailSettings.cadence
     @State private var confirmingForget = false
 
-    /// Recomputed when the sheet appears and after every prompt, since the
-    /// answer lives in Settings and can change while the app is open.
-    @State private var needsAlways = false
+    private var cadence: TrailCadence { trail.cadence }
+
+    /// True whenever the trail is on but iOS has not granted Always, whether
+    /// the user declined the prompt or revoked it later in Settings.
+    private var needsAlways: Bool { !trail.isAlwaysAuthorized }
 
     var body: some View {
         NavigationStack {
@@ -275,16 +282,17 @@ private struct TrailSheet: View {
                     }
                 }
 
-                Section {
+                Section("What it has gathered") {
+                    // The count is a row rather than a footer so the section
+                    // never renders as a header and footer with a hole in it.
+                    Text(gatheredFooter)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                     if model.trailCount > 0 {
                         Button("Forget the trail", role: .destructive) {
                             confirmingForget = true
                         }
                     }
-                } header: {
-                    Text("What it has gathered")
-                } footer: {
-                    Text(gatheredFooter)
                 }
             }
             .navigationTitle("The trail")
@@ -307,32 +315,33 @@ private struct TrailSheet: View {
             }
         }
         .presentationDetents([.large])
-        .onAppear { refreshAuthorization() }
     }
 
     private var gatheredFooter: String {
-        let trail = model.trailCount
-        let opened = model.moments.count - trail
+        let trailDots = model.trailCount
+        let opened = model.moments.count - trailDots
         let openedWord = opened == 1 ? "dot" : "dots"
-        if trail == 0 {
+        if trailDots == 0 {
+            if cadence.isOn {
+                return "\(opened) \(openedWord) so far, every one of them from opening the app. The trail adds its first once you have gone somewhere."
+            }
             return "\(opened) \(openedWord) so far, every one of them from opening the app."
         }
-        let trailWord = trail == 1 ? "dot" : "dots"
-        return "\(trail) \(trailWord) from the trail, \(opened) \(openedWord) from opening the app."
+        let trailWord = trailDots == 1 ? "dot" : "dots"
+        var line = "\(trailDots) \(trailWord) from the trail, \(opened) \(openedWord) from opening the app."
+        // Saying when the last one landed is the only honest way to show the
+        // trail is alive: there is nothing to watch, by design.
+        if let last = model.lastTrailDate {
+            let elapsed = Date().timeIntervalSince(last)
+            line += elapsed < 120
+                ? " The last one just now."
+                : " The last one \(last.formatted(.relative(presentation: .named)))."
+        }
+        return line
     }
 
     private func choose(_ option: TrailCadence) {
-        cadence = option
         LocationTrail.shared.setCadence(option)
-        // The Always prompt is answered outside this view. Give iOS a moment
-        // to report the new status before deciding whether to ask for Settings.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            refreshAuthorization()
-        }
-    }
-
-    private func refreshAuthorization() {
-        needsAlways = !LocationTrail.shared.isAlwaysAuthorized
     }
 }
 

@@ -49,6 +49,10 @@ final class SpaceModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     var trailCount: Int { moments.lazy.filter { $0.kind == .trail }.count }
 
+    /// When the trail last added a dot, for the one line in settings that shows
+    /// it is working. Moments are kept sorted, so the last match is the newest.
+    var lastTrailDate: Date? { moments.last { $0.kind == .trail }?.date }
+
     /// Forgets every dot the trail placed, keeping the ones the user made by
     /// opening the app. The counterpart to switching the trail on: whatever it
     /// gathered can be taken back in one tap, here and in iCloud.
@@ -160,17 +164,24 @@ final class SpaceModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 /// for a location event there may be no window and no view, so nothing in the
 /// SwiftUI hierarchy can be trusted to exist. Monitoring has to be re-armed from
 /// the app's own initialiser, which is what `RandhawaApp` does.
-final class LocationTrail: NSObject, CLLocationManagerDelegate {
+final class LocationTrail: NSObject, ObservableObject, CLLocationManagerDelegate {
     static let shared = LocationTrail()
+
+    /// Mirrors of the two facts the settings screen draws from. Published so
+    /// that screen reacts to iOS answering rather than guessing when it will:
+    /// the Always prompt is answered outside the app, and the user can revoke
+    /// access in Settings while the sheet is open.
+    @Published private(set) var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    @Published private(set) var cadence: TrailCadence = .off
 
     private let manager = CLLocationManager()
 
-    /// Set while a request is in flight so the authorization callback knows the
-    /// user is mid-decision and can finish turning the trail on for them.
-    private var awaitingAlwaysDecision = false
-
     private override init() {
         super.init()
+        cadence = TrailSettings.cadence
+        // Seed both mirrors before the first delegate callback arrives, so a
+        // sheet opened immediately after launch is never briefly wrong.
+        authorizationStatus = manager.authorizationStatus
         manager.delegate = self
         // Neighbourhood resolution. The map clusters at 35 and 150 metres, so
         // anything finer than this is battery spent on precision nobody sees.
@@ -187,28 +198,19 @@ final class LocationTrail: NSObject, CLLocationManagerDelegate {
     }
 
     var isAlwaysAuthorized: Bool {
-        manager.authorizationStatus == .authorizedAlways
-    }
-
-    /// Whether the user has been asked for Always and said no. The settings
-    /// screen uses this to stop offering a prompt that iOS will not show again.
-    var needsSettingsForAlways: Bool {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .denied, .restricted: return true
-        default: return false
-        }
+        authorizationStatus == .authorizedAlways
     }
 
     /// Turns the trail on, off, or to a different cadence. Asks for Always the
     /// first time it is needed; iOS shows that prompt once per install, and
     /// after that only Settings can change the answer.
-    func setCadence(_ cadence: TrailCadence) {
-        TrailSettings.cadence = cadence
-        if cadence.isOn && !isAlwaysAuthorized {
-            awaitingAlwaysDecision = true
+    func setCadence(_ newCadence: TrailCadence) {
+        TrailSettings.cadence = newCadence
+        cadence = newCadence
+        if newCadence.isOn && !isAlwaysAuthorized {
             manager.requestAlwaysAuthorization()
         }
-        apply(cadence)
+        apply(newCadence)
     }
 
     /// Starts or stops the monitoring the cadence calls for. Safe to call
@@ -243,13 +245,11 @@ final class LocationTrail: NSObject, CLLocationManagerDelegate {
         guard CLLocationCoordinate2DIsValid(CLLocationCoordinate2D(latitude: latitude, longitude: longitude)) else {
             return
         }
-        // Throttle against the newest dot from any source, so a trail wake
-        // seconds after the user opened the app does not double-mark the spot.
-        if let newest = MomentSync.newestDate(), date.timeIntervalSince(newest) < cadence.minimumSpacing {
-            return
-        }
         let moment = Moment(latitude: latitude, longitude: longitude, date: date, source: .trail)
-        MomentSync.append(moment)
+        // One read of the moment file, not two: the spacing check and the
+        // append share it. Nothing else happens if the dot was too close to
+        // the last one.
+        guard MomentSync.appendIfSpaced(moment, minimumSpacing: cadence.minimumSpacing) else { return }
         Task { @MainActor in
             CloudSync.startIfEnabled()
             CloudSync.shared?.momentAppended(moment.id)
@@ -259,9 +259,7 @@ final class LocationTrail: NSObject, CLLocationManagerDelegate {
     // MARK: - CLLocationManagerDelegate
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        if awaitingAlwaysDecision, manager.authorizationStatus != .notDetermined {
-            awaitingAlwaysDecision = false
-        }
+        authorizationStatus = manager.authorizationStatus
         // Covers the grant, and also the revoke: someone who turns Always off
         // in Settings should stop being followed immediately.
         apply(TrailSettings.cadence)

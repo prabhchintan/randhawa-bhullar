@@ -51,6 +51,12 @@ struct DotGrid: View {
     /// have no sheets to open and ignore gestures anyway.
     var onSelectUnit: ((Int) -> Void)?
 
+    /// Names the unit for VoiceOver ("Day 219 of 365"). The grid is a single
+    /// accessibility element, so without this the whole feature would be
+    /// unreachable: there is no per-dot element to focus, and hit testing a
+    /// dot a few points wide is not something anyone should have to do.
+    var unitName: String = "Unit"
+
     var body: some View {
         GeometryReader { proxy in
             Canvas { context, size in
@@ -103,8 +109,16 @@ struct DotGrid: View {
         .accessibilityElement()
         .accessibilityLabel("Time progress")
         .accessibilityValue(
-            "Unit \(position.index) of \(position.total), \(position.percent) percent elapsed"
+            "\(unitName) \(position.index) of \(position.total), \(position.percent) percent elapsed"
         )
+        .accessibilityAddTraits(onSelectUnit == nil ? [] : .isButton)
+        .accessibilityHint(onSelectUnit == nil ? "" : "Opens the current \(unitName.lowercased())")
+        // Activating the element opens the unit in progress. Sighted users get
+        // any dot by tapping it; this at least makes the sheet reachable, and
+        // "now" is the one dot that needs no aiming to mean something.
+        .accessibilityAction {
+            onSelectUnit?(position.index)
+        }
     }
 }
 

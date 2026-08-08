@@ -86,13 +86,13 @@ struct BhullarWidgetEntryView: View {
         case .accessoryCircular:
             ZStack {
                 AccessoryWidgetBackground()
-                DotGrid(position: entry.position, palette: .accessory, dotScale: 0.62)
+                DotGrid(position: entry.position, palette: .accessory, dotScale: 0.62, unitName: entry.scale.unitName)
                     .padding(2)
             }
 
         case .accessoryRectangular:
             HStack(spacing: 8) {
-                DotGrid(position: entry.position, palette: .accessory, dotScale: 0.7)
+                DotGrid(position: entry.position, palette: .accessory, dotScale: 0.7, unitName: entry.scale.unitName)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("\(entry.position.percent)%")
                         .font(.headline)
@@ -102,7 +102,7 @@ struct BhullarWidgetEntryView: View {
             }
 
         default: // systemSmall, systemMedium, systemLarge
-            DotGrid(position: entry.position)
+            DotGrid(position: entry.position, unitName: entry.scale.unitName)
         }
     }
 }

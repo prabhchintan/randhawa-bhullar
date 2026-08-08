@@ -137,11 +137,28 @@ enum MomentSync {
         didChange()
     }
 
-    /// The most recent moment's date, whatever wrote it. The trail throttles
-    /// against this rather than its own last sample, so opening the app and
-    /// the trail waking up cannot place two dots a second apart.
-    static func newestDate() -> Date? {
-        MomentPersistence.load().map(\.date).max()
+    /// Appends only if the newest moment on file is at least `minimumSpacing`
+    /// older, and reports whether it did.
+    ///
+    /// The spacing check reads the same file the append writes, so it happens
+    /// here rather than in the caller: a trail wake gets a few seconds of
+    /// background time, and loading the whole moment list twice to answer one
+    /// question is the kind of waste that grows with the file. Throttling
+    /// against the newest moment from any source is deliberate, so opening the
+    /// app and the trail waking cannot place two dots a second apart.
+    @discardableResult
+    static func appendIfSpaced(_ moment: Moment, minimumSpacing: TimeInterval) -> Bool {
+        var moments = MomentPersistence.load()
+        if let newest = moments.lazy.map(\.date).max(),
+           moment.date.timeIntervalSince(newest) < minimumSpacing {
+            return false
+        }
+        guard !moments.contains(where: { $0.id == moment.id }) else { return false }
+        moments.append(moment)
+        moments.sort { $0.date < $1.date }
+        MomentPersistence.save(moments)
+        didChange()
+        return true
     }
 
     static func remove(ids: Set<UUID>) {
@@ -275,26 +292,77 @@ enum MomentGeometry {
         var count: Int
     }
 
+    /// A square of the lookup grid, one clustering radius tall.
+    private struct Cell: Hashable {
+        let lat: Int
+        let lon: Int
+    }
+
     /// Greedy clustering: each moment joins the first clump within
     /// `radiusMeters` (tracked as a running average), or starts a new one.
     /// Order-dependent but stable, cheap, and plenty for rendering density.
+    ///
+    /// The obvious way to write this compares every moment against every clump,
+    /// which is fine while moments only arrive when someone opens the app. The
+    /// trail breaks that assumption, so clumps are indexed into a grid and each
+    /// moment only looks at the cells its radius can actually reach. Output is
+    /// identical to the all-pairs version, including clump order and the rule
+    /// that the earliest eligible clump wins.
     static func clumps(in moments: [Moment], radiusMeters: Double) -> [Clump] {
+        guard !moments.isEmpty, radiusMeters > 0 else { return [] }
         var result: [Clump] = []
+        var buckets: [Cell: [Int]] = [:]
+
+        // Cells are one radius of latitude on a side. Latitude degrees are a
+        // fixed distance, so cell height is constant; longitude degrees shrink
+        // toward the poles, which makes cells narrower than a radius up there,
+        // so the horizontal search widens to compensate.
+        let cellDegrees = radiusMeters / metersPerDegree
+        func cell(_ latitude: Double, _ longitude: Double) -> Cell {
+            Cell(
+                lat: Int((latitude / cellDegrees).rounded(.down)),
+                lon: Int((longitude / cellDegrees).rounded(.down))
+            )
+        }
+
         for moment in moments {
-            var joined = false
-            for i in 0..<result.count {
-                let clump = result[i]
-                if metersBetween(clump.latitude, clump.longitude, moment.latitude, moment.longitude) <= radiusMeters {
-                    let n = Double(clump.count)
-                    result[i].latitude = (clump.latitude * n + moment.latitude) / (n + 1)
-                    result[i].longitude = (clump.longitude * n + moment.longitude) / (n + 1)
-                    result[i].count += 1
-                    joined = true
-                    break
+            let home = cell(moment.latitude, moment.longitude)
+            let cosLat = Swift.max(cos(moment.latitude * Double.pi / 180), 0.01)
+            let lonReach = Int((1 / cosLat).rounded(.up))
+
+            var winner: Int?
+            for dLat in -1...1 {
+                for dLon in -lonReach...lonReach {
+                    guard let candidates = buckets[Cell(lat: home.lat + dLat, lon: home.lon + dLon)] else { continue }
+                    for index in candidates {
+                        // Skip anything that cannot beat the clump already found;
+                        // "first one wins" is what makes this stable.
+                        if let winner, index >= winner { continue }
+                        let clump = result[index]
+                        if metersBetween(clump.latitude, clump.longitude, moment.latitude, moment.longitude) <= radiusMeters {
+                            winner = index
+                        }
+                    }
                 }
             }
-            if !joined {
+
+            guard let index = winner else {
                 result.append(Clump(id: result.count, latitude: moment.latitude, longitude: moment.longitude, count: 1))
+                buckets[home, default: []].append(result.count - 1)
+                continue
+            }
+
+            let before = cell(result[index].latitude, result[index].longitude)
+            let n = Double(result[index].count)
+            result[index].latitude = (result[index].latitude * n + moment.latitude) / (n + 1)
+            result[index].longitude = (result[index].longitude * n + moment.longitude) / (n + 1)
+            result[index].count += 1
+            // The running average moves the clump, occasionally across a cell
+            // boundary. Reindex when it does, or later moments will not find it.
+            let after = cell(result[index].latitude, result[index].longitude)
+            if after != before {
+                buckets[before]?.removeAll { $0 == index }
+                buckets[after, default: []].append(index)
             }
         }
         return result
