@@ -17,9 +17,10 @@ Read before changing anything, in this order:
 3. VISION.md: the voice, and the rule that the names story stays quiet.
 4. RELEASING.md: the end to end ship process.
 
-Build checks, from the repo root (prefix with
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer when the active
-developer directory is CommandLineTools):
+Build checks, from the repo root. The DEVELOPER_DIR prefix is kept because
+xcode-select still points at CommandLineTools (whose Swift is 5.3 from 2020);
+~/.zshrc exports the same variable, so interactive shells are already correct
+and the prefix is only insurance for shells that skip the profile:
 
     xcodebuild -project Randhawa.xcodeproj -target Randhawa \
       -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
