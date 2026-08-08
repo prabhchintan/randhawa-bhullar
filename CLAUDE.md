@@ -3,6 +3,11 @@
 GitHub is the source of truth. Pull before working, commit and push when
 done, and tag releases as described in RELEASING.md.
 
+This repository lives at ~/Desktop/prabhchintan.com/Randhawa. It sits inside
+the website repository's folder for convenience and is ignored by it; the two
+are separate repositories with separate remotes, and neither should ever be
+committed into the other.
+
 Read before changing anything, in this order:
 
 1. MemoryKit/README.md: the shared data contract. Its compatibility rules
@@ -30,7 +35,12 @@ House style:
   are verified through App Store updates.
 - Widget targets compile only the widget safe MemoryKit files
   (MomentStore.swift, MemoryModel.swift); check target membership before
-  adding types to shared files.
+  adding types to shared files. Bhullar's widget compiles TimeScale.swift and
+  DotGrid.swift but neither MemoryKit file, so nothing in those two may
+  mention Moment or Memory.
+- The trail (background location, Randhawa 3.1) ships under five constraints
+  written down in ROADMAP.md under "The one we reversed". Any change that
+  cannot honour all five should turn the trail off instead.
 - The apps' public privacy and support pages are not in this repo; they
   live in the maintainer's website repo and are served at
   prabhchintan.com/randhawa/privacy and /randhawa/support.

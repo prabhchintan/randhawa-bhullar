@@ -63,11 +63,86 @@ enum TimeScale: String, CaseIterable {
         }
     }
 
-    /// The next scale in the tap-to-zoom cycle, wrapping at the end.
+    /// The next scale in the zoom cycle, finer, wrapping at the end.
     var next: TimeScale {
         let all = TimeScale.allCases
         let position = all.firstIndex(of: self) ?? 0
         return all[(position + 1) % all.count]
+    }
+
+    /// The previous scale in the zoom cycle, coarser, wrapping at the start.
+    var previous: TimeScale {
+        let all = TimeScale.allCases
+        let position = all.firstIndex(of: self) ?? 0
+        return all[(position + all.count - 1) % all.count]
+    }
+
+    /// The calendar component one dot stands for at this scale.
+    var unit: Calendar.Component {
+        switch self {
+        case .months: return .month
+        case .weeks: return .weekOfYear
+        case .days: return .day
+        case .hours: return .hour
+        case .minutes: return .minute
+        }
+    }
+
+    /// The span of time that dot number `index` covers, in the year (or the
+    /// day) that `date` belongs to. This is the inverse of `position`, and it
+    /// is what lets a tapped dot become a question with an answer: what
+    /// happened between these two instants.
+    ///
+    /// Built by walking forward from the start of the span rather than by
+    /// arithmetic, so leap years, daylight saving, and short months come out
+    /// of the calendar instead of being special-cased here.
+    func interval(ofUnit index: Int, containing date: Date = Date(), calendar: Calendar = .current) -> DateInterval? {
+        guard let anchor = spanStart(containing: date, calendar: calendar),
+              let start = calendar.date(byAdding: unit, value: index - 1, to: anchor),
+              let end = calendar.date(byAdding: unit, value: 1, to: start) else { return nil }
+        return DateInterval(start: start, end: end)
+    }
+
+    /// The first instant of the span this scale divides: the start of the year
+    /// for the year scales, the start of the day for the day scales.
+    private func spanStart(containing date: Date, calendar: Calendar) -> Date? {
+        switch self {
+        case .months, .days:
+            return calendar.dateInterval(of: .year, for: date)?.start
+        case .weeks:
+            // Weeks are ordinal within the year but do not start on 1 January,
+            // so the first week's own start is the anchor. Without this, week
+            // N would be offset by however many days the year began mid-week.
+            guard let yearStart = calendar.dateInterval(of: .year, for: date)?.start else { return nil }
+            return calendar.dateInterval(of: .weekOfYear, for: yearStart)?.start
+        case .hours, .minutes:
+            return calendar.startOfDay(for: date)
+        }
+    }
+
+    /// A human label for one dot, used as the title when a dot is opened.
+    func label(ofUnit index: Int, containing date: Date = Date(), calendar: Calendar = .current) -> String {
+        guard let interval = interval(ofUnit: index, containing: date, calendar: calendar) else {
+            return "\(unitName) \(index)"
+        }
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = .current
+        switch self {
+        case .months:
+            formatter.setLocalizedDateFormatFromTemplate("MMMM y")
+        case .weeks:
+            formatter.setLocalizedDateFormatFromTemplate("MMMd")
+            let end = interval.end.addingTimeInterval(-1)
+            return formatter.string(from: interval.start) + " to " + formatter.string(from: end)
+        case .days:
+            formatter.setLocalizedDateFormatFromTemplate("EEEE MMMM d")
+        case .hours:
+            formatter.setLocalizedDateFormatFromTemplate("jmm")
+        case .minutes:
+            formatter.setLocalizedDateFormatFromTemplate("jmm")
+        }
+        return formatter.string(from: interval.start)
     }
 
     /// Where `date` falls on this scale, per `calendar`.

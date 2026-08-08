@@ -100,6 +100,12 @@ final class CloudSync: CKSyncEngineDelegate {
         engine.state.add(pendingRecordZoneChanges: [.saveRecord(Self.recordID(moment: id))])
     }
 
+    /// Moments are otherwise append-only, but the trail can be forgotten on
+    /// request, and a dot deleted here must not come back on the next fetch.
+    func momentDeleted(_ id: UUID) {
+        engine.state.add(pendingRecordZoneChanges: [.deleteRecord(Self.recordID(moment: id))])
+    }
+
     func memoryChanged(_ id: UUID) {
         engine.state.add(pendingRecordZoneChanges: [.saveRecord(Self.recordID(memory: id))])
     }

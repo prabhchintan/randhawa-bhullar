@@ -34,6 +34,14 @@ struct Memory: Codable, Equatable, Identifiable {
 }
 
 extension Array where Element == Memory {
+    /// Every memory made inside a span of time, newest first, matching the
+    /// order every list in both apps shows. Half-open, like the moment
+    /// version, so no memory belongs to two neighbouring units of time.
+    func within(_ interval: DateInterval) -> [Memory] {
+        filter { $0.date >= interval.start && $0.date < interval.end }
+            .sorted { $0.date > $1.date }
+    }
+
     /// The "on this day" set: memories made on this calendar date, not
     /// counting today's own. Both apps use this to resurface the past at the
     /// moment it becomes an anniversary.

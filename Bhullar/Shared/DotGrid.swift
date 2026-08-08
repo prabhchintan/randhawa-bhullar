@@ -43,33 +43,61 @@ struct DotGrid: View {
     /// gutters between dots.
     var dotScale: CGFloat = 0.7
 
-    var body: some View {
-        Canvas { context, size in
-            let layout = GridLayout(count: position.total, in: size)
-            let radius = layout.cell * dotScale / 2
-            guard radius > 0 else { return }
-            let current = position.index
+    /// The unit the user has opened, drawn with a ring so the grid says which
+    /// dot the sheet is talking about.
+    var selected: Int?
 
-            for index in 0..<position.total {
-                let unit = index + 1
-                let center = layout.center(of: index)
-                let rect = CGRect(
-                    x: center.x - radius,
-                    y: center.y - radius,
-                    width: radius * 2,
-                    height: radius * 2
-                )
-                let color: Color
-                if unit == current {
-                    color = palette.today
-                } else if highlighted.contains(unit) {
-                    color = palette.memory
-                } else if unit < current {
-                    color = palette.elapsed
-                } else {
-                    color = palette.remaining
+    /// Set by the app to make dots openable. Left nil by the widgets, which
+    /// have no sheets to open and ignore gestures anyway.
+    var onSelectUnit: ((Int) -> Void)?
+
+    var body: some View {
+        GeometryReader { proxy in
+            Canvas { context, size in
+                let layout = GridLayout(count: position.total, in: size)
+                let radius = layout.cell * dotScale / 2
+                guard radius > 0 else { return }
+                let current = position.index
+
+                for index in 0..<position.total {
+                    let unit = index + 1
+                    let center = layout.center(of: index)
+                    let rect = CGRect(
+                        x: center.x - radius,
+                        y: center.y - radius,
+                        width: radius * 2,
+                        height: radius * 2
+                    )
+                    let color: Color
+                    if unit == current {
+                        color = palette.today
+                    } else if highlighted.contains(unit) {
+                        color = palette.memory
+                    } else if unit < current {
+                        color = palette.elapsed
+                    } else {
+                        color = palette.remaining
+                    }
+                    context.fill(Path(ellipseIn: rect), with: .color(color))
+
+                    // The ring sits outside the dot, so selecting one never
+                    // changes how much of the field is filled in.
+                    if unit == selected {
+                        let ring = rect.insetBy(dx: -radius * 0.9, dy: -radius * 0.9)
+                        context.stroke(
+                            Path(ellipseIn: ring),
+                            with: .color(palette.today),
+                            lineWidth: Swift.max(radius * 0.35, 1)
+                        )
+                    }
                 }
-                context.fill(Path(ellipseIn: rect), with: .color(color))
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { point in
+                guard let onSelectUnit else { return }
+                let layout = GridLayout(count: position.total, in: proxy.size)
+                guard let unit = layout.unit(at: point) else { return }
+                onSelectUnit(unit)
             }
         }
         .accessibilityElement()
@@ -84,11 +112,13 @@ struct DotGrid: View {
 /// the layout off the available rect means the grid looks deliberate at any
 /// widget family or screen size without per-size tuning.
 private struct GridLayout {
+    let count: Int
     let columns: Int
     let cell: CGFloat
     let origin: CGPoint
 
     init(count: Int, in size: CGSize) {
+        self.count = count
         guard count > 0, size.width > 0, size.height > 0 else {
             columns = 1
             cell = 0
@@ -123,6 +153,22 @@ private struct GridLayout {
             x: (size.width - gridWidth) / 2,
             y: (size.height - gridHeight) / 2
         )
+    }
+
+    /// The 1-based unit under `point`, or nil outside the grid.
+    ///
+    /// Hit-testing the cell rather than the drawn circle is deliberate: at the
+    /// minute scale a dot is a few points across, and asking someone to hit
+    /// that would make the whole feature feel broken. Every point inside the
+    /// block belongs to exactly one dot, so there are no dead gutters.
+    func unit(at point: CGPoint) -> Int? {
+        guard cell > 0 else { return nil }
+        let column = Int(floor((point.x - origin.x) / cell))
+        let row = Int(floor((point.y - origin.y) / cell))
+        guard column >= 0, column < columns, row >= 0 else { return nil }
+        let index = row * columns + column
+        guard index >= 0, index < count else { return nil }
+        return index + 1
     }
 
     func center(of index: Int) -> CGPoint {

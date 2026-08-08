@@ -44,6 +44,21 @@ let (dayIdx, dayTotal) = position(.day, in: .year, fallback: 365)
 let (hourIdx, hourTotal) = position(.hour, in: .day, fallback: 24)
 let dayPercent = Int(Double(dayIdx) / Double(dayTotal) * 100)
 
+// The dot shot 3 opens: a day far enough back to read as history rather than
+// as today. Its label is derived from the same index, so the ringed dot and the
+// card underneath can never drift apart.
+let openedDay = Swift.max(dayIdx - 34, 1)
+let openedDate: Date = {
+    let yearStart = cal.dateInterval(of: .year, for: now)?.start ?? now
+    return cal.date(byAdding: .day, value: openedDay - 1, to: yearStart) ?? now
+}()
+let openedDayLabel: String = {
+    let f = DateFormatter()
+    f.calendar = cal
+    f.setLocalizedDateFormatFromTemplate("EEEEdMMMM")
+    return f.string(from: openedDate)
+}()
+
 func render(W: Int, H: Int, outDir: String) {
     let s = CGFloat(W) / 1284.0
 
@@ -86,10 +101,11 @@ func render(W: Int, H: Int, outDir: String) {
 
     /// Draws `total` dots (current one orange, elapsed filled, units in
     /// `highlighted` gold, the way memory days render) packed into rect.
+    @discardableResult
     func drawDots(_ ctx: CGContext, in rect: CGRect, current: Int, total: Int,
                   dotScale: CGFloat, elapsedColor: CGColor, remainingColor: CGColor,
-                  highlighted: Set<Int> = []) {
-        guard total > 0, rect.width > 0, rect.height > 0 else { return }
+                  highlighted: Set<Int> = [], ringed: Int? = nil) -> CGPoint {
+        guard total > 0, rect.width > 0, rect.height > 0 else { return .zero }
         var bestCols = 1
         var bestCell: CGFloat = 0
         for c in 1...total {
@@ -104,6 +120,8 @@ func render(W: Int, H: Int, outDir: String) {
         let originX = rect.minX + (rect.width - gridW) / 2
         let originTop = (rect.height - gridH) / 2
         let radius = cell * dotScale / 2
+        var ringCenter: CGPoint?
+        var ringRadius: CGFloat = 0
         for i in 0..<total {
             let unit = i + 1
             let col = i % bestCols
@@ -116,7 +134,19 @@ func render(W: Int, H: Int, outDir: String) {
             else if unit < current { ctx.setFillColor(elapsedColor) }
             else { ctx.setFillColor(remainingColor) }
             ctx.fillEllipse(in: dot)
+            if unit == ringed {
+                ringCenter = CGPoint(x: cx, y: cy)
+                ringRadius = radius
+            }
         }
+        if let center = ringCenter {
+            ctx.setStrokeColor(white)
+            ctx.setLineWidth(6 * s)
+            let rr = ringRadius * 2.4
+            ctx.strokeEllipse(in: CGRect(x: center.x - rr, y: center.y - rr, width: rr * 2, height: rr * 2))
+            return center
+        }
+        return .zero
     }
 
     // Shot 1: hero, the day-of-year grid, the app's classic face.
@@ -145,7 +175,7 @@ func render(W: Int, H: Int, outDir: String) {
                      centerX: CGFloat(W) / 2, baselineFromTop: pctBaseline)
         drawCentered(ctx, line("Day \(dayIdx) of \(dayTotal) · \(dayTotal - dayIdx) left", font(medium, 54 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: pctBaseline + 90 * s)
-        drawCentered(ctx, line("tap the dots to zoom", font(medium, 44 * s), rgb(0.45, 0.45, 0.5)),
+        drawCentered(ctx, line("swipe to zoom · tap a dot to open", font(medium, 44 * s), rgb(0.45, 0.45, 0.5)),
                      centerX: CGFloat(W) / 2, baselineFromTop: pctBaseline + 160 * s)
         save(ctx, "01-app.png")
     }
@@ -178,13 +208,67 @@ func render(W: Int, H: Int, outDir: String) {
         tile(leftX, topRow + rowGap, current: dayIdx, total: dayTotal, label: "\(dayTotal) days")
         tile(leftX + tileSize + gap, topRow + rowGap, current: hourIdx, total: hourTotal, label: "\(hourTotal) hours")
 
-        drawCentered(ctx, line("One grid. Tap to zoom.", font(medium, 50 * s), subtle),
+        drawCentered(ctx, line("One grid. Swipe to zoom.", font(medium, 50 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: topRow + rowGap + tileSize + 170 * s)
         save(ctx, "02-scales.png")
     }
 
-    // Shot 3: the widgets.
-    func shot3() {
+    // Shot 3: opening a dot, the 2.1 headline. The card is the real sheet's
+    // shape: where you were on top, what you kept underneath.
+    func shot3open() {
+        let ctx = newContext()
+        backgroundGradient(ctx)
+        caption(ctx, "Open any dot", nil)
+        let subBase = CGFloat(H) * 0.090 + 175 * s
+        drawCentered(ctx, line("Where you were, and what you kept,", font(medium, 48 * s), subtle),
+                     centerX: CGFloat(W) / 2, baselineFromTop: subBase)
+        drawCentered(ctx, line("for that stretch of time.", font(medium, 48 * s), subtle),
+                     centerX: CGFloat(W) / 2, baselineFromTop: subBase + 74 * s)
+
+        let gridTop = CGFloat(H) * 0.265
+        let gridH = CGFloat(H) * 0.20
+        let gridRect = rectFromTop(x: CGFloat(W) * 0.12, topInset: gridTop,
+                                   w: CGFloat(W) * 0.76, h: gridH)
+        // Ring a day well before today, so the shot shows a dot being opened
+        // rather than the app simply reporting the present.
+        drawDots(ctx, in: gridRect, current: dayIdx, total: dayTotal,
+                 dotScale: 0.72, elapsedColor: white, remainingColor: dim,
+                 highlighted: [openedDay], ringed: openedDay)
+
+        let cardW = CGFloat(W) * 0.80
+        let cardH = 760 * s
+        let cardTop = gridTop + gridH + 110 * s
+        let card = rectFromTop(x: (CGFloat(W) - cardW) / 2, topInset: cardTop, w: cardW, h: cardH)
+        ctx.addPath(roundedPath(card, 56 * s)); ctx.setFillColor(rgb(1, 1, 1, 0.09)); ctx.fillPath()
+
+        let leftX = card.minX + 72 * s
+        func text(_ str: String, _ f: CTFont, _ color: CGColor, topOffset: CGFloat, x: CGFloat? = nil) {
+            ctx.textPosition = CGPoint(x: x ?? leftX, y: CGFloat(H) - (cardTop + topOffset))
+            CTLineDraw(line(str, f, color), ctx)
+        }
+
+        text(openedDayLabel, font(bold, 54 * s), white, topOffset: 104 * s)
+        text("WHERE YOU WERE", font(medium, 36 * s), rgb(0.5, 0.5, 0.55), topOffset: 206 * s)
+        text("Berkeley, California", font(medium, 48 * s), white, topOffset: 288 * s)
+        text("8:40 AM to 12:15 PM", font(medium, 40 * s), subtle, topOffset: 350 * s)
+        text("San Francisco, California", font(medium, 48 * s), white, topOffset: 434 * s)
+        text("1:20 PM to 6:05 PM", font(medium, 40 * s), subtle, topOffset: 496 * s)
+        text("WHAT YOU KEPT", font(medium, 36 * s), rgb(0.5, 0.5, 0.55), topOffset: 594 * s)
+
+        // The gold dot that marks a memory, then its line.
+        let dotR = 15 * s
+        let dotCX = leftX + dotR
+        let dotCY = CGFloat(H) - (cardTop + 668 * s) + 16 * s
+        ctx.setFillColor(gold)
+        ctx.fillEllipse(in: CGRect(x: dotCX - dotR, y: dotCY - dotR, width: dotR * 2, height: dotR * 2))
+        text("First morning in the new place", font(medium, 46 * s), white,
+             topOffset: 676 * s, x: leftX + 58 * s)
+
+        save(ctx, "03-open.png")
+    }
+
+    // Shot 4: the widgets.
+    func shot4widgets() {
         let ctx = newContext()
         backgroundGradient(ctx)
         caption(ctx, "Widgets at", "every scale")
@@ -223,11 +307,11 @@ func render(W: Int, H: Int, outDir: String) {
 
         drawCentered(ctx, line("Lock Screen sizes included.", font(medium, 50 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: medTop + medH + 190 * s)
-        save(ctx, "03-widgets.png")
+        save(ctx, "04-widgets.png")
     }
 
-    // Shot 4: memories, the 2.0 headline.
-    func shot4() {
+    // Shot 5: memories, the 2.0 headline.
+    func shot5memories() {
         let ctx = newContext()
         backgroundGradient(ctx)
         caption(ctx, "Memories return", "on their day")
@@ -257,11 +341,11 @@ func render(W: Int, H: Int, outDir: String) {
         ctx.setFillColor(rgb(1, 1, 1, 0.08)); ctx.fillPath()
         drawCentered(ctx, line(pillText, font(medium, 48 * s), gold),
                      centerX: CGFloat(W) / 2, baselineFromTop: pillTop + ph * 0.66)
-        save(ctx, "04-memories.png")
+        save(ctx, "05-memories.png")
     }
 
-    // Shot 5: the honesty/privacy card.
-    func shot5() {
+    // Shot 6: the honesty/privacy card.
+    func shot6() {
         let ctx = newContext()
         backgroundGradient(ctx)
         caption(ctx, "No accounts.", "No sign-up.")
@@ -280,10 +364,10 @@ func render(W: Int, H: Int, outDir: String) {
                  elapsedColor: white, remainingColor: dim)
         drawCentered(ctx, line("\(dayPercent)% of \(cal.component(.year, from: now)) complete", font(medium, 50 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: top + size + 150 * s)
-        save(ctx, "05-privacy.png")
+        save(ctx, "06-privacy.png")
     }
 
-    shot1(); shot2(); shot3(); shot4(); shot5()
+    shot1(); shot2(); shot3open(); shot4widgets(); shot5memories(); shot6()
 }
 
 // Run from the repo root: swift Bhullar/scripts/makescreenshots.swift

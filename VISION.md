@@ -19,6 +19,11 @@ charge: the one who goes first into the field. That is what the space app
 does each time it opens. It claims the ground you are standing on with a
 single dot, and asks nothing else.
 
+Since 3.1 it can also be asked to keep claiming ground while you are not
+looking. That is a different act, and the code says so: a dot carries whether
+you placed it or the trail did, and the trail is off until someone goes
+looking for it. The charge you order is not the charge you make yourself.
+
 Bhullar's origin is less settled, but in Punjabi the name sits a breath
 away from bhulna, to forget. The time app is a long argument with that
 sound. Days that hold memories turn gold, and when a date comes back

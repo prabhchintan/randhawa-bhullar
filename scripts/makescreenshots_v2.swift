@@ -3,7 +3,7 @@ import CoreText
 import ImageIO
 import Foundation
 
-// Renders the v3.0 (space app) App Store screenshots at both required sizes:
+// Renders the v3.1 (space app) App Store screenshots at both required sizes:
 // iPhone 6.7" (1284x2778) and iPad 13" (2048x2732). All visuals are the app's
 // real constellation language drawn deterministically, no fake map tiles.
 
@@ -181,9 +181,9 @@ func render(W: Int, H: Int, outDir: String) {
         backgroundGradient(ctx)
         caption(ctx, "Each open marks", "where you are")
         let subBase = CGFloat(H) * 0.090 + 235 * s
-        drawCentered(ctx, line("Read only while the app is open,", font(medium, 46 * s), subtle),
+        drawCentered(ctx, line("One dot per open. No account,", font(medium, 46 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: subBase)
-        drawCentered(ctx, line("never in the background.", font(medium, 46 * s), subtle),
+        drawCentered(ctx, line("no tracking, nothing sent to us.", font(medium, 46 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: subBase + 72 * s)
 
         let fieldTop = CGFloat(H) * 0.30
@@ -193,6 +193,68 @@ func render(W: Int, H: Int, outDir: String) {
         drawConstellation(ctx, in: field, dots: zoomDots, latest: zoomLatest,
                           dotRadius: 34 * s, ringLatest: true)
         save(ctx, "02-open.png")
+    }
+
+    // Shot 3: the trail, the 3.1 headline. The card mirrors the real settings
+    // screen, checkmark included, so the promise on the store page and the
+    // control inside the app are visibly the same thing.
+    func shot3trail() {
+        let ctx = newContext()
+        backgroundGradient(ctx)
+        caption(ctx, "Or let the map", "draw itself")
+        let subBase = CGFloat(H) * 0.090 + 235 * s
+        drawCentered(ctx, line("Turn the trail on and dots keep arriving", font(medium, 46 * s), subtle),
+                     centerX: CGFloat(W) / 2, baselineFromTop: subBase)
+        drawCentered(ctx, line("at a pace you pick. Off until you do.", font(medium, 46 * s), subtle),
+                     centerX: CGFloat(W) / 2, baselineFromTop: subBase + 72 * s)
+
+        // A path of dots between two clusters: what a trail actually adds.
+        // Normalized to fill the field, so the walk reads as a walk rather
+        // than a smudge in the middle of an empty frame.
+        let fieldTop = CGFloat(H) * 0.265
+        let fieldH = CGFloat(H) * 0.36
+        let field = rectFromTop(x: CGFloat(W) * 0.12, topInset: fieldTop,
+                                w: CGFloat(W) * 0.76, h: fieldH)
+        let walked: [(CGFloat, CGFloat)] = [
+            (0.430, 0.500), (0.470, 0.530), (0.505, 0.548), (0.545, 0.582),
+            (0.580, 0.610), (0.612, 0.632),
+        ]
+        let (trailDots, trailLatest) = normalized(clusterA + clusterB + walked,
+                                                  latest: latestDot, pad: 0.06)
+        drawConstellation(ctx, in: field, dots: trailDots,
+                          latest: trailLatest, dotRadius: 26 * s, ringLatest: true)
+
+        // The cadence card.
+        let cardW = CGFloat(W) * 0.76
+        let cardH = 430 * s
+        let cardTop = fieldTop + fieldH + 80 * s
+        let card = rectFromTop(x: (CGFloat(W) - cardW) / 2, topInset: cardTop, w: cardW, h: cardH)
+        ctx.addPath(roundedPath(card, 56 * s)); ctx.setFillColor(rgb(1, 1, 1, 0.09)); ctx.fillPath()
+
+        let rows = ["Whenever you move", "At most once an hour", "Only when you arrive"]
+        let checked = 1
+        for (i, text) in rows.enumerated() {
+            let rowBase = cardTop + 118 * s + CGFloat(i) * 116 * s
+            ctx.textPosition = CGPoint(x: card.minX + 76 * s, y: CGFloat(H) - rowBase)
+            CTLineDraw(line(text, font(medium, 50 * s), i == checked ? white : subtle), ctx)
+            if i == checked {
+                // A checkmark, drawn as two strokes.
+                let cx = card.maxX - 104 * s
+                let cy = CGFloat(H) - rowBase - 14 * s
+                ctx.setStrokeColor(orange)
+                ctx.setLineWidth(9 * s)
+                ctx.setLineCap(.round)
+                ctx.beginPath()
+                ctx.move(to: CGPoint(x: cx - 30 * s, y: cy + 4 * s))
+                ctx.addLine(to: CGPoint(x: cx - 10 * s, y: cy - 16 * s))
+                ctx.addLine(to: CGPoint(x: cx + 30 * s, y: cy + 30 * s))
+                ctx.strokePath()
+            }
+        }
+        drawCentered(ctx, line("Forget the trail any time, in one tap.",
+                               font(medium, 42 * s), rgb(0.5, 0.5, 0.55)),
+                     centerX: CGFloat(W) / 2, baselineFromTop: cardTop + cardH + 96 * s)
+        save(ctx, "03-trail.png")
     }
 
     /// Gold memory dots with a white ring, drawn over the constellation.
@@ -211,8 +273,8 @@ func render(W: Int, H: Int, outDir: String) {
         }
     }
 
-    // Shot 3: memories, the 3.0 headline.
-    func shot3() {
+    // Shot 4: memories, the 3.0 headline.
+    func shot4memories() {
         let ctx = newContext()
         backgroundGradient(ctx)
         caption(ctx, "Pin memories", "to your places")
@@ -248,11 +310,11 @@ func render(W: Int, H: Int, outDir: String) {
         CTLineDraw(line("Jul 25 · Austin, TX", font(medium, 44 * s), subtle), ctx)
         ctx.textPosition = CGPoint(x: textX, y: CGFloat(H) - (cardTop + 278 * s))
         CTLineDraw(line("Back on this day, every year", font(medium, 40 * s), rgb(0.5, 0.5, 0.55)), ctx)
-        save(ctx, "03-memories.png")
+        save(ctx, "04-memories.png")
     }
 
-    // Shot 4: privacy, now with the iCloud story told straight.
-    func shot4() {
+    // Shot 5: privacy, now with the iCloud story told straight.
+    func shot5() {
         let ctx = newContext()
         backgroundGradient(ctx)
         caption(ctx, "Private by", "architecture")
@@ -271,10 +333,10 @@ func render(W: Int, H: Int, outDir: String) {
         drawCentered(ctx, line("Your map, on every phone you will ever own.",
                                font(medium, 48 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: top + size + 150 * s)
-        save(ctx, "04-privacy.png")
+        save(ctx, "05-privacy.png")
     }
 
-    shot1(); shot2(); shot3(); shot4()
+    shot1(); shot2(); shot3trail(); shot4memories(); shot5()
 }
 
 // Run from the repo root: swift scripts/makescreenshots_v2.swift

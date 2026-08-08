@@ -2,18 +2,53 @@ import Foundation
 import CoreGraphics
 import WidgetKit
 
-/// One opening of the app: where you were, and when.
+/// How a moment came to exist. A dot you placed by opening the app is a
+/// different kind of thing from one the phone placed while your pocket was
+/// closed, and the apps say so rather than blurring them together.
+///
+/// Optional on `Moment` on purpose: moments written by Randhawa 3.0 carry no
+/// source, and moments arriving from iCloud carry none either, since the field
+/// is deliberately not part of the CloudKit schema. Both read back as
+/// `.opened`, which is what they were.
+enum MomentSource: String, Codable {
+    case opened
+    case trail
+}
+
+/// One dot on the map: where you were, and when.
 struct Moment: Codable, Equatable, Identifiable {
     let id: UUID
     let latitude: Double
     let longitude: Double
     let date: Date
 
-    init(id: UUID = UUID(), latitude: Double, longitude: Double, date: Date = Date()) {
+    /// Absent in files written before 3.1. Read `kind` instead of this.
+    let source: MomentSource?
+
+    init(
+        id: UUID = UUID(),
+        latitude: Double,
+        longitude: Double,
+        date: Date = Date(),
+        source: MomentSource? = nil
+    ) {
         self.id = id
         self.latitude = latitude
         self.longitude = longitude
         self.date = date
+        self.source = source
+    }
+
+    /// The source, with the pre-3.1 absence resolved.
+    var kind: MomentSource { source ?? .opened }
+}
+
+extension Array where Element == Moment {
+    /// Every moment inside a span of time, oldest first. The span is
+    /// half-open, so adjacent units never claim the same moment.
+    func within(_ interval: DateInterval) -> [Moment] {
+        filter { $0.date >= interval.start && $0.date < interval.end }
+            .sorted { $0.date < $1.date }
     }
 }
 
@@ -89,6 +124,26 @@ enum MomentSync {
         didChange()
     }
 
+    /// Appends one moment by re-reading the file first, so a trail sample
+    /// taken while the app was asleep cannot clobber whatever CloudKit or the
+    /// other app wrote in the meantime. Kept sorted, because callers that ask
+    /// for the newest moment expect the last one to be it.
+    static func append(_ moment: Moment) {
+        var moments = MomentPersistence.load()
+        guard !moments.contains(where: { $0.id == moment.id }) else { return }
+        moments.append(moment)
+        moments.sort { $0.date < $1.date }
+        MomentPersistence.save(moments)
+        didChange()
+    }
+
+    /// The most recent moment's date, whatever wrote it. The trail throttles
+    /// against this rather than its own last sample, so opening the app and
+    /// the trail waking up cannot place two dots a second apart.
+    static func newestDate() -> Date? {
+        MomentPersistence.load().map(\.date).max()
+    }
+
     static func remove(ids: Set<UUID>) {
         let moments = MomentPersistence.load()
         let kept = moments.filter { !ids.contains($0.id) }
@@ -106,6 +161,103 @@ enum MomentSync {
         WidgetCenter.shared.reloadAllTimelines()
         NotificationCenter.default.post(name: didChangeExternally, object: nil)
     }
+}
+
+/// How often Randhawa may add a dot on its own, when the user has asked it to.
+///
+/// The honest framing, which the settings screen repeats: iOS decides when to
+/// wake a sleeping app, and it does that when you move, not on a clock. So a
+/// cadence here is a ceiling, not a promise. It says how close together two
+/// dots are allowed to be, and the phone supplies the movement.
+enum TrailCadence: String, Codable, CaseIterable, Identifiable {
+    /// The 3.0 behaviour, and still the default: dots come from opening the app.
+    case off
+    case moves
+    case quarterHour
+    case hour
+    case quarterDay
+    case arrivals
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .off: return "Off"
+        case .moves: return "Whenever you move"
+        case .quarterHour: return "At most every 15 minutes"
+        case .hour: return "At most once an hour"
+        case .quarterDay: return "At most every 4 hours"
+        case .arrivals: return "Only when you arrive somewhere"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .off:
+            return "Randhawa marks a dot only when you open it. Nothing is read while the app is closed."
+        case .moves:
+            return "The densest trail. Every time your phone notices you have moved a meaningful distance."
+        case .quarterHour:
+            return "A close trail that still skips the small shuffles around one room."
+        case .hour:
+            return "Enough to draw a day's shape without filling the map."
+        case .quarterDay:
+            return "Morning, afternoon, evening. The lightest way to keep a trail."
+        case .arrivals:
+            return "No trail between places. A dot when you settle somewhere and stay a while."
+        }
+    }
+
+    /// The smallest gap allowed between two dots.
+    var minimumSpacing: TimeInterval {
+        switch self {
+        case .off: return .infinity
+        case .moves: return 300
+        case .quarterHour: return 900
+        case .hour: return 3_600
+        case .quarterDay: return 14_400
+        // Visits are already rare. The floor only guards against a visit
+        // landing on top of a dot the user just placed by opening the app.
+        case .arrivals: return 300
+        }
+    }
+
+    /// Significant-change monitoring is the movement source. Arrivals mode
+    /// deliberately does without it, which is what makes it the quiet one.
+    var watchesMovement: Bool {
+        switch self {
+        case .off, .arrivals: return false
+        default: return true
+        }
+    }
+
+    /// Visit monitoring costs almost nothing and always says something worth
+    /// keeping, so every mode except off uses it.
+    var watchesVisits: Bool { self != .off }
+
+    var isOn: Bool { self != .off }
+}
+
+/// Where the trail setting lives: the App Group defaults, next to the sync
+/// switch, so Bhullar can tell the user where its dots are coming from without
+/// Randhawa having to be open.
+enum TrailSettings {
+    private static let cadenceKey = "trailCadence"
+
+    private static var sharedDefaults: UserDefaults {
+        UserDefaults(suiteName: MomentPersistence.appGroupID) ?? .standard
+    }
+
+    static var cadence: TrailCadence {
+        get {
+            guard let raw = sharedDefaults.string(forKey: cadenceKey) else { return .off }
+            return TrailCadence(rawValue: raw) ?? .off
+        }
+        set {
+            sharedDefaults.set(newValue.rawValue, forKey: cadenceKey)
+        }
+    }
+
 }
 
 /// Pure geometry over moments: clustering for density and captions, and the

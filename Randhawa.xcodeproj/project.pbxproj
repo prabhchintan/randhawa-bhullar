@@ -398,12 +398,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Randhawa/Randhawa.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Turn on the trail and Randhawa keeps marking dots as you go, at a pace you choose, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -414,7 +415,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -430,12 +431,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Randhawa/Randhawa.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Turn on the trail and Randhawa keeps marking dots as you go, at a pace you choose, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -446,7 +448,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -459,7 +461,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
@@ -472,7 +474,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa.RandhawaWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -486,7 +488,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
@@ -499,7 +501,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0;
+				MARKETING_VERSION = 3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa.RandhawaWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

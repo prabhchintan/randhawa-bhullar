@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -6,6 +7,7 @@ struct ContentView: View {
     @ObservedObject private var memoryStore = MemoryStore.shared
     @State private var composing = false
     @State private var showingMemories = false
+    @State private var opened: OpenedDot?
 
     private var scale: TimeScale { TimeScale(rawValue: scaleRaw) ?? .days }
 
@@ -18,16 +20,17 @@ struct ContentView: View {
             let onThisDayCount = memoryStore.memories.onThisDayIDs(now: timeline.date).count
 
             VStack(spacing: 28) {
-                DotGrid(position: position, highlighted: memoryHighlights(at: timeline.date))
-                    .id(scaleRaw)
-                    .transition(.opacity)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            scaleRaw = scale.next.rawValue
-                        }
+                DotGrid(
+                    position: position,
+                    highlighted: memoryHighlights(at: timeline.date),
+                    selected: opened?.unit,
+                    onSelectUnit: { unit in
+                        opened = OpenedDot(unit: unit, scale: scale, reference: timeline.date)
                     }
+                )
+                .id(scaleRaw)
+                .transition(.opacity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 VStack(spacing: 6) {
                     Text("\(position.percent)%")
@@ -46,7 +49,7 @@ struct ContentView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    Text("tap the dots to zoom")
+                    Text("swipe to change scale · tap a dot to open it")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -55,6 +58,19 @@ struct ContentView: View {
         .padding(28)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+        // Swiping is the zoom now, which leaves the tap free to mean "open
+        // this one". A horizontal drag only, so a downward flick still belongs
+        // to whatever sheet is on screen.
+        .gesture(
+            DragGesture(minimumDistance: 24)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    let target = value.translation.width < 0 ? scale.next : scale.previous
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        scaleRaw = target.rawValue
+                    }
+                }
+        )
         .overlay(alignment: .bottomTrailing) {
             Button {
                 composing = true
@@ -83,6 +99,9 @@ struct ContentView: View {
                 onThisDayIDs: memoryStore.memories.onThisDayIDs()
             )
         }
+        .sheet(item: $opened) { dot in
+            DotDetailSheet(dot: dot, store: memoryStore)
+        }
         .onAppear {
             CloudSync.startIfEnabled()
             CloudSync.shared?.fetchNow()
@@ -97,6 +116,10 @@ struct ContentView: View {
 
     /// The units of the visible scale that hold at least one memory: same
     /// year for the year scales, same day for the day scales.
+    ///
+    /// Only memories light a dot, never moments. Somewhere you merely were is
+    /// not the same as something you chose to keep, and a grid that glowed for
+    /// every day you left the house would say nothing at all.
     private func memoryHighlights(at date: Date) -> Set<Int> {
         let calendar = Calendar.current
         var indices: Set<Int> = []
@@ -118,6 +141,219 @@ struct ContentView: View {
         }
         let total = memoryStore.memories.count
         return total == 1 ? "1 memory" : "\(total) memories"
+    }
+}
+
+/// The dot the user tapped, and everything needed to say what it covers.
+struct OpenedDot: Identifiable {
+    let unit: Int
+    let scale: TimeScale
+    /// A date inside the span the grid is currently showing, which fixes which
+    /// year (or which day) unit number `unit` belongs to.
+    let reference: Date
+
+    var id: String { "\(scale.rawValue)-\(unit)" }
+
+    var interval: DateInterval? {
+        scale.interval(ofUnit: unit, containing: reference)
+    }
+
+    var title: String {
+        scale.label(ofUnit: unit, containing: reference)
+    }
+
+    /// Whether this dot is still ahead of the reference date.
+    var isFuture: Bool {
+        guard let interval else { return false }
+        return interval.start > reference
+    }
+}
+
+/// One stay in one place: consecutive moments close enough together to be the
+/// same spot, kept as a span rather than a cluster so returning somewhere later
+/// in the day reads as a second visit, in order, the way it happened.
+private struct Visit: Identifiable {
+    let id = UUID()
+    var latitude: Double
+    var longitude: Double
+    var start: Date
+    var end: Date
+    var count: Int
+
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+}
+
+/// Groups moments into visits by walking them in time order. A moment joins the
+/// current visit while it stays within `radiusMeters` of that visit's running
+/// centre, and starts a new one when it does not.
+private func visits(in moments: [Moment], radiusMeters: Double = 150) -> [Visit] {
+    var result: [Visit] = []
+    for moment in moments {
+        if var current = result.last,
+           MomentGeometry.metersBetween(current.latitude, current.longitude, moment.latitude, moment.longitude) <= radiusMeters {
+            let n = Double(current.count)
+            current.latitude = (current.latitude * n + moment.latitude) / (n + 1)
+            current.longitude = (current.longitude * n + moment.longitude) / (n + 1)
+            current.end = Swift.max(current.end, moment.date)
+            current.count += 1
+            result[result.count - 1] = current
+        } else {
+            result.append(
+                Visit(
+                    latitude: moment.latitude,
+                    longitude: moment.longitude,
+                    start: moment.date,
+                    end: moment.date,
+                    count: 1
+                )
+            )
+        }
+    }
+    return result
+}
+
+/// Names for coordinates, resolved once and remembered for the life of the
+/// process. Bhullar draws no map, so a place has to arrive as a word; this asks
+/// Apple's geocoder for that word and asks only once per neighbourhood.
+@MainActor
+private final class PlaceNames: ObservableObject {
+    static let shared = PlaceNames()
+
+    @Published private(set) var names: [String: String] = [:]
+
+    private let geocoder = CLGeocoder()
+    private var inFlight: Set<String> = []
+
+    /// Roughly 100 metres of latitude per key, so two dots in the same block
+    /// share one lookup.
+    private func key(_ coordinate: CLLocationCoordinate2D) -> String {
+        String(format: "%.3f,%.3f", coordinate.latitude, coordinate.longitude)
+    }
+
+    func name(for coordinate: CLLocationCoordinate2D) -> String? {
+        names[key(coordinate)]
+    }
+
+    func resolve(_ coordinate: CLLocationCoordinate2D) {
+        let cacheKey = key(coordinate)
+        guard names[cacheKey] == nil, !inFlight.contains(cacheKey) else { return }
+        inFlight.insert(cacheKey)
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.inFlight.remove(cacheKey)
+                guard let placemark = placemarks?.first else { return }
+                let name = [placemark.locality ?? placemark.name, placemark.administrativeArea]
+                    .compactMap { $0 }
+                    .joined(separator: ", ")
+                guard !name.isEmpty else { return }
+                self.names[cacheKey] = name
+            }
+        }
+    }
+}
+
+/// What one dot held: where you were, and what you kept. This is the whole
+/// point of the pairing. Randhawa gathers the places; Bhullar is where they
+/// come back, filed under the hour they happened.
+private struct DotDetailSheet: View {
+    let dot: OpenedDot
+    @ObservedObject var store: MemoryStore
+    @ObservedObject private var placeNames = PlaceNames.shared
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var stays: [Visit] = []
+    @State private var memories: [Memory] = []
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if dot.isFuture {
+                    empty("Not yet.", "This one has not happened.")
+                } else if stays.isEmpty && memories.isEmpty {
+                    empty("Nothing kept.", emptyDetail)
+                } else {
+                    List {
+                        if !stays.isEmpty {
+                            Section("Where you were") {
+                                ForEach(stays) { stay in
+                                    row(for: stay)
+                                }
+                            }
+                        }
+                        if !memories.isEmpty {
+                            Section("What you kept") {
+                                ForEach(memories) { memory in
+                                    NavigationLink {
+                                        MemoryDetailView(memory: memory, photoURL: store.photoURL(for: memory))
+                                    } label: {
+                                        MemoryRow(memory: memory, photoURL: store.photoURL(for: memory))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(dot.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .onAppear(perform: load)
+    }
+
+    private func row(for stay: Visit) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(placeNames.name(for: stay.coordinate) ?? "Locating…")
+                .font(.body)
+            Text(timeSpan(of: stay))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+        }
+        .padding(.vertical, 2)
+        .onAppear { placeNames.resolve(stay.coordinate) }
+    }
+
+    private func timeSpan(of stay: Visit) -> String {
+        let start = stay.start.formatted(date: .omitted, time: .shortened)
+        // A single dot is an instant, not a stay, and saying "9:12 to 9:12"
+        // would be a small lie about how much we know.
+        guard stay.end.timeIntervalSince(stay.start) >= 60 else { return start }
+        return start + " to " + stay.end.formatted(date: .omitted, time: .shortened)
+    }
+
+    private var emptyDetail: String {
+        TrailSettings.cadence.isOn
+            ? "No places and no memories from this stretch of time."
+            : "No memories from this stretch of time. Randhawa's trail can fill these in with the places you went."
+    }
+
+    private func empty(_ title: String, _ detail: String) -> some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.title3.weight(.semibold))
+            Text(detail)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(28)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func load() {
+        guard let interval = dot.interval else { return }
+        stays = visits(in: MomentPersistence.load().within(interval))
+        memories = store.memories.within(interval)
     }
 }
 

@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var confirmingErase = false
     @State private var composing = false
     @State private var showingMemories = false
+    @State private var showingTrail = false
     @State private var offeringSync = false
 
     var body: some View {
@@ -75,6 +76,11 @@ struct ContentView: View {
                         } label: {
                             Label("Memories", systemImage: "sparkles")
                         }
+                        Button {
+                            showingTrail = true
+                        } label: {
+                            Label(trailMenuTitle, systemImage: "figure.walk")
+                        }
                         Divider()
                         Button("Erase everything", role: .destructive) {
                             confirmingErase = true
@@ -134,6 +140,9 @@ struct ContentView: View {
                 onThisDayIDs: memoryStore.memories.onThisDayIDs()
             )
         }
+        .sheet(isPresented: $showingTrail) {
+            TrailSheet(model: model)
+        }
         .confirmationDialog(
             "Erase your map and memories?",
             isPresented: $confirmingErase,
@@ -158,6 +167,10 @@ struct ContentView: View {
         let momentWord = momentCount == 1 ? "moment" : "moments"
         let placeWord = placeCount == 1 ? "place" : "places"
         return "\(momentCount) \(momentWord) · \(placeCount) \(placeWord)"
+    }
+
+    private var trailMenuTitle: String {
+        TrailSettings.cadence.isOn ? "Trail: on" : "Trail: off"
     }
 
     private var composerContext: String {
@@ -200,6 +213,126 @@ struct ContentView: View {
                 MemoryStore.shared.setPlaceName(name, for: memory.id)
             }
         }
+    }
+}
+
+/// The trail settings: the one screen in either app that asks for something
+/// bigger than a tap. It says plainly what it will do, what iOS will actually
+/// honour, and how to take it all back.
+private struct TrailSheet: View {
+    @ObservedObject var model: SpaceModel
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+
+    /// Mirrors the stored cadence so the rows update the instant one is tapped.
+    @State private var cadence = TrailSettings.cadence
+    @State private var confirmingForget = false
+
+    /// Recomputed when the sheet appears and after every prompt, since the
+    /// answer lives in Settings and can change while the app is open.
+    @State private var needsAlways = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(TrailCadence.allCases) { option in
+                        Button {
+                            choose(option)
+                        } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(option.title)
+                                        .foregroundStyle(.primary)
+                                    Text(option.detail)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 0)
+                                if option == cadence {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.orange)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    Text("How often")
+                } footer: {
+                    Text("A cadence is a ceiling, not a schedule. iOS wakes a sleeping app when you move, not on a clock, so Randhawa marks a dot no more often than this and only once you have actually gone somewhere. Stay in one place and the trail stays quiet.")
+                }
+
+                if cadence.isOn && needsAlways {
+                    Section {
+                        Button("Open Settings") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                openURL(url)
+                            }
+                        }
+                    } footer: {
+                        Text("The trail needs Location set to Always. Without it Randhawa is never woken, so dots would still only arrive when you open the app.")
+                    }
+                }
+
+                Section {
+                    if model.trailCount > 0 {
+                        Button("Forget the trail", role: .destructive) {
+                            confirmingForget = true
+                        }
+                    }
+                } header: {
+                    Text("What it has gathered")
+                } footer: {
+                    Text(gatheredFooter)
+                }
+            }
+            .navigationTitle("The trail")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .confirmationDialog(
+                "Forget every dot the trail placed?",
+                isPresented: $confirmingForget,
+                titleVisibility: .visible
+            ) {
+                Button("Forget the trail", role: .destructive) {
+                    model.eraseTrailDots()
+                }
+            } message: {
+                Text("The dots you placed by opening Randhawa stay. The rest are deleted from this device, and from your iCloud if sync is on.")
+            }
+        }
+        .presentationDetents([.large])
+        .onAppear { refreshAuthorization() }
+    }
+
+    private var gatheredFooter: String {
+        let trail = model.trailCount
+        let opened = model.moments.count - trail
+        let openedWord = opened == 1 ? "dot" : "dots"
+        if trail == 0 {
+            return "\(opened) \(openedWord) so far, every one of them from opening the app."
+        }
+        let trailWord = trail == 1 ? "dot" : "dots"
+        return "\(trail) \(trailWord) from the trail, \(opened) \(openedWord) from opening the app."
+    }
+
+    private func choose(_ option: TrailCadence) {
+        cadence = option
+        LocationTrail.shared.setCadence(option)
+        // The Always prompt is answered outside this view. Give iOS a moment
+        // to report the new status before deciding whether to ask for Settings.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            refreshAuthorization()
+        }
+    }
+
+    private func refreshAuthorization() {
+        needsAlways = !LocationTrail.shared.isAlwaysAuthorized
     }
 }
 
@@ -341,7 +474,7 @@ private struct IntroView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.orange)
-                Text("Your location is read only while the app is open. It stays on this device unless you turn on iCloud sync, which keeps a copy in your private iCloud, invisible to us. No account to create. No tracking.")
+                Text("Randhawa reads your location while you have it open. If you ever want the map to keep drawing itself, there is a trail you can switch on, off until you do. Everything stays on this device unless you turn on iCloud sync, which keeps a copy in your private iCloud, invisible to us. No account to create. No tracking.")
                     .font(.footnote)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
@@ -361,7 +494,7 @@ private struct DeniedView: View {
             Text("Randhawa needs location to draw your map")
                 .font(.title3.weight(.semibold))
                 .multilineTextAlignment(.center)
-            Text("Allow location in Settings. It is read only while the app is open, and only to place your dots.")
+            Text("Allow location in Settings. Randhawa reads it to place your dots on your own map, and for nothing else.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button("Open Settings") {

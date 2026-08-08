@@ -18,11 +18,19 @@ servers of ours, and data we cannot read. Open code is the strongest form of
 that promise. Don't take our word for it; read it. The plan lives in
 [`ROADMAP.md`](ROADMAP.md).
 
-## Randhawa (v3.0, space)
+## Randhawa (v3.1, space)
 
 A deliberately minimal iOS app: each time you open it, it marks a dot where you
 are. Over weeks and years, your places draw a map only you can read: dense
 where your life happens, sparse where you've wandered.
+
+New in 3.1, and off until you go and switch it on: **the trail**. Pick a
+cadence and the map keeps drawing itself while the app is closed. It listens
+only to the two low-power signals iOS offers a sleeping app, significant
+location changes and visits, so the cadence you pick is a ceiling rather than a
+schedule and standing still costs nothing. One tap forgets everything it
+gathered. The argument for reversing a promise this file used to make is in
+[`ROADMAP.md`](ROADMAP.md), under "The one we reversed".
 
 Since 3.0 the dots can carry more than presence. Tap the plus button and pin a
 memory to where you are: a thought, a photo, or both. Memories show as gold
@@ -60,9 +68,16 @@ a cost: lose the phone, lose the map. 3.0 keeps the spirit and fixes the cost:
   the developer. Re-verify that reading of the App Privacy Details page at
   submission time.
 
-Location itself is unchanged: read once per app open, When-In-Use only, never
-in the background. Reverse geocoding (naming the place on a memory) and map
-tiles go through Apple's frameworks under Apple's privacy policy.
+Location, as of 3.1, has two modes and the quiet one is the default. With the
+trail off, which is how every install and every update starts, location is read
+once per app open, When-In-Use, and never otherwise. Turn the trail on and the
+app also asks for Always, then takes a fix when iOS wakes it for a significant
+location change or a visit, no more often than the chosen cadence. There is no
+location background mode and no continuous updates, so the app never holds the
+system awake and never lights the status bar. Where the dots go does not change
+at all: the same file, the same optional private CloudKit database, no servers
+of ours. Reverse geocoding (naming a place, in either app) and map tiles go
+through Apple's frameworks under Apple's privacy policy.
 
 ## What's inside
 
@@ -119,28 +134,38 @@ immediately.
 3. Select the **Randhawa** scheme and a device, then Run (Cmd-R). Grant
    location when asked; your first dot appears immediately.
 
-Deployment target is **iOS 17.0** (CKSyncEngine needs 17). Version is **3.0
-(build 10)** on both targets; this ships as an update to the existing App
+Deployment target is **iOS 17.0** (CKSyncEngine needs 17). Version is **3.1
+(build 11)** on both targets; this ships as an update to the existing App
 Store record (Apple App ID 6742061604).
 
 ## CloudKit: one manual step before release
 
 CloudKit schemas are created lazily in the **Development** environment the
-first time the app saves records. Before shipping 3.0 (TestFlight or App
-Store), open the CloudKit Console for `iCloud.Prabhchintan.Randhawa`, confirm
+first time the app saves records. Before shipping a release that writes a new
+field, open the CloudKit Console for `iCloud.Prabhchintan.Randhawa`, confirm
 the record types `Moment` and `Memory` exist with the fields the code writes,
 and **deploy the schema to Production**. A store build pointed at an empty
 Production schema cannot sync.
 
+**3.1 does not need this step.** The one new field, a moment's `source`, is
+local to the device file by design and is never written to CloudKit. The
+schema is unchanged from 3.0.
+
 ## App Store notes
 
-- Privacy label: **Data Not Collected** (see the privacy section above).
-- The location purpose string is set in build settings
-  (`INFOPLIST_KEY_NSLocationWhenInUseUsageDescription`).
+- Privacy label: **Data Not Collected** (see the privacy section above). The
+  trail does not change this: it writes to the same on-device file and the
+  same private CloudKit database, and neither is readable by us.
+- Two location purpose strings are set in build settings,
+  `INFOPLIST_KEY_NSLocationWhenInUseUsageDescription` for the per-open dot and
+  `INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription` for the trail.
+  There is deliberately **no** `UIBackgroundModes` entry: significant-change
+  and visit monitoring relaunch a terminated app without it, and adding it
+  would invite a rejection for capability the app does not use.
 - Photos are attached through the system Photos picker, which runs out of
   process and needs no permission string and no privacy declaration.
 - Full listing copy lives in `AppStore/metadata.md`; release notes in
-  `AppStore/whatsnew-3.0.md`.
+  `AppStore/whatsnew-3.1.md`.
 
 ## App icon
 
