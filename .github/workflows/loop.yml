@@ -58,12 +58,23 @@ jobs:
       LOOP_MODEL_PROVIDER: ${{ vars.LOOP_MODEL_PROVIDER }}
       HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
+      # The kill switch: set the repository variable LOOP_PAUSED to 1 and every
+      # run ends here, quietly, until it is unset. Disabling the workflow in
+      # the Actions tab does the same.
+      - name: Paused?
+        if: ${{ vars.LOOP_PAUSED == '1' }}
+        run: |
+          echo "LOOP_PAUSED is set; nothing runs."
+          exit 0
+
       - name: Check out the apps
+        if: ${{ vars.LOOP_PAUSED != '1' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Check out the private loop repo
+        if: ${{ vars.LOOP_PAUSED != '1' }}
         env:
           LOOP_DEPLOY_KEY: ${{ secrets.LOOP_DEPLOY_KEY }}
         run: |
@@ -80,6 +91,7 @@ jobs:
           git config user.email "loop@pulse.prabhchintan.com"
 
       - name: Pick the newest Xcode on the runner
+        if: ${{ vars.LOOP_PAUSED != '1' }}
         run: |
           NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
           sudo xcode-select -s "$NEWEST"
@@ -87,6 +99,7 @@ jobs:
           swift --version 2>&1 | head -1
 
       - name: Install the keys
+        if: ${{ vars.LOOP_PAUSED != '1' }}
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -111,6 +124,7 @@ jobs:
       # maintainer, his map or his words is printed here; all of that goes to
       # the private repo.
       - name: Feeds (map, review state, mail)
+        if: ${{ vars.LOOP_PAUSED != '1' }}
         env:
           LOOP_SECRET: ${{ secrets.LOOP_SECRET }}
         run: |
@@ -122,13 +136,13 @@ jobs:
           echo "mail: $NEW new"
 
       - name: Simulator builds (check mode)
-        if: ${{ github.event.inputs.mode == 'check' }}
+        if: ${{ vars.LOOP_PAUSED != '1' && (github.event.inputs.mode == 'check') }}
         run: |
           xcodebuild -project Randhawa.xcodeproj -target Randhawa -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
           xcodebuild -project Bhullar/Bhullar.xcodeproj -target Bhullar -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
 
       - name: Install the agent
-        if: ${{ github.event.inputs.mode != 'check' }}
+        if: ${{ vars.LOOP_PAUSED != '1' && (github.event.inputs.mode != 'check') }}
         run: |
           case "$LOOP_AGENT" in
             claude) npm install -g @anthropic-ai/claude-code && claude --version ;;
@@ -153,7 +167,7 @@ jobs:
           esac
 
       - name: Run the session
-        if: ${{ github.event.inputs.mode != 'check' }}
+        if: ${{ vars.LOOP_PAUSED != '1' && (github.event.inputs.mode != 'check') }}
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -186,7 +200,7 @@ jobs:
       # one, its Short version is the email. If the session died, that is the
       # email. A quiet day sends nothing.
       - name: Keep the logs and write to the maintainer
-        if: ${{ always() }}
+        if: ${{ vars.LOOP_PAUSED != '1' && (always()) }}
         env:
           LOOP_SECRET: ${{ secrets.LOOP_SECRET }}
         run: |
@@ -213,5 +227,5 @@ jobs:
           fi
 
       - name: Fail the job if the session failed
-        if: ${{ github.event.inputs.mode != 'check' && env.SESSION_STATUS != '0' && env.SESSION_STATUS != '' }}
+        if: ${{ vars.LOOP_PAUSED != '1' && (github.event.inputs.mode != 'check' && env.SESSION_STATUS != '0' && env.SESSION_STATUS != '') }}
         run: exit 1

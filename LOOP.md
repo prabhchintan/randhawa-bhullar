@@ -142,6 +142,55 @@ Nothing runs on the maintainer's Mac, and nothing about him lives in public.
   which is how the first release under this loop was made by hand on
   2026-08-16.
 
+## When Apple rejects
+
+It will happen sooner or later, most likely over the Always location prompt.
+The plan, in order:
+
+1. The session sees `REJECTED` from `scripts/asc.py status`. Apple's reason
+   is not in the API; it arrives by email to the maintainer. If a note with
+   the reason is already in the inbox (he forwarded or replied), the session
+   reads it.
+2. With a reason inside scope (a missing string, a screenshot, a review note
+   that needs a sentence, a build problem): fix it, rebuild, resubmit the same
+   version with a new build number, and say so in the report.
+3. With a reason outside scope (permissions, the privacy story, what the app
+   is for): do not resubmit. Write the case in the report, propose the two
+   or three honest options, and stop. The maintainer decides and answers in
+   the Resolution Center himself; the loop never argues with App Review on
+   his behalf. The known fallback for a location dispute is already
+   designed: ask While Using at the intro and offer Always afterwards from
+   the trail screen, which is 3.1's flow, and turn the default back off.
+4. With no reason anywhere: mail the maintainer one line asking him to
+   forward Apple's email to loop@pulse.prabhchintan.com, ship nothing, and
+   check again next run.
+5. Never resubmit the same build unchanged, and never more than once per run.
+
+## Failsafes
+
+- **Pause.** Repository variable `LOOP_PAUSED=1` stops every step of every
+  run until unset; disabling the workflow in the Actions tab does the same.
+- **One at a time.** Concurrency group `loop`; a run never overlaps another,
+  and a run has a five-hour ceiling.
+- **Nothing ships unbuilt.** Both apps must build for the simulator first;
+  a broken build reverts the session's changes and reports.
+- **The gate.** Nothing ships with a version in review, within three days of
+  the last submission (rejection and crash fixes excepted), or without
+  user-visible value.
+- **Every submission is a tag.** `randhawa-X.Y-bN`, `bhullar-X.Y-bN`. A bad
+  release cannot be pulled back from users, but the next build can be cut
+  from the last good tag in one run, and the report says which tag is good.
+- **Crashes first.** If Apple's opt-in crash reports show a spike after a
+  release, that outranks the backlog.
+- **Promises wait.** Anything that changes a public promise never ships
+  unattended; see "What waits for the maintainer".
+- **Stumbles are announced.** A run that dies mails one line and leaves its
+  transcript in the private repository; the next run starts clean.
+- **Mail is optional.** If the post office is unreachable, the run continues
+  without the inbox and says so.
+- **Undo is git.** Every change is a commit on main in the open; the
+  maintainer can revert any of it from any machine.
+
 ## Why this shape
 
 The apps are quiet on purpose. The loop keeps them quiet: it studies one

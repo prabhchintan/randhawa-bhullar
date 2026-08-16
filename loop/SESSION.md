@@ -40,9 +40,12 @@ inside scope (write a report anyway and say what stopped you).
    $LOOP_PRIVATE/reports (compare the timestamps in the filenames), and read
    that newest report.
 
-2. Triage. If a submission is REJECTED, that comes first: read the state,
-   fix it if the fix is inside scope, resubmit; otherwise write it up and
-   stop. Then the inbox: each file is a message from the maintainer and
+2. Triage. If a submission is REJECTED, that comes first, and LOOP.md
+   "When Apple rejects" is the procedure: Apple's reason is not in the API,
+   so look for it in the inbox; fix and resubmit only a reason inside scope,
+   never resubmit an unchanged build, never argue with App Review, and with
+   no reason in hand write a one-line report asking the maintainer to
+   forward Apple's email and ship nothing. Then the inbox: each file is a message from the maintainer and
    outranks your own ideas when it is inside scope; when it is not, say so in
    the report and do what you can. A message that asks a question deserves an
    answer in the report even if nothing else happens today.
