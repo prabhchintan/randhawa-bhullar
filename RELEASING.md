@@ -1,7 +1,7 @@
 # Releasing
 
 The end to end process for shipping both apps. Last run in full on
-2026-08-16 (Randhawa 3.2 build 13, Bhullar 2.2 build 7), entirely from the
+2026-08-16 (Randhawa 3.2 build 14, Bhullar 2.2 build 7), entirely from the
 command line: no browser and no Xcode GUI once the machine is set up. This is
 also what the Sunday loop runs unattended; see [LOOP.md](LOOP.md).
 

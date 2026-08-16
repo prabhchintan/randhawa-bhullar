@@ -160,6 +160,6 @@ submitting version 2.2 alongside this one.
 - [x] Hosted privacy and support pages updated and deployed for the default
       trail, the two prompts, the camera and the export
 - [x] Screenshots regenerated (5 iPhone + 5 iPad)
-- [ ] Build 3.2 (13) archived and uploaded to App Store Connect
+- [ ] Build 3.2 (14) archived and uploaded to App Store Connect
 - [ ] `scripts/asc.py release ... --submit` run for Randhawa, then Bhullar,
       in the same sitting

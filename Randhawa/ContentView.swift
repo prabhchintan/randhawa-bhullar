@@ -30,7 +30,12 @@ struct ContentView: View {
         Group {
             switch model.permission {
             case .undetermined:
-                IntroView(begin: model.requestPermission)
+                IntroView {
+                    // Begin is the ask; whatever iOS hears back, the app does
+                    // not ask again with a card of its own.
+                    TrailSettings.offerAnswered = true
+                    model.requestPermission()
+                }
             case .denied:
                 if model.moments.isEmpty {
                     DeniedView()

@@ -45,9 +45,11 @@ API = "https://api.appstoreconnect.apple.com/v1"
 CONFIG_PATH = os.path.expanduser("~/.config/appstoreconnect/config.json")
 
 # Screenshot folders in this repo map to these display types. iPhone shots are
-# 1284x2778 (6.7 inch); iPad shots under ipad/ are 2048x2732 (13 inch).
+# 1284x2778, which Apple files under the 6.5 inch set (the 6.7 inch set wants
+# 1290x2796 and rejects these with IMAGE_INCORRECT_DIMENSIONS); iPad shots
+# under ipad/ are 2048x2732, the 12.9/13 inch set.
 DISPLAY_TYPES = {
-    ".": "APP_IPHONE_67",
+    ".": "APP_IPHONE_65",
     "ipad": "APP_IPAD_PRO_3GEN_129",
 }
 
