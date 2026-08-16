@@ -33,7 +33,7 @@ them, and the rule that keeps that story quiet live in
   and constellation, blots and memories you can open, a place sheet that is
   the natural door to writing a memory, export of everything, and a widget
   drawn with the same ink.
-- Next: whatever the Sunday loop learns (see [LOOP.md](LOOP.md)); "on this
+- Next: whatever the loop learns (see [LOOP.md](LOOP.md)); "on this
   day" surfaced on the map, not only in the list.
 - Considering: iPad layouts that actually use the width; a quiet way to show
   the year's shape over time.
@@ -48,7 +48,7 @@ them, and the rule that keeps that story quiet live in
   to change scale and dots you can open, with place names from Apple's
   geocoder. 2.2, gold memory days in the widgets, the camera in the composer,
   and the shared place-name cache.
-- Next: whatever the Sunday loop learns.
+- Next: whatever the loop learns.
 - Considering: a year picker to look at past years' grids; the minutes scale
   on Apple Watch someday.
 

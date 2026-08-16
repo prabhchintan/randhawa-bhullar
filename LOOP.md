@@ -1,11 +1,13 @@
-# The Sunday loop
+# The loop
 
-Every Sunday morning this repository is worked on by an unattended Claude
-session on a GitHub-hosted Mac. It reads how the apps were actually used
-during the week, decides what to improve, builds it, ships it through App
-Store Connect, and writes a report. The maintainer's part is to carry the
-apps on his phone, answer the Saturday email when he has something to say,
-and read the Sunday one. This file is the covenant that session runs under.
+Every morning this repository is worked on by an unattended coding agent on
+a GitHub-hosted Mac. It reads how the apps were actually used, decides what
+to improve, builds it, ships it through App Store Connect when shipping is
+warranted, and writes to the maintainer only when there is something to say.
+The maintainer's part is to carry the apps on his phone, answer the Saturday
+email when he has something to say, and glance at the rest. Sunday is the
+weekly summary. This file is the covenant every session runs under, whichever
+model is behind it.
 
 ## What it reads
 
@@ -21,13 +23,13 @@ themselves:
 2. **App Store Connect analytics**, `scripts/asc.py analytics`: installs,
    sessions, retention and crashes from the users who opted into sharing
    with developers. Apple gathers it; the apps do not.
-3. **The maintainer's words.** Every Saturday a check-in issue with three
-   questions is opened in the private repository and mailed to him; he
-   replies to the email, the reply becomes a comment, and a workflow files
-   the comment under `inbox/`. Any reply to any of the loop's emails lands
-   there, any day of the week. The Sunday session reads everything newer
-   than its last report. Plus the review state of the last submission and
-   that last report.
+3. **The maintainer's words.** Every Saturday the loop's post office (a
+   Cloudflare worker, `worker/loop.js` in the prabhchintan.com repo) mails
+   him one question from `loop@pulse.prabhchintan.com`. He replies to that
+   email, or to any of the loop's emails, any day; the reply lands in the
+   worker's mailbox, and the next session fetches it into the private
+   repository's `inbox/` before it starts. Plus the review state of the last
+   submission and the last report.
 
 ## What it may do alone
 
@@ -41,9 +43,19 @@ themselves:
 - Roadmap items marked Next, if small enough to finish and verify in one
   session.
 - Bump versions, regenerate screenshots, archive, upload, submit for review
-  with automatic release, tag, push, and write the report.
-- Skip the release. A week with nothing user-visible ships nothing; the
-  report says so.
+  with automatic release, tag, push, and write the report, subject to the
+  shipping gate below.
+- Skip the release, and skip the report. A quiet day ships nothing and says
+  nothing; the transcript is enough.
+
+## The shipping gate
+
+The loop runs daily; the App Store does not want daily updates, and Apple
+allows one submission in review per app at a time. So a session ships only
+when all three hold: nothing is waiting for or in review for that app; at
+least three days have passed since that app's last submission (a rejection
+or a crash fix is exempt); and the changes since then have user-visible
+value. Everything else accumulates on main and ships when the gate opens.
 
 ## What waits for the maintainer
 
@@ -80,39 +92,49 @@ test case:
 
 ## Mechanics
 
-Nothing runs on the maintainer's Mac. Two repositories, three workflows, one
-session:
+Nothing runs on the maintainer's Mac, and nothing about him lives in public.
 
-- **This repository, public.** `.github/workflows/sunday.yml` runs Sundays at
+- **This repository, public.** `.github/workflows/loop.yml` runs daily at
   15:00 UTC on a GitHub-hosted macOS runner: it checks out both repositories,
   selects the newest Xcode, installs the App Store Connect key and the cktool
-  token from repository secrets, and runs `claude -p` with `loop/SUNDAY.md` as
-  the prompt and permission checks off. The session builds, decides, ships
-  through RELEASING.md and `scripts/asc.py`, and writes the report. Its
-  transcript goes to the private repository, never to the public job log.
-  Change the cron there to change the cadence; `workflow_dispatch` runs it on
-  demand, with a `check` mode that only proves the runner and a `note` field
-  for a one-line instruction.
-- **prabhchintan/randhawa-loop, private.** `inbox/`, `reports/`, `logs/`,
-  `analytics/`, and the conversation as issues. Three small workflows:
-  `checkin.yml` opens the Saturday check-in (Saturdays 15:00 UTC),
-  `report.yml` turns a pushed report into an issue addressed to the
-  maintainer, `inbox.yml` files every comment he writes. GitHub's own
-  notification email is the channel in both directions: the issue body is the
-  message, and a reply to the email is a comment.
+  token from repository secrets, fetches the maintainer's mail into the
+  private repository, and runs the agent with `loop/SESSION.md` as the
+  prompt and permission checks off. The transcript goes to the private
+  repository, never to the public job log. When the session leaves a report
+  with a Short version, the workflow mails those bullets; when the session
+  dies, it mails that; otherwise it mails nothing. `workflow_dispatch` runs
+  it on demand, with a `check` mode that only proves the runner and a `note`
+  field for a one-line instruction. Change the cron to change the cadence.
+- **The agent is a variable.** Repository variable `LOOP_AGENT` picks it:
+  `claude` (Claude Code, secret `CLAUDE_CODE_OAUTH_TOKEN` from
+  `claude setup-token`, or `ANTHROPIC_API_KEY`) or `codex` (OpenAI Codex CLI;
+  with `LOOP_MODEL_PROVIDER=xai` and secret `XAI_API_KEY` it runs Grok, with
+  `OPENAI_API_KEY` it runs OpenAI; `LOOP_MODEL` names the model). Same
+  prompt, same tools, same covenant. Adding an agent is one more case in the
+  workflow's install and run steps. Expect weaker agents to stumble on the
+  App Store half; the workflow reports a stumble as a stumble, and the next
+  day's run tries again with a clean checkout.
+- **prabhchintan/randhawa-loop, private.** `inbox/` (his replies), `reports/`
+  (days with news), `logs/` (map feeds, transcripts), `analytics/`. Nothing
+  in it is ever copied to the public repository.
+- **The post office.** `worker/loop.js` on the Pulse worker: `/loop/send`
+  mails him one screen of serif text from `loop@pulse.prabhchintan.com`, no
+  chrome, a Details link if he wants more; inbound mail to that address (from
+  his own addresses only) is kept for the next session; a cron on the worker
+  sends the Saturday question. Email Routing is enabled for the
+  `pulse.prabhchintan.com` subdomain only; the apex still points at iCloud.
+  `scripts/loopmail.py` is the runner's side of it.
 - **Secrets**, all in the public repository's Actions secrets and nowhere in
-  git: `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`, the maintainer's
-  subscription), `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`,
-  `ASC_CONTACT_JSON`, `CKTOOL_USER_TOKEN`, and `LOOP_DEPLOY_KEY`, a write
-  deploy key for the private repository.
+  git: an agent key, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`,
+  `ASC_CONTACT_JSON`, `CKTOOL_USER_TOKEN`, `LOOP_DEPLOY_KEY`, `LOOP_SECRET`.
 - Both apps must build for the simulator before anything is archived. If a
   build fails and the fix is not obvious, the session reverts its own
-  changes, reports, and ships nothing. A failed job also emails the
-  maintainer through GitHub Actions itself.
+  changes, reports, and ships nothing.
 - To pause the loop, disable the workflow in the Actions tab; to run it
-  early, dispatch it. `scripts/mymap.py` and `scripts/asc.py` also run from
-  any Mac with the same keys installed, which is how the first release under
-  this loop was made by hand on 2026-08-16.
+  early, dispatch it. `scripts/mymap.py`, `scripts/asc.py` and
+  `scripts/loopmail.py` also run from any Mac with the same keys installed,
+  which is how the first release under this loop was made by hand on
+  2026-08-16.
 
 ## Why this shape
 
@@ -120,5 +142,5 @@ The apps are quiet on purpose. The loop keeps them quiet: it studies one
 person who agreed to be studied and the numbers Apple already gathers, and
 it changes small things often instead of large things rarely. The maintainer
 sees each change the way everyone else does, as an update in the App Store,
-and reads one report a week. That is the whole feedback system, and it is
-enough.
+and gets one short email when there is news. That is the whole feedback
+system, and it is enough.

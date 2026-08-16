@@ -3,7 +3,7 @@
 The end to end process for shipping both apps. Last run in full on
 2026-08-16 (Randhawa 3.2 build 14, Bhullar 2.2 build 7), entirely from the
 command line: no browser and no Xcode GUI once the machine is set up. This is
-also what the Sunday loop runs unattended; see [LOOP.md](LOOP.md).
+also what the loop runs unattended; see [LOOP.md](LOOP.md).
 
 ## Prerequisites, once per machine
 
@@ -153,12 +153,12 @@ Install the updates from the App Store, never from Xcode, so the update
 arrives the way users see it, release notes included. If MemoryKit
 changed, verify sync between two signed-in devices before celebrating.
 
-## 10. Every Sunday
+## 10. Every day
 
 The loop in [LOOP.md](LOOP.md) runs steps 1 to 7 unattended on a GitHub-hosted
-Mac (`.github/workflows/sunday.yml`) for whatever it decided to ship that
-week, and writes a report that reaches the maintainer as an email. Read the
-report; reply to it if there is something to say.
+Mac (`.github/workflows/loop.yml`) whenever its shipping gate opens, and
+writes to the maintainer only when there is news. Reply to the email if there
+is something to say.
 
 ## Non-negotiables
 

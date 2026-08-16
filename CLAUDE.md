@@ -17,9 +17,9 @@ Read before changing anything, in this order:
 3. VISION.md: the voice, and the rule that the names story stays quiet.
 4. RELEASING.md: the end to end ship process, now entirely from the
    terminal (`scripts/asc.py` drives App Store Connect with an API key).
-5. LOOP.md: the Sunday loop, the unattended session that studies the week
-   and ships. Its scope rules bind any session that runs without the
-   maintainer present.
+5. LOOP.md: the loop, the unattended daily session that studies the apps
+   in use and ships when its gate opens. Its scope rules bind any session
+   that runs without the maintainer present, whichever model runs it.
 
 Build checks, from the repo root. No toolchain prefix is needed: as of
 2026-08-08 xcode-select points at Xcode (Swift 6.2), not CommandLineTools. If
