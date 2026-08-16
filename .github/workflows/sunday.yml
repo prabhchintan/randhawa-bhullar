@@ -124,9 +124,7 @@ jobs:
         run: |
           PROMPT="$(cat loop/SUNDAY.md)"
           if [ -n "$SUNDAY_NOTE" ]; then
-            PROMPT="$PROMPT
-
-Extra instruction from the maintainer for this run: $SUNDAY_NOTE"
+            PROMPT="$(printf '%s\n\nExtra instruction from the maintainer for this run: %s' "$PROMPT" "$SUNDAY_NOTE")"
           fi
           LOG="$LOOP_PRIVATE/logs/$(date -u +%F)-session.log"
           set +e
