@@ -52,6 +52,37 @@ them, and the rule that keeps that story quiet live in
 - Considering: a year picker to look at past years' grids; the minutes scale
   on Apple Watch someday.
 
+## The loop's backlog
+
+The loop (LOOP.md) chips through this list on its own, one small piece per
+run, in this order unless a message from the maintainer says otherwise. Each
+item is written so a session can tell when it is done.
+
+1. **Watch the ink on real data.** Tune blot alpha, thread alpha and the
+   thread gap against the maintainer's own map at street and city scale
+   until threads read as movement, not as a web. Done when two consecutive
+   weekly summaries have nothing to change.
+2. **A note to the loop, from inside the apps.** Today a memory that begins
+   with `@loop` is filed as a note to the loop by `scripts/mymap.py`, which
+   costs no app change but leaves the note on the map as a memory. The
+   proper version: a quiet "Write to the makers" entry in each app's menu
+   that opens the system mail sheet, prefilled to
+   loop@pulse.prabhchintan.com, so the app itself still sends nothing and
+   "no servers of ours" stays literally true. Anyone can use it (the public
+   half of the loop); the maintainer's own address is what the loop treats
+   as its private inbox. Copy stays quiet, one menu line. Done when it ships
+   in both apps and the maintainer's first note through it arrives.
+3. **One voice for the mail.** The site's Pulse worker already writes to the
+   maintainer about visitors; the loop now writes from the same worker in a
+   different voice. Give them one template, one sender family and one
+   cadence so the inbox reads as one system, and let the loop's summary
+   carry the site's numbers on Sundays if that proves useful. Not before 1
+   and 2.
+4. **"On this day" on the map**, not only in the list (from the Randhawa
+   lane below).
+5. **Gold in Bhullar's Lock Screen accessories** and the year picker, from
+   the Bhullar lane, when nothing above is open.
+
 ## Both, eventually
 
 - Say "open source" inside the apps and on the App Store pages, linking back

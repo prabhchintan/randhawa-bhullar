@@ -12,15 +12,22 @@ token from the CloudKit Console (account menu, Settings, Tokens), and the
 recordName QUERYABLE index on Moment and Memory deployed to Production
 (done 2026-08-16).
 
+A memory whose text begins with "@loop" (any case, optional colon) is a note
+to the loop written from inside the app: `--inbox DIR` files each new one
+under DIR as inbox/<stamp>-memory<id>.md, remembering which ids were already
+delivered in DIR/.memories-seen. The memory itself is left untouched.
+
 Usage:
-    mymap.py            pull everything and print a summary
-    mymap.py --summary  summary of what is already on disk, no network
+    mymap.py                 pull everything and print a summary
+    mymap.py --summary       summary of what is already on disk, no network
+    mymap.py --inbox DIR     also file @loop memories into DIR
 """
 
 import argparse
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
@@ -134,13 +141,48 @@ def summary(moments, memories, days=7):
     return "\n".join(lines)
 
 
+NOTE_PREFIX = re.compile(r"^\s*@loop\b:?\s*", re.IGNORECASE)
+
+
+def file_notes(memories, inbox_dir):
+    """Writes each not-yet-delivered @loop memory as an inbox file. Returns
+    the paths written."""
+    os.makedirs(inbox_dir, exist_ok=True)
+    seen_path = os.path.join(inbox_dir, ".memories-seen")
+    seen = set()
+    if os.path.exists(seen_path):
+        with open(seen_path) as handle:
+            seen = {line.strip() for line in handle if line.strip()}
+    written = []
+    for memory in memories:
+        text = memory.get("text") or ""
+        if not NOTE_PREFIX.match(text) or memory["id"] in seen:
+            continue
+        body = NOTE_PREFIX.sub("", text, count=1).strip()
+        stamp = re.sub(r"[^0-9T]", "", memory.get("date") or "")[:13] + "Z"
+        path = os.path.join(inbox_dir, f"{stamp}-memory{memory['id'][:8]}.md")
+        with open(path, "w") as handle:
+            handle.write("# From inside the app\n\n")
+            handle.write(f"A memory written in {'Randhawa' if memory.get('latitude') is not None else 'Bhullar'} at {memory.get('date')}\n\n")
+            handle.write(body + "\n")
+        seen.add(memory["id"])
+        written.append(path)
+    with open(seen_path, "w") as handle:
+        handle.write("\n".join(sorted(seen)) + ("\n" if seen else ""))
+    return written
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--summary", action="store_true", help="summarise what is on disk, do not pull")
     parser.add_argument("--days", type=int, default=7)
+    parser.add_argument("--inbox", default=None, help="file @loop memories into this directory")
     args = parser.parse_args(argv)
     moments, memories = load() if args.summary else pull()
     print(summary(moments, memories, days=args.days))
+    if args.inbox:
+        written = file_notes(memories, args.inbox)
+        print(f"notes from inside the app: {len(written)} new")
 
 
 if __name__ == "__main__":

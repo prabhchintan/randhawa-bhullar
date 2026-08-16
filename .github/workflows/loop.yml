@@ -3,15 +3,18 @@
 # driving a headless coding agent with loop/SESSION.md as its prompt. LOOP.md
 # is the covenant that session runs under.
 #
-# Cadence: daily at 15:00 UTC (10:00 Austin, 09:00 Denver). Sunday is the
-# weekly summary day; the other days write to the maintainer only when
+# Cadence: Wednesdays and Sundays at 15:00 UTC (10:00 Austin, 09:00 Denver),
+# roughly every three or four days, gentle on a Claude subscription. Sunday
+# is the weekly summary day; other runs write to the maintainer only when
 # something happened. Change the cron here to change the cadence; the
 # Saturday question is a cron on the Cloudflare worker (worker/wrangler.toml
 # in the prabhchintan.com repo).
 #
 # The agent is chosen by the repository variable LOOP_AGENT:
 #   claude (default)  Claude Code, secret CLAUDE_CODE_OAUTH_TOKEN (the
-#                     maintainer's subscription) or ANTHROPIC_API_KEY
+#                     maintainer's subscription) or ANTHROPIC_API_KEY;
+#                     LOOP_MODEL picks the model (leave empty for the
+#                     plan's default; a smaller plan may want claude-sonnet-5)
 #   codex             OpenAI Codex CLI; with LOOP_MODEL_PROVIDER=xai and secret
 #                     XAI_API_KEY it runs Grok, with OPENAI_API_KEY it runs
 #                     OpenAI models. LOOP_MODEL names the model.
@@ -24,7 +27,7 @@ name: Loop
 
 on:
   schedule:
-    - cron: "0 15 * * *"
+    - cron: "0 15 * * 0,3"
   workflow_dispatch:
     inputs:
       mode:
@@ -114,7 +117,7 @@ jobs:
           python3 scripts/asc.py status --app Prabhchintan.Randhawa | head -2
           python3 scripts/asc.py status --app Prabhchintan.Bhullar | head -2
           mkdir -p "$LOOP_PRIVATE/logs" "$LOOP_PRIVATE/inbox"
-          python3 scripts/mymap.py > "$LOOP_PRIVATE/logs/$(date -u +%F)-map.txt" && echo "map feed ok"
+          python3 scripts/mymap.py --inbox "$LOOP_PRIVATE/inbox" > "$LOOP_PRIVATE/logs/$(date -u +%F)-map.txt" && echo "map feed ok"
           NEW=$(python3 scripts/loopmail.py inbox --into "$LOOP_PRIVATE/inbox" | wc -l | tr -d ' ')
           echo "mail: $NEW new"
 
@@ -168,7 +171,7 @@ jobs:
           set +e
           case "$LOOP_AGENT" in
             claude)
-              claude -p "$PROMPT" --dangerously-skip-permissions --output-format text > "$LOG" 2>&1 ;;
+              claude -p "$PROMPT" --dangerously-skip-permissions --output-format text ${LOOP_MODEL:+--model "$LOOP_MODEL"} > "$LOG" 2>&1 ;;
             codex)
               codex exec --dangerously-bypass-approvals-and-sandbox "$PROMPT" > "$LOG" 2>&1 ;;
           esac

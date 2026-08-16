@@ -1,7 +1,7 @@
 # The loop
 
-Every morning this repository is worked on by an unattended coding agent on
-a GitHub-hosted Mac. It reads how the apps were actually used, decides what
+Twice a week (Wednesdays and Sundays) this repository is worked on by an
+unattended coding agent on a GitHub-hosted Mac. It reads how the apps were actually used, decides what
 to improve, builds it, ships it through App Store Connect when shipping is
 warranted, and writes to the maintainer only when there is something to say.
 The maintainer's part is to carry the apps on his phone, answer the Saturday
@@ -23,13 +23,16 @@ themselves:
 2. **App Store Connect analytics**, `scripts/asc.py analytics`: installs,
    sessions, retention and crashes from the users who opted into sharing
    with developers. Apple gathers it; the apps do not.
-3. **The maintainer's words.** Every Saturday the loop's post office (a
-   Cloudflare worker, `worker/loop.js` in the prabhchintan.com repo) mails
-   him one question from `loop@pulse.prabhchintan.com`. He replies to that
-   email, or to any of the loop's emails, any day; the reply lands in the
-   worker's mailbox, and the next session fetches it into the private
-   repository's `inbox/` before it starts. Plus the review state of the last
-   submission and the last report.
+3. **The maintainer's words**, by either of two doors, both optional, and
+   the loop runs whether or not he uses them. By email: every Saturday the
+   loop's post office (a Cloudflare worker, `worker/loop.js` in the
+   prabhchintan.com repo) mails him one question from
+   `loop@pulse.prabhchintan.com`; he replies to that, or to any of the loop's
+   emails, any day, and the next session fetches the reply into the private
+   repository's `inbox/` before it starts. From inside the app: a memory
+   whose text begins with `@loop` is a note to the loop; `scripts/mymap.py`
+   files it into the same inbox and never touches the memory. Plus the
+   review state of the last submission and the last report.
 
 ## What it may do alone
 
@@ -40,7 +43,8 @@ themselves:
   MemoryKit/README.md.
 - Copy inside the apps and on the store pages, provided every privacy claim
   stays literally true and no dash of either long kind appears anywhere.
-- Roadmap items marked Next, if small enough to finish and verify in one
+- The loop's backlog in ROADMAP.md, in order, one piece per run, and
+  roadmap items marked Next, if small enough to finish and verify in one
   session.
 - Bump versions, regenerate screenshots, archive, upload, submit for review
   with automatic release, tag, push, and write the report, subject to the
@@ -50,8 +54,8 @@ themselves:
 
 ## The shipping gate
 
-The loop runs daily; the App Store does not want daily updates, and Apple
-allows one submission in review per app at a time. So a session ships only
+The loop runs twice a week; the App Store does not want an update every
+run, and Apple allows one submission in review per app at a time. So a session ships only
 when all three hold: nothing is waiting for or in review for that app; at
 least three days have passed since that app's last submission (a rejection
 or a crash fix is exempt); and the changes since then have user-visible
@@ -94,8 +98,8 @@ test case:
 
 Nothing runs on the maintainer's Mac, and nothing about him lives in public.
 
-- **This repository, public.** `.github/workflows/loop.yml` runs daily at
-  15:00 UTC on a GitHub-hosted macOS runner: it checks out both repositories,
+- **This repository, public.** `.github/workflows/loop.yml` runs Wednesdays
+  and Sundays at 15:00 UTC on a GitHub-hosted macOS runner: it checks out both repositories,
   selects the newest Xcode, installs the App Store Connect key and the cktool
   token from repository secrets, fetches the maintainer's mail into the
   private repository, and runs the agent with `loop/SESSION.md` as the
@@ -107,7 +111,9 @@ Nothing runs on the maintainer's Mac, and nothing about him lives in public.
   field for a one-line instruction. Change the cron to change the cadence.
 - **The agent is a variable.** Repository variable `LOOP_AGENT` picks it:
   `claude` (Claude Code, secret `CLAUDE_CODE_OAUTH_TOKEN` from
-  `claude setup-token`, or `ANTHROPIC_API_KEY`) or `codex` (OpenAI Codex CLI;
+  `claude setup-token`, which runs on the maintainer's subscription, or
+  `ANTHROPIC_API_KEY`; `LOOP_MODEL` picks the model, and a smaller plan
+  should set it to a smaller model) or `codex` (OpenAI Codex CLI;
   with `LOOP_MODEL_PROVIDER=xai` and secret `XAI_API_KEY` it runs Grok, with
   `OPENAI_API_KEY` it runs OpenAI; `LOOP_MODEL` names the model). Same
   prompt, same tools, same covenant. Adding an agent is one more case in the
