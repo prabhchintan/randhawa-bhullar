@@ -22,6 +22,11 @@
 		B00000000000000000000012 /* ConstellationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* ConstellationView.swift */; };
 		B00000000000000000000016 /* RandhawaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000006 /* RandhawaWidget.swift */; };
 		B00000000000000000000017 /* RandhawaWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000007 /* RandhawaWidgetBundle.swift */; };
+		B00000000000000000000031 /* Ink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000010 /* Ink.swift */; };
+		B00000000000000000000032 /* InkMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000011 /* InkMapView.swift */; };
+		B00000000000000000000033 /* PlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000012 /* PlaceNames.swift */; };
+		B00000000000000000000034 /* Export.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000013 /* Export.swift */; };
+		B00000000000000000000035 /* Ink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000010 /* Ink.swift */; };
 		B000000000000000000000EE /* RandhawaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000B /* RandhawaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -65,6 +70,10 @@
 		D0000000000000000000000D /* MemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryStore.swift; sourceTree = "<group>"; };
 		D0000000000000000000000E /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
 		D0000000000000000000000F /* MemoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryViews.swift; sourceTree = "<group>"; };
+		D00000000000000000000010 /* Ink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ink.swift; sourceTree = "<group>"; };
+		D00000000000000000000011 /* InkMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkMapView.swift; sourceTree = "<group>"; };
+		D00000000000000000000012 /* PlaceNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceNames.swift; sourceTree = "<group>"; };
+		D00000000000000000000013 /* Export.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Export.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				D00000000000000000000002 /* ConstellationView.swift */,
+				D00000000000000000000010 /* Ink.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -112,6 +122,8 @@
 				D0000000000000000000000D /* MemoryStore.swift */,
 				D0000000000000000000000E /* CloudSync.swift */,
 				D0000000000000000000000F /* MemoryViews.swift */,
+				D00000000000000000000012 /* PlaceNames.swift */,
+				D00000000000000000000013 /* Export.swift */,
 			);
 			path = MemoryKit;
 			sourceTree = "<group>";
@@ -121,6 +133,7 @@
 			children = (
 				D00000000000000000000003 /* RandhawaApp.swift */,
 				D00000000000000000000004 /* ContentView.swift */,
+				D00000000000000000000011 /* InkMapView.swift */,
 				D00000000000000000000009 /* SpaceModel.swift */,
 				D00000000000000000000005 /* Assets.xcassets */,
 			);
@@ -246,6 +259,10 @@
 				B00000000000000000000023 /* CloudSync.swift in Sources */,
 				B00000000000000000000024 /* MemoryViews.swift in Sources */,
 				B00000000000000000000002 /* ConstellationView.swift in Sources */,
+				B00000000000000000000031 /* Ink.swift in Sources */,
+				B00000000000000000000032 /* InkMapView.swift in Sources */,
+				B00000000000000000000033 /* PlaceNames.swift in Sources */,
+				B00000000000000000000034 /* Export.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +275,7 @@
 				B00000000000000000000011 /* MomentStore.swift in Sources */,
 				B00000000000000000000025 /* MemoryModel.swift in Sources */,
 				B00000000000000000000012 /* ConstellationView.swift in Sources */,
+				B00000000000000000000035 /* Ink.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,14 +416,15 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Randhawa/Randhawa.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Turn on the trail and Randhawa keeps marking dots as you go, at a pace you choose, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it. Your places stay on this device, plus your private iCloud if you turn on sync.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Randhawa marks a dot each time your phone notices you have gone somewhere, and draws the line between, so your map draws itself. It uses only low-power signals, never continuous location. Your places stay on this device, plus your private iCloud if you turn on sync.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Only when you choose to take a photo for a memory. The photo stays with the memory, on this device and in your private iCloud if sync is on.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -415,7 +434,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -431,14 +450,15 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Randhawa/Randhawa.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Turn on the trail and Randhawa keeps marking dots as you go, at a pace you choose, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it. Your places stay on this device, plus your private iCloud if you turn on sync.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Randhawa marks a dot each time your phone notices you have gone somewhere, and draws the line between, so your map draws itself. It uses only low-power signals, never continuous location. Your places stay on this device, plus your private iCloud if you turn on sync.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Only when you choose to take a photo for a memory. The photo stays with the memory, on this device and in your private iCloud if sync is on.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -448,7 +468,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -461,7 +481,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
@@ -474,7 +494,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa.RandhawaWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -488,7 +508,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
@@ -501,7 +521,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Randhawa.RandhawaWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

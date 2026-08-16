@@ -227,48 +227,6 @@ private func visits(in moments: [Moment], radiusMeters: Double = 150) -> [Visit]
     return result
 }
 
-/// Names for coordinates, resolved once and remembered for the life of the
-/// process. Bhullar draws no map, so a place has to arrive as a word; this asks
-/// Apple's geocoder for that word and asks only once per neighbourhood.
-@MainActor
-private final class PlaceNames: ObservableObject {
-    static let shared = PlaceNames()
-
-    @Published private(set) var names: [String: String] = [:]
-
-    private let geocoder = CLGeocoder()
-    private var inFlight: Set<String> = []
-
-    /// Roughly 100 metres of latitude per key, so two dots in the same block
-    /// share one lookup.
-    private func key(_ coordinate: CLLocationCoordinate2D) -> String {
-        String(format: "%.3f,%.3f", coordinate.latitude, coordinate.longitude)
-    }
-
-    func name(for coordinate: CLLocationCoordinate2D) -> String? {
-        names[key(coordinate)]
-    }
-
-    func resolve(_ coordinate: CLLocationCoordinate2D) {
-        let cacheKey = key(coordinate)
-        guard names[cacheKey] == nil, !inFlight.contains(cacheKey) else { return }
-        inFlight.insert(cacheKey)
-        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
-            Task { @MainActor in
-                guard let self else { return }
-                self.inFlight.remove(cacheKey)
-                guard let placemark = placemarks?.first else { return }
-                let name = [placemark.locality ?? placemark.name, placemark.administrativeArea]
-                    .compactMap { $0 }
-                    .joined(separator: ", ")
-                guard !name.isEmpty else { return }
-                self.names[cacheKey] = name
-            }
-        }
-    }
-}
-
 /// What one dot held: where you were, and what you kept. This is the whole
 /// point of the pairing. Randhawa gathers the places; Bhullar is where they
 /// come back, filed under the hour they happened.
@@ -349,7 +307,7 @@ private struct DotDetailSheet: View {
     private var emptyDetail: String {
         TrailSettings.cadence.isOn
             ? "No places and no memories from this stretch of time."
-            : "No memories from this stretch of time. Randhawa's trail can fill these in with the places you went."
+            : "No memories from this stretch of time. Randhawa, the sibling map app, can fill these in with the places you went."
     }
 
     private func empty(_ title: String, _ detail: String) -> some View {

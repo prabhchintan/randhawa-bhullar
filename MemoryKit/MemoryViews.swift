@@ -24,7 +24,7 @@ enum MemoryPhoto {
 
 /// One sheet for writing a memory down, shared by both apps. The caller
 /// decides what the memory is pinned to; this view only collects the words
-/// and an optional photo.
+/// and an optional photo, from the library or straight from the camera.
 struct MemoryComposerView: View {
     let prompt: String
     let contextLine: String
@@ -35,9 +35,14 @@ struct MemoryComposerView: View {
     @State private var text = ""
     @State private var pickedItem: PhotosPickerItem?
     @State private var photoData: Data?
+    @State private var showingCamera = false
 
     private var canSave: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || photoData != nil
+    }
+
+    private var hasCamera: Bool {
+        UIImagePickerController.isSourceTypeAvailable(.camera)
     }
 
     var body: some View {
@@ -47,17 +52,38 @@ struct MemoryComposerView: View {
                     .lineLimit(4...12)
                     .focused($focused)
 
-                PhotosPicker(selection: $pickedItem, matching: .images) {
-                    if let photoData, let image = UIImage(data: photoData) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 160)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    } else {
-                        Label("Add a photo", systemImage: "photo")
-                            .font(.subheadline)
+                if let photoData, let image = UIImage(data: photoData) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 160)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(alignment: .topTrailing) {
+                            Button {
+                                self.photoData = nil
+                                pickedItem = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.white, .black.opacity(0.5))
+                                    .padding(8)
+                            }
+                        }
+                } else {
+                    HStack(spacing: 20) {
+                        if hasCamera {
+                            Button {
+                                showingCamera = true
+                            } label: {
+                                Label("Take a photo", systemImage: "camera")
+                                    .font(.subheadline)
+                            }
+                        }
+                        PhotosPicker(selection: $pickedItem, matching: .images) {
+                            Label("Choose a photo", systemImage: "photo")
+                                .font(.subheadline)
+                        }
                     }
                 }
 
@@ -91,6 +117,49 @@ struct MemoryComposerView: View {
                     }
                 }
             }
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraPicker { image in
+                    if let image, let raw = image.jpegData(compressionQuality: 0.95) {
+                        photoData = MemoryPhoto.processed(raw)
+                    }
+                }
+                .ignoresSafeArea()
+            }
+        }
+    }
+}
+
+/// The system camera, for a photo that becomes part of a memory and nothing
+/// else: it is not written to the photo library, so no library permission is
+/// asked for either.
+struct CameraPicker: UIViewControllerRepresentable {
+    let onFinish: (UIImage?) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ controller: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: CameraPicker
+        init(_ parent: CameraPicker) { self.parent = parent }
+
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            parent.onFinish(info[.originalImage] as? UIImage)
+            parent.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.onFinish(nil)
+            parent.dismiss()
         }
     }
 }

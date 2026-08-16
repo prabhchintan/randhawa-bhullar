@@ -3,9 +3,10 @@ import CoreLocation
 import WidgetKit
 
 /// The app's single source of truth: the moment list, its persistence, and the
-/// one-shot location sampling that grows it. Location is read only while the
-/// app is open and written only to the on-device store; when the user turns on
-/// iCloud sync, CloudSync mirrors that store into their private database.
+/// one-shot location sampling that grows it each time the app opens. The trail
+/// (below) grows it between opens. Everything is written only to the on-device
+/// store; when the user turns on iCloud sync, CloudSync mirrors that store into
+/// their private database.
 final class SpaceModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     enum Permission {
         case undetermined  // never asked, so show the intro
@@ -68,8 +69,19 @@ final class SpaceModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
+    /// The one ask, from Begin. Since 3.2 the map is meant to draw itself, so
+    /// this asks for Always straight away rather than While Using first: iOS
+    /// shows its ordinary prompt, grants background access provisionally if
+    /// the user allows, and comes back on its own later to ask whether that
+    /// should stand. Answer While Using only, at either point, and the app
+    /// falls back to a dot per open, which is what 3.0 was.
     func requestPermission() {
-        manager.requestWhenInUseAuthorization()
+        manager.requestAlwaysAuthorization()
+    }
+
+    /// Whether iOS currently lets the trail run.
+    var isAlwaysAuthorized: Bool {
+        manager.authorizationStatus == .authorizedAlways
     }
 
     /// Called on every foreground activation. One fix per open, at most.
@@ -137,11 +149,13 @@ final class SpaceModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 }
 
-/// The trail: dots that arrive without the app being opened, for people who
-/// want the map to keep drawing itself while they live.
+/// The trail: dots that arrive without the app being opened, so the map keeps
+/// drawing itself while you live.
 ///
-/// Off until the user turns it on, and off again the moment they say so. Three
-/// decisions shape everything here.
+/// Since 3.2 this is the default way the map is made; it still needs the
+/// user's yes to iOS's own prompt before it reads anything, and it goes quiet
+/// the moment they say so, in the trail screen or in Settings. Three decisions
+/// shape everything here.
 ///
 /// **Why iOS wakes us, and why that is not a clock.** The only honest cadence a
 /// background app can promise is a ceiling. iOS wakes a sleeping app when the

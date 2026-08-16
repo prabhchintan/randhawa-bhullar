@@ -1,23 +1,27 @@
 # Releasing
 
 The end to end process for shipping both apps. Last run in full on
-2026-07-25 (Randhawa 3.0 build 10, Bhullar 2.0 build 4), entirely from the
-command line and a signed-in browser. The Xcode GUI is not part of the
-process once the machine is set up.
+2026-08-16 (Randhawa 3.2 build 13, Bhullar 2.2 build 7), entirely from the
+command line: no browser and no Xcode GUI once the machine is set up. This is
+also what the Sunday loop runs unattended; see [LOOP.md](LOOP.md).
 
 ## Prerequisites, once per machine
 
-- Xcode installed, and signed into the Apple Account in Xcode Settings.
-  Distribution signing is cloud managed by that session; no local
-  distribution certificate is needed, and `-allowProvisioningUpdates`
-  handles profiles and new capabilities from the command line.
-- `xcode-select -p` must point at `/Applications/Xcode.app/Contents/Developer`,
-  not CommandLineTools. Fixed on this machine 2026-08-08; on a fresh one run
+- Xcode installed. `xcode-select -p` must point at
+  `/Applications/Xcode.app/Contents/Developer`, not CommandLineTools. Fixed on
+  this machine 2026-08-08; on a fresh one run
   `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`. Check with
   `swift --version`: anything reporting 5.x means the wrong toolchain is active
   and builds will reject modern syntax.
-- Browser sessions signed into App Store Connect and the CloudKit Console.
+- An App Store Connect API key (Team key, Admin) described by
+  `~/.config/appstoreconnect/config.json` (`key_id`, `issuer_id`, `key_path`,
+  `team_id`), plus `contact.json` beside it with the App Review contact
+  fields. `scripts/asc.py` reads both. Distribution signing is cloud managed;
+  `-allowProvisioningUpdates` with the key handles profiles and capabilities.
+- `pip3 install "PyJWT[crypto]"`, the one dependency of `scripts/asc.py`.
 - `gh` authenticated, for tags and the repo.
+- A CloudKit Console session, only for the rare release that changes the
+  schema (step 4).
 
 ## 1. Bump versions
 
@@ -60,11 +64,16 @@ and fails quietly.
 
 ## 5. Archive and upload
 
+Set the key once per shell:
+
 ```
+KEY=(-authenticationKeyPath "$HOME/.config/appstoreconnect/AuthKey_35DM9PC8S8.p8" \
+     -authenticationKeyID 35DM9PC8S8 \
+     -authenticationKeyIssuerID f0637e77-d15f-4807-a0e3-0c35531b3b7d)
 xcodebuild -project Randhawa.xcodeproj -scheme Randhawa \
   -destination 'generic/platform=iOS' \
   -archivePath "$HOME/Library/Developer/Xcode/Archives/$(date +%F)/Randhawa X.Y (N).xcarchive" \
-  -allowProvisioningUpdates archive
+  -allowProvisioningUpdates "${KEY[@]}" archive
 ```
 
 Same shape for Bhullar. Then export straight to App Store Connect with
@@ -87,21 +96,39 @@ this `exportOptions.plist`:
 
 ```
 xcodebuild -exportArchive -archivePath <the archive> \
-  -exportOptionsPlist exportOptions.plist -allowProvisioningUpdates
+  -exportOptionsPlist exportOptions.plist -allowProvisioningUpdates "${KEY[@]}"
 ```
 
 Success prints `Upload succeeded`. Apple-side processing takes five to
-thirty minutes before the build appears in App Store Connect.
+thirty minutes before the build appears in App Store Connect;
+`scripts/asc.py release` waits for it.
 
-## 6. App Store Connect
+## 6. App Store Connect, from the terminal
 
-All copy is prewritten in `AppStore/metadata.md` and
-`AppStore/whatsnew-<version>.md` (and the same under `Bhullar/`); the
-character counts in those files are verified, so paste without editing.
-Create the new version, fill promotional text, description, keywords, and
-What's New, replace both screenshot sets, refresh the App Review notes,
-attach the processed build, and submit. When a release spans both apps,
-submit them together, since each release's copy references the other.
+All copy lives in `AppStore/metadata.md` and `AppStore/whatsnew-<version>.md`
+(and the same under `Bhullar/`). `scripts/asc.py` reads the Promotional
+text, Keywords, Description and App Review notes sections straight out of
+metadata.md, so the file is the listing:
+
+```
+python3 scripts/asc.py release --app Prabhchintan.Randhawa \
+  --version X.Y --build N \
+  --metadata AppStore/metadata.md --whatsnew AppStore/whatsnew-X.Y.md \
+  --screenshots AppStore/screenshots --submit
+python3 scripts/asc.py release --app Prabhchintan.Bhullar \
+  --version X.Y --build N \
+  --metadata Bhullar/AppStore/metadata.md --whatsnew Bhullar/AppStore/whatsnew-X.Y.md \
+  --screenshots Bhullar/AppStore/screenshots --submit
+```
+
+That creates the version if needed, sets the copy, replaces both screenshot
+sets (omit `--screenshots` to keep the current ones), writes the review notes,
+waits for the build to finish processing, attaches it, and submits for review
+with automatic release. Without `--submit` it stops one step short.
+`asc.py status --app ...` reads back the version and submission states. When
+a release spans both apps, submit them together, since each release's copy
+references the other. App Privacy is app-level and stays Data Not Collected;
+it is not touched by the script and should not need to be.
 
 ## 7. Tag and record
 
@@ -125,6 +152,11 @@ review may read them.
 Install the updates from the App Store, never from Xcode, so the update
 arrives the way users see it, release notes included. If MemoryKit
 changed, verify sync between two signed-in devices before celebrating.
+
+## 10. Every Sunday
+
+The loop in [LOOP.md](LOOP.md) runs steps 1 to 8 unattended for whatever it
+decided to ship that week, and writes a report. Read the report.
 
 ## Non-negotiables
 

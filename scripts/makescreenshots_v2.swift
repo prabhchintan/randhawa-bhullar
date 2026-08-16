@@ -195,17 +195,17 @@ func render(W: Int, H: Int, outDir: String) {
         save(ctx, "02-open.png")
     }
 
-    // Shot 3: the trail, the 3.1 headline. The card mirrors the real settings
-    // screen, checkmark included, so the promise on the store page and the
-    // control inside the app are visibly the same thing.
+    // Shot 3: the trail, the way the map is made since 3.2. The card mirrors
+    // the real settings screen, checkmark included, so the promise on the
+    // store page and the control inside the app are visibly the same thing.
     func shot3trail() {
         let ctx = newContext()
         backgroundGradient(ctx)
-        caption(ctx, "Or let the map", "draw itself")
+        caption(ctx, "The map", "draws itself")
         let subBase = CGFloat(H) * 0.090 + 235 * s
-        drawCentered(ctx, line("Turn the trail on and dots keep arriving", font(medium, 46 * s), subtle),
+        drawCentered(ctx, line("Carry your phone. A dot where you go,", font(medium, 46 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: subBase)
-        drawCentered(ctx, line("at a pace you pick. Off until you do.", font(medium, 46 * s), subtle),
+        drawCentered(ctx, line("a line where you moved, today in orange.", font(medium, 46 * s), subtle),
                      centerX: CGFloat(W) / 2, baselineFromTop: subBase + 72 * s)
 
         // A path of dots between two clusters: what a trail actually adds.
@@ -221,6 +221,21 @@ func render(W: Int, H: Int, outDir: String) {
         ]
         let (trailDots, trailLatest) = normalized(clusterA + clusterB + walked,
                                                   latest: latestDot, pad: 0.06)
+        // Today's line: from the newest dot along the walk, in orange, drawn
+        // under the dots the way the app layers it.
+        do {
+            let path = [trailLatest] + trailDots.suffix(walked.count)
+            ctx.setStrokeColor(rgb(1.0, 0.584, 0.0, 0.7))
+            ctx.setLineWidth(7 * s)
+            ctx.setLineCap(.round)
+            ctx.setLineJoin(.round)
+            ctx.beginPath()
+            for (i, (ux, uy)) in path.enumerated() {
+                let pt = CGPoint(x: field.minX + ux * field.width, y: field.maxY - uy * field.height)
+                if i == 0 { ctx.move(to: pt) } else { ctx.addLine(to: pt) }
+            }
+            ctx.strokePath()
+        }
         drawConstellation(ctx, in: field, dots: trailDots,
                           latest: trailLatest, dotRadius: 26 * s, ringLatest: true)
 
@@ -231,8 +246,8 @@ func render(W: Int, H: Int, outDir: String) {
         let card = rectFromTop(x: (CGFloat(W) - cardW) / 2, topInset: cardTop, w: cardW, h: cardH)
         ctx.addPath(roundedPath(card, 56 * s)); ctx.setFillColor(rgb(1, 1, 1, 0.09)); ctx.fillPath()
 
-        let rows = ["Whenever you move", "At most once an hour", "Only when you arrive"]
-        let checked = 1
+        let rows = ["Whenever you move", "Only when you arrive", "Off"]
+        let checked = 0
         for (i, text) in rows.enumerated() {
             let rowBase = cardTop + 118 * s + CGFloat(i) * 116 * s
             ctx.textPosition = CGPoint(x: card.minX + 76 * s, y: CGFloat(H) - rowBase)
@@ -251,7 +266,7 @@ func render(W: Int, H: Int, outDir: String) {
                 ctx.strokePath()
             }
         }
-        drawCentered(ctx, line("Forget the trail any time, in one tap.",
+        drawCentered(ctx, line("Off in one tap. Forget the trail in one more.",
                                font(medium, 42 * s), rgb(0.5, 0.5, 0.55)),
                      centerX: CGFloat(W) / 2, baselineFromTop: cardTop + cardH + 96 * s)
         save(ctx, "03-trail.png")

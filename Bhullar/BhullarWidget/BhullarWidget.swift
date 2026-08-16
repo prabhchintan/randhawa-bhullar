@@ -2,11 +2,31 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-/// A single point on a widget's timeline: where `date` falls on one time scale.
+/// A single point on a widget's timeline: where `date` falls on one time scale,
+/// and which units of that scale hold a memory (gold in the grid, as in the app).
 struct ScaleEntry: TimelineEntry {
     let date: Date
     let scale: TimeScale
     let position: ScalePosition
+    var highlighted: Set<Int> = []
+}
+
+/// The units of `scale` that hold a memory, seen from `date`: same year for the
+/// day grid, same day for the hour grid. Read from the shared file, so a
+/// memory made in either app lights the widget the next time it reloads,
+/// which MemoryStore asks for on every save.
+func memoryHighlights(scale: TimeScale, at date: Date, memories: [Memory], calendar: Calendar = .current) -> Set<Int> {
+    var indices: Set<Int> = []
+    for memory in memories {
+        switch scale {
+        case .months, .weeks, .days:
+            guard calendar.isDate(memory.date, equalTo: date, toGranularity: .year) else { continue }
+        case .hours, .minutes:
+            guard calendar.isDate(memory.date, inSameDayAs: date) else { continue }
+        }
+        indices.insert(scale.position(date: memory.date, calendar: calendar).index)
+    }
+    return indices
 }
 
 /// Supplies the day widget with one entry per hour.
@@ -29,13 +49,15 @@ struct DayProvider: TimelineProvider {
         // them at the top of each hour; `.atEnd` makes it request a fresh window
         // once the last entry is reached, so the grid keeps ticking indefinitely
         // without relying on background refresh budget.
+        let memories = MemoryPersistence.load()
         var entries: [ScaleEntry] = []
         for hourOffset in 0..<24 {
             guard let hour = calendar.date(byAdding: .hour, value: hourOffset, to: startOfHour) else { continue }
             entries.append(ScaleEntry(
                 date: hour,
                 scale: .hours,
-                position: TimeScale.hours.position(date: hour, calendar: calendar)
+                position: TimeScale.hours.position(date: hour, calendar: calendar),
+                highlighted: memoryHighlights(scale: .hours, at: hour, memories: memories, calendar: calendar)
             ))
         }
 
@@ -59,13 +81,15 @@ struct YearProvider: TimelineProvider {
 
         // One entry per day for the next two weeks; same `.atEnd` trick as above,
         // advancing at local midnight instead of the top of the hour.
+        let memories = MemoryPersistence.load()
         var entries: [ScaleEntry] = []
         for dayOffset in 0..<14 {
             guard let day = calendar.date(byAdding: .day, value: dayOffset, to: startOfToday) else { continue }
             entries.append(ScaleEntry(
                 date: day,
                 scale: .days,
-                position: TimeScale.days.position(date: day, calendar: calendar)
+                position: TimeScale.days.position(date: day, calendar: calendar),
+                highlighted: memoryHighlights(scale: .days, at: day, memories: memories, calendar: calendar)
             ))
         }
 
@@ -86,13 +110,13 @@ struct BhullarWidgetEntryView: View {
         case .accessoryCircular:
             ZStack {
                 AccessoryWidgetBackground()
-                DotGrid(position: entry.position, palette: .accessory, dotScale: 0.62, unitName: entry.scale.unitName)
+                DotGrid(position: entry.position, palette: .accessory, highlighted: entry.highlighted, dotScale: 0.62, unitName: entry.scale.unitName)
                     .padding(2)
             }
 
         case .accessoryRectangular:
             HStack(spacing: 8) {
-                DotGrid(position: entry.position, palette: .accessory, dotScale: 0.7, unitName: entry.scale.unitName)
+                DotGrid(position: entry.position, palette: .accessory, highlighted: entry.highlighted, dotScale: 0.7, unitName: entry.scale.unitName)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("\(entry.position.percent)%")
                         .font(.headline)
@@ -102,7 +126,7 @@ struct BhullarWidgetEntryView: View {
             }
 
         default: // systemSmall, systemMedium, systemLarge
-            DotGrid(position: entry.position, unitName: entry.scale.unitName)
+            DotGrid(position: entry.position, highlighted: entry.highlighted, unitName: entry.scale.unitName)
         }
     }
 }

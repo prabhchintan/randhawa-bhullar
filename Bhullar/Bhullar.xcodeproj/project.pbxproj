@@ -21,6 +21,9 @@
 		B00000000000000000000012 /* DotGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* DotGrid.swift */; };
 		B00000000000000000000016 /* BhullarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000006 /* BhullarWidget.swift */; };
 		B00000000000000000000017 /* BhullarWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000007 /* BhullarWidgetBundle.swift */; };
+		B00000000000000000000026 /* PlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000011 /* PlaceNames.swift */; };
+		B00000000000000000000027 /* MomentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000C /* MomentStore.swift */; };
+		B00000000000000000000028 /* MemoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000D /* MemoryModel.swift */; };
 		B000000000000000000000EE /* BhullarWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000B /* BhullarWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -64,6 +67,7 @@
 		D0000000000000000000000E /* MemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryStore.swift; sourceTree = "<group>"; };
 		D0000000000000000000000F /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
 		D00000000000000000000010 /* MemoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryViews.swift; sourceTree = "<group>"; };
+		D00000000000000000000011 /* PlaceNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceNames.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +107,7 @@
 				D0000000000000000000000E /* MemoryStore.swift */,
 				D0000000000000000000000F /* CloudSync.swift */,
 				D00000000000000000000010 /* MemoryViews.swift */,
+				D00000000000000000000011 /* PlaceNames.swift */,
 			);
 			name = MemoryKit;
 			path = ../MemoryKit;
@@ -246,6 +251,7 @@
 				B00000000000000000000023 /* MemoryStore.swift in Sources */,
 				B00000000000000000000024 /* CloudSync.swift in Sources */,
 				B00000000000000000000025 /* MemoryViews.swift in Sources */,
+				B00000000000000000000026 /* PlaceNames.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +263,8 @@
 				B00000000000000000000017 /* BhullarWidgetBundle.swift in Sources */,
 				B00000000000000000000011 /* TimeScale.swift in Sources */,
 				B00000000000000000000012 /* DotGrid.swift in Sources */,
+				B00000000000000000000027 /* MomentStore.swift in Sources */,
+				B00000000000000000000028 /* MemoryModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,12 +405,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Bhullar/Bhullar.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Only when you choose to take a photo for a memory. The photo stays with the memory, on this device and in your private iCloud if sync is on.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -412,7 +421,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Bhullar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -428,12 +437,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Bhullar/Bhullar.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Only when you choose to take a photo for a memory. The photo stays with the memory, on this device and in your private iCloud if sync is on.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -443,7 +453,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Bhullar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -457,7 +467,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BhullarWidget/BhullarWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -469,7 +479,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Bhullar.BhullarWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -484,7 +494,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BhullarWidget/BhullarWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -496,7 +506,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Bhullar.BhullarWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

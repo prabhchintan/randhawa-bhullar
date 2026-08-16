@@ -18,19 +18,28 @@ servers of ours, and data we cannot read. Open code is the strongest form of
 that promise. Don't take our word for it; read it. The plan lives in
 [`ROADMAP.md`](ROADMAP.md).
 
-## Randhawa (v3.1, space)
+## Randhawa (v3.2, space)
 
-A deliberately minimal iOS app: each time you open it, it marks a dot where you
-are. Over weeks and years, your places draw a map only you can read: dense
-where your life happens, sparse where you've wandered.
+A deliberately minimal iOS app: carry your phone and it draws the map of your
+life. A dot where you go, a line where you moved, darker where you return.
+Over weeks and years the ink becomes a map only you can read: dense where your
+life happens, sparse where you've wandered.
 
-New in 3.1, and off until you go and switch it on: **the trail**. Pick a
-cadence and the map keeps drawing itself while the app is closed. It listens
-only to the two low-power signals iOS offers a sleeping app, significant
-location changes and visits, so the cadence you pick is a ceiling rather than a
-schedule and standing still costs nothing. One tap forgets everything it
-gathered. The argument for reversing a promise this file used to make is in
+Since 3.2 the map draws itself by default: the intro asks for location once,
+and if you say yes the trail listens for the two low-power signals iOS offers
+a sleeping app, significant location changes and visits, and marks a dot each
+time you have actually gone somewhere. It never runs continuously and never
+keeps the phone awake. One tap forgets everything it gathered, one screen turns
+it off, and opening the app still places a dot the old way. The argument for
+reversing a promise this file used to make, twice, is in
 [`ROADMAP.md`](ROADMAP.md), under "The one we reversed".
+
+3.2 also redrew the map as ink: blots where you stayed, threads where you
+moved, today in orange on top, all translucent so repetition darkens. Tap a
+blot to open the place, or a gold dot to open a memory. The sparkles button
+toggles between the map and the constellation; press and slide it to set the
+veil anywhere in between. "Export your map" hands you a single file with
+everything in it.
 
 Since 3.0 the dots can carry more than presence. Tap the plus button and pin a
 memory to where you are: a thought, a photo, or both. Memories show as gold
@@ -38,15 +47,13 @@ dots on the map, and they flow into Bhullar (the sibling time app in
 `Bhullar/`), where they resurface on the day they were made. Randhawa gives a
 memory its place; Bhullar gives it its time.
 
-Two ways to look at the same map:
-- **Map mode**: your dots over a real (Apple Maps) basemap; repeat visits
-  darken into blots, memories sit on top in gold.
-- **Constellation mode**: no basemap at all, just the abstract shape of your
-  places on black.
+Two ends of one veil:
+- **Map**: your ink over a real, muted Apple Maps basemap.
+- **Constellation**: the basemap gone, just the shape of your places on black.
 
-One widget: **Map**, an Apple Maps snapshot of your moments and memories that
-updates whenever a dot lands. (The old Constellation widget was retired in
-3.0; the constellation lives on inside the app.)
+One widget: **Map**, an Apple Maps snapshot drawn with the same ink, updated
+whenever a dot lands. (The old Constellation widget was retired in 3.0; the
+constellation lives on inside the app.)
 
 ## Privacy, and the one honest change in 3.0
 
@@ -68,16 +75,17 @@ a cost: lose the phone, lose the map. 3.0 keeps the spirit and fixes the cost:
   the developer. Re-verify that reading of the App Privacy Details page at
   submission time.
 
-Location, as of 3.1, has two modes and the quiet one is the default. With the
-trail off, which is how every install and every update starts, location is read
-once per app open, When-In-Use, and never otherwise. Turn the trail on and the
-app also asks for Always, then takes a fix when iOS wakes it for a significant
-location change or a visit, no more often than the chosen cadence. There is no
-location background mode and no continuous updates, so the app never holds the
-system awake and never lights the status bar. Where the dots go does not change
-at all: the same file, the same optional private CloudKit database, no servers
-of ours. Reverse geocoding (naming a place, in either app) and map tiles go
-through Apple's frameworks under Apple's privacy policy.
+Location, as of 3.2, is asked for once, at the intro, and the map draws
+itself if the answer is yes. The trail takes a fix when iOS wakes the app for a
+significant location change or a visit, no more often than the chosen cadence,
+and opening the app places a dot as it always has. Answer While Using only and
+the app falls back to a dot per open. There is no location background mode and
+no continuous updates, so the app never holds the system awake and never lights
+the status bar. Where the dots go does not change at all: the same file, the
+same optional private CloudKit database, no servers of ours. Reverse geocoding
+(naming a place, in either app) and map tiles go through Apple's frameworks
+under Apple's privacy policy. The camera, when you take a photo for a memory,
+writes to the memory and not to your photo library.
 
 ## What's inside
 

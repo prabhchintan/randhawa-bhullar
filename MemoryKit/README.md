@@ -41,9 +41,16 @@ Shared settings, in the App Group defaults `group.Prabhchintan.Randhawa`:
 - `cloudSyncEnabled` (Bool): whether the user turned iCloud sync on. Absent
   means never asked.
 - `trailCadence` (String): one of `off`, `moves`, `quarterHour`, `hour`,
-  `quarterDay`, `arrivals`. Absent or unrecognised means `off`, so a reader
-  that does not know a future cadence fails closed rather than open. Only
-  Randhawa acts on it; Bhullar reads it to word an empty state.
+  `quarterDay`, `arrivals`. Absent means the standard cadence, which is
+  `moves` since 3.2 (3.1 read absence as `off`; the difference only ever
+  words Bhullar's empty state, because the setting alone starts nothing: the
+  trail also needs Always location, which only the user grants). Unrecognised
+  still means `off`, so a reader that does not know a future cadence fails
+  closed. Since 3.2 only `moves`, `arrivals` and `off` are offered; the other
+  three still parse for anyone who picked them in 3.1. Only Randhawa acts on
+  it; Bhullar reads it to word an empty state.
+- `trailOfferAnswered` (Bool): Randhawa only. Whether the one-time card that
+  asks pre-3.2 users to let the map draw itself has been answered.
 
 Compatibility rules:
 
@@ -73,5 +80,10 @@ Compatibility rules:
   targets only.
 - `CloudSync.swift`: CKSyncEngine wrapper for the private database. App
   targets only; widgets never sync.
-- `MemoryViews.swift`: composer sheet, memory list, detail view, photo
-  processing. App targets only.
+- `MemoryViews.swift`: composer sheet (library or camera), memory list,
+  detail view, photo processing. App targets only.
+- `PlaceNames.swift`: one geocoder cache for both apps, so a place arrives as
+  the same word in each. App targets only.
+- `Export.swift`: the single-file export of everything (moments, memories,
+  photos as base64) and the share sheet that hands it over. App targets only;
+  offered from Randhawa's menu.

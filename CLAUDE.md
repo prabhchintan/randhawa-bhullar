@@ -15,7 +15,11 @@ Read before changing anything, in this order:
 2. ROADMAP.md: the three lanes (MemoryKit, Randhawa, Bhullar) and why this
    is one repository.
 3. VISION.md: the voice, and the rule that the names story stays quiet.
-4. RELEASING.md: the end to end ship process.
+4. RELEASING.md: the end to end ship process, now entirely from the
+   terminal (`scripts/asc.py` drives App Store Connect with an API key).
+5. LOOP.md: the Sunday loop, the unattended session that studies the week
+   and ships. Its scope rules bind any session that runs without the
+   maintainer present.
 
 Build checks, from the repo root. No toolchain prefix is needed: as of
 2026-08-08 xcode-select points at Xcode (Swift 6.2), not CommandLineTools. If
@@ -36,13 +40,19 @@ House style:
 - Do not install development builds on the maintainer's devices; releases
   are verified through App Store updates.
 - Widget targets compile only the widget safe MemoryKit files
-  (MomentStore.swift, MemoryModel.swift); check target membership before
-  adding types to shared files. Bhullar's widget compiles TimeScale.swift and
-  DotGrid.swift but neither MemoryKit file, so nothing in those two may
-  mention Moment or Memory.
-- The trail (background location, Randhawa 3.1) ships under five constraints
-  written down in ROADMAP.md under "The one we reversed". Any change that
-  cannot honour all five should turn the trail off instead.
+  (MomentStore.swift, MemoryModel.swift, both widgets since 2.2) plus, for
+  Randhawa's widget, Shared/Ink.swift and Shared/ConstellationView.swift;
+  check target membership before adding types to shared files. Bhullar's
+  TimeScale.swift and DotGrid.swift must stay free of Moment and Memory so
+  the grid stays a pure function of the date.
+- The trail (background location, Randhawa 3.1, the default since 3.2)
+  ships under five constraints written down in ROADMAP.md under "The one we
+  reversed" and "The one we reversed, twice". Any change that cannot honour
+  all five should turn the trail off instead.
+- Secrets never enter this repository: the App Store Connect key lives in
+  ~/.config/appstoreconnect/, the cktool user token in ~/.config/cktool, and
+  the maintainer's own map data under ~/Library/Application Support/
+  randhawa-loop/. Reports quote counts, never coordinates or place names.
 - The apps' public privacy and support pages are not in this repo; they
   live in the maintainer's website repo and are served at
   prabhchintan.com/randhawa/privacy and /randhawa/support.

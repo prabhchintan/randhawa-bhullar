@@ -74,10 +74,10 @@ struct MapProvider: TimelineProvider {
     }
 }
 
-/// Renders Apple Maps snapshots with the dots baked in, matching the in-app
-/// map: clumped density dots that darken where you return, gold memory dots,
-/// and the newest moment ringed in white. Only stored data is read; the
-/// widget never samples location.
+/// Renders Apple Maps snapshots with the ink baked in, matching the in-app
+/// map: blots that darken where you return, threads where you moved, today in
+/// orange, memories in gold. Only stored data is read; the widget never
+/// samples location.
 enum MapSnapshotRenderer {
     static func render(
         moments: [Moment],
@@ -117,7 +117,7 @@ enum MapSnapshotRenderer {
             )
         )
         options.size = size
-        let configuration = MKStandardMapConfiguration(elevationStyle: .flat)
+        let configuration = MKStandardMapConfiguration(elevationStyle: .flat, emphasisStyle: .muted)
         configuration.pointOfInterestFilter = .excludingAll
         configuration.showsTraffic = false
         options.preferredConfiguration = configuration
@@ -132,64 +132,28 @@ enum MapSnapshotRenderer {
                 completion(nil)
                 return
             }
-            completion(draw(moments: moments, memories: memories, on: snapshot, size: size))
+            completion(draw(moments: moments, memories: memories, on: snapshot, size: size, style: style))
         }
     }
 
-    /// Same visual constants as the in-app `MomentMap` annotations.
+    /// The same ink the app draws, on the snapshot: blots, threads, today in
+    /// orange, memories in gold. Points here are screen points, so the unit is 1.
     private static func draw(
         moments: [Moment],
         memories: [Memory],
         on snapshot: MKMapSnapshotter.Snapshot,
-        size: CGSize
+        size: CGSize,
+        style: UIUserInterfaceStyle
     ) -> UIImage {
-        let clumps = MomentGeometry.clumps(in: moments, radiusMeters: 35)
+        let prepared = Ink.prepare(moments: moments, memories: memories) { latitude, longitude in
+            snapshot.point(for: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
+        }
+        let palette = Ink.Palette.resolve(dark: style == .dark)
         let format = UIGraphicsImageRendererFormat()
         format.scale = snapshot.image.scale
         return UIGraphicsImageRenderer(size: size, format: format).image { context in
             snapshot.image.draw(at: .zero)
-
-            for clump in clumps {
-                let point = snapshot.point(for: CLLocationCoordinate2D(
-                    latitude: clump.latitude,
-                    longitude: clump.longitude
-                ))
-                let diameter = CGFloat(10 + Swift.min(clump.count, 14))
-                let opacity = Swift.min(0.25 + 0.1 * Double(clump.count), 0.85)
-                UIColor.systemOrange.withAlphaComponent(CGFloat(opacity)).setFill()
-                context.cgContext.fillEllipse(in: CGRect(
-                    x: point.x - diameter / 2,
-                    y: point.y - diameter / 2,
-                    width: diameter,
-                    height: diameter
-                ))
-            }
-
-            for memory in memories where memory.hasLocation {
-                let point = snapshot.point(for: CLLocationCoordinate2D(
-                    latitude: memory.latitude ?? 0,
-                    longitude: memory.longitude ?? 0
-                ))
-                let rect = CGRect(x: point.x - 4.5, y: point.y - 4.5, width: 9, height: 9)
-                UIColor.systemYellow.setFill()
-                context.cgContext.fillEllipse(in: rect)
-                UIColor.white.setStroke()
-                context.cgContext.setLineWidth(1.5)
-                context.cgContext.strokeEllipse(in: rect.insetBy(dx: 0.75, dy: 0.75))
-            }
-
-            if let latest = moments.last {
-                let point = snapshot.point(for: CLLocationCoordinate2D(
-                    latitude: latest.latitude,
-                    longitude: latest.longitude
-                ))
-                let rect = CGRect(x: point.x - 6, y: point.y - 6, width: 12, height: 12)
-                UIColor.systemOrange.setFill()
-                context.cgContext.fillEllipse(in: rect)
-                UIColor.white.setStroke()
-                context.cgContext.setLineWidth(2)
-                context.cgContext.strokeEllipse(in: rect.insetBy(dx: 1, dy: 1))
-            }
+            Ink.draw(prepared, in: context.cgContext, palette: palette, unit: 1)
         }
     }
 }
@@ -240,7 +204,7 @@ struct RandhawaMapWidget: Widget {
             RandhawaMapWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Map")
-        .description("Your moments as orange dots on a real map, denser where you return, with your memories in gold.")
+        .description("Your places in ink on a real map, darker where you return, with today in orange and your memories in gold.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

@@ -18,3 +18,4 @@ xcuserdata/
 *.ipa
 *.mobileprovision
 *.p12
+__pycache__/

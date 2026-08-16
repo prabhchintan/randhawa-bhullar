@@ -1,4 +1,4 @@
-# Bhullar (v2.1, time)
+# Bhullar (v2.2, time)
 
 A deliberately minimal iOS app: a telescope for time. One grid of dots, five
 zoom levels; swipe the grid sideways to move between them:
@@ -25,8 +25,13 @@ frees the tap to mean "this one": tap any elapsed dot and Bhullar answers what
 that span of time held, where you were during it and what you kept from it.
 Places arrive as words, not as a map, since Bhullar draws no maps; consecutive
 moments within about 150 metres are folded into one stay and named through
-Apple's geocoder. Turn on Randhawa's trail and these fill in on their own.
-A dot still ahead of now says only "Not yet."
+Apple's geocoder. Since Randhawa 3.2 its map draws itself by default, so
+these fill in on their own for anyone who said yes to it. A dot still ahead of
+now says only "Not yet."
+
+New in 2.2, the widgets show gold days too, the composer can take a photo
+with the camera, and both apps name places through one shared cache so a
+place is the same word in each.
 
 Only memories light a dot gold, never places. Somewhere you merely were is not
 the same as something you chose to keep, and a grid that glowed for every day
@@ -96,24 +101,24 @@ by test, so the day scales do their own midnight-to-midnight arithmetic.
    there are three, so several scales can sit on the Home Screen at once.
 
 Deployment target is **iOS 17.0**. Bundle IDs `Prabhchintan.Bhullar` /
-`Prabhchintan.Bhullar.BhullarWidget`, team preset, version **2.1 (build 6)**.
+`Prabhchintan.Bhullar.BhullarWidget`, team preset, version **2.2 (build 7)**.
 
 ## CloudKit: one manual step before release
 
 The CloudKit schema (record types `Moment` and `Memory` in container
 `iCloud.Prabhchintan.Randhawa`) is created lazily in the Development
 environment on first use. Deploy it to Production in the CloudKit Console
-before shipping any release that writes a new field. 2.1 writes none, so the
+before shipping any release that writes a new field. 2.2 writes none, so the
 schema is unchanged from 2.0 and this step does not gate it.
 
 ## App Store notes
 
-- Ship this 2.1 alongside Randhawa 3.1. They are one feature split across two
-  apps: Randhawa's trail gathers the places, and this is where they are read
-  back. Shipping either alone leaves half of it unexplained.
-- Privacy label: **Data Not Collected** (see above).
+- Ship alongside Randhawa; each release's copy references the other. 2.2
+  goes with Randhawa 3.2.
+- Privacy label: **Data Not Collected** (see above). The camera is used only
+  when the user takes a photo for a memory and writes nothing to the library.
 - Listing copy lives in `AppStore/metadata.md`; release notes in
-  `AppStore/whatsnew-2.1.md`.
+  `AppStore/whatsnew-2.2.md`.
 
 ## Regenerating the app icon
 

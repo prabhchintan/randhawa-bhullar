@@ -3,19 +3,28 @@ import MapKit
 import UIKit
 import CoreLocation
 
-/// One geocoder for the app; requests are rare (one per saved memory).
-private let geocoder = CLGeocoder()
-
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var model = SpaceModel()
     @ObservedObject private var memoryStore = MemoryStore.shared
-    @AppStorage("showMap") private var showMap = true
+    @ObservedObject private var trail = LocationTrail.shared
+    /// How much of the basemap is hidden under the ink, 0 to 1. One is the
+    /// constellation.
+    @AppStorage("veil") private var veil = 0.0
+    /// The pre-3.2 toggle, honoured once so nobody's constellation turns back
+    /// into a map on update.
+    @AppStorage("showMap") private var legacyShowMap = true
     @State private var confirmingErase = false
-    @State private var composing = false
+    @State private var composing: ComposerTarget?
     @State private var showingMemories = false
     @State private var showingTrail = false
     @State private var offeringSync = false
+    @State private var offeringTrail = false
+    @State private var openedMemory: Memory?
+    @State private var openedPlace: MomentGeometry.Clump?
+    @State private var exportItem: ShareItem?
+    @State private var fitRequest = 0
 
     var body: some View {
         Group {
@@ -36,40 +45,43 @@ struct ContentView: View {
         // already be .active before this view exists), onChange covers every
         // return from the background. SpaceModel's interval guard dedupes.
         .onAppear {
+            if !legacyShowMap {
+                veil = 1
+                legacyShowMap = true
+            }
             CloudSync.startIfEnabled()
             model.sampleIfAuthorized()
             CloudSync.shared?.fetchNow()
-            refreshSyncOffer()
+            refreshOffers()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 model.sampleIfAuthorized()
                 memoryStore.reloadFromDisk()
                 CloudSync.shared?.fetchNow()
-                refreshSyncOffer()
+                refreshOffers()
             }
+        }
+        .onChange(of: trail.authorizationStatus) { _, _ in
+            refreshOffers()
         }
     }
 
     private var spaceView: some View {
         ZStack {
-            if showMap {
-                MomentMap(
-                    moments: model.moments,
-                    memories: memoryStore.memories,
-                    onMemoryTap: { showingMemories = true }
-                )
-                .ignoresSafeArea()
-            } else {
-                ZStack {
-                    Color.black.ignoresSafeArea()
-                    ConstellationView(moments: model.moments, dotDiameter: 7, inset: 48)
-                }
-                .environment(\.colorScheme, .dark)
-            }
+            InkMapView(
+                moments: model.moments,
+                memories: memoryStore.memories,
+                veil: veil,
+                dark: colorScheme == .dark,
+                fitRequest: fitRequest,
+                onTapMemory: { openedMemory = $0 },
+                onTapPlace: { openedPlace = $0 }
+            )
+            .ignoresSafeArea()
 
             VStack {
-                HStack {
+                HStack(alignment: .top) {
                     Menu {
                         Button {
                             showingMemories = true
@@ -81,6 +93,16 @@ struct ContentView: View {
                         } label: {
                             Label(trailMenuTitle, systemImage: "figure.walk")
                         }
+                        Button {
+                            fitRequest += 1
+                        } label: {
+                            Label("Show everything", systemImage: "arrow.up.left.and.arrow.down.right")
+                        }
+                        Button {
+                            exportMap()
+                        } label: {
+                            Label("Export your map", systemImage: "square.and.arrow.up")
+                        }
                         Divider()
                         Button("Erase everything", role: .destructive) {
                             confirmingErase = true
@@ -89,14 +111,24 @@ struct ContentView: View {
                         ControlIcon(systemName: "ellipsis")
                     }
                     Spacer()
-                    Button {
-                        showMap.toggle()
-                    } label: {
-                        ControlIcon(systemName: showMap ? "sparkles" : "map")
-                    }
+                    VeilControl(veil: $veil)
                 }
                 Spacer()
-                if offeringSync {
+                if offeringTrail {
+                    TrailOfferCard(
+                        turnOn: {
+                            TrailSettings.offerAnswered = true
+                            LocationTrail.shared.setCadence(.standard)
+                            offeringTrail = false
+                        },
+                        notNow: {
+                            TrailSettings.offerAnswered = true
+                            LocationTrail.shared.setCadence(.off)
+                            offeringTrail = false
+                        }
+                    )
+                    .padding(.bottom, 8)
+                } else if offeringSync {
                     SyncOfferCard(
                         turnOn: {
                             CloudSync.setEnabled(true)
@@ -117,20 +149,26 @@ struct ContentView: View {
                     .background(.thinMaterial, in: Capsule())
             }
             .padding(20)
+            // Once the veil is mostly drawn the map is black whatever the
+            // system says, so the controls dress for the dark.
+            .environment(\.colorScheme, veil > 0.5 ? .dark : colorScheme)
         }
         .overlay(alignment: .bottomTrailing) {
             Button {
-                composing = true
+                composing = ComposerTarget(here: model.moments.last)
             } label: {
                 ControlIcon(systemName: "plus")
             }
             .padding(20)
+            .environment(\.colorScheme, veil > 0.5 ? .dark : colorScheme)
         }
-        .sheet(isPresented: $composing) {
+        .sheet(item: $composing) { target in
             MemoryComposerView(
-                prompt: "What is worth remembering here?",
-                contextLine: composerContext,
-                onSave: saveMemory
+                prompt: target.prompt,
+                contextLine: target.contextLine,
+                onSave: { text, photoData in
+                    saveMemory(text: text, photoData: photoData, at: target)
+                }
             )
             .presentationDetents([.medium, .large])
         }
@@ -142,6 +180,38 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingTrail) {
             TrailSheet(model: model)
+        }
+        .sheet(item: $openedMemory) { memory in
+            NavigationStack {
+                MemoryDetailView(memory: memory, photoURL: memoryStore.photoURL(for: memory))
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { openedMemory = nil }
+                        }
+                    }
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $openedPlace) { clump in
+            PlaceSheet(
+                clump: clump,
+                moments: model.moments,
+                memories: memoryStore.memories,
+                photoURL: memoryStore.photoURL(for:),
+                onRemember: { name in
+                    openedPlace = nil
+                    composing = ComposerTarget(
+                        latitude: clump.latitude,
+                        longitude: clump.longitude,
+                        placeName: name,
+                        isHere: false
+                    )
+                }
+            )
+        }
+        .sheet(item: $exportItem) { item in
+            ShareSheet(items: [item.url])
+                .presentationDetents([.medium, .large])
         }
         .confirmationDialog(
             "Erase your map and memories?",
@@ -170,13 +240,7 @@ struct ContentView: View {
     }
 
     private var trailMenuTitle: String {
-        TrailSettings.cadence.isOn ? "Trail: on" : "Trail: off"
-    }
-
-    private var composerContext: String {
-        model.moments.last == nil
-            ? "Pinned to this moment."
-            : "Pinned to this place and this moment."
+        trail.cadence.isOn && trail.isAlwaysAuthorized ? "Trail: on" : "Trail: off"
     }
 
     private var eraseMessage: String {
@@ -185,46 +249,238 @@ struct ContentView: View {
             : "Every moment and memory is deleted from this device. There is no copy anywhere else, so this cannot be undone."
         // Erasing does not answer the trail question, so say so rather than
         // let a fresh dot appear a mile down the road and look like a bug.
-        if TrailSettings.cadence.isOn {
+        if trail.cadence.isOn && trail.isAlwaysAuthorized {
             message += " The trail stays on, so it will begin a new map from wherever you go next. Turn it off first if you would rather it did not."
         }
         return message
     }
 
-    /// Offer iCloud sync once the map is worth keeping, and only until the
-    /// user has answered one way or the other.
-    private func refreshSyncOffer() {
-        offeringSync = !CloudSync.isDecided && model.moments.count >= 2
+    /// Two one-time cards, never both. The trail card goes to people who
+    /// granted While Using before 3.2 and have not yet been told the map can
+    /// draw itself; the sync card waits its turn behind it.
+    private func refreshOffers() {
+        let trailUnanswered = model.permission == .granted
+            && !trail.isAlwaysAuthorized
+            && trail.cadence.isOn
+            && !TrailSettings.offerAnswered
+        offeringTrail = trailUnanswered
+        offeringSync = !trailUnanswered && !CloudSync.isDecided && model.moments.count >= 2
     }
 
-    private func saveMemory(text: String, photoData: Data?) {
-        let here = model.moments.last
+    private func exportMap() {
+        if let url = try? MapExport.write() {
+            exportItem = ShareItem(url: url)
+        }
+    }
+
+    private func saveMemory(text: String, photoData: Data?, at target: ComposerTarget) {
         let memory = memoryStore.add(
             text: text,
-            latitude: here?.latitude,
-            longitude: here?.longitude,
+            latitude: target.latitude,
+            longitude: target.longitude,
+            placeName: target.placeName,
             photoData: photoData
         )
-        guard let here else { return }
-        // Name the place while it is fresh; Apple's geocoder does one lookup
-        // and the name syncs along with the memory.
-        let location = CLLocation(latitude: here.latitude, longitude: here.longitude)
-        geocoder.reverseGeocodeLocation(location) { placemarks, _ in
-            guard let placemark = placemarks?.first else { return }
-            let name = [placemark.locality ?? placemark.name, placemark.administrativeArea]
-                .compactMap { $0 }
-                .joined(separator: ", ")
-            guard !name.isEmpty else { return }
-            Task { @MainActor in
-                MemoryStore.shared.setPlaceName(name, for: memory.id)
+        guard target.placeName == nil, let latitude = target.latitude, let longitude = target.longitude else { return }
+        // Name the place while it is fresh; the name syncs along with the memory.
+        PlaceNames.shared.lookup(CLLocationCoordinate2D(latitude: latitude, longitude: longitude)) { name in
+            guard let name else { return }
+            MemoryStore.shared.setPlaceName(name, for: memory.id)
+        }
+    }
+}
+
+/// What a new memory is pinned to: here and now (the plus button), or a place
+/// the user opened on the map.
+struct ComposerTarget: Identifiable {
+    let id = UUID()
+    let latitude: Double?
+    let longitude: Double?
+    let placeName: String?
+    let isHere: Bool
+
+    init(latitude: Double?, longitude: Double?, placeName: String?, isHere: Bool) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.placeName = placeName
+        self.isHere = isHere
+    }
+
+    init(here: Moment?) {
+        self.init(latitude: here?.latitude, longitude: here?.longitude, placeName: nil, isHere: true)
+    }
+
+    var prompt: String {
+        isHere ? "What is worth remembering here?" : "What is worth remembering about this place?"
+    }
+
+    var contextLine: String {
+        if !isHere {
+            if let placeName {
+                return "Pinned to \(placeName), and to this moment."
+            }
+            return "Pinned to this place, and to this moment."
+        }
+        return latitude == nil ? "Pinned to this moment." : "Pinned to this place and this moment."
+    }
+}
+
+/// The sparkles button. Tap: map or constellation. Press and slide up or
+/// down: anywhere in between, the basemap fading under the ink. The slider
+/// only shows itself while a finger is on it.
+private struct VeilControl: View {
+    @Binding var veil: Double
+    @State private var dragging = false
+    @State private var startVeil = 0.0
+    @State private var moved = false
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ControlIcon(systemName: veil < 0.5 ? "sparkles" : "map")
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            if !dragging {
+                                dragging = true
+                                moved = false
+                                startVeil = veil
+                            }
+                            if abs(value.translation.height) > 6 {
+                                moved = true
+                            }
+                            if moved {
+                                // Down is more veil: the finger draws the curtain.
+                                let next = startVeil + Double(value.translation.height) / 140
+                                veil = Swift.min(Swift.max(next, 0), 1)
+                            }
+                        }
+                        .onEnded { _ in
+                            if !moved {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    veil = veil < 0.5 ? 1 : 0
+                                }
+                            }
+                            dragging = false
+                        }
+                )
+            if dragging && moved {
+                Capsule()
+                    .fill(.thinMaterial)
+                    .frame(width: 6, height: 90)
+                    .overlay(alignment: .top) {
+                        Capsule()
+                            .fill(.orange)
+                            .frame(width: 6, height: 90 * veil)
+                    }
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.15), value: dragging && moved)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Map veil")
+        .accessibilityValue(veil < 0.5 ? "Map" : "Constellation")
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: veil = Swift.min(veil + 0.25, 1)
+            case .decrement: veil = Swift.max(veil - 0.25, 0)
+            @unknown default: break
             }
         }
     }
 }
 
-/// The trail settings: the one screen in either app that asks for something
-/// bigger than a tap. It says plainly what it will do, what iOS will actually
-/// honour, and how to take it all back.
+/// One place, opened from the map: what it is called, how often you were
+/// there, what you kept there, and a way to keep something more.
+private struct PlaceSheet: View {
+    let clump: MomentGeometry.Clump
+    let moments: [Moment]
+    let memories: [Memory]
+    let photoURL: (Memory) -> URL?
+    let onRemember: (String?) -> Void
+
+    @ObservedObject private var placeNames = PlaceNames.shared
+    @Environment(\.dismiss) private var dismiss
+
+    private var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: clump.latitude, longitude: clump.longitude)
+    }
+
+    /// Moments within the clump's neighbourhood; the clump itself only knows
+    /// its count, and the sheet wants dates.
+    private var nearby: [Moment] {
+        moments.filter {
+            MomentGeometry.metersBetween($0.latitude, $0.longitude, clump.latitude, clump.longitude) <= 60
+        }
+    }
+
+    private var memoriesHere: [Memory] {
+        memories.filter { memory in
+            guard let latitude = memory.latitude, let longitude = memory.longitude else { return false }
+            return MomentGeometry.metersBetween(latitude, longitude, clump.latitude, clump.longitude) <= 150
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text(summary)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Button {
+                        onRemember(placeNames.name(for: coordinate))
+                    } label: {
+                        Label("Remember something here", systemImage: "plus")
+                    }
+                }
+                if !memoriesHere.isEmpty {
+                    Section("Kept here") {
+                        ForEach(memoriesHere) { memory in
+                            NavigationLink {
+                                MemoryDetailView(memory: memory, photoURL: photoURL(memory))
+                            } label: {
+                                MemoryRow(memory: memory, photoURL: photoURL(memory))
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(placeNames.name(for: coordinate) ?? "This place")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .onAppear { placeNames.resolve(coordinate) }
+    }
+
+    private var summary: String {
+        let here = nearby
+        let count = here.count
+        guard count > 0, let first = here.first?.date, let last = here.last?.date else {
+            return "A place on your map."
+        }
+        let calendar = Calendar.current
+        let days = Set(here.map { calendar.startOfDay(for: $0.date) }).count
+        let momentWord = count == 1 ? "moment" : "moments"
+        let dayWord = days == 1 ? "day" : "days"
+        if count == 1 {
+            return "One moment here, \(first.formatted(date: .abbreviated, time: .shortened))."
+        }
+        var line = "\(count) \(momentWord) on \(days) \(dayWord). First \(first.formatted(date: .abbreviated, time: .omitted))"
+        line += calendar.isDate(first, inSameDayAs: last)
+            ? "."
+            : ", last \(last.formatted(date: .abbreviated, time: .omitted))."
+        return line
+    }
+}
+
+/// The trail settings: the one screen in either app that talks about
+/// something bigger than a tap. It says plainly what the trail does, what iOS
+/// will actually honour, and how to take it all back.
 private struct TrailSheet: View {
     @ObservedObject var model: SpaceModel
     @ObservedObject private var trail = LocationTrail.shared
@@ -243,7 +499,7 @@ private struct TrailSheet: View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(TrailCadence.allCases) { option in
+                    ForEach(TrailCadence.offered(including: cadence)) { option in
                         Button {
                             choose(option)
                         } label: {
@@ -265,9 +521,9 @@ private struct TrailSheet: View {
                         .buttonStyle(.plain)
                     }
                 } header: {
-                    Text("How often")
+                    Text("How the map is made")
                 } footer: {
-                    Text("A cadence is a ceiling, not a schedule. iOS wakes a sleeping app when you move, not on a clock, so Randhawa marks a dot no more often than this and only once you have actually gone somewhere. Stay in one place and the trail stays quiet.")
+                    Text("iOS wakes a sleeping app when you move, not on a clock, so a dot lands only once you have actually gone somewhere, and never more often than this. Stay in one place and the trail stays quiet. It never runs continuously and never keeps your phone awake.")
                 }
 
                 if cadence.isOn && needsAlways {
@@ -278,7 +534,7 @@ private struct TrailSheet: View {
                             }
                         }
                     } footer: {
-                        Text("The trail needs Location set to Always. Without it Randhawa is never woken, so dots would still only arrive when you open the app.")
+                        Text("The trail needs Location set to Always. Without it Randhawa is never woken, so dots only arrive when you open the app.")
                     }
                 }
 
@@ -322,7 +578,7 @@ private struct TrailSheet: View {
         let opened = model.moments.count - trailDots
         let openedWord = opened == 1 ? "dot" : "dots"
         if trailDots == 0 {
-            if cadence.isOn {
+            if cadence.isOn && !needsAlways {
                 return "\(opened) \(openedWord) so far, every one of them from opening the app. The trail adds its first once you have gone somewhere."
             }
             return "\(opened) \(openedWord) so far, every one of them from opening the app."
@@ -341,6 +597,7 @@ private struct TrailSheet: View {
     }
 
     private func choose(_ option: TrailCadence) {
+        TrailSettings.offerAnswered = true
         LocationTrail.shared.setCadence(option)
     }
 }
@@ -358,20 +615,23 @@ private struct ControlIcon: View {
     }
 }
 
-/// The one-time iCloud pitch: what it does, in the app's own voice.
-private struct SyncOfferCard: View {
+/// A card in the app's own voice, for the two things it asks once.
+private struct OfferCard: View {
+    let title: String
+    let detail: String
+    let accept: String
     let turnOn: () -> Void
     let notNow: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Keep your map, even on your next phone")
+            Text(title)
                 .font(.subheadline.weight(.semibold))
-            Text("iCloud sync keeps your moments and memories in your private iCloud, which we cannot read. Sign in on a new phone and your map comes back.")
+            Text(detail)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             HStack(spacing: 10) {
-                Button("Turn On", action: turnOn)
+                Button(accept, action: turnOn)
                     .buttonStyle(.borderedProminent)
                     .tint(.orange)
                 Button("Not Now", action: notNow)
@@ -385,79 +645,36 @@ private struct SyncOfferCard: View {
     }
 }
 
-/// The real-map view: moments clumped for density, drawn as translucent orange
-/// dots that darken where you return, the newest moment ringed in white, and
-/// memories as small gold stars you can tap.
-private struct MomentMap: View {
-    let moments: [Moment]
-    let memories: [Memory]
-    var onMemoryTap: () -> Void = {}
-
-    @State private var camera: MapCameraPosition = .automatic
-    @State private var clumps: [MomentGeometry.Clump] = []
+/// The one-time iCloud pitch: what it does, in the app's own voice.
+private struct SyncOfferCard: View {
+    let turnOn: () -> Void
+    let notNow: () -> Void
 
     var body: some View {
-        Map(position: $camera) {
-            ForEach(clumps) { clump in
-                Annotation(
-                    "",
-                    coordinate: CLLocationCoordinate2D(latitude: clump.latitude, longitude: clump.longitude)
-                ) {
-                    Circle()
-                        .fill(.orange.opacity(clumpOpacity(clump.count)))
-                        .frame(width: clumpDiameter(clump.count), height: clumpDiameter(clump.count))
-                }
-                .annotationTitles(.hidden)
-            }
-
-            ForEach(placedMemories) { memory in
-                Annotation(
-                    "",
-                    coordinate: CLLocationCoordinate2D(latitude: memory.latitude ?? 0, longitude: memory.longitude ?? 0)
-                ) {
-                    Circle()
-                        .fill(.yellow)
-                        .frame(width: 10, height: 10)
-                        .overlay(Circle().stroke(.white, lineWidth: 1.5))
-                        .onTapGesture(perform: onMemoryTap)
-                }
-                .annotationTitles(.hidden)
-            }
-
-            if let latest = moments.last {
-                Annotation(
-                    "",
-                    coordinate: CLLocationCoordinate2D(latitude: latest.latitude, longitude: latest.longitude)
-                ) {
-                    Circle()
-                        .fill(.orange)
-                        .frame(width: 12, height: 12)
-                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                }
-                .annotationTitles(.hidden)
-            }
-        }
-        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll, showsTraffic: false))
-        // Clustering is O(n^2)-ish, so do it when moments change, not on
-        // every body evaluation while the map is panned.
-        .onAppear { recluster() }
-        .onChange(of: moments) { _, _ in recluster() }
+        OfferCard(
+            title: "Keep your map, even on your next phone",
+            detail: "iCloud sync keeps your moments and memories in your private iCloud, which we cannot read. Sign in on a new phone and your map comes back.",
+            accept: "Turn On",
+            turnOn: turnOn,
+            notNow: notNow
+        )
     }
+}
 
-    private var placedMemories: [Memory] {
-        memories.filter(\.hasLocation)
-    }
+/// For people who granted While Using before 3.2: the map can draw itself
+/// now, and iOS will ask them whether that is all right.
+private struct TrailOfferCard: View {
+    let turnOn: () -> Void
+    let notNow: () -> Void
 
-    private func recluster() {
-        clumps = MomentGeometry.clumps(in: moments, radiusMeters: 35)
-    }
-
-    private func clumpOpacity(_ count: Int) -> Double {
-        Swift.min(0.25 + 0.1 * Double(count), 0.85)
-    }
-
-    private func clumpDiameter(_ count: Int) -> CGFloat {
-        CGFloat(10 + Swift.min(count, 14))
+    var body: some View {
+        OfferCard(
+            title: "Your map can draw itself now",
+            detail: "Randhawa can mark a dot each time your phone notices you have gone somewhere, and draw the line between. It uses only the low-power signals iOS gives a sleeping app, and everything still stays with you. iOS will ask you to allow it.",
+            accept: "Turn On",
+            turnOn: turnOn,
+            notNow: notNow
+        )
     }
 }
 
@@ -470,7 +687,7 @@ private struct IntroView: View {
             Spacer()
             Text("Randhawa")
                 .font(.system(size: 40, weight: .semibold, design: .rounded))
-            Text("Each time you open Randhawa, it marks a dot where you are. Slowly, your places draw a map only you can read.")
+            Text("Carry your phone and Randhawa draws the map of your life: a dot where you go, a line where you moved, darker where you return. A map only you can read.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             Spacer()
@@ -483,7 +700,7 @@ private struct IntroView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.orange)
-                Text("Randhawa reads your location while you have it open. If you ever want the map to keep drawing itself, there is a trail you can switch on, off until you do. Everything stays on this device unless you turn on iCloud sync, which keeps a copy in your private iCloud, invisible to us. No account to create. No tracking.")
+                Text("iOS will ask about your location. Randhawa listens only for the moments your phone notices you have moved, using the low-power signals a sleeping app is allowed; it never runs continuously. Everything stays on this device unless you turn on iCloud sync, which keeps a copy in your private iCloud, invisible to us. No account. No tracking. Off in one tap.")
                     .font(.footnote)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)

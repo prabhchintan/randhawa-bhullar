@@ -180,20 +180,39 @@ enum MomentSync {
     }
 }
 
-/// How often Randhawa may add a dot on its own, when the user has asked it to.
+/// How often Randhawa may add a dot on its own.
 ///
 /// The honest framing, which the settings screen repeats: iOS decides when to
 /// wake a sleeping app, and it does that when you move, not on a clock. So a
 /// cadence here is a ceiling, not a promise. It says how close together two
 /// dots are allowed to be, and the phone supplies the movement.
+///
+/// Since 3.2 the trail is how the map is meant to be made, so `moves` is the
+/// default and the menu offers three choices instead of six. The middle
+/// cadences still parse, because a 3.1 user may have picked one, but nothing
+/// offers them any more.
 enum TrailCadence: String, Codable, CaseIterable, Identifiable {
-    /// The 3.0 behaviour, and still the default: dots come from opening the app.
+    /// The 3.0 behaviour: dots come only from opening the app.
     case off
     case moves
     case quarterHour
     case hour
     case quarterDay
     case arrivals
+
+    /// What a fresh install, or a setting that was never touched, means.
+    static let standard: TrailCadence = .moves
+
+    /// The choices the settings screen shows, in order. A legacy cadence that
+    /// is currently selected is shown too, so the screen never lies about
+    /// what is on.
+    static func offered(including current: TrailCadence) -> [TrailCadence] {
+        var list: [TrailCadence] = [.moves, .arrivals, .off]
+        if !list.contains(current) {
+            list.insert(current, at: 1)
+        }
+        return list
+    }
 
     var id: String { rawValue }
 
@@ -211,9 +230,9 @@ enum TrailCadence: String, Codable, CaseIterable, Identifiable {
     var detail: String {
         switch self {
         case .off:
-            return "Randhawa marks a dot only when you open it. Nothing is read while the app is closed."
+            return "A dot only when you open the app. Nothing is read while it is closed."
         case .moves:
-            return "The densest trail. Every time your phone notices you have moved a meaningful distance."
+            return "The map as it is meant to be made: a dot each time your phone notices you have gone somewhere, and lines between them."
         case .quarterHour:
             return "A close trail that still skips the small shuffles around one room."
         case .hour:
@@ -221,7 +240,7 @@ enum TrailCadence: String, Codable, CaseIterable, Identifiable {
         case .quarterDay:
             return "Morning, afternoon, evening. The lightest way to keep a trail."
         case .arrivals:
-            return "No trail between places. A dot when you settle somewhere and stay a while."
+            return "No lines between places. A dot when you settle somewhere and stay a while."
         }
     }
 
@@ -258,8 +277,15 @@ enum TrailCadence: String, Codable, CaseIterable, Identifiable {
 /// Where the trail setting lives: the App Group defaults, next to the sync
 /// switch, so Bhullar can tell the user where its dots are coming from without
 /// Randhawa having to be open.
+///
+/// An absent value means the standard cadence (3.1 read absence as off; 3.2
+/// reads it as `moves`, because the trail is now how the map is made). An
+/// unrecognised value still means off, so a reader that does not know a future
+/// cadence fails closed. Note that the setting alone starts nothing: the trail
+/// also needs Always location, which only the user can grant.
 enum TrailSettings {
     private static let cadenceKey = "trailCadence"
+    private static let offerAnsweredKey = "trailOfferAnswered"
 
     private static var sharedDefaults: UserDefaults {
         UserDefaults(suiteName: MomentPersistence.appGroupID) ?? .standard
@@ -267,7 +293,7 @@ enum TrailSettings {
 
     static var cadence: TrailCadence {
         get {
-            guard let raw = sharedDefaults.string(forKey: cadenceKey) else { return .off }
+            guard let raw = sharedDefaults.string(forKey: cadenceKey) else { return .standard }
             return TrailCadence(rawValue: raw) ?? .off
         }
         set {
@@ -275,6 +301,12 @@ enum TrailSettings {
         }
     }
 
+    /// Whether the one-time "your map can draw itself now" card, shown to
+    /// people who granted While Using before 3.2, has been answered.
+    static var offerAnswered: Bool {
+        get { sharedDefaults.bool(forKey: offerAnsweredKey) }
+        set { sharedDefaults.set(newValue, forKey: offerAnsweredKey) }
+    }
 }
 
 /// Pure geometry over moments: clustering for density and captions, and the
@@ -371,6 +403,44 @@ enum MomentGeometry {
     /// Distinct places for the caption: clumps at neighborhood radius.
     static func placeCount(in moments: [Moment]) -> Int {
         clumps(in: moments, radiusMeters: 150).count
+    }
+
+    /// Two dots are joined by a line when they are this close in time. Half a
+    /// day: a night at home joins yesterday's last dot to this morning's first
+    /// with a line of no length, and a flight longer than this leaves a gap
+    /// rather than a straight stroke across an ocean nobody crossed on foot.
+    static let threadGap: TimeInterval = 12 * 3600
+
+    /// Runs of consecutive moments joined by lines, as index ranges into
+    /// `moments`, which must be sorted by date. Each range is one thread; a
+    /// moment with no neighbour within `maxGap` on either side is in none.
+    ///
+    /// A thread also ends at midnight. Each day is drawn as one stroke, and
+    /// strokes are translucent, so a road taken every morning darkens the way
+    /// a place visited every morning does. One unbroken stroke across weeks
+    /// would never stack on itself, and the commute would stay faint forever.
+    static func threads(
+        in moments: [Moment],
+        maxGap: TimeInterval = threadGap,
+        calendar: Calendar = .current
+    ) -> [Range<Int>] {
+        guard moments.count > 1 else { return [] }
+        var result: [Range<Int>] = []
+        var start = 0
+        for index in 1..<moments.count {
+            let previous = moments[index - 1].date
+            let current = moments[index].date
+            if current.timeIntervalSince(previous) > maxGap || !calendar.isDate(current, inSameDayAs: previous) {
+                if index - start > 1 {
+                    result.append(start..<index)
+                }
+                start = index
+            }
+        }
+        if moments.count - start > 1 {
+            result.append(start..<moments.count)
+        }
+        return result
     }
 
     /// Geographic frame for a map of `moments`: center plus span in degrees.

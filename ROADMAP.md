@@ -16,11 +16,9 @@ them, and the rule that keeps that story quiet live in
 
 - Shipped: first release. Memories (a thought, a photo, a place, a time),
   App Group storage, optional sync through the user's private CloudKit
-  database.
-- In review: 3.1 adds `source` to a moment, so a dot the user placed by
-  opening the app is distinguishable from one the trail placed. Local field
-  only, deliberately absent from the CloudKit schema, so no Production
-  deploy gates the release.
+  database. 3.1 added `source` to a moment (local only, absent from the
+  CloudKit schema). 3.2 added the shared place-name cache, the export file,
+  and camera capture in the composer.
 - The rule that outranks every item below: any change to the stored formats
   must remain readable by the previous shipped version of both apps, because
   users update the two apps at different times. The contract is documented
@@ -28,28 +26,29 @@ them, and the rule that keeps that story quiet live in
 
 ## Randhawa, space
 
-- Shipped: 3.0. Memories on the map, optional iCloud sync, the Map widget
-  as the one widget.
-- In review: 3.1. The trail, off by default: dots that arrive while the app
-  is closed, at a cadence the user picks, with a one tap "forget the trail"
-  that takes back every dot it placed.
-- Next: tap a memory dot on the map to open that memory directly; surface
-  "on this day" in the map view, not only in the list.
-- Considering: camera capture in the composer; iPad layouts that actually
-  use the width.
-- Watch: greedy clustering is roughly O(moments x clumps) and runs on the
-  main thread when the map appears. Opening the app has always kept that
-  number small. A year of trail dots will not, so the map will need either
-  a spatial index or a background recluster before that becomes a hitch.
+- Shipped: 3.0, memories on the map, optional iCloud sync, the Map widget as
+  the one widget. 3.1, the trail as an opt-in. 3.2, the ink: the trail as the
+  default way the map is made (see "The one we reversed, twice" below), the
+  map redrawn as blots and threads with today in orange, the veil between map
+  and constellation, blots and memories you can open, a place sheet that is
+  the natural door to writing a memory, export of everything, and a widget
+  drawn with the same ink.
+- Next: whatever the Sunday loop learns (see [LOOP.md](LOOP.md)); "on this
+  day" surfaced on the map, not only in the list.
+- Considering: iPad layouts that actually use the width; a quiet way to show
+  the year's shape over time.
+- Resolved: clustering was O(moments x clumps) on the main thread; 3.1 gave
+  it a grid index and 3.2 moved all drawing into a per-tile overlay renderer
+  from data prepared once per change, so a year of trail dots costs what a
+  week of opens used to.
 
 ## Bhullar, time
 
-- Shipped: 2.0. Memories in the grid, gold days, "on this day".
-- In review: 2.1. Swipe to change scale, and a dot is now something you can
-  open: tap one to see where you were during that span and what you kept.
-  Place names come from Apple's geocoder, since Bhullar draws no map and a
-  place has to arrive as a word.
-- Next: gold memory dots in the widgets.
+- Shipped: 2.0, memories in the grid, gold days, "on this day". 2.1, swipe
+  to change scale and dots you can open, with place names from Apple's
+  geocoder. 2.2, gold memory days in the widgets, the camera in the composer,
+  and the shared place-name cache.
+- Next: whatever the Sunday loop learns.
 - Considering: a year picker to look at past years' grids; the minutes scale
   on Apple Watch someday.
 
@@ -65,10 +64,12 @@ them, and the rule that keeps that story quiet live in
 
 - Accounts, passwords, or any sign-in of our own; the Apple Account is the
   account
-- Analytics, tracking, or ads
+- Analytics, tracking, or ads. Apple's own opt-in App Store analytics and
+  the maintainer's own map are the only signals the project reads (see
+  [LOOP.md](LOOP.md)); nothing in the apps phones home.
 - Servers of ours; sync lives in the user's private iCloud, which we cannot
   read
-- Location read without the user having asked for it, in any release
+- Location read without the user's explicit permission, in any release
 
 ## The one we reversed
 
@@ -86,11 +87,16 @@ be opened, the question it answers is "where was I during this hour", and a
 map made only of app openings answers that only for the hours you happened to
 reach for your phone. The gaps were not restraint, they were just gaps.
 
-So the promise is now narrower, and the narrower version is the one that
-carries the weight:
+So the promise became narrower, and the narrower version is the one that
+carries the weight. As 3.1 wrote it, the first line read "off by default, and
+off after every update"; the second reversal, below, rewrote that line and
+only that line:
 
-- Off by default, and off after every update. The user turns it on, alone, in
-  one screen that says exactly what it will do.
+- It asks before it listens. First launch says in plain words what the map
+  will do, then iOS asks in its own words, and iOS asks a second time before
+  background access becomes permanent. Nothing is monitored until the user
+  has said yes, and one screen (or Location in Settings) turns it off, at
+  once.
 - No continuous location, ever. Only significant-change and visit monitoring,
   the two low-power APIs. No location background mode, so the app cannot ask
   the system to keep it running.
@@ -104,6 +110,24 @@ carries the weight:
 
 If a future release cannot honour all five, it should turn the trail off
 rather than weaken the list.
+
+## The one we reversed, twice
+
+3.1 shipped the trail off by default. 3.2 (2026-08-16) makes it the default:
+a new install asks for location once, from the intro, and if the answer is
+yes the map starts drawing itself. Someone who granted While Using before
+3.2 is shown one card and asked. The reason is the same one that argued for
+the trail in the first place, followed to its end. A map made of app opens is
+a worse object than a map made of days; the argument for the trail was that
+the gaps were not restraint, only gaps. Once that is believed, keeping the
+better map behind a menu nobody opens is not caution, it is a worse product
+with a clear conscience. The consent is unchanged in kind: the same iOS
+prompt, the same second prompt from iOS later, the same one screen to stop.
+What changed is that the app now says up front what it is for, and stops
+pretending its opening gesture is the whole of it.
+
+The list above still holds, and "off by default" was replaced rather than
+deleted so that this document keeps the shape of what was promised when.
 
 ## Why one repository
 
