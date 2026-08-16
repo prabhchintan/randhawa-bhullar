@@ -88,7 +88,7 @@ jobs:
           chmod 600 ~/.config/appstoreconnect/*
           printf '%s' "$CKTOOL_USER_TOKEN" > ~/.config/cktool
           chmod 600 ~/.config/cktool
-          pip3 install --quiet "PyJWT[crypto]"
+          pip3 install --quiet --break-system-packages "PyJWT[crypto]"
           # xcodebuild takes the same key for signing and upload.
           echo "ASC_KEY_PATH=$HOME/.config/appstoreconnect/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
           echo "ASC_KEY_ID=$ASC_KEY_ID" >> "$GITHUB_ENV"
