@@ -1,11 +1,11 @@
 # The Sunday loop
 
 Every Sunday morning this repository is worked on by an unattended Claude
-session on the maintainer's Mac. It reads how the apps were actually used
+session on a GitHub-hosted Mac. It reads how the apps were actually used
 during the week, decides what to improve, builds it, ships it through App
 Store Connect, and writes a report. The maintainer's part is to carry the
-apps on his phone, file thoughts as GitHub issues labeled `sunday`, and read
-the report. This file is the covenant that session runs under.
+apps on his phone, answer the Saturday email when he has something to say,
+and read the Sunday one. This file is the covenant that session runs under.
 
 ## What it reads
 
@@ -15,15 +15,19 @@ themselves:
 
 1. **The maintainer's own map**, `scripts/mymap.py`. His moments and memories,
    read from his own private CloudKit database with a cktool user token that
-   belongs to his iCloud account. Written to
-   `~/Library/Application Support/randhawa-loop/map/`, never into this
-   repository, and never quoted in a report as coordinates or place names.
-   Counts, gaps and shapes only.
+   belongs to his iCloud account. Summarised as counts, gaps and shapes; the
+   raw points stay on the runner and die with it, and no report ever quotes a
+   coordinate or a place name.
 2. **App Store Connect analytics**, `scripts/asc.py analytics`: installs,
    sessions, retention and crashes from the users who opted into sharing
    with developers. Apple gathers it; the apps do not.
-3. **The inbox**: open GitHub issues labeled `sunday`, plus review state from
-   `scripts/asc.py status`, plus last week's report.
+3. **The maintainer's words.** Every Saturday a check-in issue with three
+   questions is opened in the private repository and mailed to him; he
+   replies to the email, the reply becomes a comment, and a workflow files
+   the comment under `inbox/`. Any reply to any of the loop's emails lands
+   there, any day of the week. The Sunday session reads everything newer
+   than its last report. Plus the review state of the last submission and
+   that last report.
 
 ## What it may do alone
 
@@ -76,19 +80,39 @@ test case:
 
 ## Mechanics
 
-- `scripts/sunday.sh` is what launchd runs, Sundays 09:00 local, from
-  `~/Library/LaunchAgents/com.prabhchintan.randhawa.sunday.plist`. A missed
-  Sunday runs when the Mac next wakes. It pulls both repositories, runs
-  `claude -p` with `loop/SUNDAY.md` as the prompt, and logs to
-  `~/Library/Logs/randhawa-sunday/`.
-- Reports go to `loop/reports/YYYY-MM-DD.md` in this repository and are also
-  posted as a GitHub issue labeled `sunday-report`, which is what reaches the
-  maintainer's inbox.
-- The release path is RELEASING.md; the App Store Connect half is
-  `scripts/asc.py`, driven by an API key in `~/.config/appstoreconnect/`.
+Nothing runs on the maintainer's Mac. Two repositories, three workflows, one
+session:
+
+- **This repository, public.** `.github/workflows/sunday.yml` runs Sundays at
+  15:00 UTC on a GitHub-hosted macOS runner: it checks out both repositories,
+  selects the newest Xcode, installs the App Store Connect key and the cktool
+  token from repository secrets, and runs `claude -p` with `loop/SUNDAY.md` as
+  the prompt and permission checks off. The session builds, decides, ships
+  through RELEASING.md and `scripts/asc.py`, and writes the report. Its
+  transcript goes to the private repository, never to the public job log.
+  Change the cron there to change the cadence; `workflow_dispatch` runs it on
+  demand, with a `check` mode that only proves the runner and a `note` field
+  for a one-line instruction.
+- **prabhchintan/randhawa-loop, private.** `inbox/`, `reports/`, `logs/`,
+  `analytics/`, and the conversation as issues. Three small workflows:
+  `checkin.yml` opens the Saturday check-in (Saturdays 15:00 UTC),
+  `report.yml` turns a pushed report into an issue addressed to the
+  maintainer, `inbox.yml` files every comment he writes. GitHub's own
+  notification email is the channel in both directions: the issue body is the
+  message, and a reply to the email is a comment.
+- **Secrets**, all in the public repository's Actions secrets and nowhere in
+  git: `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`, the maintainer's
+  subscription), `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`,
+  `ASC_CONTACT_JSON`, `CKTOOL_USER_TOKEN`, and `LOOP_DEPLOY_KEY`, a write
+  deploy key for the private repository.
 - Both apps must build for the simulator before anything is archived. If a
   build fails and the fix is not obvious, the session reverts its own
-  changes, reports, and ships nothing.
+  changes, reports, and ships nothing. A failed job also emails the
+  maintainer through GitHub Actions itself.
+- To pause the loop, disable the workflow in the Actions tab; to run it
+  early, dispatch it. `scripts/mymap.py` and `scripts/asc.py` also run from
+  any Mac with the same keys installed, which is how the first release under
+  this loop was made by hand on 2026-08-16.
 
 ## Why this shape
 

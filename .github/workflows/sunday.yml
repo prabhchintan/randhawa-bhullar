@@ -1,0 +1,151 @@
+# The Sunday loop, running where nothing depends on the maintainer's Mac: a
+# GitHub-hosted macOS runner with Xcode, cktool and the App Store Connect key,
+# driving a headless Claude Code session with loop/SUNDAY.md as its prompt.
+# LOOP.md is the covenant that session runs under.
+#
+# Schedule: Sundays 15:00 UTC (10:00 Austin, 09:00 Denver). Change the cron
+# here to change the cadence; the Saturday check-in lives in the private repo
+# prabhchintan/randhawa-loop and should move with it.
+#
+# Secrets (repository settings): CLAUDE_CODE_OAUTH_TOKEN (from `claude
+# setup-token`, the maintainer's subscription), ASC_KEY_ID, ASC_ISSUER_ID,
+# ASC_KEY_P8, ASC_CONTACT_JSON, CKTOOL_USER_TOKEN, LOOP_DEPLOY_KEY (write
+# deploy key for the private repo).
+name: Sunday loop
+
+on:
+  schedule:
+    - cron: "0 15 * * 0"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "full runs the session; check only proves the runner (toolchain, keys, feeds)"
+        type: choice
+        options: [full, check]
+        default: full
+      note:
+        description: "One line handed to the session as an extra instruction (optional)"
+        type: string
+        default: ""
+
+concurrency:
+  group: sunday-loop
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sunday:
+    runs-on: macos-15
+    timeout-minutes: 300
+    env:
+      LOOP_PRIVATE: ${{ github.workspace }}/../randhawa-loop
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - name: Check out the apps
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out the private loop repo
+        env:
+          LOOP_DEPLOY_KEY: ${{ secrets.LOOP_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$LOOP_DEPLOY_KEY" > ~/.ssh/loop_deploy_key
+          chmod 600 ~/.ssh/loop_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/loop_deploy_key -o IdentitiesOnly=yes"
+          git clone git@github.com:prabhchintan/randhawa-loop.git "$LOOP_PRIVATE"
+          echo "GIT_SSH_COMMAND=$GIT_SSH_COMMAND" >> "$GITHUB_ENV"
+          git -C "$LOOP_PRIVATE" config user.name "Sunday loop"
+          git -C "$LOOP_PRIVATE" config user.email "loop@prabhchintan.com"
+          git config user.name "Sunday loop"
+          git config user.email "loop@prabhchintan.com"
+
+      - name: Pick the newest Xcode on the runner
+        run: |
+          ls -d /Applications/Xcode*.app | sort -V
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$NEWEST"
+          xcodebuild -version
+          swift --version 2>&1 | head -1
+
+      - name: Install the keys
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_CONTACT_JSON: ${{ secrets.ASC_CONTACT_JSON }}
+          CKTOOL_USER_TOKEN: ${{ secrets.CKTOOL_USER_TOKEN }}
+        run: |
+          mkdir -p ~/.config/appstoreconnect
+          printf '%s\n' "$ASC_KEY_P8" > ~/.config/appstoreconnect/AuthKey_$ASC_KEY_ID.p8
+          printf '%s\n' "$ASC_CONTACT_JSON" > ~/.config/appstoreconnect/contact.json
+          printf '{"key_id": "%s", "issuer_id": "%s", "key_path": "%s/.config/appstoreconnect/AuthKey_%s.p8", "team_id": "7FWNAT83XU"}\n' \
+            "$ASC_KEY_ID" "$ASC_ISSUER_ID" "$HOME" "$ASC_KEY_ID" > ~/.config/appstoreconnect/config.json
+          chmod 600 ~/.config/appstoreconnect/*
+          printf '%s' "$CKTOOL_USER_TOKEN" > ~/.config/cktool
+          chmod 600 ~/.config/cktool
+          pip3 install --quiet "PyJWT[crypto]"
+          # xcodebuild takes the same key for signing and upload.
+          echo "ASC_KEY_PATH=$HOME/.config/appstoreconnect/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
+          echo "ASC_KEY_ID=$ASC_KEY_ID" >> "$GITHUB_ENV"
+          echo "ASC_ISSUER_ID=$ASC_ISSUER_ID" >> "$GITHUB_ENV"
+
+      # This job's log is public, like the repository. Nothing about the
+      # maintainer's map is printed here; the session's own transcript goes to
+      # the private repo under logs/.
+      - name: Prove the runner (always)
+        run: |
+          python3 scripts/asc.py status --app Prabhchintan.Randhawa | head -2
+          python3 scripts/asc.py status --app Prabhchintan.Bhullar | head -2
+          mkdir -p "$LOOP_PRIVATE/logs"
+          python3 scripts/mymap.py > "$LOOP_PRIVATE/logs/$(date -u +%F)-map.txt" && echo "map feed ok"
+          ls "$LOOP_PRIVATE"
+
+      - name: Simulator builds (check mode)
+        if: ${{ github.event.inputs.mode == 'check' }}
+        run: |
+          xcodebuild -project Randhawa.xcodeproj -target Randhawa -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
+          xcodebuild -project Bhullar/Bhullar.xcodeproj -target Bhullar -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
+
+      - name: Install Claude Code
+        if: ${{ github.event.inputs.mode != 'check' }}
+        run: npm install -g @anthropic-ai/claude-code && claude --version
+
+      - name: Run the Sunday session
+        if: ${{ github.event.inputs.mode != 'check' }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          SUNDAY_NOTE: ${{ github.event.inputs.note }}
+        run: |
+          PROMPT="$(cat loop/SUNDAY.md)"
+          if [ -n "$SUNDAY_NOTE" ]; then
+            PROMPT="$PROMPT
+
+Extra instruction from the maintainer for this run: $SUNDAY_NOTE"
+          fi
+          LOG="$LOOP_PRIVATE/logs/$(date -u +%F)-session.log"
+          set +e
+          claude -p "$PROMPT" --dangerously-skip-permissions --output-format text > "$LOG" 2>&1
+          STATUS=$?
+          set -e
+          echo "session exit $STATUS, $(wc -l < "$LOG") lines of transcript in the private repo"
+          echo "SESSION_STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      # The transcript and the map feed are pushed to the private repo whatever
+      # happened, so a failed run is still readable.
+      - name: Keep the logs (private)
+        if: ${{ always() }}
+        run: |
+          cd "$LOOP_PRIVATE"
+          git add -A logs
+          git diff --cached --quiet || git commit -q -m "Logs for $(date -u +%F)"
+          git push -q origin HEAD:main || (git pull -q --rebase origin main && git push -q origin HEAD:main)
+
+      - name: Fail the job if the session failed
+        if: ${{ github.event.inputs.mode != 'check' && env.SESSION_STATUS != '0' && env.SESSION_STATUS != '' }}
+        run: exit 1

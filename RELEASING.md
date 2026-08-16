@@ -155,8 +155,10 @@ changed, verify sync between two signed-in devices before celebrating.
 
 ## 10. Every Sunday
 
-The loop in [LOOP.md](LOOP.md) runs steps 1 to 8 unattended for whatever it
-decided to ship that week, and writes a report. Read the report.
+The loop in [LOOP.md](LOOP.md) runs steps 1 to 7 unattended on a GitHub-hosted
+Mac (`.github/workflows/sunday.yml`) for whatever it decided to ship that
+week, and writes a report that reaches the maintainer as an email. Read the
+report; reply to it if there is something to say.
 
 ## Non-negotiables
 
