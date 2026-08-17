@@ -110,6 +110,7 @@
 				D0000000000000000000000F /* CloudSync.swift */,
 				D00000000000000000000010 /* MemoryViews.swift */,
 				D00000000000000000000011 /* PlaceNames.swift */,
+				D00000000000000000000012 /* MailComposer.swift */,
 			);
 			name = MemoryKit;
 			path = ../MemoryKit;
@@ -129,7 +130,6 @@
 			children = (
 				D00000000000000000000003 /* BhullarApp.swift */,
 				D00000000000000000000004 /* ContentView.swift */,
-				D00000000000000000000012 /* MailComposer.swift */,
 				D00000000000000000000005 /* Assets.xcassets */,
 			);
 			path = Bhullar;

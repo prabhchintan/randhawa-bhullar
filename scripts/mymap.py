@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The maintainer's own map, pulled from his private CloudKit database.
 
-This is the one dataset the Sunday loop can study without the apps ever
+This is the one dataset the loop can study without the apps ever
 phoning home: the maintainer's own moments and memories, read with a cktool
 user token that belongs to his iCloud account and nobody else's. It writes to
 ~/Library/Application Support/randhawa-loop/map/, never into the repository,

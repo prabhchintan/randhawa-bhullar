@@ -126,6 +126,7 @@
 				D0000000000000000000000F /* MemoryViews.swift */,
 				D00000000000000000000012 /* PlaceNames.swift */,
 				D00000000000000000000013 /* Export.swift */,
+				D00000000000000000000014 /* MailComposer.swift */,
 			);
 			path = MemoryKit;
 			sourceTree = "<group>";
@@ -137,7 +138,6 @@
 				D00000000000000000000004 /* ContentView.swift */,
 				D00000000000000000000011 /* InkMapView.swift */,
 				D00000000000000000000009 /* SpaceModel.swift */,
-				D00000000000000000000014 /* MailComposer.swift */,
 				D00000000000000000000005 /* Assets.xcassets */,
 			);
 			path = Randhawa;

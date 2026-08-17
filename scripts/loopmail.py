@@ -65,7 +65,9 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("inbox")
-    p.add_argument("--into", required=True)
+    p.add_argument("--into", required=True, help="the maintainer's own mail goes here")
+    p.add_argument("--feedback-into", default=None,
+                   help="mail from anyone else goes here instead (default: a feedback/ folder beside --into)")
     p.add_argument("--keep-unread", action="store_true")
 
     p = sub.add_parser("send")
@@ -86,14 +88,17 @@ def main(argv=None):
         return
 
     if args.command == "inbox":
+        feedback_dir = args.feedback_into or os.path.join(os.path.dirname(os.path.abspath(args.into)), "feedback")
         os.makedirs(args.into, exist_ok=True)
+        os.makedirs(feedback_dir, exist_ok=True)
         mail = call("GET", "/loop/inbox").get("mail", [])
         written = []
         for item in mail:
             stamp = re.sub(r"[^0-9T]", "", item["received_at"])[:13] + "Z"
             name = f"{stamp}-mail{item['id']}.md"
-            path = os.path.join(args.into, name)
             mine = item.get("is_maintainer", 1) in (1, True)
+            # The maintainer's words and everyone else's never share a folder.
+            path = os.path.join(args.into if mine else feedback_dir, name)
             with open(path, "w") as handle:
                 handle.write(f"# {item.get('subject') or 'Reply'}\n\n")
                 if mine:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""App Store Connect from the command line, for the Sunday loop.
+"""App Store Connect from the command line, for the loop.
 
 Everything RELEASING.md used to do in a browser after the upload: create the
 version, set the copy, replace the screenshots, write the review notes, attach

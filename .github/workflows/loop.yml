@@ -163,7 +163,7 @@ jobs:
         run: |
           python3 scripts/asc.py status --app Prabhchintan.Randhawa | head -2
           python3 scripts/asc.py status --app Prabhchintan.Bhullar | head -2
-          mkdir -p "$LOOP_PRIVATE/logs" "$LOOP_PRIVATE/inbox"
+          mkdir -p "$LOOP_PRIVATE/logs" "$LOOP_PRIVATE/inbox" "$LOOP_PRIVATE/feedback"
           python3 scripts/mymap.py --inbox "$LOOP_PRIVATE/inbox" > "$LOOP_PRIVATE/logs/$(date -u +%F)-map.txt" && echo "map feed ok"
           NEW=$(python3 scripts/loopmail.py inbox --into "$LOOP_PRIVATE/inbox" | wc -l | tr -d ' ')
           echo "mail: $NEW new"
@@ -240,8 +240,8 @@ jobs:
           LOOP_SECRET: ${{ secrets.LOOP_SECRET }}
         run: |
           cd "$LOOP_PRIVATE"
-          mkdir -p logs inbox reports analytics
-          git add -A logs inbox reports analytics
+          mkdir -p logs inbox feedback reports analytics
+          git add -A logs inbox feedback reports analytics
           git diff --cached --quiet || git commit -q -m "Loop $(date -u +%F)"
           git push -q origin HEAD:main || (git pull -q --rebase origin main && git push -q origin HEAD:main)
           cd "$GITHUB_WORKSPACE"

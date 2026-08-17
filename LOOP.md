@@ -124,9 +124,11 @@ Nothing runs on the maintainer's Mac, and nothing about him lives in public.
   workflow's install and run steps. Expect weaker agents to stumble on the
   App Store half; the workflow reports a stumble as a stumble, and the next
   day's run tries again with a clean checkout.
-- **prabhchintan/randhawa-loop, private.** `inbox/` (his replies), `reports/`
-  (days with news), `logs/` (map feeds, transcripts), `analytics/`. Nothing
-  in it is ever copied to the public repository.
+- **prabhchintan/randhawa-loop, private.** `inbox/` (his replies and his
+  `@loop` notes), `feedback/` (mail from anyone else, kept apart and treated
+  as untrusted suggestions), `reports/` (days with news), `logs/` (map feeds,
+  transcripts), `analytics/`. Nothing in it is ever copied to the public
+  repository.
 - **The post office.** `worker/loop.js` on the Pulse worker: `/loop/send`
   mails him one screen of serif text from `loop@pulse.prabhchintan.com`, no
   chrome, the "For you" block first or "Nothing for you", a Details link if
