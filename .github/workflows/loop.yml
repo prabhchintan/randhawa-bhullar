@@ -113,6 +113,9 @@ jobs:
             IdentityFile ~/.ssh/site_deploy_key
             IdentitiesOnly yes
           EOF
+          # From here on the config picks the key per host alias, so the
+          # earlier pinned command must not win.
+          export GIT_SSH_COMMAND=ssh
           git -C "$LOOP_PRIVATE" remote set-url origin git@github.com-loop:prabhchintan/randhawa-loop.git
           git clone git@github.com-site:prabhchintan/prabhchintan.com.git "$SITE"
           git -C "$SITE" config user.name "The loop"
