@@ -221,7 +221,8 @@ jobs:
               --details "https://github.com/prabhchintan/randhawa-loop/blob/main/reports/$TODAY.md"
           elif [ "${SESSION_STATUS:-0}" != "0" ]; then
             python3 scripts/loopmail.py send --subject "Randhawa, the loop stumbled" --kind failure \
-              --line "Today's run did not finish (agent: $LOOP_AGENT). The transcript is in the private repo under logs/." \
+              --line "Nothing for you." \
+              --line "Today's run did not finish (agent: $LOOP_AGENT); the next scheduled run starts clean. If this repeats, reply and say so." \
               --details "https://github.com/prabhchintan/randhawa-bhullar/actions/runs/${{ github.run_id }}"
           else
             echo "quiet day, no mail"

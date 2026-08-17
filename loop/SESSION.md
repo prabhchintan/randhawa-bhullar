@@ -91,8 +91,12 @@ inside scope (write a report anyway and say what stopped you).
    summary goes out regardless (the Wednesday run is silent unless it has
    news). It must begin with `## Short version` and at
    most six bullet lines a person reads on a phone in ten seconds, each
-   starting with "- ": what happened, the one number that mattered, what waits
-   for him. Then the long version: the numbers (counts only), what you
+   starting with "- ". The first of them is the only line about him: either
+   `- For you: <one action, as few words as possible>` (repeat the form for
+   a second action, never a third) or exactly `- Nothing for you.` The email
+   lifts that line to the top in colour, so the rest of the bullets must
+   never mention what he should do; they say what happened and the one
+   number that mattered. Then the long version: the numbers (counts only), what you
    observed, what you decided and why, the standing questions in one line
    each, and which inbox files you acted on. Commit and push the private
    repository (`git -C $LOOP_PRIVATE push`). On a day with none of the above,
