@@ -129,9 +129,13 @@ Nothing runs on the maintainer's Mac, and nothing about him lives in public.
   in it is ever copied to the public repository.
 - **The post office.** `worker/loop.js` on the Pulse worker: `/loop/send`
   mails him one screen of serif text from `loop@pulse.prabhchintan.com`, no
-  chrome, a Details link if he wants more; inbound mail to that address (from
-  his own addresses only) is kept for the next session; a cron on the worker
-  sends the Saturday question. Email Routing is enabled for the
+  chrome, the "For you" block first or "Nothing for you", a Details link if
+  he wants more; inbound mail to that address is kept for the next session,
+  and mail from his own addresses also starts a run at once (a fine-grained
+  GitHub token that can only press "run workflow" on this repository), so a
+  reply is acted on within the hour rather than at the next scheduled run;
+  mail from anyone else is public feedback and waits for the schedule; a cron
+  on the worker sends the Saturday question. Email Routing is enabled for the
   `pulse.prabhchintan.com` subdomain only; the apex still points at iCloud.
   `scripts/loopmail.py` is the runner's side of it.
 - **Secrets**, all in the public repository's Actions secrets and nowhere in
