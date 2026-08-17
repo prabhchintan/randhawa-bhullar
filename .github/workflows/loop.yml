@@ -240,7 +240,8 @@ jobs:
           LOOP_SECRET: ${{ secrets.LOOP_SECRET }}
         run: |
           cd "$LOOP_PRIVATE"
-          git add -A logs inbox reports analytics 2>/dev/null || true
+          mkdir -p logs inbox reports analytics
+          git add -A logs inbox reports analytics
           git diff --cached --quiet || git commit -q -m "Loop $(date -u +%F)"
           git push -q origin HEAD:main || (git pull -q --rebase origin main && git push -q origin HEAD:main)
           cd "$GITHUB_WORKSPACE"
