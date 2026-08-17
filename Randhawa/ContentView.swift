@@ -2,10 +2,12 @@ import SwiftUI
 import MapKit
 import UIKit
 import CoreLocation
+import MessageUI
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
     @StateObject private var model = SpaceModel()
     @ObservedObject private var memoryStore = MemoryStore.shared
     @ObservedObject private var trail = LocationTrail.shared
@@ -25,6 +27,7 @@ struct ContentView: View {
     @State private var openedPlace: MomentGeometry.Clump?
     @State private var exportItem: ShareItem?
     @State private var fitRequest = 0
+    @State private var showingMailComposer = false
 
     var body: some View {
         Group {
@@ -107,6 +110,11 @@ struct ContentView: View {
                             exportMap()
                         } label: {
                             Label("Export your map", systemImage: "square.and.arrow.up")
+                        }
+                        Button {
+                            writeToMakers()
+                        } label: {
+                            Label("Write to the makers", systemImage: "envelope")
                         }
                         Divider()
                         Button("Erase everything", role: .destructive) {
@@ -218,6 +226,9 @@ struct ContentView: View {
             ShareSheet(items: [item.url])
                 .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showingMailComposer) {
+            MailComposerSheet()
+        }
         .confirmationDialog(
             "Erase your map and memories?",
             isPresented: $confirmingErase,
@@ -275,6 +286,14 @@ struct ContentView: View {
     private func exportMap() {
         if let url = try? MapExport.write() {
             exportItem = ShareItem(url: url)
+        }
+    }
+
+    private func writeToMakers() {
+        if MFMailComposeViewController.canSendMail() {
+            showingMailComposer = true
+        } else if let url = URL(string: "mailto:\(LoopMail.address)") {
+            openURL(url)
         }
     }
 

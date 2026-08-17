@@ -1,12 +1,15 @@
 import SwiftUI
 import CoreLocation
+import MessageUI
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @AppStorage("timeScale") private var scaleRaw = TimeScale.days.rawValue
     @ObservedObject private var memoryStore = MemoryStore.shared
     @State private var composing = false
     @State private var showingMemories = false
+    @State private var showingMailComposer = false
     @State private var opened: OpenedDot?
 
     /// Randhawa's moments, read once when the app comes forward rather than
@@ -89,6 +92,18 @@ struct ContentView: View {
             }
             .padding(20)
         }
+        .overlay(alignment: .topTrailing) {
+            Button {
+                writeToMakers()
+            } label: {
+                Image(systemName: "envelope")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(.primary)
+                    .frame(width: 38, height: 38)
+                    .background(.thinMaterial, in: Circle())
+            }
+            .padding(20)
+        }
         .sheet(isPresented: $composing) {
             MemoryComposerView(
                 prompt: "What is worth remembering right now?",
@@ -107,6 +122,9 @@ struct ContentView: View {
         }
         .sheet(item: $opened) { dot in
             DotDetailSheet(dot: dot, store: memoryStore, moments: moments)
+        }
+        .sheet(isPresented: $showingMailComposer) {
+            MailComposerSheet()
         }
         .onAppear {
             CloudSync.startIfEnabled()
@@ -154,6 +172,14 @@ struct ContentView: View {
         }
         let total = memoryStore.memories.count
         return total == 1 ? "1 memory" : "\(total) memories"
+    }
+
+    private func writeToMakers() {
+        if MFMailComposeViewController.canSendMail() {
+            showingMailComposer = true
+        } else if let url = URL(string: "mailto:\(LoopMail.address)") {
+            openURL(url)
+        }
     }
 }
 

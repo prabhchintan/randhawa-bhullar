@@ -24,6 +24,7 @@
 		B00000000000000000000026 /* PlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000011 /* PlaceNames.swift */; };
 		B00000000000000000000027 /* MomentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000C /* MomentStore.swift */; };
 		B00000000000000000000028 /* MemoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000D /* MemoryModel.swift */; };
+		B00000000000000000000029 /* MailComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000012 /* MailComposer.swift */; };
 		B000000000000000000000EE /* BhullarWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000B /* BhullarWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -68,6 +69,7 @@
 		D0000000000000000000000F /* CloudSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSync.swift; sourceTree = "<group>"; };
 		D00000000000000000000010 /* MemoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryViews.swift; sourceTree = "<group>"; };
 		D00000000000000000000011 /* PlaceNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceNames.swift; sourceTree = "<group>"; };
+		D00000000000000000000012 /* MailComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailComposer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +129,7 @@
 			children = (
 				D00000000000000000000003 /* BhullarApp.swift */,
 				D00000000000000000000004 /* ContentView.swift */,
+				D00000000000000000000012 /* MailComposer.swift */,
 				D00000000000000000000005 /* Assets.xcassets */,
 			);
 			path = Bhullar;
@@ -252,6 +255,7 @@
 				B00000000000000000000024 /* CloudSync.swift in Sources */,
 				B00000000000000000000025 /* MemoryViews.swift in Sources */,
 				B00000000000000000000026 /* PlaceNames.swift in Sources */,
+				B00000000000000000000029 /* MailComposer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

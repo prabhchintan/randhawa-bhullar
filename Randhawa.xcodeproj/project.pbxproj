@@ -27,6 +27,7 @@
 		B00000000000000000000033 /* PlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000012 /* PlaceNames.swift */; };
 		B00000000000000000000034 /* Export.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000013 /* Export.swift */; };
 		B00000000000000000000035 /* Ink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000010 /* Ink.swift */; };
+		B00000000000000000000036 /* MailComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000014 /* MailComposer.swift */; };
 		B000000000000000000000EE /* RandhawaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000B /* RandhawaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -74,6 +75,7 @@
 		D00000000000000000000011 /* InkMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkMapView.swift; sourceTree = "<group>"; };
 		D00000000000000000000012 /* PlaceNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceNames.swift; sourceTree = "<group>"; };
 		D00000000000000000000013 /* Export.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Export.swift; sourceTree = "<group>"; };
+		D00000000000000000000014 /* MailComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailComposer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +137,7 @@
 				D00000000000000000000004 /* ContentView.swift */,
 				D00000000000000000000011 /* InkMapView.swift */,
 				D00000000000000000000009 /* SpaceModel.swift */,
+				D00000000000000000000014 /* MailComposer.swift */,
 				D00000000000000000000005 /* Assets.xcassets */,
 			);
 			path = Randhawa;
@@ -263,6 +266,7 @@
 				B00000000000000000000032 /* InkMapView.swift in Sources */,
 				B00000000000000000000033 /* PlaceNames.swift in Sources */,
 				B00000000000000000000034 /* Export.swift in Sources */,
+				B00000000000000000000036 /* MailComposer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
