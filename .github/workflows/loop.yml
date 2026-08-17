@@ -185,11 +185,12 @@ jobs:
           set +e
           case "$LOOP_AGENT" in
             claude)
-              claude -p "$PROMPT" --dangerously-skip-permissions --output-format text ${LOOP_MODEL:+--model "$LOOP_MODEL"} > "$LOG" 2>&1 ;;
+              claude -p "$PROMPT" --dangerously-skip-permissions --output-format stream-json --verbose ${LOOP_MODEL:+--model "$LOOP_MODEL"} 2>&1 \
+                | python3 scripts/transcript.py > "$LOG" ;;
             codex)
               codex exec --dangerously-bypass-approvals-and-sandbox "$PROMPT" > "$LOG" 2>&1 ;;
           esac
-          STATUS=$?
+          STATUS=${PIPESTATUS[0]:-$?}
           set -e
           echo "session ($LOOP_AGENT) exit $STATUS, $(wc -l < "$LOG") lines of transcript in the private repo"
           echo "SESSION_STATUS=$STATUS" >> "$GITHUB_ENV"
