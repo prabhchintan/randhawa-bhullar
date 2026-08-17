@@ -263,6 +263,15 @@ jobs:
             echo "quiet day, no mail"
           fi
 
-      - name: Fail the job if the session failed
-        if: ${{ vars.LOOP_PAUSED != '1' && (github.event.inputs.mode != 'check' && env.SESSION_STATUS != '0' && env.SESSION_STATUS != '') }}
-        run: exit 1
+      # A session that stumbles does not turn the run red: the maintainer was
+      # told by the loop's own email, and a red run would make GitHub email him
+      # too. Only a runner that cannot even start (a failed checkout, a bad
+      # key) fails the job, and that alarm should be loud.
+      - name: Note the session outcome
+        if: ${{ vars.LOOP_PAUSED != '1' && github.event.inputs.mode != 'check' }}
+        run: |
+          if [ "${SESSION_STATUS:-0}" != "0" ]; then
+            echo "::warning::the session exited $SESSION_STATUS; see the transcript in the private repo"
+          else
+            echo "session finished cleanly"
+          fi
