@@ -22,7 +22,9 @@
 #
 # Secrets: one of the agent keys above, plus ASC_KEY_ID, ASC_ISSUER_ID,
 # ASC_KEY_P8, ASC_CONTACT_JSON, CKTOOL_USER_TOKEN, LOOP_DEPLOY_KEY (write
-# deploy key for the private repo) and LOOP_SECRET (the mail relay).
+# deploy key for the private repo), SITE_DEPLOY_KEY (write deploy key for
+# the website repo), CLOUDFLARE_API_TOKEN (the site's zone and workers) and
+# LOOP_SECRET (the mail relay).
 name: Loop
 
 on:
@@ -53,6 +55,7 @@ jobs:
     timeout-minutes: 300
     env:
       LOOP_PRIVATE: ${{ github.workspace }}/../randhawa-loop
+      SITE: ${{ github.workspace }}/../prabhchintan.com
       LOOP_AGENT: ${{ vars.LOOP_AGENT || 'claude' }}
       LOOP_MODEL: ${{ vars.LOOP_MODEL }}
       LOOP_MODEL_PROVIDER: ${{ vars.LOOP_MODEL_PROVIDER }}
@@ -89,6 +92,33 @@ jobs:
           git -C "$LOOP_PRIVATE" config user.email "loop@pulse.prabhchintan.com"
           git config user.name "The loop"
           git config user.email "loop@pulse.prabhchintan.com"
+
+      # The website is the loop's other subject. Its own deploy key; its own
+      # tempo (a push to main deploys it, so site work goes out at once).
+      - name: Check out the website
+        if: ${{ vars.LOOP_PAUSED != '1' }}
+        env:
+          SITE_DEPLOY_KEY: ${{ secrets.SITE_DEPLOY_KEY }}
+        run: |
+          printf '%s\n' "$SITE_DEPLOY_KEY" > ~/.ssh/site_deploy_key
+          chmod 600 ~/.ssh/site_deploy_key
+          # One SSH config, two keys, so git picks the right one per host alias.
+          cat >> ~/.ssh/config <<EOF
+          Host github.com-loop
+            HostName github.com
+            IdentityFile ~/.ssh/loop_deploy_key
+            IdentitiesOnly yes
+          Host github.com-site
+            HostName github.com
+            IdentityFile ~/.ssh/site_deploy_key
+            IdentitiesOnly yes
+          EOF
+          git -C "$LOOP_PRIVATE" remote set-url origin git@github.com-loop:prabhchintan/randhawa-loop.git
+          git clone git@github.com-site:prabhchintan/prabhchintan.com.git "$SITE"
+          git -C "$SITE" config user.name "The loop"
+          git -C "$SITE" config user.email "loop@pulse.prabhchintan.com"
+          echo "GIT_SSH_COMMAND=ssh" >> "$GITHUB_ENV"
+          pip3 install --quiet --break-system-packages -r "$SITE/requirements.txt" 2>&1 | tail -1 || true
 
       - name: Pick the newest Xcode on the runner
         if: ${{ vars.LOOP_PAUSED != '1' }}
@@ -174,6 +204,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           LOOP_SECRET: ${{ secrets.LOOP_SECRET }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           GH_TOKEN: ${{ github.token }}
           LOOP_NOTE: ${{ github.event.inputs.note }}
         run: |
