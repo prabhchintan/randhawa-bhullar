@@ -66,10 +66,13 @@ inside scope (write a report anyway and say what stopped you).
    Commit and push the public repository whenever you have something that
    builds, release or not.
 
-5. Ship, or not. Ship only when all three hold: nothing is WAITING_FOR_REVIEW
-   or IN_REVIEW for that app; at least three days have passed since that
-   app's last submission (a rejection or a crash fix is exempt); and the
-   changes since the last submission have user-visible value. Then bump
+5. Ship, or not. Ship only when all four hold: today is a Wednesday (`date
+   -u +%u` is 3); nothing is WAITING_FOR_REVIEW or IN_REVIEW for that app;
+   at least three days have passed since that app's last submission; and
+   the changes since the last submission have user-visible value. A
+   rejection or a crash fix is exempt from the first three. On any other
+   day, commit and push your work to main and leave the release for
+   Wednesday. Then bump
    MARKETING_VERSION and CURRENT_PROJECT_VERSION for each app that changed
    (four places per project), write AppStore/whatsnew-<version>.md and update
    metadata.md, archive and upload as RELEASING.md describes (with the key

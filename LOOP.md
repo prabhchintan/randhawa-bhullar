@@ -55,11 +55,15 @@ themselves:
 ## The shipping gate
 
 The loop runs twice a week; the App Store does not want an update every
-run, and Apple allows one submission in review per app at a time. So a session ships only
-when all three hold: nothing is waiting for or in review for that app; at
-least three days have passed since that app's last submission (a rejection
-or a crash fix is exempt); and the changes since then have user-visible
-value. Everything else accumulates on main and ships when the gate opens.
+run, and Apple allows one submission in review per app at a time. So a
+session ships only when all four hold: it is the Wednesday run, so that a
+build reviewed midweek is on the maintainer's phone by the weekend and
+Sunday's run can read how it went; nothing is waiting for or in review for
+that app; at least three days have passed since that app's last submission;
+and the changes since then have user-visible value. A rejection or a crash
+fix is exempt from the first three. Everything else accumulates on main,
+from any session on any day, and ships when the gate opens. Sunday works,
+tunes and reports; it does not submit.
 
 ## What waits for the maintainer
 
