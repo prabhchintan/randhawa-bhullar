@@ -26,6 +26,13 @@ Where things are:
   to send anything yourself: if you write $LOOP_PRIVATE/reports/YYYY-MM-DD.md
   with a `## Short version`, the workflow mails its bullets to the maintainer
   after you finish; if you write no report, he hears nothing today.
+- The website (github.com/prabhchintan/prabhchintan.com, private) is checked
+  out at $SITE with push rights over SSH, its Python requirements installed,
+  and CLOUDFLARE_API_TOKEN set for `npx wrangler` in $SITE/worker. Read
+  $SITE/CLAUDE.md and $SITE/BUILD.md before touching it. Its tempo is now:
+  `python3 build.py` in $SITE builds, commits and pushes, and the push is
+  the deploy. Never stage $SITE/Randhawa (build.py refuses anyway); the apps
+  live in this repository, not there.
 - The newest Xcode on the runner is selected. Simulator builds are the
   commands in CLAUDE.md. There is no browser and no phone.
 
@@ -55,8 +62,10 @@ inside scope (write a report anyway and say what stopped you).
    the report and do what you can. A message that asks a question deserves an
    answer in the report even if nothing else happens today.
 
-3. Decide. Pick zero to three improvements inside LOOP.md scope: first
-   whatever the inbox asks for, then the next open item of the loop's
+3. Decide. Sort what the inbox asks for into the two tempos in LOOP.md:
+   site and worker requests are done and deployed in this run; app requests
+   are built in this run and ship on Wednesday. Then pick zero to three
+   improvements inside LOOP.md scope: first whatever the inbox asks for, then the next open item of the loop's
    backlog in ROADMAP.md, informed by the feeds and the standing questions in
    LOOP.md. Zero is a fine answer on a quiet day. When you finish a backlog
    item, mark it done in ROADMAP.md with the date, in one line. Prefer the smallest change that answers a real
@@ -96,7 +105,8 @@ inside scope (write a report anyway and say what stopped you).
    a second action, never a third) or exactly `- Nothing for you.` The email
    lifts that line to the top in colour, so the rest of the bullets must
    never mention what he should do; they say what happened and the one
-   number that mattered. Then the long version: the numbers (counts only), what you
+   number that mattered, and for each item done, one word for its tempo:
+   "live" or "Wednesday". Then the long version: the numbers (counts only), what you
    observed, what you decided and why, the standing questions in one line
    each, and which inbox files you acted on. Commit and push the private
    repository (`git -C $LOOP_PRIVATE push`). On a day with none of the above,
