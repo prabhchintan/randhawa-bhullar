@@ -84,7 +84,10 @@ class ASC:
         if params:
             url += ("&" if "?" in url else "?") + urllib.parse.urlencode(params, doseq=True)
         data = None
-        headers = {"Authorization": "Bearer " + self.token()}
+        # Pre-signed report URLs (S3) carry their own auth in the query
+        # string; adding ours too makes S3 reject the request outright.
+        headers = {} if url.startswith("http") and not url.startswith(API) else \
+            {"Authorization": "Bearer " + self.token()}
         if body is not None:
             data = json.dumps(body).encode()
             headers["Content-Type"] = "application/json"

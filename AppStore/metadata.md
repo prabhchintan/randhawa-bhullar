@@ -1,10 +1,10 @@
-# Randhawa, App Store listing (v3.2)
+# Randhawa, App Store listing (v3.3)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
 App Review notes sections of this file and pushes them to App Store Connect;
-What's New comes from `whatsnew-3.2.md`. Everything here is truthful about
+What's New comes from `whatsnew-3.3.md`. Everything here is truthful about
 the app: location on-device, iCloud sync optional and private, no data
-reaches us. The v3.1 copy this replaces is in git history; v1 is archived at
+reaches us. The v3.2 copy this replaces is in git history; v1 is archived at
 Archive/metadata-v1.md.
 
 ---
@@ -48,12 +48,18 @@ Private by architecture, not by promise:
 
 Randhawa cannot be rushed and cannot be faked. It simply gets better the longer you live with it. Carry it wherever you go, and watch your map appear.
 
-## What's New (from AppStore/whatsnew-3.2.md)
+## What's New (from AppStore/whatsnew-3.3.md)
 
 ## App Review notes (Review Information → Notes)
 Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
+
+NEW IN 3.3: "Write to the makers" in the "..." menu presents the standard
+MFMailComposeViewController, addressed to loop@pulse.prabhchintan.com. This
+is a hand-off to the system mail sheet, the same as any mailto link; the app
+sends nothing itself and reads nothing back. No new permission, no change to
+the privacy label.
 
 WHAT CHANGED IN 3.2, AND WHY THE APP ASKS FOR "ALWAYS" AT THE INTRO
 
@@ -155,11 +161,11 @@ submitting version 2.2 alongside this one.
 
 ---
 
-## Pre-submit checklist (v3.2)
-- [x] CloudKit: no schema change in 3.2, so no Production deploy gates this
-- [x] Hosted privacy and support pages updated and deployed for the default
-      trail, the two prompts, the camera and the export
-- [x] Screenshots regenerated (5 iPhone + 5 iPad)
-- [ ] Build 3.2 (14) archived and uploaded to App Store Connect
+## Pre-submit checklist (v3.3)
+- [x] CloudKit: no schema change in 3.3, so no Production deploy gates this
+- [x] No public promise changed: no new permission, App Privacy stays Data
+      Not Collected, hosted privacy/support pages untouched
+- [x] Screenshots unchanged: nothing in the curated set shows the "..." menu
+- [ ] Build 3.3 archived and uploaded to App Store Connect
 - [ ] `scripts/asc.py release ... --submit` run for Randhawa, then Bhullar,
       in the same sitting

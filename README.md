@@ -18,7 +18,7 @@ servers of ours, and data we cannot read. Open code is the strongest form of
 that promise. Don't take our word for it; read it. The plan lives in
 [`ROADMAP.md`](ROADMAP.md).
 
-## Randhawa (v3.2, space)
+## Randhawa (v3.3, space)
 
 A deliberately minimal iOS app: carry your phone and it draws the map of your
 life. A dot where you go, a line where you moved, darker where you return.

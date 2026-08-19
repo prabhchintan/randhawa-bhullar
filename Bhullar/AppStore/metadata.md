@@ -1,7 +1,7 @@
-# Bhullar, App Store listing (v2.2)
+# Bhullar, App Store listing (v2.3)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
-App Review notes sections of this file; What's New comes from `whatsnew-2.2.md`.
+App Review notes sections of this file; What's New comes from `whatsnew-2.3.md`.
 
 ---
 
@@ -48,7 +48,7 @@ Deliberately minimal:
 
 Glance, take it in, get on with your day.
 
-## What's New (from AppStore/whatsnew-2.2.md)
+## What's New (from AppStore/whatsnew-2.3.md)
 
 ## App Review notes (Review Information → Notes)
 Bhullar is the time-keeping sibling of our app Randhawa (Apple App ID
@@ -76,6 +76,12 @@ NEW IN 2.2: the widgets read the shared memories file to colour the days and
 hours that hold a memory, exactly as the app's grid already did. Nothing new
 is stored and nothing leaves the device.
 
+NEW IN 2.3: a small envelope button, "Write to the makers", presents the
+standard MFMailComposeViewController, addressed to
+loop@pulse.prabhchintan.com. This is a hand-off to the system mail sheet, the
+same as any mailto link; the app sends nothing itself and reads nothing back.
+No new permission, no change to the privacy label.
+
 ---
 
 ## URLs (shared with Randhawa, the company site covers both apps)
@@ -101,10 +107,13 @@ is stored and nothing leaves the device.
 
 ---
 
-## Pre-submit checklist (v2.2)
-- [x] CloudKit: no schema change in 2.2
-- [x] Screenshots regenerated (6 iPhone + 6 iPad); captions unchanged, still true
-- [ ] Build 2.2 (7) archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.2,
+## Pre-submit checklist (v2.3)
+- [x] CloudKit: no schema change in 2.3
+- [x] No public promise changed: no new permission, App Privacy stays Data
+      Not Collected
+- [x] Screenshots unchanged: the curated set does not show the new envelope
+      button
+- [ ] Build 2.3 archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.3,
       not after. The dot sheet is empty of places without Randhawa, so a
       reviewer who sees this alone sees half a feature.
