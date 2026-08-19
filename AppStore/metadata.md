@@ -55,11 +55,9 @@ Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
 
-NEW IN 3.3: "Write to the makers" in the "..." menu presents the standard
-MFMailComposeViewController, addressed to loop@pulse.prabhchintan.com. This
-is a hand-off to the system mail sheet, the same as any mailto link; the app
-sends nothing itself and reads nothing back. No new permission, no change to
-the privacy label.
+NEW IN 3.3: "Write to the makers" in the "..." menu opens the standard system
+mail sheet, addressed to us. No new permission, no change to the privacy
+label.
 
 WHAT CHANGED IN 3.2, AND WHY THE APP ASKS FOR "ALWAYS" AT THE INTRO
 
