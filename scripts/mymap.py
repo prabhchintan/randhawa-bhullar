@@ -7,10 +7,17 @@ user token that belongs to his iCloud account and nobody else's. It writes to
 ~/Library/Application Support/randhawa-loop/map/, never into the repository,
 because it is location data.
 
-Needs, once: `xcrun cktool save-token --type user --method file` with the user
-token from the CloudKit Console (account menu, Settings, Tokens), and the
-recordName QUERYABLE index on Moment and Memory deployed to Production
-(done 2026-08-16).
+Needs the recordName QUERYABLE index on Moment and Memory deployed to
+Production (done 2026-08-16), and a saved user token: `xcrun cktool
+save-token --type user --method file` with the token from the CloudKit
+Console (account menu, Settings, Tokens). That token is not a set-once
+secret: cktool's own docs describe a `--type user` token as short-lived and
+scoped to an interactive login session, and this project has seen one go
+from freshly minted to "session has expired or is invalid" in about three
+days. Only an interactive Apple ID sign-in can mint a new one, so this feed
+cannot renew itself; expect to repeat the save-token step, and update the
+CKTOOL_USER_TOKEN repository secret from the new file, every time a report
+asks for it.
 
 A memory whose text begins with "@loop" (any case, optional colon) is a note
 to the loop written from inside the app: `--inbox DIR` files each new one
