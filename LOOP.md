@@ -143,6 +143,13 @@ Nothing runs on the maintainer's Mac, and nothing about him lives in public.
 - **Secrets**, all in the public repository's Actions secrets and nowhere in
   git: an agent key, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`,
   `ASC_CONTACT_JSON`, `CKTOOL_USER_TOKEN`, `LOOP_DEPLOY_KEY`, `LOOP_SECRET`.
+  `CKTOOL_USER_TOKEN` alone is perishable: Apple keeps cktool user tokens
+  short-lived and only an interactive Apple ID sign-in mints one, so it is
+  the one credential the loop cannot renew for itself. `scripts/renewmap.sh`
+  on the maintainer's Mac makes the renewal one paste and updates the secret;
+  its `--check` probe, a LaunchAgent there, speaks on Tuesday and Saturday
+  evenings when the next run would find the token dead. A dead token only
+  stales the map feed; everything else runs without it.
 - Both apps must build for the simulator before anything is archived. If a
   build fails and the fix is not obvious, the session reverts its own
   changes, reports, and ships nothing.

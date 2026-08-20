@@ -17,7 +17,10 @@ from freshly minted to "session has expired or is invalid" in about three
 days. Only an interactive Apple ID sign-in can mint a new one, so this feed
 cannot renew itself; expect to repeat the save-token step, and update the
 CKTOOL_USER_TOKEN repository secret from the new file, every time a report
-asks for it.
+asks for it. scripts/renewmap.sh makes the renewal one paste and keeps the
+secret in step; its --check probe, installed as a LaunchAgent on the
+maintainer's Mac, flags Tuesday and Saturday evenings when the next run
+would find the token dead.
 
 A memory whose text begins with "@loop" (any case, optional colon) is a note
 to the loop written from inside the app: `--inbox DIR` files each new one
