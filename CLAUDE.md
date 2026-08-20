@@ -50,9 +50,9 @@ House style:
   reversed" and "The one we reversed, twice". Any change that cannot honour
   all five should turn the trail off instead.
 - Secrets never enter this repository: the App Store Connect key lives in
-  ~/.config/appstoreconnect/, the cktool user token in ~/.config/cktool, and
-  the maintainer's own map data under ~/Library/Application Support/
-  randhawa-loop/. Reports quote counts, never coordinates or place names.
+  ~/.config/appstoreconnect/, and the maintainer's own map data under
+  ~/Library/Application Support/randhawa-loop/. Reports quote counts, never
+  coordinates or place names.
 - The apps' public privacy and support pages are not in this repo; they
   live in the maintainer's website repo and are served at
   prabhchintan.com/randhawa/privacy and /randhawa/support.

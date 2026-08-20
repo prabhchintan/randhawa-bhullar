@@ -1,5 +1,5 @@
 # The loop, running where nothing depends on the maintainer's Mac: a
-# GitHub-hosted macOS runner with Xcode, cktool and the App Store Connect key,
+# GitHub-hosted macOS runner with Xcode and the App Store Connect key,
 # driving a headless coding agent with loop/SESSION.md as its prompt. LOOP.md
 # is the covenant that session runs under.
 #
@@ -21,7 +21,7 @@
 # The prompt, the tools and the covenant are the same whichever agent runs.
 #
 # Secrets: one of the agent keys above, plus ASC_KEY_ID, ASC_ISSUER_ID,
-# ASC_KEY_P8, ASC_CONTACT_JSON, CKTOOL_USER_TOKEN, LOOP_DEPLOY_KEY (write
+# ASC_KEY_P8, ASC_CONTACT_JSON, LOOP_DEPLOY_KEY (write
 # deploy key for the private repo), SITE_DEPLOY_KEY (write deploy key for
 # the website repo), CLOUDFLARE_API_TOKEN (the site's zone and workers) and
 # LOOP_SECRET (the mail relay).
@@ -138,7 +138,6 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           ASC_CONTACT_JSON: ${{ secrets.ASC_CONTACT_JSON }}
-          CKTOOL_USER_TOKEN: ${{ secrets.CKTOOL_USER_TOKEN }}
         run: |
           mkdir -p ~/.config/appstoreconnect
           printf '%s\n' "$ASC_KEY_P8" > ~/.config/appstoreconnect/AuthKey_$ASC_KEY_ID.p8
@@ -146,8 +145,6 @@ jobs:
           printf '{"key_id": "%s", "issuer_id": "%s", "key_path": "%s/.config/appstoreconnect/AuthKey_%s.p8", "team_id": "7FWNAT83XU"}\n' \
             "$ASC_KEY_ID" "$ASC_ISSUER_ID" "$HOME" "$ASC_KEY_ID" > ~/.config/appstoreconnect/config.json
           chmod 600 ~/.config/appstoreconnect/*
-          printf '%s' "$CKTOOL_USER_TOKEN" > ~/.config/cktool
-          chmod 600 ~/.config/cktool
           pip3 install --quiet --break-system-packages "PyJWT[crypto]"
           echo "ASC_KEY_PATH=$HOME/.config/appstoreconnect/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
           echo "ASC_KEY_ID=$ASC_KEY_ID" >> "$GITHUB_ENV"
@@ -164,17 +161,11 @@ jobs:
           python3 scripts/asc.py status --app Prabhchintan.Randhawa | head -2
           python3 scripts/asc.py status --app Prabhchintan.Bhullar | head -2
           mkdir -p "$LOOP_PRIVATE/logs" "$LOOP_PRIVATE/inbox" "$LOOP_PRIVATE/feedback"
-          # A dead token must not fail the run or leave an empty dated log
-          # pretending to be a good read; the last good feed stands and the
-          # session reports the staleness. scripts/renewmap.sh on the
-          # maintainer's Mac is the renewal.
-          if python3 scripts/mymap.py --inbox "$LOOP_PRIVATE/inbox" > /tmp/map.txt; then
-            mv /tmp/map.txt "$LOOP_PRIVATE/logs/$(date -u +%F)-map.txt"
-            echo "map feed ok"
-          else
-            rm -f /tmp/map.txt
-            echo "map feed failed, likely the short-lived cktool user token; renewmap.sh renews it"
-          fi
+          # The map feed is made on the maintainer's Mac (Maproom/ and
+          # scripts/maproom.sh, see LOOP.md) and pushed to the private repo;
+          # here it is only read. Its freshness is the session's to judge.
+          LATEST=$(ls "$LOOP_PRIVATE"/logs/*-map.txt 2>/dev/null | sort | tail -1)
+          if [ -n "$LATEST" ]; then echo "map feed: $(basename "$LATEST")"; else echo "map feed: none yet"; fi
           NEW=$(python3 scripts/loopmail.py inbox --into "$LOOP_PRIVATE/inbox" | wc -l | tr -d ' ')
           echo "mail: $NEW new"
 

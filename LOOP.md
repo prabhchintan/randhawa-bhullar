@@ -15,11 +15,16 @@ Nothing in the apps phones home; the roadmap says analytics will not happen
 and this loop does not change that. Three feeds, none of them from the apps
 themselves:
 
-1. **The maintainer's own map**, `scripts/mymap.py`. His moments and memories,
-   read from his own private CloudKit database with a cktool user token that
-   belongs to his iCloud account. Summarised as counts, gaps and shapes; the
-   raw points stay on the runner and die with it, and no report ever quotes a
-   coordinate or a place name.
+1. **The maintainer's own map**, made on his Mac. Maproom (`Maproom/`, a
+   small signed macOS app) reads his moments and memories from his own
+   private CloudKit database with the Mac's iCloud session, the one
+   long-lived credential Apple allows for a private database (cktool user
+   tokens died in days and could only be minted by hand; that path is gone).
+   `scripts/maproom.sh` runs it from launchd at 08:00 and 20:00, has
+   `scripts/mymap.py` summarise as counts, gaps and shapes, and pushes only
+   that summary and any `@loop` notes to the private repo. The raw points
+   never leave his Mac, and no report ever quotes a coordinate or a place
+   name.
 2. **App Store Connect analytics**, `scripts/asc.py analytics`: installs,
    sessions, retention and crashes from the users who opted into sharing
    with developers. Apple gathers it; the apps do not.
@@ -100,12 +105,17 @@ test case:
 
 ## Mechanics
 
-Nothing runs on the maintainer's Mac, and nothing about him lives in public.
+The loop runs away from the maintainer's Mac, and nothing about him lives in
+public. One exception, by design: the map feed is made on his Mac, because
+only a signed-in Apple device can read a private database for long. His Mac
+pulls this repository before each maproom run, so the loop's own changes to
+`Maproom/` and `scripts/mymap.py` reach it unattended; that is code from this
+repository running on his machine, and it is the only code that does.
 
 - **This repository, public.** `.github/workflows/loop.yml` runs Wednesdays
   and Sundays at 15:00 UTC on a GitHub-hosted macOS runner: it checks out both repositories,
-  selects the newest Xcode, installs the App Store Connect key and the cktool
-  token from repository secrets, fetches the maintainer's mail into the
+  selects the newest Xcode, installs the App Store Connect key from
+  repository secrets, fetches the maintainer's mail into the
   private repository, and runs the agent with `loop/SESSION.md` as the
   prompt and permission checks off. The transcript goes to the private
   repository, never to the public job log. When the session leaves a report
@@ -142,14 +152,16 @@ Nothing runs on the maintainer's Mac, and nothing about him lives in public.
   `scripts/loopmail.py` is the runner's side of it.
 - **Secrets**, all in the public repository's Actions secrets and nowhere in
   git: an agent key, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`,
-  `ASC_CONTACT_JSON`, `CKTOOL_USER_TOKEN`, `LOOP_DEPLOY_KEY`, `LOOP_SECRET`.
-  `CKTOOL_USER_TOKEN` alone is perishable: Apple keeps cktool user tokens
-  short-lived and only an interactive Apple ID sign-in mints one, so it is
-  the one credential the loop cannot renew for itself. `scripts/renewmap.sh`
-  on the maintainer's Mac makes the renewal one paste and updates the secret;
-  its `--check` probe, a LaunchAgent there, speaks on Tuesday and Saturday
-  evenings when the next run would find the token dead. A dead token only
-  stales the map feed; everything else runs without it.
+  `ASC_CONTACT_JSON`, `LOOP_DEPLOY_KEY`, `LOOP_SECRET`.
+- **The maproom**, the map feed's side of the bargain, on the maintainer's
+  Mac: `scripts/maproom.sh --install` sets up a LaunchAgent
+  (com.prabhchintan.maproom, 08:00 and 20:00, or on waking past them) that
+  pulls this repository, rebuilds Maproom when its source changed (cloud
+  signing renews the yearly provisioning profile as a side effect), reads
+  the map, and pushes summary and notes to the private repo. A stale feed
+  is reported as stale and stales nothing else; if the maproom itself fails
+  for two days it notifies him on his own screen. It needs his Mac awake
+  sometime most days and signed into iCloud, nothing more.
 - Both apps must build for the simulator before anything is archived. If a
   build fails and the fix is not obvious, the session reverts its own
   changes, reports, and ships nothing.

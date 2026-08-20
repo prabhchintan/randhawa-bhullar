@@ -15,8 +15,9 @@ Where things are:
   maintainer wrote, one file per message, newest by filename: replies to the
   loop's emails, and notes he wrote inside the apps as memories beginning
   with "@loop"; both were fetched into it before you started), `reports/` (one file per
-  day that had news), `logs/` (today's map feed at logs/YYYY-MM-DD-map.txt,
-  and transcripts) and `analytics/`. Everything about the maintainer as a
+  day that had news), `logs/` (map feeds at logs/YYYY-MM-DD-map.txt, made on
+  the maintainer's Mac and pushed here, newest date wins; and transcripts)
+  and `analytics/`. Everything about the maintainer as a
   person belongs there and nowhere else.
 - App Store Connect: `python3 scripts/asc.py ...` works. For archiving and
   uploading, xcodebuild takes `-allowProvisioningUpdates -authenticationKeyPath

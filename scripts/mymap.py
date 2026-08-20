@@ -1,26 +1,16 @@
 #!/usr/bin/env python3
-"""The maintainer's own map, pulled from his private CloudKit database.
+"""The maintainer's map, summarized for the loop.
 
-This is the one dataset the loop can study without the apps ever
-phoning home: the maintainer's own moments and memories, read with a cktool
-user token that belongs to his iCloud account and nobody else's. It writes to
-~/Library/Application Support/randhawa-loop/map/, never into the repository,
-because it is location data.
-
-Needs the recordName QUERYABLE index on Moment and Memory deployed to
-Production (done 2026-08-16), and a saved user token: `xcrun cktool
-save-token --type user --method file` with the token from the CloudKit
-Console (account menu, Settings, Tokens). That token is not a set-once
-secret: cktool's own docs describe a `--type user` token as short-lived and
-scoped to an interactive login session, and this project has seen one go
-from freshly minted to "session has expired or is invalid" in about three
-days. Only an interactive Apple ID sign-in can mint a new one, so this feed
-cannot renew itself; expect to repeat the save-token step, and update the
-CKTOOL_USER_TOKEN repository secret from the new file, every time a report
-asks for it. scripts/renewmap.sh makes the renewal one paste and keeps the
-secret in step; its --check probe, installed as a LaunchAgent on the
-maintainer's Mac, flags Tuesday and Saturday evenings when the next run
-would find the token dead.
+Maproom (Maproom/, a small signed macOS app) reads the maintainer's Moments
+and Memories from his private CloudKit database with his Mac's own iCloud
+session, the one long-lived credential Apple allows for a private database,
+and writes them to ~/Library/Application Support/randhawa-loop/map/ as
+moments.json and memories.json. scripts/maproom.sh runs it on a launchd
+schedule and pushes what this script makes of those files to the private
+repo. This script never touches the network: it reads the files, prints the
+summary the loop reads each run, and files @loop memories as inbox notes.
+Location data stays on the Mac; the summary is counts and gaps, never
+coordinates or place names.
 
 A memory whose text begins with "@loop" (any case, optional colon) is a note
 to the loop written from inside the app: `--inbox DIR` files each new one
@@ -28,8 +18,7 @@ under DIR as inbox/<stamp>-memory<id>.md, remembering which ids were already
 delivered in DIR/.memories-seen. The memory itself is left untouched.
 
 Usage:
-    mymap.py                 pull everything and print a summary
-    mymap.py --summary       summary of what is already on disk, no network
+    mymap.py                 summary of what Maproom pulled
     mymap.py --inbox DIR     also file @loop memories into DIR
 """
 
@@ -38,70 +27,11 @@ import json
 import math
 import os
 import re
-import subprocess
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 
-TEAM = "7FWNAT83XU"
-CONTAINER = "iCloud.Prabhchintan.Randhawa"
 OUT_DIR = os.path.expanduser("~/Library/Application Support/randhawa-loop/map")
-
-
-def query(record_type):
-    """Every record of a type in the production private database."""
-    records = []
-    token = None
-    while True:
-        cmd = ["xcrun", "cktool", "query-records", "--team-id", TEAM, "--container-id", CONTAINER,
-               "--environment", "production", "--database-type", "private", "--zone-name", "SpaceTime",
-               "--record-type", record_type, "--limit", "200"]
-        if token:
-            cmd += ["--continuation-token", token]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise SystemExit(f"cktool failed: {result.stderr.strip() or result.stdout.strip()}")
-        page = json.loads(result.stdout)
-        records.extend(page.get("records", []))
-        token = page.get("continuationToken")
-        if not token:
-            return records
-
-
-def moment_from(record):
-    fields = record["fields"]
-    return {
-        "id": record["recordName"].removeprefix("moment-"),
-        "latitude": fields["latitude"]["value"],
-        "longitude": fields["longitude"]["value"],
-        "date": fields["date"]["value"],
-    }
-
-
-def memory_from(record):
-    fields = record["fields"]
-    def value(name):
-        return fields.get(name, {}).get("value")
-    return {
-        "id": record["recordName"].removeprefix("memory-"),
-        "date": value("date"),
-        "latitude": value("latitude"),
-        "longitude": value("longitude"),
-        "placeName": value("placeName"),
-        "text": value("text") or "",
-        "hasPhoto": "photo" in fields,
-    }
-
-
-def pull():
-    os.makedirs(OUT_DIR, exist_ok=True)
-    moments = sorted((moment_from(r) for r in query("Moment")), key=lambda m: m["date"])
-    memories = sorted((memory_from(r) for r in query("Memory")), key=lambda m: m["date"] or "")
-    with open(os.path.join(OUT_DIR, "moments.json"), "w") as handle:
-        json.dump({"pulledAt": datetime.now(timezone.utc).isoformat(), "moments": moments}, handle, indent=1)
-    with open(os.path.join(OUT_DIR, "memories.json"), "w") as handle:
-        json.dump({"pulledAt": datetime.now(timezone.utc).isoformat(), "memories": memories}, handle, indent=1)
-    return moments, memories
 
 
 def load():
@@ -184,11 +114,13 @@ def file_notes(memories, inbox_dir):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--summary", action="store_true", help="summarise what is on disk, do not pull")
     parser.add_argument("--days", type=int, default=7)
     parser.add_argument("--inbox", default=None, help="file @loop memories into this directory")
     args = parser.parse_args(argv)
-    moments, memories = load() if args.summary else pull()
+    try:
+        moments, memories = load()
+    except FileNotFoundError:
+        raise SystemExit("no map on disk; Maproom has not run here (scripts/maproom.sh)")
     print(summary(moments, memories, days=args.days))
     if args.inbox:
         written = file_notes(memories, args.inbox)
