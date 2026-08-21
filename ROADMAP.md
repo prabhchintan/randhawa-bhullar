@@ -72,7 +72,8 @@ item is written so a session can tell when it is done.
    half of the loop); the maintainer's own address is what the loop treats
    as its private inbox. Copy stays quiet, one menu line. Done when it ships
    in both apps and the maintainer's first note through it arrives. Shipped
-   2026-08-19 (Randhawa 3.3, Bhullar 2.3); still waiting on his first note.
+   2026-08-19 (Randhawa 3.3, Bhullar 2.3); his first note arrived 2026-08-21.
+   Done.
 3. **One voice for the mail.** The site's Pulse worker already writes to the
    maintainer about visitors; the loop now writes from the same worker in a
    different voice. Give them one template, one sender family and one
