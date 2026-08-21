@@ -109,11 +109,19 @@ inside scope (write a report anyway and say what stopped you).
    lifts that line to the top in colour, so the rest of the bullets must
    never mention what he should do; they say what happened and the one
    number that mattered, and for each item done, one word for its tempo:
-   "live" or "Wednesday". Then the long version: the numbers (counts only), what you
-   observed, what you decided and why, the standing questions in one line
-   each, and which inbox files you acted on. Commit and push the private
-   repository (`git -C $LOOP_PRIVATE push`). On a day with none of the above,
-   write no report; the transcript is enough.
+   "live" or "Wednesday". The mailed message is normally exactly these
+   bullets and nothing else: `scripts/loopmail.py send` drops any Details
+   link into the private repo before it reaches him, since that 404s
+   unless he happens to be logged into GitHub in whatever browser opened
+   the mail. So if a "For you" line asks for a real decision, put the
+   actual choices in that bullet itself, as few words as possible, rather
+   than "see below" or "read the note" pointing at content only the long
+   version has. Then the
+   long version: the numbers (counts only), what you observed, what you
+   decided and why, the standing questions in one line each, and which
+   inbox files you acted on. Commit and push the private repository
+   (`git -C $LOOP_PRIVATE push`). On a day with none of the above, write no
+   report; the transcript is enough.
 
 Rules of the road: never install anything on the maintainer's devices; never
 touch the website; never widen the trail's five constraints; never add

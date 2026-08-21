@@ -121,7 +121,15 @@ def main(argv=None):
         body = {"subject": args.subject, "kind": args.kind, "lines": lines}
         if args.title:
             body["title"] = args.title
-        if args.details:
+        # randhawa-loop is private: a link into it 404s for anyone not already
+        # signed into GitHub as an authorized viewer in whatever browser opens
+        # the mail, which is not guaranteed even for the maintainer himself.
+        # Found 2026-08-21: he clicked Details on a report with a real
+        # question in it and never saw the question. Drop it rather than mail
+        # a link that cannot be opened.
+        if args.details and "github.com/prabhchintan/randhawa-loop" in args.details:
+            print("dropping --details, it points at the private repo and would 404", file=sys.stderr)
+        elif args.details:
             body["details"] = args.details
         if args.footer:
             body["footer"] = args.footer
