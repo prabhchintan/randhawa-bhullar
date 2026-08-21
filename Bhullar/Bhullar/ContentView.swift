@@ -64,7 +64,14 @@ struct ContentView: View {
                 }
             }
         }
-        .padding(28)
+        .padding(.horizontal, 28)
+        .padding(.bottom, 28)
+        // Extra clearance up top, not just 28: the envelope button in the
+        // topTrailing overlay below reaches about 58pt in from the corner,
+        // and at the finer scales (hours, minutes) the grid tiles edge to
+        // edge with no natural gutter, so a plain 28 let it draw right under
+        // the button.
+        .padding(.top, 64)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
         // Swiping is the zoom now, which leaves the tap free to mean "open
