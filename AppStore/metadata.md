@@ -1,10 +1,10 @@
-# Randhawa, App Store listing (v3.3)
+# Randhawa, App Store listing (v3.4)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
 App Review notes sections of this file and pushes them to App Store Connect;
-What's New comes from `whatsnew-3.3.md`. Everything here is truthful about
+What's New comes from `whatsnew-3.4.md`. Everything here is truthful about
 the app: location on-device, iCloud sync optional and private, no data
-reaches us. The v3.2 copy this replaces is in git history; v1 is archived at
+reaches us. The v3.3 copy this replaces is in git history; v1 is archived at
 Archive/metadata-v1.md.
 
 ---
@@ -48,12 +48,22 @@ Private by architecture, not by promise:
 
 Randhawa cannot be rushed and cannot be faked. It simply gets better the longer you live with it. Carry it wherever you go, and watch your map appear.
 
-## What's New (from AppStore/whatsnew-3.3.md)
+## What's New (from AppStore/whatsnew-3.4.md)
 
 ## App Review notes (Review Information → Notes)
 Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
+
+NEW IN 3.4: two additions to a memory's own screen. First, when a memory has
+a photo, VNClassifyImageRequest (Apple's built-in Vision classifier) guesses
+a tag or two for it entirely on device; the guess is stored locally, is never
+part of the CloudKit record, and never leaves the phone. Second, a share
+button on the memory's detail view hands its photo, a plain-text caption, and
+one App Store link to the standard system share sheet (UIActivityViewController);
+this is the same peer-to-peer hand-off as any other share button on iOS, with
+no server of ours in between. Neither addition requests a new permission or
+changes the privacy label.
 
 NEW IN 3.3: "Write to the makers" in the "..." menu opens the standard system
 mail sheet, addressed to us. No new permission, no change to the privacy
@@ -159,11 +169,13 @@ submitting version 2.2 alongside this one.
 
 ---
 
-## Pre-submit checklist (v3.3)
-- [x] CloudKit: no schema change in 3.3, so no Production deploy gates this
+## Pre-submit checklist (v3.4)
+- [x] CloudKit: no schema change in 3.4 (tags are local only, never in the
+      CloudKit record), so no Production deploy gates this
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected, hosted privacy/support pages untouched
-- [x] Screenshots unchanged: nothing in the curated set shows the "..." menu
-- [ ] Build 3.3 archived and uploaded to App Store Connect
+- [x] Screenshots unchanged: nothing in the curated set shows the memory
+      detail view's toolbar or tags
+- [ ] Build 3.4 archived and uploaded to App Store Connect
 - [ ] `scripts/asc.py release ... --submit` run for Randhawa, then Bhullar,
       in the same sitting

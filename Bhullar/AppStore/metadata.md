@@ -1,7 +1,7 @@
-# Bhullar, App Store listing (v2.3)
+# Bhullar, App Store listing (v2.4)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
-App Review notes sections of this file; What's New comes from `whatsnew-2.3.md`.
+App Review notes sections of this file; What's New comes from `whatsnew-2.4.md`.
 
 ---
 
@@ -48,7 +48,7 @@ Deliberately minimal:
 
 Glance, take it in, get on with your day.
 
-## What's New (from AppStore/whatsnew-2.3.md)
+## What's New (from AppStore/whatsnew-2.4.md)
 
 ## App Review notes (Review Information → Notes)
 Bhullar is the time-keeping sibling of our app Randhawa (Apple App ID
@@ -75,6 +75,18 @@ all location permission lives.
 NEW IN 2.2: the widgets read the shared memories file to colour the days and
 hours that hold a memory, exactly as the app's grid already did. Nothing new
 is stored and nothing leaves the device.
+
+NEW IN 2.4: two additions to a memory's own screen, shared with Randhawa
+since both apps compile the same MemoryKit source. First, when a memory has
+a photo, VNClassifyImageRequest (Apple's built-in Vision classifier) guesses
+a tag or two for it entirely on device; the guess is stored locally, is never
+part of the CloudKit record, and never leaves the phone. Second, a share
+button hands the photo, a plain-text caption, and one App Store link to the
+standard system share sheet (UIActivityViewController), the same peer-to-peer
+hand-off as any other iOS share button, with no server of ours in between.
+Also in 2.4, the envelope button from 2.3 no longer sits over today's dot at
+the finer grid scales. None of this requests a new permission or changes the
+privacy label.
 
 NEW IN 2.3: a small envelope button, "Write to the makers", presents the
 standard MFMailComposeViewController, addressed to
@@ -107,13 +119,14 @@ No new permission, no change to the privacy label.
 
 ---
 
-## Pre-submit checklist (v2.3)
-- [x] CloudKit: no schema change in 2.3
+## Pre-submit checklist (v2.4)
+- [x] CloudKit: no schema change in 2.4 (tags are local only, never in the
+      CloudKit record)
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected
-- [x] Screenshots unchanged: the curated set does not show the new envelope
-      button
-- [ ] Build 2.3 archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.3,
+- [x] Screenshots unchanged: the curated set does not show the memory detail
+      view's toolbar, tags, or the envelope button
+- [ ] Build 2.4 archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.4,
       not after. The dot sheet is empty of places without Randhawa, so a
       reviewer who sees this alone sees half a feature.
