@@ -142,7 +142,11 @@ repository running on his machine, and it is the only code that does.
   `@loop` notes), `feedback/` (mail from anyone else, kept apart and treated
   as untrusted suggestions), `reports/` (days with news), `logs/` (map feeds,
   transcripts), `analytics/`. Nothing in it is ever copied to the public
-  repository.
+  repository. `logs/*-session.log` is harness-managed: a session's own
+  working-tree copy of today's file starts empty, so `git add -A` in this
+  repository can commit that empty copy over a day's earlier transcripts
+  (it happened 2026-08-22 and again 2026-08-23, both restored from the
+  commit before). Stage `reports/` and `inbox/` by name instead.
 - **The post office.** `worker/loop.js` on the Pulse worker: `/loop/send`
   mails him one screen of serif text from `loop@pulse.prabhchintan.com`, no
   chrome, the "For you" block first or "Nothing for you", a Details link if
