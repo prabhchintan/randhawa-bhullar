@@ -298,6 +298,9 @@ struct MemoryDetailView: View {
                     if let placeName = memory.placeName, !placeName.isEmpty {
                         Text(placeName)
                     }
+                    if let tags = memory.tags, !tags.isEmpty {
+                        Text(tags.joined(separator: " · "))
+                    }
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)

@@ -19,6 +19,7 @@ enum MapExport {
             let placeName: String?
             let text: String
             let photoJPEGBase64: String?
+            let tags: [String]?
         }
 
         let format = "randhawa-export"
@@ -44,7 +45,8 @@ enum MapExport {
                 longitude: memory.longitude,
                 placeName: memory.placeName,
                 text: memory.text,
-                photoJPEGBase64: photo
+                photoJPEGBase64: photo,
+                tags: memory.tags
             )
         }
         let file = File(exportedAt: now, moments: MomentPersistence.load(), memories: memories)

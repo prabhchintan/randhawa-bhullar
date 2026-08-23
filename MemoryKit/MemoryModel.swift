@@ -11,6 +11,12 @@ struct Memory: Codable, Equatable, Identifiable {
     var placeName: String?
     var text: String
     var photoFileName: String?
+    /// What the photo shows, guessed on-device from the built-in image
+    /// classifier. Local only, like a moment's source: nothing downstream of
+    /// sync needs it, and keeping it out of the CloudKit record means it
+    /// never needs a schema deploy. Absent means no photo, or a guess below
+    /// the confidence floor.
+    var tags: [String]?
 
     init(
         id: UUID = UUID(),
@@ -19,7 +25,8 @@ struct Memory: Codable, Equatable, Identifiable {
         longitude: Double? = nil,
         placeName: String? = nil,
         text: String,
-        photoFileName: String? = nil
+        photoFileName: String? = nil,
+        tags: [String]? = nil
     ) {
         self.id = id
         self.date = date
@@ -28,6 +35,7 @@ struct Memory: Codable, Equatable, Identifiable {
         self.placeName = placeName
         self.text = text
         self.photoFileName = photoFileName
+        self.tags = tags
     }
 
     var hasLocation: Bool { latitude != nil && longitude != nil }

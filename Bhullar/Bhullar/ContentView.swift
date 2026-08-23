@@ -116,7 +116,13 @@ struct ContentView: View {
                 prompt: "What is worth remembering right now?",
                 contextLine: "Pinned to this moment. If you also use Randhawa, memories made there carry their place.",
                 onSave: { text, photoData in
-                    memoryStore.add(text: text, photoData: photoData)
+                    let memory = memoryStore.add(text: text, photoData: photoData)
+                    if let photoData {
+                        Task {
+                            let tags = await MemoryStore.classify(photoData)
+                            MemoryStore.shared.setTags(tags, for: memory.id)
+                        }
+                    }
                 }
             )
             .presentationDetents([.medium, .large])

@@ -1,6 +1,8 @@
 import Foundation
 import Combine
 import WidgetKit
+import Vision
+import UIKit
 
 /// The in-memory source of truth for memories inside each app. It owns the
 /// shared file and photo folder, tells CloudSync about local edits, and
@@ -67,6 +69,29 @@ final class MemoryStore: ObservableObject {
         memories[index].placeName = placeName
         persist()
         CloudSync.shared?.memoryChanged(id)
+    }
+
+    /// On-device classification finishes after the save; fill the tags in
+    /// when it does. Not synced: tags are not part of the CloudKit record.
+    func setTags(_ tags: [String], for id: UUID) {
+        guard !tags.isEmpty, let index = memories.firstIndex(where: { $0.id == id }) else { return }
+        memories[index].tags = tags
+        persist()
+    }
+
+    /// Guesses what a photo shows using Apple's built-in image classifier,
+    /// entirely on the phone: no network call, no third party, nothing to
+    /// declare in the privacy label. Runs off the main actor since Vision
+    /// does its work synchronously.
+    nonisolated static func classify(_ photoData: Data, confidence: Float = 0.6, limit: Int = 3) async -> [String] {
+        guard let cgImage = UIImage(data: photoData)?.cgImage else { return [] }
+        let request = VNClassifyImageRequest()
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        guard (try? handler.perform([request])) != nil, let observations = request.results else { return [] }
+        return observations
+            .filter { $0.confidence >= confidence }
+            .prefix(limit)
+            .map { $0.identifier.replacingOccurrences(of: "_", with: " ") }
     }
 
     func delete(_ memory: Memory) {

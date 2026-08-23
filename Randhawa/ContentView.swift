@@ -305,6 +305,12 @@ struct ContentView: View {
             placeName: target.placeName,
             photoData: photoData
         )
+        if let photoData {
+            Task {
+                let tags = await MemoryStore.classify(photoData)
+                MemoryStore.shared.setTags(tags, for: memory.id)
+            }
+        }
         guard target.placeName == nil, let latitude = target.latitude, let longitude = target.longitude else { return }
         // Name the place while it is fresh; the name syncs along with the memory.
         PlaceNames.shared.lookup(CLLocationCoordinate2D(latitude: latitude, longitude: longitude)) { name in
