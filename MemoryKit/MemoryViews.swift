@@ -360,5 +360,12 @@ struct MemoryDetailView: View {
         return lines.joined(separator: "\n")
     }
 
-    private static let appStoreURL = URL(string: "https://apps.apple.com/app/id6742061604")!
+    /// Each app links to its own App Store page, not the other one's; this
+    /// file is compiled into both, so the choice is made at runtime from
+    /// which app is actually running.
+    private static let appStoreURL: URL = {
+        let randhawa = URL(string: "https://apps.apple.com/app/id6742061604")!
+        let bhullar = URL(string: "https://apps.apple.com/app/id6787122959")!
+        return Bundle.main.bundleIdentifier == "Prabhchintan.Bhullar" ? bhullar : randhawa
+    }()
 }
