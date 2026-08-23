@@ -59,16 +59,20 @@ themselves:
 
 ## The shipping gate
 
-The loop runs twice a week; the App Store does not want an update every
-run, and Apple allows one submission in review per app at a time. So a
-session ships only when all four hold: it is the Wednesday run, so that a
-build reviewed midweek is on the maintainer's phone by the weekend and
-Sunday's run can read how it went; nothing is waiting for or in review for
-that app; at least three days have passed since that app's last submission;
-and the changes since then have user-visible value. A rejection or a crash
-fix is exempt from the first three. Everything else accumulates on main,
-from any session on any day, and ships when the gate opens. Sunday works,
-tunes and reports; it does not submit.
+The loop runs twice a week, and since the maintainer confirmed it on
+2026-08-23 (he had asked for this on 2026-08-22 and again on 2026-08-23),
+both runs may ship: Apple allows one submission in review per app at a
+time, but nothing about the App Store objects to a release every three or
+four days. So a session ships only when all four hold: today is Wednesday
+or Sunday, the loop's two scheduled days, so a review clock always starts
+on a day this repository is actually being read; nothing is waiting for or
+in review for that app; at least three days have passed since that app's
+last submission; and the changes since then have user-visible value. A
+rejection or a crash fix is exempt from the last three. Everything else
+accumulates on main, from any session on any day, and ships when the gate
+opens. A session that runs outside those two days from a mail reply builds
+and pushes but does not submit, so a review clock never starts on a day
+nobody is watching for it.
 
 ## What waits for the maintainer
 

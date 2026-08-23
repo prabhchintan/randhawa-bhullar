@@ -67,7 +67,8 @@ inside scope (write a report anyway and say what stopped you).
 
 3. Decide. Sort what the inbox asks for into the two tempos in LOOP.md:
    site and worker requests are done and deployed in this run; app requests
-   are built in this run and ship on Wednesday. Then pick zero to three
+   are built in this run and ship on the next Wednesday or Sunday, whichever
+   the gate opens for first. Then pick zero to three
    improvements inside LOOP.md scope: first whatever the inbox asks for, then the next open item of the loop's
    backlog in ROADMAP.md, informed by the feeds and the standing questions in
    LOOP.md. Zero is a fine answer on a quiet day. When you finish a backlog
@@ -83,13 +84,13 @@ inside scope (write a report anyway and say what stopped you).
    Commit and push the public repository whenever you have something that
    builds, release or not.
 
-5. Ship, or not. Ship only when all four hold: today is a Wednesday (`date
-   -u +%u` is 3); nothing is WAITING_FOR_REVIEW or IN_REVIEW for that app;
-   at least three days have passed since that app's last submission; and
-   the changes since the last submission have user-visible value. A
-   rejection or a crash fix is exempt from the first three. On any other
-   day, commit and push your work to main and leave the release for
-   Wednesday. Then bump
+5. Ship, or not. Ship only when all four hold: today is a Wednesday or a
+   Sunday (`date -u +%u` is 3 or 7); nothing is WAITING_FOR_REVIEW or
+   IN_REVIEW for that app; at least three days have passed since that
+   app's last submission; and the changes since the last submission have
+   user-visible value. A rejection or a crash fix is exempt from the last
+   three. On any other day, commit and push your work to main and leave
+   the release for the next Wednesday or Sunday. Then bump
    MARKETING_VERSION and CURRENT_PROJECT_VERSION for each app that changed
    (four places per project), write AppStore/whatsnew-<version>.md and update
    metadata.md, archive and upload as RELEASING.md describes (with the key
@@ -109,7 +110,8 @@ inside scope (write a report anyway and say what stopped you).
    lifts that line to the top in colour, so the rest of the bullets must
    never mention what he should do; they say what happened and the one
    number that mattered, and for each item done, one word for its tempo:
-   "live" or "Wednesday". The mailed message is normally exactly these
+   "live", or the day it ships next ("Wednesday" or "Sunday"). The mailed
+   message is normally exactly these
    bullets and nothing else: `scripts/loopmail.py send` drops any Details
    link into the private repo before it reaches him, since that 404s
    unless he happens to be logged into GitHub in whatever browser opened
