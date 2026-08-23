@@ -2,6 +2,19 @@ import SwiftUI
 import PhotosUI
 import UIKit
 
+/// The system share sheet, for handing something to AirDrop, Messages, or Mail.
+/// Shared by both apps; Randhawa's map export and a memory's own share button
+/// both drive it.
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+}
+
 /// Shared photo handling: memories keep a reasonably sized JPEG, not the
 /// original, so the store and iCloud stay light.
 enum MemoryPhoto {
@@ -278,6 +291,7 @@ struct MemoryRow: View {
 struct MemoryDetailView: View {
     let memory: Memory
     let photoURL: URL?
+    @State private var sharing = false
 
     var body: some View {
         ScrollView {
@@ -309,5 +323,42 @@ struct MemoryDetailView: View {
         }
         .navigationTitle("Memory")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    sharing = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+        }
+        .sheet(isPresented: $sharing) {
+            ShareSheet(items: shareItems)
+                .presentationDetents([.medium, .large])
+        }
     }
+
+    /// The photo (if any) and a plain-text caption, so the recipient sees the
+    /// memory itself, not a link to a page we would have to host. One App
+    /// Store link, Apple's own preview does the rest; peer to peer, nothing
+    /// of ours in between.
+    private var shareItems: [Any] {
+        var items: [Any] = [shareCaption]
+        if let photoURL, let image = UIImage(contentsOfFile: photoURL.path) {
+            items.append(image)
+        }
+        items.append(MemoryDetailView.appStoreURL)
+        return items
+    }
+
+    private var shareCaption: String {
+        var lines: [String] = []
+        if !memory.text.isEmpty { lines.append(memory.text) }
+        var meta = memory.date.formatted(date: .abbreviated, time: .shortened)
+        if let placeName = memory.placeName, !placeName.isEmpty { meta += " · \(placeName)" }
+        lines.append(meta)
+        return lines.joined(separator: "\n")
+    }
+
+    private static let appStoreURL = URL(string: "https://apps.apple.com/app/id6742061604")!
 }

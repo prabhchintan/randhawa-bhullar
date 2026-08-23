@@ -61,17 +61,6 @@ enum MapExport {
     }
 }
 
-/// The system share sheet, for handing the export to AirDrop, Files, or Mail.
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
-}
-
 /// Wraps a URL so a sheet can be driven by `.sheet(item:)`.
 struct ShareItem: Identifiable {
     let url: URL
