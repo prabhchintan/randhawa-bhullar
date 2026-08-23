@@ -77,16 +77,13 @@ hours that hold a memory, exactly as the app's grid already did. Nothing new
 is stored and nothing leaves the device.
 
 NEW IN 2.4: two additions to a memory's own screen, shared with Randhawa
-since both apps compile the same MemoryKit source. First, when a memory has
-a photo, VNClassifyImageRequest (Apple's built-in Vision classifier) guesses
-a tag or two for it entirely on device; the guess is stored locally, is never
-part of the CloudKit record, and never leaves the phone. Second, a share
-button hands the photo, a plain-text caption, and one App Store link to the
-standard system share sheet (UIActivityViewController), the same peer-to-peer
-hand-off as any other iOS share button, with no server of ours in between.
-Also in 2.4, the envelope button from 2.3 no longer sits over today's dot at
-the finer grid scales. None of this requests a new permission or changes the
-privacy label.
+since both apps compile the same MemoryKit source. VNClassifyImageRequest
+(Apple's on-device Vision classifier) tags a memory's photo locally; the tag
+never leaves the phone and is never in the CloudKit record. A share button
+hands the photo, a caption, and one App Store link to the system share sheet,
+the same peer-to-peer hand-off as any other iOS share button. Also in 2.4,
+the envelope button from 2.3 no longer sits over today's dot at the finer
+grid scales. No new permission, no privacy label change.
 
 NEW IN 2.3: a small envelope button, "Write to the makers", presents the
 standard MFMailComposeViewController, addressed to

@@ -55,15 +55,12 @@ Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
 
-NEW IN 3.4: two additions to a memory's own screen. First, when a memory has
-a photo, VNClassifyImageRequest (Apple's built-in Vision classifier) guesses
-a tag or two for it entirely on device; the guess is stored locally, is never
-part of the CloudKit record, and never leaves the phone. Second, a share
-button on the memory's detail view hands its photo, a plain-text caption, and
-one App Store link to the standard system share sheet (UIActivityViewController);
-this is the same peer-to-peer hand-off as any other share button on iOS, with
-no server of ours in between. Neither addition requests a new permission or
-changes the privacy label.
+NEW IN 3.4: two additions to a memory's own screen. VNClassifyImageRequest
+(Apple's on-device Vision classifier) tags a memory's photo locally; the tag
+never leaves the phone and is never in the CloudKit record. A share button
+hands the photo, a caption, and one App Store link to the system share sheet,
+the same peer-to-peer hand-off as any other iOS share button. No new
+permission, no privacy label change.
 
 NEW IN 3.3: "Write to the makers" in the "..." menu opens the standard system
 mail sheet, addressed to us. No new permission, no change to the privacy
@@ -117,20 +114,6 @@ is.
 The hosted privacy policy at https://prabhchintan.com/randhawa/privacy has
 been updated for this release and describes the default-on trail, the two iOS
 prompts, and how to switch it off.
-
-ALSO IN 3.2
-
-The map is drawn as translucent ink (blots and lines) over a muted Apple Maps
-basemap; there is a slider between the map and a plain black background.
-Tapping a blot opens a sheet naming the place with CLGeocoder, the same Apple
-lookup used since 3.0 to name a memory's place. Users can write short notes
-("memories"), optionally with a photo chosen through the out-of-process
-system Photos picker or taken with the camera (NSCameraUsageDescription is
-present; the camera is used only when the user taps "Take a photo", and the
-photo is stored with the memory, not written to the photo library). The app
-shares its data on-device, through an App Group and the same private
-CloudKit container, with our companion app Bhullar (same developer), which is
-submitting version 2.2 alongside this one.
 
 ---
 
