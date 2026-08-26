@@ -33,8 +33,7 @@ them, and the rule that keeps that story quiet live in
   and constellation, blots and memories you can open, a place sheet that is
   the natural door to writing a memory, export of everything, and a widget
   drawn with the same ink.
-- Next: whatever the loop learns (see [LOOP.md](LOOP.md)); "on this
-  day" surfaced on the map, not only in the list.
+- Next: whatever the loop learns (see [LOOP.md](LOOP.md)).
 - Considering: iPad layouts that actually use the width; a quiet way to show
   the year's shape over time.
 - Resolved: clustering was O(moments x clumps) on the main thread; 3.1 gave
@@ -81,7 +80,9 @@ item is written so a session can tell when it is done.
    carry the site's numbers on Sundays if that proves useful. Not before 1
    and 2.
 4. **"On this day" on the map**, not only in the list (from the Randhawa
-   lane below).
+   lane below). Shipped 2026-08-26: a memory made on this calendar date in
+   an earlier year now wears an orange halo in the shared ink, on the map
+   and in the widget, the same set the list already sections off. Done.
 5. **Gold in Bhullar's Lock Screen accessories** and the year picker, from
    the Bhullar lane, when nothing above is open.
 

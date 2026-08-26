@@ -16,7 +16,9 @@ import UIKit
 ///   taken daily darkens like a place visited daily.
 /// - **Today**, since midnight, drawn on top in orange: the live stroke over
 ///   the sediment. The newest dot wears a white ring. Memories sit above
-///   everything, in gold.
+///   everything, in gold. A memory made on this calendar date in an earlier
+///   year, the same "on this day" set the list shows, wears an orange halo:
+///   the anniversary rendered as light, not just as a section header.
 ///
 /// Sizes are in screen points and every drawing routine takes a `unit`, the
 /// length of one screen point in the drawing's own coordinates. The widget
@@ -81,11 +83,15 @@ enum Ink {
         /// Threads restricted to today's moments, for the orange stroke.
         let todayThreads: [[CGPoint]]
         let memories: [CGPoint]
+        /// Memories made on this calendar date in a previous year: the map's
+        /// share of the same "on this day" set the list shows.
+        let anniversaries: [CGPoint]
         let newest: CGPoint?
         /// True when a thread stroke or blot could exist at all.
-        var isEmpty: Bool { blots.isEmpty && memories.isEmpty }
+        var isEmpty: Bool { blots.isEmpty && memories.isEmpty && anniversaries.isEmpty }
 
-        static let empty = Prepared(blots: [], threads: [], today: [], todayThreads: [], memories: [], newest: nil)
+        static let empty = Prepared(
+            blots: [], threads: [], today: [], todayThreads: [], memories: [], anniversaries: [], newest: nil)
     }
 
     /// Projects and groups the data. `project` maps a coordinate to the
@@ -116,13 +122,19 @@ enum Ink {
             }
         }
 
-        let placed = memories.filter(\.hasLocation).map { project($0.latitude ?? 0, $0.longitude ?? 0) }
+        let onThisDayIDs = memories.onThisDayIDs(now: now)
+        let placed = memories.filter(\.hasLocation)
+        let ordinary = placed.filter { !onThisDayIDs.contains($0.id) }
+            .map { project($0.latitude ?? 0, $0.longitude ?? 0) }
+        let anniversaries = placed.filter { onThisDayIDs.contains($0.id) }
+            .map { project($0.latitude ?? 0, $0.longitude ?? 0) }
         return Prepared(
             blots: blots,
             threads: threads,
             today: today,
             todayThreads: todayThreads,
-            memories: placed,
+            memories: ordinary,
+            anniversaries: anniversaries,
             newest: points.last
         )
     }
@@ -190,13 +202,27 @@ enum Ink {
         }
 
         // Memories: gold, ringed white, above the ink.
-        for point in prepared.memories where onScreen(point) {
+        func drawMemory(_ point: CGPoint) {
             let rect = circle(point, 4.5 * unit)
             context.setFillColor(palette.memory)
             context.fillEllipse(in: rect)
             context.setStrokeColor(palette.ring)
             context.setLineWidth(1.5 * unit)
             context.strokeEllipse(in: rect.insetBy(dx: 0.75 * unit, dy: 0.75 * unit))
+        }
+        for point in prepared.memories where onScreen(point) {
+            drawMemory(point)
+        }
+
+        // Anniversaries: the same gold dot, with an orange halo underneath so
+        // "on this day" reads on the map, not only in the list.
+        context.setStrokeColor(palette.today.copy(alpha: 0.55) ?? palette.today)
+        context.setLineWidth(1.6 * unit)
+        for point in prepared.anniversaries where onScreen(point) {
+            context.strokeEllipse(in: circle(point, 8 * unit))
+        }
+        for point in prepared.anniversaries where onScreen(point) {
+            drawMemory(point)
         }
 
         // The newest moment: where you are, or were last.
