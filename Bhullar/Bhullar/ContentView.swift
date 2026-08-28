@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var showingMemories = false
     @State private var showingMailComposer = false
     @State private var opened: OpenedDot?
+    @State private var justSaved: Memory?
 
     /// Randhawa's moments, read once when the app comes forward rather than
     /// again on every dot tapped. Bhullar never writes them, so a snapshot per
@@ -117,6 +118,11 @@ struct ContentView: View {
                 contextLine: "Pinned to this moment. If you also use Randhawa, memories made there carry their place.",
                 onSave: { text, photoData in
                     let memory = memoryStore.add(text: text, photoData: photoData)
+                    // Saving used to leave you back at the grid with nothing
+                    // to point at: the only way back to it was a menu that
+                    // stayed hidden until a memory already existed. Open the
+                    // memory the moment it is written.
+                    justSaved = memory
                     if let photoData {
                         Task {
                             let tags = await MemoryStore.classify(photoData)
@@ -135,6 +141,17 @@ struct ContentView: View {
         }
         .sheet(item: $opened) { dot in
             DotDetailSheet(dot: dot, store: memoryStore, moments: moments)
+        }
+        .sheet(item: $justSaved) { memory in
+            NavigationStack {
+                MemoryDetailView(memory: memory, photoURL: memoryStore.photoURL(for: memory))
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { justSaved = nil }
+                        }
+                    }
+            }
+            .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showingMailComposer) {
             MailComposerSheet()

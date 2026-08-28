@@ -305,6 +305,11 @@ struct ContentView: View {
             placeName: target.placeName,
             photoData: photoData
         )
+        // Saving used to hand back nothing but a dot on the map, and a
+        // memory with no location made no dot at all: the only way back to
+        // it was a menu nobody had reason to open yet. Open the memory the
+        // moment it is written, the same view a tap on its blot opens later.
+        openedMemory = memory
         if let photoData {
             Task {
                 let tags = await MemoryStore.classify(photoData)
