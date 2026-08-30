@@ -14,6 +14,12 @@ final class PlaceNames: ObservableObject {
 
     private let geocoder = CLGeocoder()
     private var inFlight: [String: [(String?) -> Void]] = [:]
+    /// CLGeocoder cancels whatever it is already doing the moment a second
+    /// request starts on the same instance, so a screen that fires several
+    /// lookups at once (one per row, all on appear) left every row but the
+    /// last stuck on its placeholder forever. Queue them one at a time instead.
+    private var queue: [(key: String, coordinate: CLLocationCoordinate2D)] = []
+    private var geocoding = false
 
     /// Roughly 100 metres of latitude per key, so two dots in the same block
     /// share one lookup.
@@ -44,10 +50,20 @@ final class PlaceNames: ObservableObject {
             return
         }
         inFlight[cacheKey] = [completion]
-        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        queue.append((cacheKey, coordinate))
+        geocodeNext()
+    }
+
+    private func geocodeNext() {
+        guard !geocoding, let next = queue.first else { return }
+        geocoding = true
+        queue.removeFirst()
+        let cacheKey = next.key
+        let location = CLLocation(latitude: next.coordinate.latitude, longitude: next.coordinate.longitude)
         geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
             Task { @MainActor in
                 guard let self else { return }
+                self.geocoding = false
                 let waiting = self.inFlight.removeValue(forKey: cacheKey) ?? []
                 var name: String?
                 if let placemark = placemarks?.first {
@@ -62,6 +78,7 @@ final class PlaceNames: ObservableObject {
                 for callback in waiting {
                     callback(name)
                 }
+                self.geocodeNext()
             }
         }
     }
