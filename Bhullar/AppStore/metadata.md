@@ -127,6 +127,6 @@ No new permission, no change to the privacy label.
       Not Collected
 - [x] Screenshots unchanged: the curated set does not show the new sheet's
       auto-open moment, only the same detail view already shown elsewhere
-- [ ] Build 2.5 (10) archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.5
+- [x] Build 2.5 (10) archived and uploaded to App Store Connect
+- [x] `scripts/asc.py release ... --submit` run together with Randhawa 3.5
       (19), since both carry the same open-on-save fix

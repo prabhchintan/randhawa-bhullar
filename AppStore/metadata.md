@@ -55,13 +55,11 @@ Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
 
-NEW IN 3.5 (19): saving a memory now opens it immediately, in the same detail
-view a tap on a map blot already opens. No new data, no new permission.
-
-NEW IN 3.5 (18): a memory made on this calendar date in an earlier year, the
-same "on this day" set the memory list already sections off, now wears a
-second ring on the map and in the widget. No new data, no new permission,
-drawn from fields already on device.
+NEW IN 3.5: saving a memory now opens it immediately, in the same detail
+view a tap on a map blot already opens. Also in 3.5, a memory made on this
+calendar date in an earlier year wears a second ring on the map and in the
+widget, the same "on this day" set the memory list already sections off. No
+new data, no new permission, both drawn from fields already on device.
 
 NEW IN 3.4: two additions to a memory's own screen. VNClassifyImageRequest
 (Apple's on-device Vision classifier) tags a memory's photo locally; the tag
@@ -168,6 +166,6 @@ prompts, and how to switch it off.
 - [x] Screenshots unchanged: the curated set has no memory dated to the
       screenshot script's own "today", so the halo does not appear in it;
       open-on-save reuses the existing memory detail view, already shown
-- [ ] Build 19 archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Bhullar 2.5,
+- [x] Build 19 archived and uploaded to App Store Connect
+- [x] `scripts/asc.py release ... --submit` run together with Bhullar 2.5,
       since both carry the same open-on-save fix
