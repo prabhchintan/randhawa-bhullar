@@ -55,10 +55,13 @@ Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
 
-NEW IN 3.5: a memory made on this calendar date in an earlier year, the same
-"on this day" set the memory list already sections off, now wears a second
-ring on the map and in the widget. No new data, no new permission, drawn
-from fields already on device.
+NEW IN 3.5 (19): saving a memory now opens it immediately, in the same detail
+view a tap on a map blot already opens. No new data, no new permission.
+
+NEW IN 3.5 (18): a memory made on this calendar date in an earlier year, the
+same "on this day" set the memory list already sections off, now wears a
+second ring on the map and in the widget. No new data, no new permission,
+drawn from fields already on device.
 
 NEW IN 3.4: two additions to a memory's own screen. VNClassifyImageRequest
 (Apple's on-device Vision classifier) tags a memory's photo locally; the tag
@@ -157,14 +160,14 @@ prompts, and how to switch it off.
 
 ---
 
-## Pre-submit checklist (v3.5)
-- [x] CloudKit: no schema change in 3.5 (the halo is drawn from a memory's
-      existing date and location, nothing new is stored), so no Production
-      deploy gates this
+## Pre-submit checklist (v3.5, build 19)
+- [x] CloudKit: no schema change in 3.5 (the halo and the open-on-save both
+      draw from fields already on device), so no Production deploy gates this
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected, hosted privacy/support pages untouched
 - [x] Screenshots unchanged: the curated set has no memory dated to the
-      screenshot script's own "today", so the halo does not appear in it
-- [ ] Build 3.5 archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run for Randhawa (Bhullar has no
-      changes to ship this run)
+      screenshot script's own "today", so the halo does not appear in it;
+      open-on-save reuses the existing memory detail view, already shown
+- [ ] Build 19 archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run together with Bhullar 2.5,
+      since both carry the same open-on-save fix

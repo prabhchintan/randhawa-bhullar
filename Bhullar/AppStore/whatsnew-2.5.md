@@ -1,0 +1,1 @@
+Save a memory and it now opens itself, so you can see what you just kept.

@@ -1,7 +1,7 @@
-# Bhullar, App Store listing (v2.4)
+# Bhullar, App Store listing (v2.5)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
-App Review notes sections of this file; What's New comes from `whatsnew-2.4.md`.
+App Review notes sections of this file; What's New comes from `whatsnew-2.5.md`.
 
 ---
 
@@ -48,7 +48,7 @@ Deliberately minimal:
 
 Glance, take it in, get on with your day.
 
-## What's New (from AppStore/whatsnew-2.4.md)
+## What's New (from AppStore/whatsnew-2.5.md)
 
 ## App Review notes (Review Information → Notes)
 Bhullar is the time-keeping sibling of our app Randhawa (Apple App ID
@@ -71,6 +71,10 @@ share, and turns their coordinates into place names with CLGeocoder, the same
 Apple lookup both apps have always used to name a memory's place. Randhawa
 3.2, submitted alongside this, is where those moments are gathered and where
 all location permission lives.
+
+NEW IN 2.5: saving a memory now opens it immediately, in a new detail sheet
+peer to the one a time span's own dot already opens. No new data, no new
+permission.
 
 NEW IN 2.2: the widgets read the shared memories file to colour the days and
 hours that hold a memory, exactly as the app's grid already did. Nothing new
@@ -116,14 +120,13 @@ No new permission, no change to the privacy label.
 
 ---
 
-## Pre-submit checklist (v2.4)
-- [x] CloudKit: no schema change in 2.4 (tags are local only, never in the
-      CloudKit record)
+## Pre-submit checklist (v2.5)
+- [x] CloudKit: no schema change in 2.5 (open-on-save draws from a memory's
+      existing fields, nothing new is stored)
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected
-- [x] Screenshots unchanged: the curated set does not show the memory detail
-      view's toolbar, tags, or the envelope button
-- [ ] Build 2.4 archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.4,
-      not after. The dot sheet is empty of places without Randhawa, so a
-      reviewer who sees this alone sees half a feature.
+- [x] Screenshots unchanged: the curated set does not show the new sheet's
+      auto-open moment, only the same detail view already shown elsewhere
+- [ ] Build 2.5 (10) archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.5
+      (19), since both carry the same open-on-save fix
