@@ -26,8 +26,9 @@ Where things are:
   "$ASC_ISSUER_ID"`.
 - Mail: `python3 scripts/loopmail.py` (LOOP_SECRET is set). You do not need
   to send anything yourself: if you write $LOOP_PRIVATE/reports/YYYY-MM-DD.md
-  with a `## Short version`, the workflow mails its bullets to the maintainer
-  after you finish; if you write no report, he hears nothing today.
+  with a `## Short version`, the workflow hands its bullets to chintan, the
+  maintainer's delegate, after you finish, and chintan tells him what he
+  needs; if you write no report, nothing goes out today.
 - The website (github.com/prabhchintan/prabhchintan.com, private) is checked
   out at $SITE with push rights over SSH, its Python requirements installed,
   and CLOUDFLARE_API_TOKEN set for `npx wrangler` in $SITE/worker. Read

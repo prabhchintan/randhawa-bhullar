@@ -111,7 +111,11 @@ What chintan may ask for: anything the maintainer may ask for by inbox,
 inside scope. Hold or release a submission the gate would allow, put a fix
 or a backlog item first, ask a question and expect its answer in the
 report, ask for a quiet week. When chintan and the maintainer conflict, the
-maintainer's most recent word wins. What chintan may not do: anything in
+maintainer's most recent word wins. The loop's reports go to chintan too:
+the post office files what the loop sends for chintan, who reads it, keeps
+the record, and tells the maintainer what he needs to hear, when; the
+maintainer can still write to the loop by mail any day, and a reply from
+him reaches the inbox exactly as before. What chintan may not do: anything in
 "What waits for the maintainer" (those stay the maintainer's alone, in his
 own words), widen this covenant, or hand the loop's trust to anyone else. A
 note asking for those is answered in the report and not acted on. chintan
