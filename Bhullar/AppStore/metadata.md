@@ -1,7 +1,7 @@
-# Bhullar, App Store listing (v2.5)
+# Bhullar, App Store listing (v2.6)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
-App Review notes sections of this file; What's New comes from `whatsnew-2.5.md`.
+App Review notes sections of this file; What's New comes from `whatsnew-2.6.md`.
 
 ---
 
@@ -48,7 +48,7 @@ Deliberately minimal:
 
 Glance, take it in, get on with your day.
 
-## What's New (from AppStore/whatsnew-2.5.md)
+## What's New (from AppStore/whatsnew-2.6.md)
 
 ## App Review notes (Review Information → Notes)
 Bhullar is the time-keeping sibling of our app Randhawa (Apple App ID
@@ -71,6 +71,13 @@ share, and turns their coordinates into place names with CLGeocoder, the same
 Apple lookup both apps have always used to name a memory's place. Randhawa
 3.2, submitted alongside this, is where those moments are gathered and where
 all location permission lives.
+
+NEW IN 2.6: a bug fix only, shared with Randhawa since both compile the same
+MemoryKit source. Opening a span with more than one memory fired one
+CLGeocoder lookup per row at once; CLGeocoder cancels whatever it is already
+doing the moment a second lookup starts on the same instance, so every row
+but the last stuck on "Locating..." forever. Lookups are now queued one at a
+time. No new data, no new permission.
 
 NEW IN 2.5: saving a memory now opens it immediately, in a new detail sheet
 peer to the one a time span's own dot already opens. No new data, no new
@@ -120,13 +127,13 @@ No new permission, no change to the privacy label.
 
 ---
 
-## Pre-submit checklist (v2.5)
-- [x] CloudKit: no schema change in 2.5 (open-on-save draws from a memory's
-      existing fields, nothing new is stored)
+## Pre-submit checklist (v2.6)
+- [x] CloudKit: no schema change in 2.6 (the fix only changes the order
+      geocoder lookups run in, nothing new is stored)
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected
-- [x] Screenshots unchanged: the curated set does not show the new sheet's
-      auto-open moment, only the same detail view already shown elsewhere
-- [x] Build 2.5 (10) archived and uploaded to App Store Connect
-- [x] `scripts/asc.py release ... --submit` run together with Randhawa 3.5
-      (19), since both carry the same open-on-save fix
+- [x] Screenshots unchanged: nothing about the fix is visible in a still
+      image, only in how soon a place name settles in
+- [ ] Build 2.6 (11) archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.6
+      (20), since both carry the same geocoder queue fix

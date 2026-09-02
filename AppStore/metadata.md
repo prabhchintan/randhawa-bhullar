@@ -1,10 +1,10 @@
-# Randhawa, App Store listing (v3.5)
+# Randhawa, App Store listing (v3.6)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
 App Review notes sections of this file and pushes them to App Store Connect;
-What's New comes from `whatsnew-3.5.md`. Everything here is truthful about
+What's New comes from `whatsnew-3.6.md`. Everything here is truthful about
 the app: location on-device, iCloud sync optional and private, no data
-reaches us. The v3.4 copy this replaces is in git history; v1 is archived at
+reaches us. The v3.5 copy this replaces is in git history; v1 is archived at
 Archive/metadata-v1.md.
 
 ---
@@ -48,12 +48,18 @@ Private by architecture, not by promise:
 
 Randhawa cannot be rushed and cannot be faked. It simply gets better the longer you live with it. Carry it wherever you go, and watch your map appear.
 
-## What's New (from AppStore/whatsnew-3.5.md)
+## What's New (from AppStore/whatsnew-3.6.md)
 
 ## App Review notes (Review Information → Notes)
 Location is used for exactly one purpose in this app: placing dots on a
 personal map that only the user can see. There is no other use, no third
 party, and no transmission to us.
+
+NEW IN 3.6: a bug fix only. Opening a place with more than one memory fired
+one CLGeocoder lookup per row at once; CLGeocoder cancels whatever it is
+already doing the moment a second lookup starts on the same instance, so
+every row but the last stuck on "Locating..." forever. Lookups are now
+queued one at a time. No new data, no new permission.
 
 NEW IN 3.5: saving a memory now opens it immediately, in the same detail
 view a tap on a map blot already opens. Also in 3.5, a memory made on this
@@ -61,16 +67,10 @@ calendar date in an earlier year wears a second ring on the map and in the
 widget, the same "on this day" set the memory list already sections off. No
 new data, no new permission, both drawn from fields already on device.
 
-NEW IN 3.4: two additions to a memory's own screen. VNClassifyImageRequest
-(Apple's on-device Vision classifier) tags a memory's photo locally; the tag
-never leaves the phone and is never in the CloudKit record. A share button
-hands the photo, a caption, and one App Store link to the system share sheet,
-the same peer-to-peer hand-off as any other iOS share button. No new
-permission, no privacy label change.
-
-NEW IN 3.3: "Write to the makers" in the "..." menu opens the standard system
-mail sheet, addressed to us. No new permission, no change to the privacy
-label.
+3.4 added on-device photo tagging (Apple's VNClassifyImageRequest, tag never
+leaves the phone) and a peer-to-peer share button. 3.3 added "Write to the
+makers", a system mail sheet. Neither added a permission or changed the
+privacy label.
 
 WHAT CHANGED IN 3.2, AND WHY THE APP ASKS FOR "ALWAYS" AT THE INTRO
 
@@ -158,14 +158,14 @@ prompts, and how to switch it off.
 
 ---
 
-## Pre-submit checklist (v3.5, build 19)
-- [x] CloudKit: no schema change in 3.5 (the halo and the open-on-save both
-      draw from fields already on device), so no Production deploy gates this
+## Pre-submit checklist (v3.6, build 20)
+- [x] CloudKit: no schema change in 3.6 (the fix only changes the order
+      geocoder lookups run in, nothing new is stored), so no Production
+      deploy gates this
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected, hosted privacy/support pages untouched
-- [x] Screenshots unchanged: the curated set has no memory dated to the
-      screenshot script's own "today", so the halo does not appear in it;
-      open-on-save reuses the existing memory detail view, already shown
-- [x] Build 19 archived and uploaded to App Store Connect
-- [x] `scripts/asc.py release ... --submit` run together with Bhullar 2.5,
-      since both carry the same open-on-save fix
+- [x] Screenshots unchanged: nothing about the fix is visible in a still
+      image, only in how soon a place name settles in
+- [ ] Build 20 archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run together with Bhullar 2.6,
+      since both carry the same geocoder queue fix
