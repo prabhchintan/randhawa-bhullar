@@ -134,6 +134,6 @@ No new permission, no change to the privacy label.
       Not Collected
 - [x] Screenshots unchanged: nothing about the fix is visible in a still
       image, only in how soon a place name settles in
-- [ ] Build 2.6 (11) archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Randhawa 3.6
+- [x] Build 2.6 (11) archived and uploaded to App Store Connect
+- [x] `scripts/asc.py release ... --submit` run together with Randhawa 3.6
       (20), since both carry the same geocoder queue fix

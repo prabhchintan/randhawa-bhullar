@@ -166,6 +166,6 @@ prompts, and how to switch it off.
       Not Collected, hosted privacy/support pages untouched
 - [x] Screenshots unchanged: nothing about the fix is visible in a still
       image, only in how soon a place name settles in
-- [ ] Build 20 archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run together with Bhullar 2.6,
+- [x] Build 20 archived and uploaded to App Store Connect
+- [x] `scripts/asc.py release ... --submit` run together with Bhullar 2.6,
       since both carry the same geocoder queue fix
