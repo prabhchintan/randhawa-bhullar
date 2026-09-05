@@ -2,8 +2,10 @@
 
 Twice a week (Wednesdays and Sundays) this repository is worked on by an
 unattended coding agent on a GitHub-hosted Mac. It reads how the apps were actually used, decides what
-to improve, builds it, ships it through App Store Connect when shipping is
-warranted, and writes to the maintainer only when there is something to say.
+to improve, builds it, and writes to the maintainer only when there is
+something to say. It ships through App Store Connect only when what has
+accumulated is worth an update to the people who carry the apps; the days
+are for reading and building, never a reason to release.
 The maintainer's part is to carry the apps on his phone, answer the Saturday
 email when he has something to say, and glance at the rest. Sunday is the
 weekly summary. This file is the covenant every session runs under, whichever
@@ -61,20 +63,30 @@ themselves:
 
 ## The shipping gate
 
-The loop runs twice a week, and since the maintainer confirmed it on
-2026-08-23 (he had asked for this on 2026-08-22 and again on 2026-08-23),
-both runs may ship: Apple allows one submission in review per app at a
-time, but nothing about the App Store objects to a release every three or
-four days. So a session ships only when all four hold: today is Wednesday
-or Sunday, the loop's two scheduled days, so a review clock always starts
-on a day this repository is actually being read; nothing is waiting for or
-in review for that app; at least three days have passed since that app's
-last submission; and the changes since then have user-visible value. A
-rejection or a crash fix is exempt from the last three. Everything else
-accumulates on main, from any session on any day, and ships when the gate
-opens. A session that runs outside those two days from a mail reply builds
-and pushes but does not submit, so a review clock never starts on a day
-nobody is watching for it.
+Releases are earned, not scheduled (the maintainer, 2026-09-02, replacing
+the twice-a-week shipping he had allowed on 2026-08-23). The loop's two
+days are when it reads and builds; they say nothing about whether to ship.
+A release happens only when what has accumulated on main since the last
+one is worth an update to a person who carries the app: something they
+would notice and be glad of. A real feature. A visible improvement. A fix
+for something that was actually hurting. That is the whole test, and the
+session writes the answer down before it archives anything: one honest
+What's New sentence a person would care to read. If the honest sentence is
+"small fixes and improvements", there is no release today. Ink tunings,
+copy polish, internal tidying, a bump for its own sake: those never make a
+release on their own. They ride along with the next one that is earned.
+
+Weeks may pass with nothing shipped. That is the loop working, not the
+loop failing, and no report should apologise for it or hint that a release
+is overdue. Nobody presses a button to keep a rhythm; there is no rhythm.
+
+Two mechanical conditions still hold: nothing is waiting for or in review
+for that app, and the release goes out from a loop run (scheduled or
+dispatched), so the next run sees what Apple said. A rejection or a crash
+fix is exempt from the worth test: it ships as soon as it is fixed and
+built. chintan may hold a release the gate would allow, or ask for one the
+loop is unsure about, inside scope; when a release is arguable, the loop
+writes the case in the report and waits rather than shipping.
 
 ## What waits for the maintainer
 
@@ -245,9 +257,9 @@ The plan, in order:
   and a run has a five-hour ceiling.
 - **Nothing ships unbuilt.** Both apps must build for the simulator first;
   a broken build reverts the session's changes and reports.
-- **The gate.** Nothing ships with a version in review, within three days of
-  the last submission (rejection and crash fixes excepted), or without
-  user-visible value.
+- **The gate.** Nothing ships with a version in review, and nothing ships
+  that is not worth an update to a person carrying the app (rejection and
+  crash fixes excepted). The calendar is never a reason.
 - **Every submission is a tag.** `randhawa-X.Y-bN`, `bhullar-X.Y-bN`. A bad
   release cannot be pulled back from users, but the next build can be cut
   from the last good tag in one run, and the report says which tag is good.
@@ -266,7 +278,8 @@ The plan, in order:
 
 The apps are quiet on purpose. The loop keeps them quiet: it studies one
 person who agreed to be studied and the numbers Apple already gathers, and
-it changes small things often instead of large things rarely. The maintainer
-sees each change the way everyone else does, as an update in the App Store,
-and gets one short email when there is news. That is the whole feedback
-system, and it is enough.
+it changes small things as it learns and lets them gather until they are
+worth an update, so every release means something. The maintainer sees each
+release the way everyone else does, as an update in the App Store, and gets
+one short email when there is news. That is the whole feedback system, and
+it is enough.

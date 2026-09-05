@@ -4,11 +4,13 @@
 # is the covenant that session runs under.
 #
 # Cadence: Wednesdays and Sundays at 15:00 UTC (10:00 Austin, 09:00 Denver),
-# roughly every three or four days, gentle on a Claude subscription. Sunday
-# is the weekly summary day; other runs write to the maintainer only when
-# something happened. Change the cron here to change the cadence; the
-# Saturday question is a cron on the Cloudflare worker (worker/wrangler.toml
-# in the prabhchintan.com repo).
+# roughly every three or four days, gentle on a Claude subscription. These
+# are reading and building days only: an App Store release happens when the
+# work on main has earned one (LOOP.md, "The shipping gate"), never because
+# a run happened. Sunday is the weekly summary day; other runs write to the
+# maintainer only when something happened. Change the cron here to change
+# the cadence; the Saturday question is a cron on the Cloudflare worker
+# (worker/wrangler.toml in the prabhchintan.com repo).
 #
 # The agent is chosen by the repository variable LOOP_AGENT:
 #   claude (default)  Claude Code, secret CLAUDE_CODE_OAUTH_TOKEN (the

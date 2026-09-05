@@ -76,8 +76,8 @@ inside scope (write a report anyway and say what stopped you).
 
 3. Decide. Sort what the inbox asks for into the two tempos in LOOP.md:
    site and worker requests are done and deployed in this run; app requests
-   are built in this run and ship on the next Wednesday or Sunday, whichever
-   the gate opens for first. Then pick zero to three
+   are built in this run and go out with the next release that is earned
+   (see step 5), which may be today or weeks away. Then pick zero to three
    improvements inside LOOP.md scope: first whatever the inbox asks for, then the next open item of the loop's
    backlog in ROADMAP.md, informed by the feeds and the standing questions in
    LOOP.md. Zero is a fine answer on a quiet day. When you finish a backlog
@@ -93,13 +93,18 @@ inside scope (write a report anyway and say what stopped you).
    Commit and push the public repository whenever you have something that
    builds, release or not.
 
-5. Ship, or not. Ship only when all four hold: today is a Wednesday or a
-   Sunday (`date -u +%u` is 3 or 7); nothing is WAITING_FOR_REVIEW or
-   IN_REVIEW for that app; at least three days have passed since that
-   app's last submission; and the changes since the last submission have
-   user-visible value. A rejection or a crash fix is exempt from the last
-   three. On any other day, commit and push your work to main and leave
-   the release for the next Wednesday or Sunday. Then bump
+5. Ship, or not. Releases are earned, never scheduled (LOOP.md, "The
+   shipping gate"). The day of the week is not a reason to ship and not a
+   reason to wait. Ship an app only when both hold: nothing is
+   WAITING_FOR_REVIEW or IN_REVIEW for it; and everything on main since its
+   last release adds up to something a person carrying the app would
+   notice and be glad of (a real feature, a visible improvement, a fix for
+   something that was hurting). Write the one honest What's New sentence
+   first; if it comes out as "small fixes and improvements", do not ship,
+   commit and push, and let the work gather. A rejection or a crash fix
+   is exempt and ships as soon as it builds. If chintan's inbox note says
+   hold, hold; if the case is arguable, write it in the report and wait.
+   Most runs ship nothing, and that is right. When shipping, bump
    MARKETING_VERSION and CURRENT_PROJECT_VERSION for each app that changed
    (four places per project), write AppStore/whatsnew-<version>.md and update
    metadata.md, archive and upload as RELEASING.md describes (with the key
@@ -118,8 +123,10 @@ inside scope (write a report anyway and say what stopped you).
    a second action, never a third) or exactly `- Nothing for you.` The email
    lifts that line to the top in colour, so the rest of the bullets must
    never mention what he should do; they say what happened and the one
-   number that mattered, and for each item done, one word for its tempo:
-   "live", or the day it ships next ("Wednesday" or "Sunday"). The mailed
+   number that mattered, and for each item done, a word for its tempo:
+   "live" (site, or an app release submitted) or "on main" (app work
+   built and pushed, waiting for a release that is earned). Never say or
+   imply a release is due or overdue. The mailed
    message is normally exactly these
    bullets and nothing else: `scripts/loopmail.py send` drops any Details
    link into the private repo before it reaches him, since that 404s
