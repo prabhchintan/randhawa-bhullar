@@ -212,10 +212,17 @@ repository running on his machine, and it is the only code that does.
   (com.prabhchintan.maproom, 08:00 and 20:00, or on waking past them) that
   pulls this repository, rebuilds Maproom when its source changed (cloud
   signing renews the yearly provisioning profile as a side effect), reads
-  the map, and pushes summary and notes to the private repo. A stale feed
-  is reported as stale and stales nothing else; if the maproom itself fails
-  for two days it notifies him on his own screen. It needs his Mac awake
-  sometime most days and signed into iCloud, nothing more.
+  the map, and pushes summary and notes to the private repo. It needs his
+  Mac awake sometime most days and signed into iCloud, nothing more.
+  launchd cannot read a script under Desktop or Documents on macOS 15 (both
+  are TCC-protected and iCloud Drive can sync them); every run from
+  ~/Desktop/prabhchintan.com/Randhawa died silently from 2026-08-21 to
+  2026-09-02 for exactly this reason. `--install` now detects that case
+  itself and runs instead from a second checkout at
+  `~/Library/Application Support/randhawa-loop/public`, leaving the
+  maintainer's own Desktop clone untouched. A stale feed is reported as
+  stale and stales nothing else; if the maproom itself fails for two days
+  it notifies him on his own screen.
 - Both apps must build for the simulator before anything is archived. If a
   build fails and the fix is not obvious, the session reverts its own
   changes, reports, and ships nothing.

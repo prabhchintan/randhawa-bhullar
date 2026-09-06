@@ -34,6 +34,24 @@ fail() {
 
 if [ "${1:-}" = "--install" ]; then
   mkdir -p "$HOME/Library/LaunchAgents" "$STATE"
+  RUNROOT="$ROOT"
+  case "$ROOT" in
+    "$HOME/Desktop"|"$HOME/Desktop"/*|"$HOME/Documents"|"$HOME/Documents"/*)
+      # launchd cannot read a script under Desktop or Documents on macOS 15:
+      # both are TCC-protected and iCloud Drive can sync them, so every run
+      # died with "Operation not permitted" before the script even opened.
+      # Keep a second checkout outside either folder and run from there;
+      # this clone stays outside the repo the maintainer works in by hand.
+      RUNROOT="$STATE/public"
+      if [ -d "$RUNROOT/.git" ]; then
+        git -C "$RUNROOT" pull --quiet || true
+      else
+        gh repo clone prabhchintan/randhawa-bhullar "$RUNROOT" -- --quiet
+      fi
+      echo "$ROOT sits under Desktop or Documents; launchd cannot read scripts there."
+      echo "installing from a second checkout at $RUNROOT instead. $ROOT is untouched."
+      ;;
+  esac
   cat > "$PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -44,7 +62,7 @@ if [ "${1:-}" = "--install" ]; then
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
-		<string>$ROOT/scripts/maproom.sh</string>
+		<string>$RUNROOT/scripts/maproom.sh</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<array>
