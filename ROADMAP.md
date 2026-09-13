@@ -60,7 +60,10 @@ item is written so a session can tell when it is done.
 1. **Watch the ink on real data.** Tune blot alpha, thread alpha and the
    thread gap against the maintainer's own map at street and city scale
    until threads read as movement, not as a web. Done when two consecutive
-   weekly summaries have nothing to change.
+   weekly summaries have nothing to change. Shipped constants unchanged
+   since 3.2: two consecutive readable weeks (2026-09-06, 2026-09-13) both
+   read as movement (136 of 139, then 96 of 98 consecutive pairs more than
+   150m apart) with no anomaly asking for a tune. Done, 2026-09-13.
 2. **A note to the loop, from inside the apps.** Today a memory that begins
    with `@loop` is filed as a note to the loop by `scripts/mymap.py`, which
    costs no app change but leaves the note on the map as a memory. The
