@@ -221,6 +221,7 @@ struct ConfigurableScaleProvider: AppIntentTimelineProvider {
         let scale = configuration.scale.timeScale
         let calendar = Calendar.current
         let now = Date()
+        let memories = MemoryPersistence.load()
         var entries: [ScaleEntry] = []
 
         if scale == .hours {
@@ -233,7 +234,8 @@ struct ConfigurableScaleProvider: AppIntentTimelineProvider {
                 entries.append(ScaleEntry(
                     date: hour,
                     scale: scale,
-                    position: scale.position(date: hour, calendar: calendar)
+                    position: scale.position(date: hour, calendar: calendar),
+                    highlighted: memoryHighlights(scale: scale, at: hour, memories: memories, calendar: calendar)
                 ))
             }
         } else {
@@ -244,7 +246,8 @@ struct ConfigurableScaleProvider: AppIntentTimelineProvider {
                 entries.append(ScaleEntry(
                     date: day,
                     scale: scale,
-                    position: scale.position(date: day, calendar: calendar)
+                    position: scale.position(date: day, calendar: calendar),
+                    highlighted: memoryHighlights(scale: scale, at: day, memories: memories, calendar: calendar)
                 ))
             }
         }

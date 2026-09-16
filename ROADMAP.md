@@ -81,13 +81,28 @@ item is written so a session can tell when it is done.
    different voice. Give them one template, one sender family and one
    cadence so the inbox reads as one system, and let the loop's summary
    carry the site's numbers on Sundays if that proves useful. Not before 1
-   and 2.
+   and 2. Passed, 2026-09-16 (chintan): since 2026-08-30 both feeds land
+   with chintan first, who reads them against the raw data and passes the
+   maintainer only what earns his attention, once, in one voice; the human
+   half of this item is solved outside the apps, and a Sunday summary
+   carrying the site's numbers would only duplicate what chintan already
+   reads, for no gain. If anything of it is worth keeping it is a stable
+   subject and shape for the Sunday report so it parses without guessing,
+   a tidy-up in passing rather than a backlog item.
 4. **"On this day" on the map**, not only in the list (from the Randhawa
    lane below). Shipped 2026-08-26: a memory made on this calendar date in
    an earlier year now wears an orange halo in the shared ink, on the map
    and in the widget, the same set the list already sections off. Done.
 5. **Gold in Bhullar's Lock Screen accessories** and the year picker, from
-   the Bhullar lane, when nothing above is open.
+   the Bhullar lane, when nothing above is open. Next, chosen 2026-09-13
+   (chintan): the first thing in a while a person carrying the app would
+   actually notice. First piece done 2026-09-16: BhullarDayWidget and
+   BhullarYearWidget have lit gold memory days on every family, Lock Screen
+   accessories included, since 2.2; BhullarScaleWidget, the configurable
+   "Dots at Any Scale" widget offering the same families, never did,
+   because its timeline entries never computed which units held a memory.
+   Fixed: its provider now calls the same highlighting helper as the two
+   fixed widgets, for every entry. Still open: the year picker.
 
 ## Both, eventually
 
