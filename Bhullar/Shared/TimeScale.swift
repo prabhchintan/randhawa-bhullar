@@ -121,6 +121,12 @@ enum TimeScale: String, CaseIterable {
     }
 
     /// A human label for one dot, used as the title when a dot is opened.
+    ///
+    /// Weeks and days name the year too when the dot's own year differs from
+    /// the calendar's current one, which only happens once a dot is opened
+    /// from a year the year picker stepped back to. Months already carried
+    /// the year regardless, so a browsed year read no differently from this
+    /// one before the picker existed to make that ambiguous.
     func label(ofUnit index: Int, containing date: Date = Date(), calendar: Calendar = .current) -> String {
         guard let interval = interval(ofUnit: index, containing: date, calendar: calendar) else {
             return "\(unitName) \(index)"
@@ -128,15 +134,18 @@ enum TimeScale: String, CaseIterable {
         let formatter = DateFormatter()
         formatter.calendar = calendar
         formatter.locale = .current
+        let sameYear = calendar.isDate(interval.start, equalTo: Date(), toGranularity: .year)
         switch self {
         case .months:
             formatter.setLocalizedDateFormatFromTemplate("MMMM y")
         case .weeks:
             formatter.setLocalizedDateFormatFromTemplate("MMMd")
             let end = interval.end.addingTimeInterval(-1)
-            return formatter.string(from: interval.start) + " to " + formatter.string(from: end)
+            let span = formatter.string(from: interval.start) + " to " + formatter.string(from: end)
+            guard !sameYear else { return span }
+            return span + ", \(calendar.component(.year, from: interval.start))"
         case .days:
-            formatter.setLocalizedDateFormatFromTemplate("EEEE MMMM d")
+            formatter.setLocalizedDateFormatFromTemplate(sameYear ? "EEEE MMMM d" : "EEEE MMMM d, y")
         case .hours:
             formatter.setLocalizedDateFormatFromTemplate("jmm")
         case .minutes:

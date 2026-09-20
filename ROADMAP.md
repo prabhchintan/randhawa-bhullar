@@ -102,7 +102,14 @@ item is written so a session can tell when it is done.
    "Dots at Any Scale" widget offering the same families, never did,
    because its timeline entries never computed which units held a memory.
    Fixed: its provider now calls the same highlighting helper as the two
-   fixed widgets, for every entry. Still open: the year picker.
+   fixed widgets, for every entry. Second piece done 2026-09-20: the month,
+   week and day scales in Bhullar's main view can now step back to any past
+   year that holds a memory, one year at a time, bounded above at the
+   current year and below at the earliest year with a memory (the picker
+   stays hidden until a second year exists to look at). Both pieces are
+   built and on main. Not shipped: chintan asked (2026-09-16, 2026-09-19)
+   that the two halves go out together as one release candidate, which
+   waits on the shipping gate in LOOP.md, not on more code.
 
 ## Both, eventually
 

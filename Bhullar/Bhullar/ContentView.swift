@@ -7,6 +7,10 @@ struct ContentView: View {
     @Environment(\.openURL) private var openURL
     @AppStorage("timeScale") private var scaleRaw = TimeScale.days.rawValue
     @ObservedObject private var memoryStore = MemoryStore.shared
+    /// Years back from the current one, at the month, week and day scales
+    /// only. Not persisted: the app always opens on now, and a year picked
+    /// last time would be easy to mistake for a fresh one.
+    @State private var yearOffset = 0
     @State private var composing = false
     @State private var showingMemories = false
     @State private var showingMailComposer = false
@@ -20,25 +24,51 @@ struct ContentView: View {
 
     private var scale: TimeScale { TimeScale(rawValue: scaleRaw) ?? .days }
 
+    /// The year picker only makes sense where a dot stands for a slice of
+    /// the year. An hour or a minute already names its own day, and shifting
+    /// that day's year without a way to also pick the day would just show
+    /// the wrong hour under the right label.
+    private var supportsYearPicker: Bool {
+        scale == .months || scale == .weeks || scale == .days
+    }
+
+    private var currentYear: Int { Calendar.current.component(.year, from: Date()) }
+
+    /// The earliest year, before this one, that holds a memory. Nil hides
+    /// the picker: a grid with nothing gold in it answers no question.
+    private var earliestPastYear: Int? {
+        let calendar = Calendar.current
+        return memoryStore.memories
+            .map { calendar.component(.year, from: $0.date) }
+            .filter { $0 < currentYear }
+            .min()
+    }
+
+    private func referenceDate(for date: Date) -> Date {
+        guard yearOffset != 0 else { return date }
+        return Calendar.current.date(byAdding: .year, value: yearOffset, to: date) ?? date
+    }
+
     var body: some View {
         // Ticks at every minute boundary while visible and catches up on
         // foregrounding, so the grid is always current at every scale; the
         // minute grid visibly fills as you watch.
         TimelineView(.everyMinute) { timeline in
-            let position = scale.position(date: timeline.date)
+            let effectiveDate = supportsYearPicker ? referenceDate(for: timeline.date) : timeline.date
+            let position = scale.position(date: effectiveDate)
             let onThisDayCount = memoryStore.memories.onThisDayIDs(now: timeline.date).count
 
             VStack(spacing: 28) {
                 DotGrid(
                     position: position,
-                    highlighted: memoryHighlights(at: timeline.date),
+                    highlighted: memoryHighlights(at: effectiveDate),
                     selected: opened?.unit,
                     onSelectUnit: { unit in
-                        opened = OpenedDot(unit: unit, scale: scale, reference: timeline.date)
+                        opened = OpenedDot(unit: unit, scale: scale, reference: effectiveDate)
                     },
                     unitName: scale.unitName
                 )
-                .id(scaleRaw)
+                .id("\(scaleRaw)-\(yearOffset)")
                 .transition(.opacity)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -49,6 +79,28 @@ struct ContentView: View {
                     Text("\(scale.unitName) \(position.index) of \(position.total) · \(position.remaining) left")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    if supportsYearPicker, let earliestPastYear {
+                        HStack(spacing: 20) {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) { yearOffset -= 1 }
+                            } label: {
+                                Image(systemName: "chevron.left")
+                            }
+                            .disabled(currentYear + yearOffset <= earliestPastYear)
+
+                            Text(String(currentYear + yearOffset))
+                                .font(.caption.monospacedDigit())
+
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) { yearOffset += 1 }
+                            } label: {
+                                Image(systemName: "chevron.right")
+                            }
+                            .disabled(yearOffset >= 0)
+                        }
+                        .foregroundStyle(.secondary)
+                        .buttonStyle(.plain)
+                    }
                     if !memoryStore.memories.isEmpty {
                         Button {
                             showingMemories = true
