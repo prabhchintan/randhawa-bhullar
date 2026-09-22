@@ -86,7 +86,9 @@ jobs:
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            archive 2>&1 | grep -E "error:|warning:|\*\* ARCHIVE|BUILD (SUCCEEDED|FAILED)"
+            archive > "$RUNNER_TEMP/archive.log" 2>&1 \
+            || { echo "archive failed; the lines around each error:"; grep -E -i -B3 -A8 "error" "$RUNNER_TEMP/archive.log" | tail -120; exit 1; }
+          grep -E "warning:|\*\* ARCHIVE|BUILD (SUCCEEDED|FAILED)" "$RUNNER_TEMP/archive.log" | tail -20
 
       - name: Upload to TestFlight
         run: |
