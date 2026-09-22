@@ -17,6 +17,8 @@ Nothing here needs Xcode. PyJWT[crypto] is the only non-stdlib dependency.
 Usage (all subcommands take --app <bundle id>):
 
     asc.py apps
+    asc.py register-bundle-id --identifier Prabhchintan.Chintan --name chintan
+    asc.py create-app --bundle-id Prabhchintan.Chintan --name chintan --sku chintan
     asc.py builds --app Prabhchintan.Randhawa
     asc.py status --app Prabhchintan.Randhawa
     asc.py release --app Prabhchintan.Randhawa --version 3.2 --build 13 \
@@ -160,6 +162,39 @@ class ASC:
             if loc["attributes"]["locale"] == locale:
                 return loc
         raise SystemExit(f"no {locale} localization on version {version_id}")
+
+    # -- provisioning --------------------------------------------------------
+
+    def bundle_id_registered(self, identifier):
+        found = self.get("/bundleIds", **{"filter[identifier]": identifier})["data"]
+        return found[0] if found else None
+
+    def register_bundle_id(self, identifier, name):
+        existing = self.bundle_id_registered(identifier)
+        if existing:
+            print(f"bundle id {identifier} already registered")
+            return existing
+        created = self.post("/bundleIds", {"data": {
+            "type": "bundleIds",
+            "attributes": {"identifier": identifier, "name": name, "platform": "IOS"},
+        }})["data"]
+        print(f"registered bundle id {identifier}")
+        return created
+
+    def create_app(self, bundle_id, name, sku, primary_locale="en-US"):
+        """The public App Store Connect API has never exposed app creation;
+        this is expected to fail (403 FORBIDDEN_ERROR, "does not allow
+        CREATE", confirmed 2026-09-22). Callers should catch the SystemExit
+        request() raises on an HTTP error and fall back to the manual steps:
+        New App in App Store Connect, iOS, the same name, bundle id and
+        SKU."""
+        return self.post("/apps", {"data": {
+            "type": "apps",
+            "attributes": {
+                "bundleId": bundle_id, "name": name, "sku": sku,
+                "primaryLocale": primary_locale,
+            },
+        }})["data"]
 
     # -- release steps -----------------------------------------------------
 
@@ -396,6 +431,15 @@ def main(argv=None):
 
     sub.add_parser("apps")
 
+    p = sub.add_parser("register-bundle-id")
+    p.add_argument("--identifier", required=True)
+    p.add_argument("--name", required=True)
+
+    p = sub.add_parser("create-app")
+    p.add_argument("--bundle-id", required=True)
+    p.add_argument("--name", required=True)
+    p.add_argument("--sku", required=True)
+
     p = sub.add_parser("builds")
     p.add_argument("--app", required=True)
 
@@ -424,6 +468,15 @@ def main(argv=None):
     if args.command == "apps":
         for app in asc.get("/apps")["data"]:
             print(app["id"], app["attributes"]["bundleId"], app["attributes"]["name"])
+        return
+
+    if args.command == "register-bundle-id":
+        asc.register_bundle_id(args.identifier, args.name)
+        return
+
+    if args.command == "create-app":
+        created = asc.create_app(args.bundle_id, args.name, args.sku)
+        print(f"created app {created['id']}")
         return
 
     app = asc.app(args.app)

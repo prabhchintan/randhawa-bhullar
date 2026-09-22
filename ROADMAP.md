@@ -48,6 +48,8 @@ them, and the rule that keeps that story quiet live in
   geocoder. 2.2, gold memory days in the widgets, the camera in the composer,
   and the shared place-name cache.
 - Next: whatever the loop learns.
+- Considering: a year picker to look at past years' grids; the minutes scale
+  on Apple Watch someday.
 
 ## chintan, the door (private)
 
@@ -56,9 +58,13 @@ them, and the rule that keeps that story quiet live in
   through TestFlight internal testing, never the store. The brief is
   [Chintan/BRIEF.md](Chintan/BRIEF.md); the covenant is LOOP.md's section
   "chintan, the private app". First build: a conversation with chintan and
-  the house's one-screen view, nothing more.
-- Considering: a year picker to look at past years' grids; the minutes scale
-  on Apple Watch someday.
+  the house's one-screen view, nothing more. Scaffolded 2026-09-22: two
+  tabs (the study, the jharokha) and settings with the house address and a
+  health check, building for the simulator. Bundle id
+  `Prabhchintan.Chintan` is registered; the app record itself needs the
+  maintainer, App Store Connect has no API for creating one (confirmed this
+  run: `POST /apps` answers 403, "does not allow CREATE"). Archive and
+  TestFlight wait on that record.
 
 ## The loop's backlog
 
