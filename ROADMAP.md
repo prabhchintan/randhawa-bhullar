@@ -68,7 +68,12 @@ them, and the rule that keeps that story quiet live in
   ledger, display name chintan on the phone) and this run archived,
   uploaded 1.0 (1), and created the internal TestFlight group "house" with
   the maintainer as its one tester, set to receive builds automatically
-  (`scripts/asc.py testflight`, idempotent for future uploads).
+  (`scripts/asc.py testflight`, idempotent for future uploads). Since
+  2026-09-22 noon the app has a second lane (BRIEF.md, "The second lane"):
+  chintan writes Swift from the house and `.github/workflows/chintan.yml`
+  does only the Mac part, nightly on yantar once `scripts/yantar-runner.sh`
+  has run there. The board tab is the first rung; marking done,
+  notifications and a widget follow on the maintainer's word.
 
 ## The loop's backlog
 
