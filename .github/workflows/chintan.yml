@@ -1,0 +1,119 @@
+# chintan, the private app (Chintan/BRIEF.md): compile, sign and upload one
+# TestFlight build, internal testing only, never a submission.
+#
+# The Swift is written on the maintainer's home machine; this job is only the
+# Mac part (Xcode, cloud signing with the App Store Connect key, the upload).
+# By hand it runs on a GitHub-hosted Mac (billed at ten times a Linux minute,
+# so sparingly). Nightly it runs on yantar, the maintainer's own MacBook,
+# registered as a self-hosted runner with scripts/yantar-runner.sh; the
+# schedule does nothing until the repository variable CHINTAN_RUNNER says
+# yantar. This file cannot be written by the loop (the Actions token may not
+# touch workflows); it is landed from the maintainer's box.
+name: chintan
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: "hosted (a GitHub Mac, billed minutes) or yantar (the MacBook)"
+        default: hosted
+        type: choice
+        options: [hosted, yantar]
+  schedule:
+    - cron: "0 9 * * *"    # 03:00 Mountain in summer, 02:00 in winter
+
+concurrency:
+  group: chintan-build
+  cancel-in-progress: false
+
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    outputs:
+      runner: ${{ steps.pick.outputs.runner }}
+      go: ${{ steps.pick.outputs.go }}
+    steps:
+      - id: pick
+        run: |
+          RUNNER="${{ github.event.inputs.runner || vars.CHINTAN_RUNNER || 'hosted' }}"
+          GO=1
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$RUNNER" != "yantar" ]; then GO=0; fi
+          echo "runner=$RUNNER" >> "$GITHUB_OUTPUT"
+          echo "go=$GO" >> "$GITHUB_OUTPUT"
+          echo "runner: $RUNNER, go: $GO"
+
+  build:
+    needs: pick
+    if: ${{ needs.pick.outputs.go == '1' }}
+    runs-on: ${{ needs.pick.outputs.runner == 'yantar' && fromJSON('["self-hosted", "macOS", "yantar"]') || 'macos-15' }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Xcode
+        run: |
+          if [ "${{ needs.pick.outputs.runner }}" != "yantar" ]; then
+            NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+            sudo xcode-select -s "$NEWEST"
+          fi
+          xcodebuild -version | head -1
+
+      - name: The key
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8"
+          chmod 600 "$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8" >> "$GITHUB_ENV"
+          echo "ASC_KEY_ID=$ASC_KEY_ID" >> "$GITHUB_ENV"
+          echo "ASC_ISSUER_ID=$ASC_ISSUER_ID" >> "$GITHUB_ENV"
+          echo "BUILD=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_ENV"
+
+      - name: Archive
+        run: |
+          set -o pipefail
+          echo "chintan 1.0 ($BUILD)"
+          xcodebuild -project Chintan/Chintan.xcodeproj -scheme Chintan \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Chintan.xcarchive" \
+            CURRENT_PROJECT_VERSION="$BUILD" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            archive 2>&1 | grep -E "error:|warning:|\*\* ARCHIVE|BUILD (SUCCEEDED|FAILED)"
+
+      - name: Upload to TestFlight
+        run: |
+          set -o pipefail
+          cat > "$RUNNER_TEMP/exportOptions.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>7FWNAT83XU</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Chintan.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" 2>&1 | grep -E "error:|Upload succeeded|EXPORT (SUCCEEDED|FAILED)"
+          echo "uploaded chintan 1.0 ($BUILD); Apple processes it in five to thirty minutes, TestFlight installs it on the phone"
+
+      - name: Sweep the key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc" "$RUNNER_TEMP/export" "$RUNNER_TEMP/Chintan.xcarchive"

@@ -44,6 +44,13 @@ struct HouseClient {
         return try JSONDecoder().decode(Cockpit.self, from: data).text
     }
 
+    func board() async throws -> String {
+        guard let url = url("/v1/board") else { throw HouseError.noAddress }
+        let (data, _) = try await Self.session.data(from: url)
+        struct Board: Decodable { let text: String }
+        return try JSONDecoder().decode(Board.self, from: data).text
+    }
+
     func say(_ text: String) async throws -> String {
         guard let sayURL = url("/v1/say") else { throw HouseError.noAddress }
         var request = URLRequest(url: sayURL)

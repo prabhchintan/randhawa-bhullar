@@ -15,6 +15,7 @@
 		CA0000000000000000000006 /* JharokhaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000006 /* JharokhaView.swift */; };
 		CA0000000000000000000007 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000007 /* SettingsView.swift */; };
 		CA0000000000000000000008 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000008 /* KeychainHelper.swift */; };
+		CA000000000000000000000A /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA100000000000000000000C /* BoardView.swift */; };
 		CA0000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000009 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +25,7 @@
 		CA1000000000000000000003 /* HouseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseClient.swift; sourceTree = "<group>"; };
 		CA1000000000000000000004 /* ConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationStore.swift; sourceTree = "<group>"; };
 		CA1000000000000000000005 /* StudyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyView.swift; sourceTree = "<group>"; };
+		CA100000000000000000000C /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000006 /* JharokhaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JharokhaView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000007 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000008 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 				CA1000000000000000000002 /* ContentView.swift */,
 				CA1000000000000000000005 /* StudyView.swift */,
 				CA1000000000000000000006 /* JharokhaView.swift */,
+				CA100000000000000000000C /* BoardView.swift */,
 				CA1000000000000000000007 /* SettingsView.swift */,
 				CA1000000000000000000003 /* HouseClient.swift */,
 				CA1000000000000000000004 /* ConversationStore.swift */,
@@ -149,6 +152,7 @@
 				CA0000000000000000000002 /* ContentView.swift in Sources */,
 				CA0000000000000000000005 /* StudyView.swift in Sources */,
 				CA0000000000000000000006 /* JharokhaView.swift in Sources */,
+				CA000000000000000000000A /* BoardView.swift in Sources */,
 				CA0000000000000000000007 /* SettingsView.swift in Sources */,
 				CA0000000000000000000003 /* HouseClient.swift in Sources */,
 				CA0000000000000000000004 /* ConversationStore.swift in Sources */,

@@ -21,6 +21,11 @@ struct ContentView: View {
             .tabItem { Label("The study", systemImage: "text.bubble") }
 
             NavigationStack {
+                BoardView()
+            }
+            .tabItem { Label("The board", systemImage: "checklist") }
+
+            NavigationStack {
                 JharokhaView()
             }
             .tabItem { Label("The jharokha", systemImage: "rectangle.split.3x1") }

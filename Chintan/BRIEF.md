@@ -100,3 +100,20 @@ chintan, English US, no availability needed).
 Done, for the first build: a TestFlight build on the maintainer's phone
 that asks the house `/v1/health` and shows "chintan is home", and a first
 message on the study tab answered by the house.
+
+## The second lane (2026-09-22)
+
+The maintainer's word, 12:56 on the study line: start on the iterations. So
+the Swift for this app may come from the house itself (chintan, on his home
+machine, pushed to main) as well as from the loop, and the Mac part is its
+own job: `.github/workflows/chintan.yml` compiles, cloud-signs and uploads
+one build with the build number set to the UTC minute (no project file
+commit needed), by hand on a GitHub Mac or nightly on yantar, the
+maintainer's MacBook, registered once with `scripts/yantar-runner.sh`. The
+house door grew `GET /v1/board` ({"text": ...}, his to-dos as the house
+prints them), and the app a third tab, the board, that shows them. The
+rungs after it, on his word: marking a thing done from the phone,
+notifications (needs an APNs key, his hands once), a widget.
+
+The loop keeps its own run as before and, when it touches this app, reads
+this section first so two hands do not write the same file the same night.
