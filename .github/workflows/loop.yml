@@ -162,6 +162,7 @@ jobs:
         run: |
           python3 scripts/asc.py status --app Prabhchintan.Randhawa | head -2
           python3 scripts/asc.py status --app Prabhchintan.Bhullar | head -2
+          python3 scripts/asc.py status --app Prabhchintan.Chintan | head -2 || echo "chintan: no app record yet"
           mkdir -p "$LOOP_PRIVATE/logs" "$LOOP_PRIVATE/inbox" "$LOOP_PRIVATE/feedback"
           # The map feed is made on the maintainer's Mac (Maproom/ and
           # scripts/maproom.sh, see LOOP.md) and pushed to the private repo;
@@ -176,6 +177,7 @@ jobs:
         run: |
           xcodebuild -project Randhawa.xcodeproj -target Randhawa -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
           xcodebuild -project Bhullar/Bhullar.xcodeproj -target Bhullar -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
+          xcodebuild -project Chintan/Chintan.xcodeproj -target Chintan -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)"
 
       - name: Install the agent
         if: ${{ vars.LOOP_PAUSED != '1' && (github.event.inputs.mode != 'check') }}
