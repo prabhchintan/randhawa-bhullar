@@ -56,13 +56,13 @@ else
 fi
 
 say "The service (launchd, asks for the password)"
-if ./svc.sh status 2>/dev/null | grep -q "Started"; then
+if ./svc.sh status 2>/dev/null | grep -q "^Started"; then
   echo "already running"
 else
   ./svc.sh install 2>/dev/null || true
   ./svc.sh start
 fi
-./svc.sh status | head -3
+./svc.sh status 2>/dev/null | grep -A1 "Started" || true
 
 say "The nightly wake (02:55, before the 03:00 build)"
 sudo pmset repeat wakeorpoweron MTWRFSU 02:55:00
