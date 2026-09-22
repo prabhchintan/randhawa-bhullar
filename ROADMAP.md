@@ -1,6 +1,6 @@
 # Roadmap
 
-One repository, two apps, three lanes. Randhawa is space, Bhullar is time,
+One repository, three apps, four lanes (the third app is private, see the end). Randhawa is space, Bhullar is time,
 and MemoryKit is the substrate both of them read: the shared files, the
 shared iCloud schema, the idea of a memory. The apps are free to drift apart
 in look, feature, and pace. The substrate is not free to fork. (Why one
@@ -48,6 +48,15 @@ them, and the rule that keeps that story quiet live in
   geocoder. 2.2, gold memory days in the widgets, the camera in the composer,
   and the shared place-name cache.
 - Next: whatever the loop learns.
+
+## chintan, the door (private)
+
+- Since 2026-09-21, the maintainer's word: a third app, `Chintan/`, his own
+  door to chintan, the butler on his home machine. An audience of one,
+  through TestFlight internal testing, never the store. The brief is
+  [Chintan/BRIEF.md](Chintan/BRIEF.md); the covenant is LOOP.md's section
+  "chintan, the private app". First build: a conversation with chintan and
+  the house's one-screen view, nothing more.
 - Considering: a year picker to look at past years' grids; the minutes scale
   on Apple Watch someday.
 

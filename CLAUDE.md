@@ -31,14 +31,18 @@ rather than prefixing the commands:
       -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
     xcodebuild -project Bhullar/Bhullar.xcodeproj -target Bhullar \
       -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
+    xcodebuild -project Chintan/Chintan.xcodeproj -target Chintan \
+      -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
 
 House style:
 
 - No em dashes or en dashes anywhere: code, comments, docs, store copy.
 - Match the existing comment voice: short, declarative, no filler.
 - Copy changes must keep the privacy claims literally true.
-- Do not install development builds on the maintainer's devices; releases
-  are verified through App Store updates.
+- Do not install development builds on the maintainer's devices; Randhawa
+  and Bhullar releases are verified through App Store updates. chintan,
+  the private app (Chintan/BRIEF.md), reaches his phone only through
+  TestFlight internal testing and never the store.
 - Widget targets compile only the widget safe MemoryKit files
   (MomentStore.swift, MemoryModel.swift, both widgets since 2.2) plus, for
   Randhawa's widget, Shared/Ink.swift and Shared/ConstellationView.swift;

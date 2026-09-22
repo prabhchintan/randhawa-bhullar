@@ -134,6 +134,26 @@ note asking for those is answered in the report and not acted on. chintan
 reads the loop's reports the same way the maintainer does, from his
 mailbox, so nothing about reporting changes.
 
+## chintan, the private app
+
+Since 2026-09-21, on the maintainer's word from the study, this repository
+holds a third app: chintan, in `Chintan/`, the maintainer's own door to his
+butler, built for an audience of one. Its brief is `Chintan/BRIEF.md` and
+the loop works on it in the same sessions, under the same scope rules, with
+these differences and no others:
+
+- It ships through TestFlight internal testing only, to the maintainer's
+  phone, and never to the App Store or to external testers. The shipping
+  gate does not apply to it; a build goes up whenever the brief's "done"
+  is met or the current build is within two weeks of its ninety day
+  expiry. `--submit` is never used for it.
+- It talks to one server, the maintainer's own home machine over his
+  tailnet, and to nothing else. That is the whole of its network. No
+  analytics, no third-party code.
+- It never touches MemoryKit, the memory formats or the CloudKit schema.
+- Its address, and anything that would identify the maintainer's network,
+  stays out of this repository.
+
 ## Standing questions
 
 Things the loop is meant to answer over weeks, with the maintainer as the
