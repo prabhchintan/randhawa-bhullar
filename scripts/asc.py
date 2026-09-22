@@ -25,6 +25,9 @@ Usage (all subcommands take --app <bundle id>):
         --metadata AppStore/metadata.md --whatsnew AppStore/whatsnew-3.2.md \
         --screenshots AppStore/screenshots [--submit]
     asc.py analytics --app Prabhchintan.Randhawa --out ~/loop/analytics
+    asc.py testflight --app Prabhchintan.Chintan --group house \
+        --tester-email prabhchintan@icloud.com \
+        --tester-first-name Prab --tester-last-name Randhawa
 """
 
 import argparse
@@ -319,6 +322,36 @@ class ASC:
             time.sleep(5)
         raise SystemExit("screenshots did not finish processing in time")
 
+    # -- TestFlight ----------------------------------------------------------
+
+    def ensure_internal_group(self, app_id, name):
+        groups = self.get(f"/apps/{app_id}/betaGroups")["data"]
+        for group in groups:
+            if group["attributes"]["name"] == name and group["attributes"]["isInternalGroup"]:
+                print(f"internal group {name!r} exists")
+                return group
+        created = self.post("/betaGroups", {"data": {
+            "type": "betaGroups",
+            "attributes": {"name": name, "isInternalGroup": True, "hasAccessToAllBuilds": True},
+            "relationships": {"app": {"data": {"type": "apps", "id": app_id}}},
+        }})["data"]
+        print(f"created internal group {name!r}")
+        return created
+
+    def ensure_internal_tester(self, group_id, email, first_name, last_name):
+        testers = self.get(f"/betaGroups/{group_id}/betaTesters")["data"]
+        for tester in testers:
+            if tester["attributes"]["email"] == email:
+                print(f"tester {email} already in group")
+                return tester
+        created = self.post("/betaTesters", {"data": {
+            "type": "betaTesters",
+            "attributes": {"email": email, "firstName": first_name, "lastName": last_name},
+            "relationships": {"betaGroups": {"data": [{"type": "betaGroups", "id": group_id}]}},
+        }})["data"]
+        print(f"added tester {email} to group")
+        return created
+
     def submit(self, app_id, version_id):
         submission = self.post("/reviewSubmissions", {"data": {
             "type": "reviewSubmissions",
@@ -462,6 +495,13 @@ def main(argv=None):
     p.add_argument("--app", required=True)
     p.add_argument("--out", required=True)
 
+    p = sub.add_parser("testflight")
+    p.add_argument("--app", required=True)
+    p.add_argument("--group", default="house")
+    p.add_argument("--tester-email", required=True)
+    p.add_argument("--tester-first-name", required=True)
+    p.add_argument("--tester-last-name", required=True)
+
     args = parser.parse_args(argv)
     asc = ASC()
 
@@ -507,6 +547,12 @@ def main(argv=None):
         print(f"{len(new)} new report files")
         for path in new:
             print("  " + path)
+        return
+
+    if args.command == "testflight":
+        group = asc.ensure_internal_group(app_id, args.group)
+        asc.ensure_internal_tester(group["id"], args.tester_email,
+                                   args.tester_first_name, args.tester_last_name)
         return
 
     if args.command == "release":

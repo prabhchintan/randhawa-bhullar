@@ -61,10 +61,14 @@ them, and the rule that keeps that story quiet live in
   the house's one-screen view, nothing more. Scaffolded 2026-09-22: two
   tabs (the study, the jharokha) and settings with the house address and a
   health check, building for the simulator. Bundle id
-  `Prabhchintan.Chintan` is registered; the app record itself needs the
-  maintainer, App Store Connect has no API for creating one (confirmed this
-  run: `POST /apps` answers 403, "does not allow CREATE"). Archive and
-  TestFlight wait on that record.
+  `Prabhchintan.Chintan` is registered; the app record itself needed the
+  maintainer, App Store Connect has no API for creating one (confirmed
+  2026-09-22: `POST /apps` answers 403, "does not allow CREATE"). Done
+  2026-09-22: the maintainer made the record by hand (name Prab on Apple's
+  ledger, display name chintan on the phone) and this run archived,
+  uploaded 1.0 (1), and created the internal TestFlight group "house" with
+  the maintainer as its one tester, set to receive builds automatically
+  (`scripts/asc.py testflight`, idempotent for future uploads).
 
 ## The loop's backlog
 
