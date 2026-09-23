@@ -66,6 +66,14 @@ place. Every string in the house's voice: plain,
 warm, lower-case chintan, never an em dash or an en dash. Dark mode is a
 first-class citizen, not a theme.
 
+## The doors the house serves (chintan-app, one host)
+
+`/v1/health`, `/v1/cockpit` (text), `/v1/board` (the to-dos as text),
+`/v1/painting` and `/v1/painting.jpg` (the day's painting), `/v1/pulse`
+(meters[] with key, name, fraction 0 to 1, resets, words; tended = the last
+round's time), `/v1/say` and `/v1/say/ID` (the study). Anything shown as a
+number, ring or bar comes from one of these or is not shown.
+
 ## The rules of a sprint
 
 - One improvement per run, finished: designed, built, seen in the
