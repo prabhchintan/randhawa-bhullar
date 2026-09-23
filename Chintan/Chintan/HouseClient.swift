@@ -45,13 +45,21 @@ struct HouseClient {
         return try JSONDecoder().decode(Cockpit.self, from: data).text
     }
 
-    // The day's painting: its label from the house, the picture itself from
-    // the house too, so the app still talks to one host.
-    struct Painting: Decodable {
+    // A painting: its label from the house, the picture itself from the
+    // house too, so the app still talks to one host. The shelf (since
+    // 2026-09-23) is today's and the days ahead; each has an id and the path
+    // of its picture, and the phone keeps them all so they are there offline.
+    struct Painting: Codable, Equatable {
+        let id: String?
         let title: String?
         let artist: String?
         let year: String?
         let credit: String?
+        let date: String?
+        let image: String?
+
+        var key: String { id ?? "today" }
+        var imagePath: String { image ?? "/v1/painting.jpg" }
     }
 
     func painting() async throws -> Painting {
@@ -60,11 +68,81 @@ struct HouseClient {
         return try JSONDecoder().decode(Painting.self, from: data)
     }
 
-    func paintingImage() async throws -> Data {
-        guard let url = url("/v1/painting.jpg") else { throw HouseError.noAddress }
+    // The shelf, today's first. A house without this door answers 404.
+    func paintings() async throws -> [Painting] {
+        guard let url = url("/v1/paintings") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
+        struct Shelf: Decodable { let paintings: [Painting] }
+        return try JSONDecoder().decode(Shelf.self, from: data).paintings
+    }
+
+    func paintingImage(_ painting: Painting? = nil) async throws -> Data {
+        guard let url = url(painting?.imagePath ?? "/v1/painting.jpg") else { throw HouseError.noAddress }
         let (data, response) = try await Self.session.data(from: url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
         return data
+    }
+
+    // The site's visitors as people (the house folds Pulse's sessions; bots
+    // and datacenters are left out), and one person's visits with each page
+    // and the time spent on it.
+    struct Visit: Decodable, Identifiable {
+        struct Step: Decodable {
+            let page: String
+            let seconds: Int
+        }
+        let id: String
+        let at: Int
+        let seconds: Int
+        let pages: Int
+        let source: String?
+        let referrer: String?
+        let device: String?
+        let place: String?
+        let network: String?
+        let scroll: Int?
+        let steps: [Step]
+        let links: [String]?
+    }
+
+    struct Visitor: Decodable, Identifiable {
+        let id: String
+        let place: String
+        let country: String?
+        let network: String
+        let kind: String
+        let device: String
+        let first: Int
+        let last: Int
+        let visits: Int
+        let pages: Int
+        let seconds: Int
+        let returning: Bool
+        let source: String
+        let read: [String]
+        let masked: Bool
+        let realRegion: String?
+        let languages: String?
+        let visitList: [Visit]?
+    }
+
+    func visitors() async throws -> [Visitor] {
+        guard let url = url("/v1/visitors") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 { throw HouseError.noDoor }
+        guard http.statusCode == 200 else { throw HouseError.unreachable }
+        struct Book: Decodable { let visitors: [Visitor] }
+        return try JSONDecoder().decode(Book.self, from: data).visitors
+    }
+
+    func visitor(_ id: String) async throws -> Visitor {
+        guard let url = url("/v1/visitors/\(id)") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
+        struct One: Decodable { let visitor: Visitor }
+        return try JSONDecoder().decode(One.self, from: data).visitor
     }
 
     // The usage meters, each with its name, how much is spent, and when it

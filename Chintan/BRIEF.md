@@ -113,7 +113,9 @@ maintainer's MacBook, registered once with `scripts/yantar-runner.sh`. The
 house door grew `GET /v1/board` ({"text": ...}, his to-dos as the house
 prints them), and the app a third tab, the board, that shows them. The
 rungs after it, on his word: marking a thing done from the phone,
-notifications (needs an APNs key, his hands once), a widget.
+notifications (needs an APNs key, his hands once), a widget. On 09-23 the
+house added the guest book (VisitorsView.swift, `/v1/visitors`) and the
+painting shelf (Gallery in Theme.swift, `/v1/paintings`).
 
 The loop keeps its own run as before and, when it touches this app, reads
 this section first so two hands do not write the same file the same night.

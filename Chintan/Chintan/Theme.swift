@@ -48,23 +48,117 @@ enum Theme {
     }
 }
 
-// The day's painting, fetched once from the house and shared by every tab.
+// The gallery: the painting under every tab, and the shelf behind it. The
+// shelf (today's and the days ahead) is kept on the phone, pictures and all,
+// so the app opens on a painting with no house in reach and "next" is a tap
+// (Prab, 2026-09-23 07:15: "a dozen or so artworks that remain downloaded for
+// offline use, easily probably one of my favorite features"). His choice
+// holds for the day; a new day opens on its own painting.
 @MainActor
 final class Gallery: ObservableObject {
     @Published var image: UIImage?
     @Published var painting: HouseClient.Painting?
+    @Published var shelf: [HouseClient.Painting] = []
+
+    private var pictures: [String: UIImage] = [:]
+    private var fetching = false
+
+    private static let folder: URL = {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let url = caches.appendingPathComponent("paintings", isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }()
+    private static let shelfFile = folder.appendingPathComponent("shelf.json")
+    private static let chosenKey = "gallery.chosen"
+    private static let dayFormat: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+    private static var today: String { dayFormat.string(from: .now) }
+
+    private static func file(_ p: HouseClient.Painting) -> URL {
+        folder.appendingPathComponent(p.key + ".jpg")
+    }
 
     func load() async {
-        guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
-        let house = HouseClient(baseAddress: address)
-        async let label = try? house.painting()
-        async let picture = try? house.paintingImage()
-        let (l, p) = await (label, picture)
-        if let l { painting = l }
-        if let p, let ui = UIImage(data: p) {
-            let prepared = await Self.prepared(ui)
-            withAnimation(.easeInOut(duration: 0.6)) { image = prepared }
+        // What the phone already holds is shown at once, house or no house.
+        if shelf.isEmpty, let data = try? Data(contentsOf: Self.shelfFile),
+           let saved = try? JSONDecoder().decode([HouseClient.Painting].self, from: data), !saved.isEmpty {
+            shelf = saved
+            await show(chosen(in: saved), animated: image == nil)
         }
+        guard !fetching, let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        fetching = true
+        defer { fetching = false }
+        let house = HouseClient(baseAddress: address)
+        var fresh = (try? await house.paintings()) ?? []
+        if fresh.isEmpty, let one = try? await house.painting() { fresh = [one] }   // an older house
+        guard !fresh.isEmpty else { return }
+        shelf = fresh
+        try? JSONEncoder().encode(fresh).write(to: Self.shelfFile, options: .atomic)
+        await show(chosen(in: fresh), animated: true)
+        // The rest of the shelf comes down quietly, so next and an evening
+        // without the house both have pictures; what left the shelf leaves the phone.
+        for p in fresh where !FileManager.default.fileExists(atPath: Self.file(p).path) {
+            _ = await picture(p, from: house)
+        }
+        let keep = Set(fresh.map { $0.key + ".jpg" } + ["shelf.json"])
+        for name in (try? FileManager.default.contentsOfDirectory(atPath: Self.folder.path)) ?? [] where !keep.contains(name) {
+            try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(name))
+        }
+    }
+
+    // The next painting on the shelf that the phone holds; his choice is
+    // remembered for the day. False when there is nothing to turn to yet.
+    @discardableResult
+    func next() async -> Bool {
+        let ready = shelf.filter { pictures[$0.key] != nil || FileManager.default.fileExists(atPath: Self.file($0).path) }
+        guard ready.count > 1 else { return false }
+        let at = ready.firstIndex { $0.key == painting?.key } ?? -1
+        let p = ready[(at + 1) % ready.count]
+        UserDefaults.standard.set(p.key + "|" + Self.today, forKey: Self.chosenKey)
+        await show(p, animated: true)
+        return true
+    }
+
+    private func chosen(in list: [HouseClient.Painting]) -> HouseClient.Painting {
+        if let saved = UserDefaults.standard.string(forKey: Self.chosenKey) {
+            let parts = saved.split(separator: "|", maxSplits: 1).map(String.init)
+            if parts.count == 2, parts[1] == Self.today, let p = list.first(where: { $0.key == parts[0] }) {
+                return p
+            }
+        }
+        return list[0]
+    }
+
+    private func show(_ p: HouseClient.Painting, animated: Bool) async {
+        painting = p
+        var ui = pictures[p.key]
+        if ui == nil, let data = try? Data(contentsOf: Self.file(p)), let raw = UIImage(data: data) {
+            ui = await Self.prepared(raw)
+            pictures[p.key] = ui
+        }
+        if ui == nil, let address = Keychain.loadHouseAddress(), !address.isEmpty {
+            ui = await picture(p, from: HouseClient(baseAddress: address))
+        }
+        guard let ui, painting?.key == p.key else { return }
+        if animated {
+            withAnimation(.easeInOut(duration: 0.6)) { image = ui }
+        } else {
+            image = ui
+        }
+    }
+
+    // One picture from the house, kept on disk and decoded once.
+    private func picture(_ p: HouseClient.Painting, from house: HouseClient) async -> UIImage? {
+        guard let data = try? await house.paintingImage(p), let raw = UIImage(data: data) else { return nil }
+        try? data.write(to: Self.file(p), options: .atomic)
+        let ui = await Self.prepared(raw)
+        pictures[p.key] = ui
+        return ui
     }
 
     // Decoded once, off the main thread, at the size the screen fills with

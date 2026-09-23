@@ -117,7 +117,11 @@ screen explains its own shape.
 `/v1/health`, `/v1/cockpit` (text), `/v1/board` (the to-dos as text),
 `/v1/painting` and `/v1/painting.jpg` (the day's painting), `/v1/pulse`
 (meters[] with key, name, fraction 0 to 1, resets, words; tended = the last
-round's time), `/v1/say` and `/v1/say/ID` (the conversation; since 09-22 evening `POST
+round's time), `/v1/paintings` (the shelf: today's first then the days ahead, each with an id and
+its `image` path; `/v1/paintings/ID.jpg` is the picture at the phone's size; the
+phone keeps the whole shelf, since 09-23), `/v1/visitors` (the site's visitors as
+people, newest last seen first; `/v1/visitors/VID` is one person with `visitList`,
+each visit's `steps` as page and seconds; since 09-23), `/v1/say` and `/v1/say/ID` (the conversation; since 09-22 evening `POST
 /v1/say {"text": ..., "to": "chintan"|"darban"|"yaar"}` reaches the voice
 named, chintan when unnamed, and `GET /v1/voices` lists the three with a line
 each and their state), `POST /v1/done {"text": ...}` when the board asks for
@@ -284,11 +288,46 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    under paged tabs, a swipe between them, the selection haptic on each
    arrival. Left in slice 1: tab taps and first visits under 10 ms/s.
    Next slices: touch to reveal, the word for the house, MetricKit.
+H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
+   actual humans who visited, where from, and if I want I can click on it
+   and it shows me details of where all they went and how much time they
+   spent on which page"; a panel beside the three tabs, not a fourth; "we
+   can remove it if it doesn't hit"). Built by the house 09-23 morning:
+   `Visitors` lettered at the head of Home opens a sheet on glass over the
+   painting; one leaf per person (place, network and kind of line, visits,
+   pages, time, returning), shelves This week, This month, Earlier; a leaf
+   opens the person: the device, languages, the proxy tell, then each
+   visit as a leaf with its pages in order and the seconds on each, and
+   any link followed out. The data behind it was put through the wringer
+   the same morning: 1,120 sessions since May, 43 percent bots and 7
+   percent datacenters (left out), 146 plausible people, 86 distinct;
+   only a quarter carry the deep client signals, so the person's line
+   leans on city, network kind, pages and time, which are always there.
+   Next slices: a mark on Home when someone new has come since he last
+   looked; the site's own page names instead of paths.
+E2. The shelf (Prab, 2026-09-23 07:15: "toggle to the next art ... some
+   dozen or so artworks that remain downloaded for offline use, easily one
+   of my favorite features"). Built by the house 09-23 morning: the house
+   pre-picks fourteen days (chintan-painting.timer 04:30, `ghar painting
+   fill`), the Gallery keeps the whole shelf on the phone (pictures in
+   Caches/paintings, the list in shelf.json), opens on the phone's own
+   copy before the house answers, and "next" under the museum label turns
+   to the next painting with a soft tick; his choice holds for the day.
+   Next slices: a swipe on the picture as the turn; yesterday's one turn
+   back; the keep gesture (E).
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · the house, by hand (the guest book and the shelf; chunks H
+  and E2): Home gains "Visitors" at the head of the wall, a sheet on glass
+  with the site's people as leaves and each person's visits told page by
+  page; and "next" under the label, the shelf of fourteen paintings kept
+  on the phone for offline and a tap to turn. House side: `/v1/paintings`,
+  `/v1/paintings/ID.jpg`, `/v1/visitors`, `/v1/visitors/VID`; the worker's
+  chintan wing gained `GET /chintan/pulse`. Seen: the screens job (below).
 
 - 2026-09-23 · sprint 13 (e23be7f, 5c4a924): one painting, a swipe that
   goes somewhere. The system TabView is gone: the painting is drawn once

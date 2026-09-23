@@ -13,6 +13,8 @@ struct JharokhaView: View {
     @State private var errorText: String?
     @State private var showCredit = false
     @State private var openMeter: String?
+    @State private var showVisitors = false
+    @State private var turned = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -28,11 +30,42 @@ struct JharokhaView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
             // One shade from the day's line down through the tab bar, no seam.
-            .background { PaintedGround(foot: geo.size.height * 0.75, footShade: 0.82) }
+            .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
+            .overlay(alignment: .topLeading) { guestBook }
         }
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
+        .sensoryFeedback(.impact(weight: .light), trigger: turned)
+        .sheet(isPresented: $showVisitors) {
+            VisitorsView()
+                .presentationBackground(.ultraThinMaterial)
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    // The guest book, lettered small at the head of the wall: who came to
+    // the site. Opens the visitors over the painting.
+    private var guestBook: some View {
+        Button {
+            showVisitors = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "book.closed")
+                    .font(.caption)
+                Text("Visitors")
+                    .font(Theme.label(.caption))
+                    .tracking(1)
+            }
+            .foregroundStyle(Theme.bone.opacity(0.85))
+            .shadow(color: .black.opacity(0.7), radius: 5)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("visitors")
+        .accessibilityLabel("Visitors to the site")
     }
 
     private var overlay: some View {
@@ -145,6 +178,35 @@ struct JharokhaView: View {
             .contentShape(Rectangle())
             .accessibilityIdentifier("label")
             .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
+            .overlay(alignment: .bottomTrailing) { nextMark.offset(y: 24) }
+            .padding(.bottom, 22)
+        }
+    }
+
+    // Under the label, the gallery's turn: the next painting on the shelf,
+    // the phone's own copy, with a soft tick when it comes.
+    @ViewBuilder private var nextMark: some View {
+        if gallery.shelf.count > 1 {
+            Button {
+                Task {
+                    if await gallery.next() { turned += 1 }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text("next")
+                        .font(Theme.label(.caption))
+                        .tracking(1)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                .foregroundStyle(Theme.giltOnArt)
+                .padding(.vertical, 6)
+                .padding(.leading, 12)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("next")
+            .accessibilityLabel("Next painting")
         }
     }
 
