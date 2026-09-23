@@ -172,10 +172,8 @@ A. The canvas (now). The palette re-cut to the look (bone, lamp black,
    tab with the right surface for its text; the rings under Home named
    from `/v1/pulse` or removed; the cut-off to-do line fixed. Slices: 1)
    palette and tab bar, 2) Board and Study get the painting and a surface,
-   3) rings and the label. Slices 1 and 2 done in sprint 4 (2477828); left
-   for slice 3: the rings named from `/v1/pulse`, Home's calendar leaf and
-   its cut-off first line re-cut in the new ink, and the study's plaques
-   seen with a real conversation (the eyes had none).
+   3) rings and the label. All three slices built (sprints 4 and 5); the
+   chunk waits on the fresh-eyes review. Next, B.
 B. The board on the canvas. Today, This week, Later on leaves over the
    picture; a thing done lifts off (`POST /v1/done`, house side to build
    when this chunk opens); the why on tap; the empty board is the painting
@@ -202,6 +200,19 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 5 (2d3354f): the canvas finished. Home's rings are
+  named from `/v1/pulse` (hours, week, Fable in small serif capitals under
+  each), and a tap on one says it in a line of italic ("18 percent of the
+  five hours, fresh again 10:30 PM."), its name turning gilt; the
+  cockpit's meters stay as the fallback when the door is quiet. The
+  calendar leaves are re-cut: the weekday in gilt small capitals (saffron
+  once the day comes), the day in bone serif, a gilt hairline on a faint
+  lamp black, square corners like a mount. A long thing wraps to a second
+  line instead of ending in dots. The study was seen for the first time
+  with a conversation (a sample put on the simulator only): bone plaques
+  and smoked glass both read cleanly over the painting in light and dark;
+  no change needed. Seen in both modes against the real house. No new door.
 
 - 2026-09-22 · sprint 4 (2477828): the canvas. The brown paper is gone
   from every screen and the asset catalog (Ground in bone and lamp black,
