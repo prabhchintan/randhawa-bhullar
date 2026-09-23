@@ -105,14 +105,13 @@ catch-all.
 
 ## The backlog (top is next)
 
-1. Home as the painting: the day's painting full bleed from `/v1/painting.jpg`
-   (live on the house since 2026-09-22 evening; `/v1/painting` carries
-   title, artist, year, credit), its label small in a corner (the credit on
-   tap), and over or beneath it the day in a few lines: today's dated
-   to-dos with their consequence, the next thing on the calendar, the
-   house's pulse as a quiet mark. Light and dark both read; the painting is
-   the light. A second slice, later: the cockpit's structure as native tiles
-   below the fold, never on top of the picture.
+1. Home, the second slice: the cockpit's structure as native tiles below
+   the fold (reminders, jobs, desk, spend, rounds, doors), never on top of
+   the picture, and the meters' letters (s, w, f) given names or dropped.
+   Needs `/v1/cockpit.json`: {"headline": "Quiet evening.", "raised": [],
+   "meters": {"s": 11, "w": 38, "f": 65}, "tiles": [{"name": "reminders",
+   "value": 23, "of": null, "state": "ok"}, ...]}; the app reads the text
+   door until it exists.
 2. The board: Today, This week, Later; done from the phone; the why on tap.
 3. The study: bubbles, time stamps, thinking state, history, retry, the
    keyboard.
@@ -123,6 +122,17 @@ catch-all.
    target), notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 3 (8d9ae91): Home is the day's painting. The wall
+  of monospaced text is gone; the house's painting fills the screen, the
+  date in small serif capitals and the day's first sentence large over its
+  foot, the dated things of the coming week on calendar leaves (one leaf
+  per day, the gist of each thing beside it, saffron once the day comes),
+  the meters as three rings with a green dot for nothing raised, and the
+  museum label bottom right with the credit on tap. The house's long dashes
+  are shown as hyphens. Seen in both modes against the real house; a thin
+  dark sliver sits at the very top edge. No new door used; the tiles slice
+  asks for `/v1/cockpit.json` (shape in the backlog).
 
 - 2026-09-22 · sprint 2 (040297d): the icon. The old blue dot on black is
   gone; the app is now a paper jharokha on the deep saffron: an arched
