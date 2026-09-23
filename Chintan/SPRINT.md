@@ -289,7 +289,10 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    hitch numbers, and by him. Slice 1 built (sprint 13): one painting
    under paged tabs, a swipe between them, the selection haptic on each
    arrival. Left in slice 1: tab taps and first visits under 10 ms/s.
-   Next slices: touch to reveal, the word for the house, MetricKit.
+   Slice 2 begun (sprint 15): touch to reveal on Home's rings, with the
+   soft impact. Next: the same on a leaf, a room name and the label (the
+   plaque in JharokhaView's RingPlaque is the pattern), then the word for
+   the house, MetricKit.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -322,6 +325,39 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 15 (77388ec, b5f45dd): a ring held, and Home's
+  foot. A ring on Home, pressed and held, now grows a small opaque plaque
+  just above the rings, out of the ring pressed (`.snappy`, scale and
+  fade): the ring larger with its number inside ("21"), the window's own
+  name from `/v1/pulse` in gilt capitals ("The five hours"), and when it
+  comes back in italic ("Fresh again 8:50 AM"); the house's words only
+  where they say more than the ring and the name. The held ring's name
+  turns gilt; a soft impact as it grows, none as it folds; let go and it
+  folds back. The tap still says the line in italic, as before. First look
+  had the plaque sitting on the rings and the leaves ghosting through its
+  97 percent; now it stands clear and whole, and narrower, so it never
+  touches the label. Home takes the Board's foot (`Theme.foot`, 96 points
+  of fade and the list's end clear of it): at rest the wall sits a little
+  higher, and at the largest text the last thing dissolves above the bar
+  instead of running under it (seen, "for the next" fading out). The walk
+  found a jolt from sprint 14: a tap on the museum label opened the credit,
+  whose long line made the label too wide for the rings' row, so the whole
+  wall jumped up with the rings thrown under the label, crossing the
+  leaves mid-flight; the shape is now chosen by text size (the label under
+  the rings only at the accessibility sizes), and the film shows the rings
+  still and the credit opening in place. Seen in both modes, held and at
+  rest; the film's hold-ring sheet shows the plaque grow across one 250 ms
+  frame and gone on release. The hitch numbers, before then after (ms/s):
+  first visits 35.8 to 28.5, tab taps 42.1 to 42.6, swipe 62.0 to 57.5
+  (the Mac's frames; neither was touched), board scroll 15.7 and study
+  scroll 6.1 after (they did not log before); reveal, new, 50.2 over three
+  holds with 4 hitches, worst 113 ms, likely the plaque's first build and
+  its shadow; next, keep the plaque built and hidden, or draw its shadow
+  once. The audit: 22 to 14; Home's label and next no longer read
+  "partially unsupported" (the ViewThatFits was what it measured). Left:
+  the full-screen unnamed element, and two study bubbles. The walk and the
+  hitch meter now hold a ring. No new door.
 
 - 2026-09-23 · sprint 14 (c384cc0): the largest text, seen and fixed.
   The audit's "partially unsupported" readings sent the eyes to the phone's
