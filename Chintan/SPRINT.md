@@ -39,7 +39,11 @@ The shape to grow into (four tabs, in this order):
 Design language: system fonts (a serif for titles, `.design(.serif)`, the
 body in the text style), a warm neutral palette that reads in light and
 dark, one accent (a deep saffron), generous spacing, real SF Symbols, no
-decoration for its own sake. Every string in the house's voice: plain,
+decoration for its own sake. And visual before verbal (his word, 09-22
+19:18, "make it more visual"): he wants to see the household alive, not
+read about it; tiles, marks, colour and shape carry meaning, a number is a
+bar or a ring before it is a digit, and text appears only where it earns its
+place. Every string in the house's voice: plain,
 warm, lower-case chintan, never an em dash or an en dash. Dark mode is a
 first-class citizen, not a theme.
 
