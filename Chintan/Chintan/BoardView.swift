@@ -48,7 +48,7 @@ struct BoardView: View {
                             .padding(.top, geo.size.height * 0.30)
                             .padding(.horizontal, 6)
                         if !shelves.isEmpty || errorText != nil {
-                            board.plaque()
+                            board
                         }
                     }
                     .padding(.horizontal, 16)
@@ -105,36 +105,52 @@ struct BoardView: View {
         }
     }
 
+    // Each shelf is named on the art, and under it one leaf per day: the
+    // painting shows between the days instead of one long list.
     private var board: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 10) {
             if let errorText {
                 Label(errorText, systemImage: "wifi.slash")
                     .font(.footnote)
                     .foregroundStyle(Theme.ink.opacity(0.7))
                     .padding(.vertical, 14)
+                    .padding(.horizontal, 18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .plaque()
             }
             ForEach(Array(shelves.enumerated()), id: \.element.title) { index, section in
                 Text(section.title)
-                    .font(Theme.label(.caption))
+                    .font(Theme.label())
                     .tracking(1)
-                    .foregroundStyle(Theme.gilt)
-                    .padding(.top, index == 0 ? 16 : 26)
-                    .padding(.bottom, 4)
-                ForEach(Array(section.items.enumerated()), id: \.element.id) { i, item in
-                    // The date is lettered once for a run of things due the same day.
-                    VStack(spacing: 0) {
-                        row(item, dated: i == 0 || section.items[i - 1].date != item.date)
-                        if item.id != section.items.last?.id {
-                            Rectangle().fill(Theme.gilt.opacity(0.28)).frame(height: 0.5)
-                        }
-                    }
-                    .id(item.id)
-                    .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .offset(y: -18))))
+                    .foregroundStyle(Theme.giltOnArt)
+                    .shadow(color: .black.opacity(0.8), radius: 6)
+                    .padding(.horizontal, 6)
+                    .padding(.top, index == 0 ? 6 : 18)
+                ForEach(section.days) { day in
+                    leaf(day.items)
                 }
             }
         }
+    }
+
+    private func leaf(_ items: [BoardItem]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.element.id) { i, item in
+                // The date is lettered once, at the head of its leaf.
+                VStack(spacing: 0) {
+                    if i > 0 {
+                        Rectangle().fill(Theme.gilt.opacity(0.28)).frame(height: 0.5)
+                    }
+                    row(item, dated: i == 0)
+                }
+                .id(item.id)
+                .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .offset(y: -18))))
+            }
+        }
         .padding(.horizontal, 18)
-        .padding(.bottom, 8)
+        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .plaque()
     }
 
     private func row(_ item: BoardItem, dated: Bool) -> some View {
@@ -290,6 +306,24 @@ extension BoardItem {
 }
 
 extension BoardSection {
+    // A run of things due the same day, one leaf on the board.
+    struct Day: Identifiable {
+        let id: String
+        let items: [BoardItem]
+    }
+
+    var days: [Day] {
+        var runs: [Day] = []
+        for item in items {
+            if let last = runs.last, last.items.first?.date == item.date {
+                runs[runs.count - 1] = Day(id: last.id, items: last.items + [item])
+            } else {
+                runs.append(Day(id: item.date ?? "undated-\(runs.count)", items: [item]))
+            }
+        }
+        return runs
+    }
+
     // The open things by when they fall, soonest first: Today (and anything
     // already past), This week (through Sunday), Later. Things without a
     // date close Later in the house's own order. Done means gone.
