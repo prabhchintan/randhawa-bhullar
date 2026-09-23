@@ -60,24 +60,69 @@ The shape to grow into (four tabs, in this order):
    timers, each with its last run and state; the usage meters as bars; the
    doctor's list. The system seen, which is the point of the app.
 
-Design language: system fonts (a serif for titles, `.design(.serif)`, the
-body in the text style), a warm neutral palette that reads in light and
-dark, one accent (a deep saffron), generous spacing, real SF Symbols, no
-decoration for its own sake. And visual before verbal (his word, 09-22
-19:18, "make it more visual"): he wants to see the household alive, not
-read about it; tiles, marks, colour and shape carry meaning, a number is a
-bar or a ring before it is a digit, and text appears only where it earns its
-place. Every string in the house's voice: plain,
-warm, lower-case chintan, never an em dash or an en dash. Dark mode is a
-first-class citizen, not a theme.
+The maintainer's word, 2026-09-22 19:44, on the whole app: every tab works
+the way Home works, the painting under everything, the conversation too,
+with translucent and opaque layers so the text makes sense; all three
+voices in the app (chintan, darban, yaar); and the look re-cut: "colors
+could be classier and more elegant, the brown seems kinda low class. I
+want this to feel like a high end museum but also incorporate Sikh and
+Indian art in it, though extremely classy and tasteful imagery and art.
+Architecture, art, you get the idea." And: Opus is said to have amazing
+aesthetic standards; show them.
+
+## The look (re-cut 2026-09-22 evening, governs every screen)
+
+A high-end museum, not a paper notebook. Think the wall label, the gilt
+hairline, the quiet of a gallery at night. The warm brown paper is retired.
+
+- Ground: the painting. Where there is no painting (never, ideally) the
+  ground is bone in light (a cool ivory, not tan) and lamp black in dark (a
+  warm near-black, gallery walls after hours). No brown, no beige cards.
+- Ink: graphite in light, bone in dark. Never pure black on pure white.
+- One accent, used hair-thin: old gold (a muted gilt, the frame's edge),
+  for rules, the active tab, a date. Saffron survives as a single mark
+  only (the day that has come, a thing that needs his hand); never a fill,
+  never a tint over a screen.
+- Surfaces for text: glass over the painting (ultra thin material), a soft
+  gradient scrim at the foot or head of the picture, or a small opaque
+  plaque in bone or lamp black with a gilt hairline for the densest text
+  (the conversation). Each tab picks the lightest surface that keeps its
+  text legible in both modes; the picture is always seen through or
+  around it. Never a full-width opaque strip, never a card grid.
+- Type: the serif for titles and the day's line; small capitals with
+  tracking for labels and section names, the way a museum letters a wall;
+  the body in the text style. Few sizes, large gaps.
+- The tab bar is drawn on the art: translucent, the icons in bone, the
+  active one in gilt, the painting running under it (his word, 19:38).
+- The collection: real works from open collections (The Met, Cleveland),
+  chosen for the phone's frame. European painting and the subcontinent's
+  own: Pahari, Kangra, Guler, Basohli, Sikh school, Mughal, Deccan, Rajput;
+  ragamala, court, landscape, nayika, architecture (Amritsar, the forts,
+  the havelis, in period photographs and drawings). Tasteful and exact:
+  the house never shows the Gurus under a to-do list or a chat (works
+  depicting the Gurus are left out of the daily rotation, his to overrule),
+  nothing lurid, nothing kitsch, no clip-art Khanda, no orange gradients.
+  The label is the only decoration: title, artist, year, credit, on tap.
+- Motion: none for its own sake. A painting fades in; a done thing lifts
+  off its leaf; the thinking state breathes.
+
+The older words still hold where they do not conflict: system fonts, real
+SF Symbols, every string in the house's voice, dark mode first-class,
+visual before verbal (his word, 09-22 19:18): a number is a ring or a bar
+before it is a digit, text only where it earns its place, nothing on a
+screen explains its own shape.
 
 ## The doors the house serves (chintan-app, one host)
 
 `/v1/health`, `/v1/cockpit` (text), `/v1/board` (the to-dos as text),
 `/v1/painting` and `/v1/painting.jpg` (the day's painting), `/v1/pulse`
 (meters[] with key, name, fraction 0 to 1, resets, words; tended = the last
-round's time), `/v1/say` and `/v1/say/ID` (the study). Anything shown as a
-number, ring or bar comes from one of these or is not shown.
+round's time), `/v1/say` and `/v1/say/ID` (the conversation; since 09-22 evening `POST
+/v1/say {"text": ..., "to": "chintan"|"darban"|"yaar"}` reaches the voice
+named, chintan when unnamed, and `GET /v1/voices` lists the three with a line
+each and their state), `POST /v1/done {"text": ...}` when the board asks for
+it. Anything shown as a number, ring or bar comes from one of these or is
+not shown.
 
 ## The rules of a sprint
 
@@ -116,23 +161,42 @@ stops the sprints until the maintainer's word, enough rests them until a
 named time, flat slows them. The nightly TestFlight build stays as the
 catch-all.
 
-## The backlog (top is next)
+## The roadmap, in chunks (2026-09-22 19:44; each chunk is a few sprints)
 
-1. Home, the second slice: the cockpit's structure as native tiles below
-   the fold (reminders, jobs, desk, spend, rounds, doors), never on top of
-   the picture, and the meters' letters (s, w, f) given names or dropped.
-   Needs `/v1/cockpit.json`: {"headline": "Quiet evening.", "raised": [],
-   "meters": {"s": 11, "w": 38, "f": 65}, "tiles": [{"name": "reminders",
-   "value": 23, "of": null, "state": "ok"}, ...]}; the app reads the text
-   door until it exists.
-2. The board: Today, This week, Later; done from the phone; the why on tap.
-3. The study: bubbles, time stamps, thinking state, history, retry, the
-   keyboard.
-4. The house: agents, timers, meters, the doctor.
-5. Settings: the health check as a green dot on the Home tab, settings one
-   tap away, a version line.
-6. Later, on the maintainer's word: a widget (App Group and an extension
-   target), notifications (an APNs key, his hands), Siri.
+Take them in order; a sprint takes the next slice of the open chunk. The
+chunk is done when the fresh-eyes review says so against the look above.
+
+A. The canvas (now). The palette re-cut to the look (bone, lamp black,
+   graphite, gilt hairlines; the brown gone from every screen and the
+   asset catalog); the tab bar drawn on the art; the painting under every
+   tab with the right surface for its text; the rings under Home named
+   from `/v1/pulse` or removed; the cut-off to-do line fixed. Slices: 1)
+   palette and tab bar, 2) Board and Study get the painting and a surface,
+   3) rings and the label.
+B. The board on the canvas. Today, This week, Later on leaves over the
+   picture; a thing done lifts off (`POST /v1/done`, house side to build
+   when this chunk opens); the why on tap; the empty board is the painting
+   alone with one line. The day card's philosophy, nothing more.
+C. The study, three voices. The conversation legible over the painting
+   (ink on a plaque or glass, never a raw bubble on the picture); the
+   voice chosen at the top the way a gallery names its room: chintan,
+   darban, yaar; history kept per voice; a thinking state that breathes;
+   time stamps; failures said plainly; retry; the composer above the
+   keyboard. Uses `to` on `/v1/say` and `/v1/voices` (house side live
+   09-22 evening).
+D. The house. The household seen: darban, yaar, the hands, the timers,
+   each with its last run and state as marks not words; the meters as
+   bars; the doctor's word. `/v1/cockpit.json` when the tiles need
+   structure (shape: {"headline", "raised": [], "meters": {"s","w","f"},
+   "tiles": [{"name","value","of","state"}]}).
+E. The collection. The painting alone on tap (label away, pinch to look);
+   the subcontinent's art and architecture woven into the rotation (house
+   side: Cleveland as a second source and the Indian and Sikh themes live
+   09-22 evening; architecture next); a keep gesture that files today's
+   painting in the vault's baithak; yesterday's painting one swipe away.
+F. Settings and the edges. The health dot; settings one tap away; a
+   version line; then on his word a widget (App Group, extension target),
+   notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
 
