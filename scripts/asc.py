@@ -508,6 +508,23 @@ def main(argv=None):
 
     args = parser.parse_args(argv)
     asc = ASC()
+    if args.command == "certificates":
+        import datetime as _dt
+        certs = asc.get_all("/v1/certificates")
+        now = _dt.datetime.now(_dt.timezone.utc)
+        for c in certs:
+            a = c["attributes"]
+            exp = _dt.datetime.fromisoformat(a["expirationDate"].replace("Z", "+00:00"))
+            made = exp - _dt.timedelta(days=365)
+            fresh = (now - made).total_seconds() / 3600
+            mark = ""
+            if args.revoke_newer_than is not None and a.get("name", "").startswith("Apple Development") \
+                    and 0 <= fresh <= args.revoke_newer_than:
+                asc.delete(f"/v1/certificates/{c['id']}")
+                mark = "  REVOKED"
+            print(f"{c['id']}  {a.get('certificateType')}  {a.get('name')}  made about {made:%Y-%m-%d %H:%M}Z{mark}")
+        return
+
 
     if args.command == "apps":
         for app in asc.get("/apps")["data"]:
@@ -551,23 +568,6 @@ def main(argv=None):
         print(f"{len(new)} new report files")
         for path in new:
             print("  " + path)
-        return
-
-    if args.command == "certificates":
-        import datetime as _dt
-        certs = asc.get_all("/v1/certificates")
-        now = _dt.datetime.now(_dt.timezone.utc)
-        for c in certs:
-            a = c["attributes"]
-            exp = _dt.datetime.fromisoformat(a["expirationDate"].replace("Z", "+00:00"))
-            made = exp - _dt.timedelta(days=365)
-            fresh = (now - made).total_seconds() / 3600
-            mark = ""
-            if args.revoke_newer_than is not None and a.get("name", "").startswith("Apple Development") \
-                    and 0 <= fresh <= args.revoke_newer_than:
-                asc.delete(f"/v1/certificates/{c['id']}")
-                mark = "  REVOKED"
-            print(f"{c['id']}  {a.get('certificateType')}  {a.get('name')}  made about {made:%Y-%m-%d %H:%M}Z{mark}")
         return
 
     if args.command == "testflight":
