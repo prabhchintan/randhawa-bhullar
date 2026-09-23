@@ -6,6 +6,7 @@
 # fails. Needs CHINTAN_HOUSE in the environment (the house address).
 #
 #   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
+#                                                    (board@N: the Nth thing opened)
 set -euo pipefail
 OUT=${1:?usage: see.sh OUTDIR [tab ...]}; shift
 TABS=${*:-jharokha board study}
@@ -37,7 +38,10 @@ for mode in light dark; do
   xcrun simctl ui "$UDID" appearance "$mode"
   for tab in $TABS; do
     xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
-    xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "$tab" >/dev/null
+    # A tab written board@N is the board with its Nth thing opened on launch.
+    EXTRA=()
+    case "$tab" in *@*) EXTRA=(--open "${tab#*@}") ;; esac
+    xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "${tab%@*}" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
     sleep 6
     xcrun simctl io "$UDID" screenshot "$OUT/$tab-$mode.png" >/dev/null
   done

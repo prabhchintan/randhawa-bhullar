@@ -1,13 +1,15 @@
 import SwiftUI
 
 // The board: his to-dos as the house keeps them, read from the house door
-// and lettered on a plaque over the painting, in the house's order. Read
-// only for now; marking a thing done from the phone is a later rung.
+// and lettered on a plaque over the painting, soonest first under Today,
+// This week and Later. A thing opened on tap can be marked done.
 struct BoardItem: Identifiable {
     let id = UUID()
     let text: String
     let date: String?
     let done: Bool
+    // The line after its checkbox, as the house printed it; what done sends.
+    var line: String = ""
 }
 
 struct BoardSection: Identifiable {
@@ -24,8 +26,13 @@ struct BoardView: View {
     @State private var errorText: String?
     @State private var loaded = false
     @State private var open: Set<UUID> = []
+    // Lines the house has taken as done; they stay off until the next read.
+    @State private var gone: Set<String> = []
+    @State private var sending: UUID?
+    @State private var refused: [UUID: String] = [:]
 
-    private var count: Int { sections.reduce(0) { $0 + $1.items.filter { !$0.done }.count } }
+    private var shelves: [BoardSection] { BoardSection.shelves(sections, without: gone) }
+    private var count: Int { shelves.reduce(0) { $0 + $1.items.count } }
 
     var body: some View {
         GeometryReader { geo in
@@ -34,7 +41,7 @@ struct BoardView: View {
                     heading
                         .padding(.top, geo.size.height * 0.30)
                         .padding(.horizontal, 6)
-                    if !sections.isEmpty || errorText != nil {
+                    if !shelves.isEmpty || errorText != nil {
                         board.plaque()
                     }
                 }
@@ -92,7 +99,7 @@ struct BoardView: View {
                     .foregroundStyle(Theme.ink.opacity(0.7))
                     .padding(.vertical, 14)
             }
-            ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
+            ForEach(Array(shelves.enumerated()), id: \.element.title) { index, section in
                 Text(section.title)
                     .font(Theme.label(.caption))
                     .tracking(1)
@@ -101,10 +108,13 @@ struct BoardView: View {
                     .padding(.bottom, 4)
                 ForEach(Array(section.items.enumerated()), id: \.element.id) { i, item in
                     // The date is lettered once for a run of things due the same day.
-                    row(item, dated: i == 0 || section.items[i - 1].date != item.date)
-                    if item.id != section.items.last?.id {
-                        Rectangle().fill(Theme.gilt.opacity(0.28)).frame(height: 0.5)
+                    VStack(spacing: 0) {
+                        row(item, dated: i == 0 || section.items[i - 1].date != item.date)
+                        if item.id != section.items.last?.id {
+                            Rectangle().fill(Theme.gilt.opacity(0.28)).frame(height: 0.5)
+                        }
                     }
+                    .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .offset(y: -18))))
                 }
             }
         }
@@ -126,6 +136,11 @@ struct BoardView: View {
                         .foregroundStyle(Theme.ink.opacity(0.6))
                         .lineLimit(isOpen ? nil : 2)
                 }
+                if isOpen && !item.line.isEmpty {
+                    doneMark(item)
+                        .padding(.top, 8)
+                        .transition(.opacity)
+                }
             }
             Spacer(minLength: 0)
             if let day = item.day {
@@ -141,6 +156,60 @@ struct BoardView: View {
         }
     }
 
+    // The one action on the board, lettered like a label: a hairline circle
+    // and the word, gilt. The thing lifts off only once the house has it.
+    private func doneMark(_ item: BoardItem) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Button {
+                Task { await markDone(item) }
+            } label: {
+                HStack(spacing: 7) {
+                    ZStack {
+                        Circle().strokeBorder(Theme.gilt, lineWidth: 0.8)
+                        if sending == item.id {
+                            ProgressView().controlSize(.mini).tint(Theme.gilt)
+                        } else {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 8, weight: .semibold))
+                        }
+                    }
+                    .frame(width: 18, height: 18)
+                    Text("Done")
+                        .font(Theme.label(.caption))
+                        .tracking(1)
+                }
+                .foregroundStyle(Theme.gilt)
+                .padding(.vertical, 4)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(sending != nil)
+            if let words = refused[item.id] {
+                Text(words)
+                    .font(.system(.footnote, design: .serif).italic())
+                    .foregroundStyle(Theme.ink.opacity(0.6))
+            }
+        }
+    }
+
+    private func markDone(_ item: BoardItem) async {
+        guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        sending = item.id
+        refused[item.id] = nil
+        defer { sending = nil }
+        do {
+            try await HouseClient(baseAddress: address).done(item.line)
+            withAnimation(.easeOut(duration: 0.35)) {
+                _ = gone.insert(item.line)
+                open.remove(item.id)
+            }
+        } catch HouseError.noDoor {
+            withAnimation { refused[item.id] = "The house cannot take this from the phone yet." }
+        } catch {
+            withAnimation { refused[item.id] = "The house did not answer; still open." }
+        }
+    }
+
     private func refresh() async {
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errorText = "No house address yet. Add it in Settings."
@@ -150,7 +219,15 @@ struct BoardView: View {
         do {
             let text = try await HouseClient(baseAddress: address).board()
             sections = BoardParser.parse(text)
+            gone = []
+            refused = [:]
             errorText = nil
+            // For the house's eyes: a thing opened on launch, to see the action.
+            let args = ProcessInfo.processInfo.arguments
+            if let i = args.firstIndex(of: "--open"), i + 1 < args.count, let n = Int(args[i + 1]) {
+                let all = shelves.flatMap(\.items)
+                if n < all.count { open = [all[n].id] }
+            }
         } catch {
             errorText = "The house is not answering. Are you on the tailnet?"
         }
@@ -194,6 +271,26 @@ extension BoardItem {
     }
 }
 
+extension BoardSection {
+    // The open things by when they fall, soonest first: Today (and anything
+    // already past), This week, Later. Things without a date close Later in
+    // the house's own order. Done means gone.
+    static func shelves(_ sections: [BoardSection], without gone: Set<String>) -> [BoardSection] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let week = cal.date(byAdding: .day, value: 7, to: today) ?? today
+        let open = sections.flatMap(\.items).filter { !$0.done && !gone.contains($0.line) }
+        let dated = open.filter { $0.day != nil }.sorted { $0.day! < $1.day! }
+        let undated = open.filter { $0.day == nil }
+        let shelves = [
+            BoardSection(title: "Today", items: dated.filter { $0.day! <= today }),
+            BoardSection(title: "This week", items: dated.filter { $0.day! > today && $0.day! < week }),
+            BoardSection(title: "Later", items: dated.filter { $0.day! >= week } + undated),
+        ]
+        return shelves.filter { !$0.items.isEmpty }
+    }
+}
+
 // The house prints the board as plain text: a heading in capitals, then
 // one task per line in the vault's own task shape, a date after the
 // calendar mark and an optional phone lead after the bell. Anything the
@@ -214,14 +311,15 @@ enum BoardParser {
             if line.isEmpty { continue }
             if line.hasPrefix("- [") {
                 let done = line.hasPrefix("- [x]") || line.hasPrefix("- [X]")
-                var body = String(line.dropFirst(5)).trimmingCharacters(in: .whitespaces)
+                let whole = String(line.dropFirst(5)).trimmingCharacters(in: .whitespaces)
+                var body = whole
                 var date: String?
                 if let mark = body.range(of: "📅") {
                     let tail = body[mark.upperBound...].trimmingCharacters(in: .whitespaces)
                     date = tail.components(separatedBy: " ").first
                     body = String(body[..<mark.lowerBound]).trimmingCharacters(in: .whitespaces)
                 }
-                items.append(BoardItem(text: body, date: date, done: done))
+                items.append(BoardItem(text: body, date: date, done: done, line: whole))
             } else if !line.hasPrefix("-"), line == line.uppercased(), line.count < 40 {
                 flush()
                 title = line.capitalized

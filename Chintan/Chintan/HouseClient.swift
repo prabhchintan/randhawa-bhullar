@@ -11,6 +11,7 @@ struct HouseHealth: Decodable {
 enum HouseError: Error {
     case noAddress
     case unreachable
+    case noDoor
 }
 
 struct HouseClient {
@@ -91,6 +92,21 @@ struct HouseClient {
         let (data, _) = try await Self.session.data(from: url)
         struct Board: Decodable { let text: String }
         return try JSONDecoder().decode(Board.self, from: data).text
+    }
+
+    // A thing marked done from the phone; the house runs `ghar done` with the
+    // line as it printed it. A house without this door answers 404.
+    func done(_ text: String) async throws {
+        guard let doneURL = url("/v1/done") else { throw HouseError.noAddress }
+        var request = URLRequest(url: doneURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 30
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["text": text])
+        let (_, response) = try await Self.session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
+        guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
     }
 
     func say(_ text: String) async throws -> String {
