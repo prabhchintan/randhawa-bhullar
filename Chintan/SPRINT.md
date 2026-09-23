@@ -228,7 +228,9 @@ chunk is done when the fresh-eyes review says so against the look above.
 0. The eyes, deeper (next, before more polish): the walk with its film and
    contact sheet (built, sprint 10: `bash Chintan/scripts/see.sh --walk
    /tmp/see/walk` until the sprint job's tool list names walk.sh itself),
-   then the hitch numbers, then the audit; the house builds
+   the hitch numbers (built, sprint 11: the walk prints them; Instruments
+   has no hitches on the simulator, so the app meters its own frames),
+   then the audit (next); the house builds
    `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
    subscriber and the long-press "a word for the house" come with chunk G.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
@@ -282,6 +284,28 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 11 (20098ee): the hitch numbers, and the tab tap
+  unstalled. The simulator cannot give Apple's hitches: XCTest's scroll
+  metrics return only durations there, and Instruments says "Hitches is
+  not supported on this platform". So the app, launched with `--hitches`
+  (the walk only, never the phone), times its own frames with a display
+  link and writes each frame that lands more than half a frame late;
+  `ChintanHitches` (in the walk target, run after the film) logs a window
+  per gesture, and walk.sh prints the hitch time ratio in ms per s for
+  each. These are the Mac's frames, so read them before against after.
+  Before: first visits 60.6 ms/s (worst 132 ms), tab taps 63.8 (worst
+  122), swipe 9.4, board scroll 17.0 (worst 25), study scroll 29.3 (worst
+  117). Every tap between tabs stalled about a tenth of a second: each tab
+  decoded and scaled the full scan of the painting again. Now the painting
+  is decoded once, off the main thread, at the size the screen fills with
+  it (`byPreparingThumbnail`), and it looks as sharp as before in both
+  modes. After: first visits 50.3 (worst 133), tab taps 38.5 (worst 49),
+  swipe 0.0, board scroll 19.2 (worst 31), study scroll 16.5 (worst 29).
+  Still over 10 on a tab tap and on first visits; the next suspects are the
+  three copies of the painting and its shades (one layer under all tabs,
+  chunk G) and the Board's first fetch (its bare frame is still in the
+  film at +500 ms). The audit is next in chunk 0. No new door.
 
 - 2026-09-23 · sprint 10 (8f573b6): the walk, and the keyboard let go.
   The eyes: `ChintanWalk`, an XCUITest target (in the scheme's tests only,
