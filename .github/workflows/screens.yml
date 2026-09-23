@@ -1,12 +1,14 @@
 # The house's eyes on chintan, the private app: build for the simulator on
-# yantar, launch each tab against the real house (the simulator shares the
-# Mac's tailnet address, so the door answers), photograph it in light and
-# dark, and hand the pictures back as an artifact for chintan to read.
+# yantar, photograph every tab in light and dark against the real house
+# (Chintan/scripts/see.sh), and hand the pictures back as an artifact.
 name: screens
 
 on:
   workflow_dispatch:
-  workflow_call:
+
+concurrency:
+  group: chintan-yantar
+  cancel-in-progress: false
 
 jobs:
   screens:
@@ -16,51 +18,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: Build for the simulator
-        run: |
-          set -o pipefail
-          xcodebuild -project Chintan/Chintan.xcodeproj -scheme Chintan -configuration Debug \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO build \
-            > "$RUNNER_TEMP/sim.log" 2>&1 || { grep -E -B3 -A6 "error:" "$RUNNER_TEMP/sim.log" | tail -60; exit 1; }
-          grep -E "warning:|BUILD (SUCCEEDED|FAILED)" "$RUNNER_TEMP/sim.log" | tail -10
-
-      - name: Photograph every tab
+      - name: Look
         env:
-          HOUSE: ${{ secrets.CHINTAN_HOUSE }}
-        run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys
-          d=json.load(sys.stdin)["devices"]
-          for rt,devs in d.items():
-              for x in devs:
-                  if x["name"]=="iPhone 16 Pro": print(x["udid"]); raise SystemExit
-          ')
-          echo "device $UDID"
-          xcrun simctl boot "$UDID" 2>/dev/null || true
-          xcrun simctl bootstatus "$UDID" -b
-          APP=$(find "$RUNNER_TEMP/dd" -name Chintan.app -path '*iphonesimulator*' | head -1)
-          xcrun simctl install "$UDID" "$APP"
-          mkdir -p "$RUNNER_TEMP/shots"
-          for mode in light dark; do
-            xcrun simctl ui "$UDID" appearance "$mode"
-            for tab in study board jharokha; do
-              xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
-              xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "$HOUSE" --tab "$tab" >/dev/null
-              sleep 7
-              xcrun simctl io "$UDID" screenshot "$RUNNER_TEMP/shots/$tab-$mode.png" >/dev/null
-            done
-          done
-          xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
-          xcrun simctl shutdown "$UDID" || true
-          ls -la "$RUNNER_TEMP/shots"
-
+          CHINTAN_HOUSE: ${{ secrets.CHINTAN_HOUSE }}
+        run: bash Chintan/scripts/see.sh "$RUNNER_TEMP/shots"
       - uses: actions/upload-artifact@v4
         with:
           name: screens
-          path: ${{ runner.temp }}/shots
+          path: ${{ runner.temp }}/shots/*.png
           retention-days: 3
-
       - name: Sweep
         if: always()
-        run: rm -rf "$RUNNER_TEMP/dd" "$RUNNER_TEMP/shots" "$RUNNER_TEMP/sim.log"
+        run: rm -rf "$RUNNER_TEMP/shots"

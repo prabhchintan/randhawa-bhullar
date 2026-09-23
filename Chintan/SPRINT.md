@@ -65,6 +65,21 @@ first-class citizen, not a theme.
 - Commits say what changed for the person, not the code; one commit per
   sprint; the ledger line names the commit.
 
+## How a sprint runs (since 2026-09-22 evening)
+
+On yantar, the Mac that builds it, in one job (`.github/workflows/sprint.yml`,
+the brief `Chintan/SPRINT-BRIEF.md`): the hand builds and photographs the app
+on the machine as many times as its cycle allowance says (`scripts/see.sh`),
+commits, the job pushes, keeps the last look, and ships to TestFlight when
+the sprint says a person would notice (`scripts/ship.sh`). The house
+(`ghar sprint` on chintan) holds the gears, the gate on the usage meters,
+and the fresh-eyes review: every third sprint a reviewer that did not make
+the change compares the last two looks against this vision and world-class
+design principles and says improving, flat, worsening or enough; worsening
+stops the sprints until the maintainer's word, enough rests them until a
+named time, flat slows them. The nightly TestFlight build stays as the
+catch-all.
+
 ## The backlog (top is next)
 
 1. Design foundation, what is left: the app icon (scripts/makeicon.swift

@@ -1,0 +1,117 @@
+# One sprint on chintan, the private app, on yantar, the maintainer's MacBook:
+# Claude Code runs here with the brief in Chintan/SPRINT-BRIEF.md, builds and
+# photographs the app on this machine as many times as it needs, commits,
+# and the job pushes, keeps the last look as an artifact, and ships to
+# TestFlight when the sprint says a person would notice. Dispatched by the
+# house (ghar sprint on chintan), which keeps the gears, the gate and the
+# fresh-eyes review. Nothing secret is printed; the log is public.
+name: sprint
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "the model for the sprint"
+        default: claude-opus-5-5
+        type: string
+      cycles:
+        description: "build-and-look cycles allowed"
+        default: "4"
+        type: string
+      ship:
+        description: "auto (the sprint decides), yes, or no"
+        default: auto
+        type: choice
+        options: [auto, "yes", "no"]
+      steer:
+        description: "a sentence from the house, optional"
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chintan-yantar
+  cancel-in-progress: false
+
+jobs:
+  sprint:
+    runs-on: [self-hosted, macOS, yantar]
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code
+        run: |
+          export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+          claude update >/dev/null 2>&1 || true
+          claude --version
+          xcodebuild -version | head -1
+
+      - name: The sprint
+        id: sprint
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          CHINTAN_HOUSE: ${{ secrets.CHINTAN_HOUSE }}
+          MODEL: ${{ inputs.model }}
+          CYCLES: ${{ inputs.cycles }}
+          STEER: ${{ inputs.steer }}
+        run: |
+          export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+          git config user.name "chintan"
+          git config user.email "prab@hey.com"
+          rm -rf /tmp/see && mkdir -p /tmp/see
+          PROMPT="$(cat Chintan/SPRINT-BRIEF.md)
+
+          Cycles allowed this sprint: $CYCLES. Steer from the house: ${STEER:-none}."
+          TOOLS="Read Glob Grep Edit Write Bash(bash Chintan/scripts/see.sh:*) Bash(git add:*) Bash(git commit:*) Bash(git status:*) Bash(git diff:*) Bash(git log:*) Bash(ls:*) Bash(cat:*) Bash(cp:*) Bash(mkdir:*) Bash(python3:*) Bash(plutil:*) Bash(swift:*) Bash(xcrun simctl:*) Bash(sleep:*)"
+          OUT=$(timeout 4200 claude -p "$PROMPT" --model "$MODEL" --output-format json \
+                --permission-mode acceptEdits --allowedTools "$TOOLS" < /dev/null 2>/tmp/see/claude.err || true)
+          RESULT=$(python3 -c 'import json,sys
+          try: print(json.load(sys.stdin).get("result",""))
+          except Exception: print("")' <<<"$OUT")
+          [ -z "$RESULT" ] && { echo "no result from the sprint:"; tail -5 /tmp/see/claude.err; }
+          NOTE=$(printf '%s\n' "$RESULT" | sed -n 's/^NOTE:[[:space:]]*//p' | tail -1)
+          SHIP=$(printf '%s\n' "$RESULT" | sed -n 's/^SHIP:[[:space:]]*//p' | tail -1 | tr '[:upper:]' '[:lower:]')
+          echo "NOTE: ${NOTE:-the sprint left no note}"
+          echo "SHIP: ${SHIP:-no}"
+          echo "ship=${SHIP:-no}" >> "$GITHUB_OUTPUT"
+          { echo "## sprint"; echo; echo "NOTE: ${NOTE:-none}"; echo; echo "SHIP: ${SHIP:-no}"; echo; git log --oneline origin/main..HEAD; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push
+        run: |
+          git status --short | head -5
+          git add -A Chintan && git commit -q -m "sprint: leftovers" 2>/dev/null || true
+          if [ -n "$(git log --oneline origin/main..HEAD)" ]; then
+            git pull --rebase -q origin main && git push -q origin HEAD:main && echo "pushed: $(git log --oneline -1)"
+          else
+            echo "nothing to push"
+          fi
+
+      - name: The last look
+        if: always()
+        run: |
+          mkdir -p /tmp/see/last
+          ls /tmp/see/last/*.png >/dev/null 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screens
+          path: /tmp/see/last
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Ship to TestFlight
+        if: ${{ inputs.ship == 'yes' || (inputs.ship == 'auto' && steps.sprint.outputs.ship == 'yes') }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: bash Chintan/scripts/ship.sh
+
+      - name: Sweep
+        if: always()
+        run: rm -rf /tmp/see/claude.err
