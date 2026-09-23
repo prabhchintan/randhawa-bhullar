@@ -67,7 +67,7 @@ struct StudyView: View {
             Text(message.text)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(message.fromHouse ? Theme.card : Color.accentColor.opacity(0.18))
+                .background(message.fromHouse ? Theme.card : Theme.saffron.opacity(0.18))
                 .clipShape(RoundedRectangle(cornerRadius: 18))
             if message.fromHouse { Spacer(minLength: 40) }
         }

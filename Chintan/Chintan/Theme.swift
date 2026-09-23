@@ -7,6 +7,7 @@ import UIKit
 enum Theme {
     static let paper = Color("Paper")
     static let card = Color("Card")
+    static let saffron = Color("AccentColor")
     static let spacing: CGFloat = 16
 
     static func title(_ style: Font.TextStyle = .title2) -> Font {

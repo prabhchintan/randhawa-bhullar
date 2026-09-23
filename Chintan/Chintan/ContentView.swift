@@ -49,9 +49,11 @@ struct ContentView: View {
             .tabItem { Label("Study", systemImage: "bubble.left.and.text.bubble.right") }
             .tag(Tab.study)
         }
+        .tint(Theme.saffron)
         .environmentObject(store)
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+                .tint(Theme.saffron)
         }
     }
 }
