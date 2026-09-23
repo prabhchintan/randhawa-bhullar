@@ -67,9 +67,9 @@ first-class citizen, not a theme.
 
 ## The backlog (top is next)
 
-1. Design foundation: palette (light and dark), type, spacing, a tint, the
-   tab bar's names and symbols, the app icon (scripts/makeicon.swift shows
-   how the siblings make theirs), a launch screen that is not white.
+1. Design foundation, what is left: the app icon (scripts/makeicon.swift
+   shows how the siblings make theirs). Palette, serif titles, the saffron
+   tint, the tabs and the paper launch screen are in (Theme.swift).
 2. Home: replace the monospaced cockpit text with native tiles from the
    cockpit's structure; today's to-dos on top with their consequence.
 3. The board: Today, This week, Later; done from the phone; the why on tap.
@@ -82,6 +82,16 @@ first-class citizen, not a theme.
    target), notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 1 (88828e6, b556d6e): the app has the house's colours.
+  Warm paper under every screen with its own dark, lighter cards, serif
+  titles, a deep saffron on the tabs, the gear and the send arrow; the tabs
+  are Home, Board, Study with Home first and the app opens there; the
+  composer is a soft pill with a round arrow; the launch screen is paper
+  (seen only as a green build, the eyes do not catch launch). The global
+  accent alone left things system blue, so the tint is set by name. Seen in
+  both modes on yantar. The empty Home still has a gap above its card; item
+  2 replaces that screen.
 
 - 2026-09-22 · sprint 0 (chintan, by hand): the board tab, launch arguments
   for the simulator's eyes, screens.yml and chintan.yml on yantar. The app
