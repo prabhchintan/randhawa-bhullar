@@ -327,7 +327,9 @@ F. Settings and the edges. The health dot; settings one tap away; a
   page; and "next" under the label, the shelf of fourteen paintings kept
   on the phone for offline and a tap to turn. House side: `/v1/paintings`,
   `/v1/paintings/ID.jpg`, `/v1/visitors`, `/v1/visitors/VID`; the worker's
-  chintan wing gained `GET /chintan/pulse`. Seen: the screens job (below).
+  chintan wing gained `GET /chintan/pulse`. Seen: screens run 35866934353,
+  Home in both modes, Visitors at the head, next under the label; shipped to
+  TestFlight from yantar as build 202609231327 at 07:29.
 
 - 2026-09-23 · sprint 13 (e23be7f, 5c4a924): one painting, a swipe that
   goes somewhere. The system TabView is gone: the painting is drawn once
