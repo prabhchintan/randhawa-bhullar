@@ -230,7 +230,8 @@ chunk is done when the fresh-eyes review says so against the look above.
    /tmp/see/walk` until the sprint job's tool list names walk.sh itself),
    the hitch numbers (built, sprint 11: the walk prints them; Instruments
    has no hitches on the simulator, so the app meters its own frames),
-   then the audit (next); the house builds
+   the audit (built, sprint 12: `see.sh --walk --audit OUT` runs it alone;
+   left: the contrast findings on the plaques, see the ledger); the house builds
    `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
    subscriber and the long-press "a word for the house" come with chunk G.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
@@ -284,6 +285,32 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 12 (8e2605a): the audit, and what it found fixed.
+  `ChintanAudit` (in the walk target) runs Apple's
+  `performAccessibilityAudit` on Home, the Board, the Board with a leaf
+  open, the study and darban's room, once light and once dark (walk.sh sets
+  the look, `AUDIT_LOOK`); each finding is a line in audit.tsv (screen,
+  look, kind, element, word) and walk.sh prints them; `see.sh --walk
+  --audit OUT` runs the audit alone in about three minutes. Before: 110
+  findings. Fixed and seen in both modes: Home's museum label read "Edgar
+  Degas (French, 1834-1917), c..." and now wraps whole; the weekday on
+  Home's leaves, the rings' names and the board's due marks were fixed
+  11 point type or set in caption2 and did not grow with the phone's text
+  size (now caption, a point larger, grows); the raised mark was a 7
+  point dot and now carries a 44 point target; the board's reasons went
+  from 60 to 72 percent ink and the gilt in light a touch deeper (4.4 to
+  5 against bone); a plaque's shadow fell from its letters too and now
+  falls from the plaque alone; darban's empty room has a pool of shade
+  under its line. After: 74, and every dynamic type, hit region and
+  Home clipping finding is gone. Left: the rest are contrast findings that
+  do not match the pictures (bone on lamp black at about 15 to 1 reads
+  "failed"), on the Board and the study's bubbles, plus Home's lines over
+  the picture; the fade mask is not the cause (tried with it off, same
+  list). Next: read `detailedDescription` and the element's own
+  screenshot to see what the audit samples, then fix or waive each by
+  name. The board's reasons cut at two lines ("Text clipped") are the
+  design, the rest on tap. No new door.
 
 - 2026-09-23 · sprint 11 (20098ee): the hitch numbers, and the tab tap
   unstalled. The simulator cannot give Apple's hitches: XCTest's scroll
