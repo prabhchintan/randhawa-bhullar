@@ -7,7 +7,12 @@ enum Keychain {
     private static let service = "Prabhchintan.Chintan.house"
     private static let account = "houseAddress"
 
+    // Set from the command line (--house) for the house's own screenshots in
+    // the simulator; wins over the Keychain and never persists.
+    static var override: String?
+
     static func loadHouseAddress() -> String? {
+        if let override, !override.isEmpty { return override }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,

@@ -9,7 +9,7 @@ struct ChintanApp: App {
         // takes a picture of it. A phone never passes these.
         let args = ProcessInfo.processInfo.arguments
         if let i = args.firstIndex(of: "--house"), i + 1 < args.count {
-            Keychain.saveHouseAddress(args[i + 1])
+            Keychain.override = args[i + 1]
         }
     }
 
