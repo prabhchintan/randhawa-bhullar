@@ -60,6 +60,22 @@ jobs:
           fi
           xcodebuild -version | head -1
 
+      # On yantar the login keychain holds the maintainer's own certificates,
+      # and a background process may not use their keys (errSecInternalComponent,
+      # seen 09-22). So the job signs in a keychain of its own, the way a
+      # GitHub Mac does: empty, unlocked, first in the search list; Xcode's
+      # cloud signing puts a fresh certificate in it and the sweep removes it.
+      - name: A keychain of its own
+        if: ${{ needs.pick.outputs.runner == 'yantar' }}
+        run: |
+          KC="$RUNNER_TEMP/build.keychain-db"
+          security create-keychain -p "" "$KC"
+          security set-keychain-settings -lut 7200 "$KC"
+          security unlock-keychain -p "" "$KC"
+          security list-keychains -d user -s "$KC" "$HOME/Library/Keychains/login.keychain-db"
+          security default-keychain -d user -s "$KC"
+          echo "BUILD_KEYCHAIN=$KC" >> "$GITHUB_ENV"
+
       - name: The key
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -118,4 +134,10 @@ jobs:
 
       - name: Sweep the key
         if: always()
-        run: rm -rf "$RUNNER_TEMP/asc" "$RUNNER_TEMP/export" "$RUNNER_TEMP/Chintan.xcarchive"
+        run: |
+          if [ -n "${BUILD_KEYCHAIN:-}" ]; then
+            security default-keychain -d user -s "$HOME/Library/Keychains/login.keychain-db" || true
+            security list-keychains -d user -s "$HOME/Library/Keychains/login.keychain-db" || true
+            security delete-keychain "$BUILD_KEYCHAIN" || true
+          fi
+          rm -rf "$RUNNER_TEMP/asc" "$RUNNER_TEMP/export" "$RUNNER_TEMP/Chintan.xcarchive" "$RUNNER_TEMP/archive.log"

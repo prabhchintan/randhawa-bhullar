@@ -1,0 +1,22 @@
+# yantar, a hand: run a shell command on the maintainer's MacBook through the
+# self-hosted runner (scripts/yantar-runner.sh). Dispatched only by the
+# maintainer or the house from his box; the log is public like the
+# repository, so nothing secret is ever printed here.
+name: yantar
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: "the command"
+        required: true
+        type: string
+
+jobs:
+  run:
+    runs-on: [self-hosted, macOS, yantar]
+    timeout-minutes: 30
+    steps:
+      - env:
+          CMD: ${{ inputs.cmd }}
+        run: bash -c "$CMD"
