@@ -180,10 +180,10 @@ B. The board on the canvas. Today, This week, Later on leaves over the
    alone with one line. The day card's philosophy, nothing more. Slice 1
    built (sprint 6): the shelves by date, the why on tap, Done in the app.
    Slice 2 built (sprint 7): the list ends cleanly above the tabs, and
-   This week closes on Sunday. Left: the house side of `POST /v1/done`
-   (in the chintan repo, not buildable from yantar's sprint; then see a
-   thing lift off), and the plaque on leaves by day rather than one long
-   list.
+   This week closes on Sunday. Slice 3 built (sprint 8): leaves by day.
+   Left: the house side of `POST /v1/done` (in the chintan repo, not
+   buildable from yantar's sprint; then see a thing lift off). The app side
+   of B is whole; the next buildable slice is C.
 C. The study, three voices. The conversation legible over the painting
    (ink on a plaque or glass, never a raw bubble on the picture); the
    voice chosen at the top the way a gallery names its room: chintan,
@@ -206,6 +206,16 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 8 (8d2e25d): the board on leaves by day. The one
+  long plaque is gone; each shelf (Today, This week, Later) is named in
+  gilt small capitals on the painting itself, and under it one leaf per
+  day, the date lettered once at the leaf's head: Wednesday's call alone,
+  Friday's four together, Monday's bill and Wednesday's hiring pool on
+  leaves of their own, the picture showing between them. A thing opened
+  keeps its Done inside its leaf. Seen in both modes against the real
+  house, at rest and scrolled to the end. No new door; `POST /v1/done` is
+  still the one written under sprint 6.
 
 - 2026-09-22 · sprint 7 (c7241a3): the board ends cleanly. At rest the
   last thing on the plaque no longer stops mid-word on the tab bar
