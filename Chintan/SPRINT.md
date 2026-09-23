@@ -18,6 +18,25 @@ person, gentle pace. A screen should read at a glance, the way a good note
 on the kitchen table does; nothing on it explains its own shape; nothing on
 it is a chore for him.
 
+The maintainer's word, 2026-09-22 19:23, which now governs the whole look:
+"a visual, very highly aesthetic and beautiful and pretty, like European
+paintings in a museum pretty, app, that I use to run my life, talk to you
+or darban or yaar, look at my to dos but in the same philosophy as our
+email, basically a painting ... actual paintings that fit the iPhone frame
+... unless there is an action or something in which case it is tastefully
+and elegantly placed." So: the app is a painting first. Home is the day's
+painting, full bleed, a real public-domain work chosen for the phone's
+frame (the house door serves it: `GET /v1/painting` gives title, artist,
+year, credit and `image`; `GET /v1/painting.jpg` is the picture, from the
+house, so the app still talks to one host), with the day's few lines and
+any action placed on or beside it the way a museum places a label: small,
+exact, never shouting. The to-dos keep the day card's philosophy (only
+dated things with a consequence, one screen, nothing habitual, done means
+gone) and, once the app is good enough, replace the daily mail card
+outright; mail that needs his hands and is a positive thing stays mail.
+Later rungs, on his word: darban and yaar as voices in the study (each a
+door on the house), and Jev-style cheap judgments behind the scenes.
+
 The shape to grow into (four tabs, in this order):
 
 1. **Home** (the jharokha, reborn native). One screen: the date and the day
@@ -86,8 +105,14 @@ catch-all.
 
 ## The backlog (top is next)
 
-1. Home: replace the monospaced cockpit text with native tiles from the
-   cockpit's structure; today's to-dos on top with their consequence.
+1. Home as the painting: the day's painting full bleed from `/v1/painting.jpg`
+   (live on the house since 2026-09-22 evening; `/v1/painting` carries
+   title, artist, year, credit), its label small in a corner (the credit on
+   tap), and over or beneath it the day in a few lines: today's dated
+   to-dos with their consequence, the next thing on the calendar, the
+   house's pulse as a quiet mark. Light and dark both read; the painting is
+   the light. A second slice, later: the cockpit's structure as native tiles
+   below the fold, never on top of the picture.
 2. The board: Today, This week, Later; done from the phone; the why on tap.
 3. The study: bubbles, time stamps, thinking state, history, retry, the
    keyboard.
