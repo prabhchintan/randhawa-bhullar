@@ -505,6 +505,13 @@ F. Settings and the edges. The health dot; settings one tap away; a
   dark sliver sits at the very top edge. No new door used; the tiles slice
   asks for `/v1/cockpit.json` (shape in the backlog).
 
+- 2026-09-23 · 06:43, his word on the study line: "Great job with the app
+  chintan, we can take away the email to do workflow now as in remove it
+  entirely." The board tab is now the only place his to-dos show; the day
+  card by mail and its HEY week board are retired on the house side (BUTLER
+  37), the job desk's ready postings arrive as dated lines with the Apply
+  link, and the night roll at 20:58 still clears the list to tomorrow.
+
 - 2026-09-22 · sprint 2 (040297d): the icon. The old blue dot on black is
   gone; the app is now a paper jharokha on the deep saffron: an arched
   frame, the room in shade behind it, one mullion, a sill. A first draft
