@@ -82,21 +82,25 @@ catch-all.
 
 ## The backlog (top is next)
 
-1. Design foundation, what is left: the app icon (scripts/makeicon.swift
-   shows how the siblings make theirs). Palette, serif titles, the saffron
-   tint, the tabs and the paper launch screen are in (Theme.swift).
-2. Home: replace the monospaced cockpit text with native tiles from the
+1. Home: replace the monospaced cockpit text with native tiles from the
    cockpit's structure; today's to-dos on top with their consequence.
-3. The board: Today, This week, Later; done from the phone; the why on tap.
-4. The study: bubbles, time stamps, thinking state, history, retry, the
+2. The board: Today, This week, Later; done from the phone; the why on tap.
+3. The study: bubbles, time stamps, thinking state, history, retry, the
    keyboard.
-5. The house: agents, timers, meters, the doctor.
-6. Settings: the health check as a green dot on the Home tab, settings one
+4. The house: agents, timers, meters, the doctor.
+5. Settings: the health check as a green dot on the Home tab, settings one
    tap away, a version line.
-7. Later, on the maintainer's word: a widget (App Group and an extension
+6. Later, on the maintainer's word: a widget (App Group and an extension
    target), notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 2 (040297d): the icon. The old blue dot on black is
+  gone; the app is now a paper jharokha on the deep saffron: an arched
+  frame, the room in shade behind it, one mullion, a sill. A first draft
+  in solid paper read as a gravestone, so the window became a frame. Seen
+  on the simulator's home screen beside Randhawa, where it reads at a
+  glance; the design foundation is done. No door needed.
 
 - 2026-09-22 · sprint 1 (88828e6, b556d6e): the app has the house's colours.
   Warm paper under every screen with its own dark, lighter cards, serif
