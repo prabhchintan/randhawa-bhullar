@@ -180,6 +180,7 @@ struct BoardView: View {
         }
         .padding(.vertical, 12)
         .contentShape(Rectangle())
+        .accessibilityIdentifier("leaf")
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.2)) {
                 if isOpen { open.remove(item.id) } else { open.insert(item.id) }

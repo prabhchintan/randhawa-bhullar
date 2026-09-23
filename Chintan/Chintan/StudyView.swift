@@ -46,6 +46,9 @@ struct StudyView: View {
                 }
                 .id(voice)
                 .defaultScrollAnchor(.bottom)
+                // A drag down the conversation puts the keyboard away; the
+                // tabs are under it, so it is the only way out unsent.
+                .scrollDismissesKeyboard(.interactively)
                 .fadedEdges()
                 .overlay(alignment: .bottom) {
                     if messages.isEmpty && !isThinking {
@@ -178,6 +181,7 @@ struct StudyView: View {
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.35), lineWidth: 0.5))
                 .onSubmit(send)
+                .accessibilityIdentifier("composer")
             Button(action: send) {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 17, weight: .semibold))

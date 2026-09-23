@@ -86,6 +86,7 @@ struct JharokhaView: View {
                     HStack(alignment: .top, spacing: 16) {
                         ForEach(meters, id: \.key) { meter in
                             MeterRing(meter: meter, open: meter.key == openMeter)
+                                .accessibilityIdentifier("ring")
                                 .onTapGesture {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         openMeter = openMeter == meter.key ? nil : meter.key
@@ -125,6 +126,7 @@ struct JharokhaView: View {
             .lineLimit(showCredit ? 4 : 1)
             .frame(maxWidth: 200, alignment: .trailing)
             .contentShape(Rectangle())
+            .accessibilityIdentifier("label")
             .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
         }
     }

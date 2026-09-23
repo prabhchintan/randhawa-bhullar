@@ -7,7 +7,12 @@
 #
 #   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
 #                                                    (board@N: the Nth thing opened)
+#   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
 set -euo pipefail
+if [ "${1:-}" = "--walk" ]; then
+  shift
+  exec bash "$(dirname "$0")/walk.sh" "$@"
+fi
 OUT=${1:?usage: see.sh OUTDIR [tab ...]}; shift
 TABS=${*:-jharokha board study}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
