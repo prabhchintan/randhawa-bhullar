@@ -41,7 +41,7 @@ struct JharokhaView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                     .font(.system(.subheadline, design: .serif).smallCaps())
-                    .foregroundStyle(Theme.bone.opacity(0.75))
+                    .foregroundStyle(Theme.bone.opacity(0.88))
                 Text(day.headline ?? "The house is quiet.")
                     .font(.system(.largeTitle, design: .serif).weight(.semibold))
                     .foregroundStyle(Theme.bone)
@@ -56,8 +56,7 @@ struct JharokhaView: View {
                                 ForEach(group.items) { item in
                                     Text(item.gist)
                                         .font(.callout)
-                                        .foregroundStyle(Theme.bone.opacity(0.94))
-                                        .lineLimit(2)
+                                        .foregroundStyle(Theme.bone)
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
@@ -97,6 +96,10 @@ struct JharokhaView: View {
                             .fill(day.raised ? Theme.saffron : Theme.giltOnArt)
                             .frame(width: 7, height: 7)
                             .padding(.top, 9)
+                            // The mark is small; what a finger or VoiceOver finds is not.
+                            .frame(width: 44, height: 44, alignment: .top)
+                            .contentShape(Rectangle())
+                            .accessibilityElement()
                             .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
                     }
                 }
@@ -114,16 +117,16 @@ struct JharokhaView: View {
                 Text(title.plainDashes)
                     .font(.system(.caption, design: .serif).italic())
                 Text([painting.artist, painting.year].compactMap { $0 }.joined(separator: ", ").plainDashes)
-                    .font(.system(.caption2, design: .serif))
+                    .font(.system(.caption, design: .serif))
                 if showCredit, let credit = painting.credit {
                     Text(credit.plainDashes)
-                        .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.6))
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.75))
                 }
             }
             .multilineTextAlignment(.trailing)
-            .foregroundStyle(.white.opacity(0.8))
-            .lineLimit(showCredit ? 4 : 1)
+            .foregroundStyle(.white.opacity(0.88))
+            .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: 200, alignment: .trailing)
             .contentShape(Rectangle())
             .accessibilityIdentifier("label")
@@ -161,14 +164,16 @@ private struct DateTile: View {
         let soon = date.map { Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: .now) } ?? false
         VStack(spacing: 1) {
             Text(date?.formatted(.dateTime.weekday(.abbreviated)).lowercased() ?? "")
-                .font(.system(size: 11, weight: .medium, design: .serif).smallCaps())
+                .font(.system(.caption, design: .serif).weight(.medium).smallCaps())
                 .tracking(0.8)
                 .foregroundStyle(soon ? Theme.saffron : Theme.giltOnArt)
             Text(date?.formatted(.dateTime.day()) ?? "")
                 .font(.system(.title3, design: .serif))
                 .foregroundStyle(Theme.bone)
         }
-        .frame(width: 42, height: 46)
+        .fixedSize()
+        .padding(.vertical, 4)
+        .frame(minWidth: 42, minHeight: 46)
         .background(Theme.lampBlack.opacity(0.35), in: RoundedRectangle(cornerRadius: 3))
         .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(Theme.giltOnArt.opacity(0.6), lineWidth: 0.5))
     }
@@ -193,9 +198,9 @@ private struct MeterRing: View {
             }
             .frame(width: 24, height: 24)
             Text(meter.label)
-                .font(.system(size: 11, weight: .medium, design: .serif).smallCaps())
+                .font(.system(.caption, design: .serif).weight(.medium).smallCaps())
                 .tracking(0.6)
-                .foregroundStyle(open ? Theme.giltOnArt : Theme.bone.opacity(0.7))
+                .foregroundStyle(open ? Theme.giltOnArt : Theme.bone.opacity(0.85))
                 .fixedSize()
         }
         .contentShape(Rectangle())

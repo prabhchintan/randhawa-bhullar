@@ -8,7 +8,10 @@
 # walk fails. Needs CHINTAN_HOUSE in the environment (the house address).
 #
 #   bash Chintan/scripts/walk.sh [OUTDIR]           default /tmp/see/walk
+#   bash Chintan/scripts/walk.sh --audit [OUTDIR]   the audit alone, no film
 set -euo pipefail
+ONLY_AUDIT=""
+if [ "${1:-}" = "--audit" ]; then ONLY_AUDIT=1; shift; fi
 OUT=${1:-/tmp/see/walk}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 DD=${SEE_DERIVED:-$HOME/Library/Developer/Xcode/DerivedData/chintan-see}
@@ -34,6 +37,7 @@ if ! xcodebuild "${XCB[@]}" -only-testing:ChintanWalk build-for-testing > "$OUT/
   exit 1
 fi
 
+if [ -z "$ONLY_AUDIT" ]; then
 xcrun simctl ui "$UDID" appearance light
 xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
 xcrun simctl io "$UDID" recordVideo --codec=h264 --force "$OUT/walk.mov" 2> "$OUT/record.log" &
@@ -103,6 +107,26 @@ for start, end, name in windows:
     print(f"{name}: {sum(ms) / (end - start):.1f} ms/s over {end - start:.1f} s,"
           f" {len(ms)} hitches, worst {max(ms, default=0):.0f} ms")
 PY
+fi
+STATUS=${STATUS:-0}
+
+# The audit: Apple's accessibility audit on every screen, light then dark.
+# Each line a real defect a person would feel; zero is the bar.
+rm -f "$OUT/audit.tsv"
+for LOOK in light dark; do
+  xcrun simctl ui "$UDID" appearance "$LOOK"
+  TEST_RUNNER_WALK_OUT="$OUT" TEST_RUNNER_AUDIT_LOOK="$LOOK" TEST_RUNNER_CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" \
+    xcodebuild "${XCB[@]}" -only-testing:ChintanWalk/ChintanAudit test-without-building > "$OUT/audit-$LOOK.log" 2>&1 || true
+done
+xcrun simctl ui "$UDID" appearance light
+
+if [ -f "$OUT/audit.tsv" ]; then
+  echo "The audit: $(grep -c . "$OUT/audit.tsv" || true) findings (screen, look, kind, element, word)"
+  sort "$OUT/audit.tsv"
+else
+  echo "The audit: did not run (see audit-light.log)"
+fi
+[ -n "$ONLY_AUDIT" ] && exit 0
 echo "The hitches:"
 cat "$OUT/hitches.txt"
 echo "The walk's notes:"

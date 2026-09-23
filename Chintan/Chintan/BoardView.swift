@@ -75,7 +75,7 @@ struct BoardView: View {
             Text("The board")
                 .font(Theme.label())
                 .tracking(0.8)
-                .foregroundStyle(Theme.bone.opacity(0.78))
+                .foregroundStyle(Theme.bone.opacity(0.9))
             Text(summary)
                 .font(.system(.title, design: .serif).weight(.semibold))
                 .foregroundStyle(Theme.bone)
@@ -164,7 +164,7 @@ struct BoardView: View {
                 if !item.why.isEmpty {
                     Text(item.why)
                         .font(.footnote)
-                        .foregroundStyle(Theme.ink.opacity(0.6))
+                        .foregroundStyle(Theme.ink.opacity(0.72))
                         .lineLimit(isOpen ? nil : 2)
                 }
                 if isOpen && !item.line.isEmpty {
@@ -279,13 +279,13 @@ private struct DueMark: View {
         let come = Calendar.current.startOfDay(for: day) <= Calendar.current.startOfDay(for: .now)
         VStack(alignment: .trailing, spacing: 0) {
             Text(day.formatted(.dateTime.weekday(.abbreviated)))
-                .font(Theme.label(.caption2))
+                .font(Theme.label(.caption))
                 .tracking(0.6)
             Text(day.formatted(.dateTime.day().month(.abbreviated)))
                 .font(.system(.footnote, design: .serif))
         }
         .foregroundStyle(come ? Theme.saffron : Theme.gilt)
-        .fixedSize()
+        .layoutPriority(1)
     }
 }
 

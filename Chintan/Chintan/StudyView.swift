@@ -89,9 +89,14 @@ struct StudyView: View {
             Text(lines[voice].map(Self.sentence) ?? "The room is quiet.")
                 .font(.system(.title3, design: .serif).italic())
                 .multilineTextAlignment(.center)
-                .foregroundStyle(Theme.bone.opacity(0.9))
+                .foregroundStyle(Theme.bone)
         }
         .shadow(color: .black.opacity(0.7), radius: 10)
+        // A pool of shade under the line, so it reads on the brightest picture.
+        .background {
+            RadialGradient(colors: [.black.opacity(0.5), .clear], center: .center, startRadius: 0, endRadius: 190)
+                .padding(-70)
+        }
         .padding(.horizontal, 40)
         .padding(.bottom, 24)
     }

@@ -208,6 +208,98 @@ final class ChintanWalk: XCTestCase {
     }
 }
 
+// The audit: Apple's own accessibility audit (iOS 17) on every screen the
+// walk rests on: contrast, dynamic type, hit targets, element descriptions,
+// clipped text. Each finding is a line in audit.tsv (screen, appearance,
+// kind, element, what is wrong), not a failure, so the walk runs whole and
+// walk.sh prints the list. walk.sh runs it once light and once dark, passing
+// AUDIT_LOOK. Zero findings is the bar.
+final class ChintanAudit: XCTestCase {
+    private var app: XCUIApplication!
+    private var log: FileHandle?
+    private var look = "light"
+
+    override func setUpWithError() throws {
+        continueAfterFailure = true
+        let env = ProcessInfo.processInfo.environment
+        look = env["AUDIT_LOOK"] ?? "light"
+        let out = URL(fileURLWithPath: env["WALK_OUT"] ?? NSTemporaryDirectory() + "walk")
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let url = out.appendingPathComponent("audit.tsv")
+        if !FileManager.default.fileExists(atPath: url.path) {
+            FileManager.default.createFile(atPath: url.path, contents: nil)
+        }
+        log = try FileHandle(forWritingTo: url)
+        try log?.seekToEnd()
+        app = XCUIApplication()
+        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha"]
+    }
+
+    override func tearDown() {
+        try? log?.close()
+    }
+
+    func testAudit() throws {
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 20))
+        Thread.sleep(forTimeInterval: 5)
+        audit("home")
+
+        app.tabBars.buttons["Board"].tap()
+        Thread.sleep(forTimeInterval: 3)
+        audit("board")
+        let leaf = app.descendants(matching: .any).matching(identifier: "leaf").firstMatch
+        if leaf.waitForExistence(timeout: 5) {
+            leaf.tap()
+            Thread.sleep(forTimeInterval: 1)
+            audit("board, a leaf open")
+            leaf.tap()
+            Thread.sleep(forTimeInterval: 0.6)
+        }
+
+        app.tabBars.buttons["Study"].tap()
+        Thread.sleep(forTimeInterval: 2)
+        audit("study")
+        let darban = app.buttons["darban"].firstMatch
+        if darban.exists {
+            darban.tap()
+            Thread.sleep(forTimeInterval: 1.2)
+            audit("study, darban")
+            app.buttons["chintan"].firstMatch.tap()
+        }
+    }
+
+    private func audit(_ screen: String) {
+        do {
+            try app.performAccessibilityAudit { issue in
+                let who = issue.element.map { el -> String in
+                    let name = el.label.isEmpty ? el.identifier : el.label
+                    return "\(el.elementType.rawValue):\(name.prefix(40))"
+                } ?? "-"
+                let what = issue.compactDescription.replacingOccurrences(of: "\n", with: " ")
+                let line = "\(screen)\t\(self.look)\t\(Self.kind(issue.auditType))\t\(who)\t\(what)\n"
+                self.log?.write(Data(line.utf8))
+                return true
+            }
+        } catch {
+            log?.write(Data("\(screen)\t\(look)\taudit\t-\t\(error.localizedDescription)\n".utf8))
+        }
+    }
+
+    private static func kind(_ type: XCUIAccessibilityAuditType) -> String {
+        switch type {
+        case .contrast: return "contrast"
+        case .dynamicType: return "dynamic type"
+        case .hitRegion: return "hit region"
+        case .elementDetection: return "element detection"
+        case .sufficientElementDescription: return "description"
+        case .textClipped: return "text clipped"
+        case .trait: return "trait"
+        default: return "other \(type.rawValue)"
+        }
+    }
+}
+
 // The hitches: the number Apple uses for jank, the hitch time ratio in ms
 // per s (under 5 is good, over 10 is a visible jank). The simulator has no
 // Instruments hitches, so the app times its own frames (--hitches) and this
