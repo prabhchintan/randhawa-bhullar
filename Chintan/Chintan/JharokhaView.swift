@@ -7,6 +7,7 @@ import UIKit
 // rings. Refreshed on open and by pull.
 struct JharokhaView: View {
     @EnvironmentObject private var gallery: Gallery
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var day = CockpitDay()
     @State private var dated: [BoardItem] = []
     @State private var pulse: [CockpitDay.Meter] = []
@@ -118,16 +119,19 @@ struct JharokhaView: View {
                     .transition(.opacity)
             }
 
-            // The rings beside the label while they fit; at the largest text
-            // the label steps under them, so the wall never runs off the phone.
-            ViewThatFits(in: .horizontal) {
+            // The rings beside the label; at the accessibility sizes the label
+            // steps under them, so the wall never runs off the phone. Chosen by
+            // the text size, not the label's width, so the credit opening on a
+            // tap never throws the whole wall into the other shape.
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .trailing, spacing: 18) {
+                    rings.frame(maxWidth: .infinity, alignment: .leading)
+                    museumLabel
+                }
+            } else {
                 HStack(alignment: .bottom) {
                     rings
                     Spacer(minLength: 12)
-                    museumLabel
-                }
-                VStack(alignment: .trailing, spacing: 18) {
-                    rings.frame(maxWidth: .infinity, alignment: .leading)
                     museumLabel
                 }
             }
