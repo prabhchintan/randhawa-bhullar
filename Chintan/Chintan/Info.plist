@@ -32,7 +32,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
-		<string>Paper</string>
+		<string>Ground</string>
 	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>

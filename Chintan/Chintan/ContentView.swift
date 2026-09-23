@@ -17,7 +17,7 @@ enum Tab: String {
 
 struct ContentView: View {
     @StateObject private var store = ConversationStore()
-    @State private var showingSettings = false
+    @StateObject private var gallery = Gallery()
     @State private var tab: Tab = Tab.launch
 
     var body: some View {
@@ -36,24 +36,13 @@ struct ContentView: View {
 
             NavigationStack {
                 StudyView()
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button {
-                                showingSettings = true
-                            } label: {
-                                Image(systemName: "gearshape")
-                            }
-                        }
-                    }
             }
             .tabItem { Label("Study", systemImage: "bubble.left.and.text.bubble.right") }
             .tag(Tab.study)
         }
-        .tint(Theme.saffron)
+        .tint(Theme.giltOnArt)
         .environmentObject(store)
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
-                .tint(Theme.saffron)
-        }
+        .environmentObject(gallery)
+        .task { await gallery.load() }
     }
 }

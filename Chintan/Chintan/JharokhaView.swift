@@ -6,8 +6,7 @@ import UIKit
 // dated things coming up as small calendar tiles, the house's meters as
 // rings. Refreshed on open and by pull.
 struct JharokhaView: View {
-    @State private var image: UIImage?
-    @State private var painting: HouseClient.Painting?
+    @EnvironmentObject private var gallery: Gallery
     @State private var day = CockpitDay()
     @State private var dated: [BoardItem] = []
     @State private var errorText: String?
@@ -22,39 +21,17 @@ struct JharokhaView: View {
                         .padding(.horizontal, 22)
                         .padding(.top, 80)
                         .padding(.bottom, 20)
-                        .background(alignment: .bottom) {
-                            LinearGradient(
-                                stops: [.init(color: .clear, location: 0), .init(color: .black.opacity(0.8), location: 0.55)],
-                                startPoint: .top, endPoint: .bottom
-                            )
-                        }
                 }
                 .frame(minHeight: geo.size.height)
             }
             .scrollBounceBehavior(.basedOnSize)
-            .background {
-                Color.clear
-                    .overlay { canvas }
-                    .clipped()
-                    .ignoresSafeArea(edges: .top)
-            }
+            // One shade from the day's line down through the tab bar, no seam.
+            .background { PaintedGround(foot: geo.size.height * 0.75, footShade: 0.82) }
         }
-        .background(Color.black)
         .toolbar(.hidden, for: .navigationBar)
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
-    }
-
-    // The picture, or while it is missing a warm ground in the house's colours.
-    @ViewBuilder private var canvas: some View {
-        if let image {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-        } else {
-            LinearGradient(colors: [Theme.saffron.opacity(0.55), Color(white: 0.08)], startPoint: .top, endPoint: .bottom)
-        }
     }
 
     private var overlay: some View {
@@ -62,10 +39,10 @@ struct JharokhaView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                     .font(.system(.subheadline, design: .serif).smallCaps())
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundStyle(Theme.bone.opacity(0.75))
                 Text(day.headline ?? "The house is quiet.")
                     .font(.system(.largeTitle, design: .serif).weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Theme.bone)
             }
 
             if !dated.isEmpty {
@@ -100,7 +77,7 @@ struct JharokhaView: View {
                             MeterRing(name: meter.name, fraction: meter.fraction)
                         }
                         Circle()
-                            .fill(day.raised ? Theme.saffron : Color.green.opacity(0.85))
+                            .fill(day.raised ? Theme.saffron : Theme.giltOnArt)
                             .frame(width: 9, height: 9)
                             .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
                     }
@@ -114,7 +91,7 @@ struct JharokhaView: View {
 
     // Small and exact, never shouting; the credit on tap.
     @ViewBuilder private var museumLabel: some View {
-        if let painting, let title = painting.title {
+        if let painting = gallery.painting, let title = painting.title {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(title.plainDashes)
                     .font(.system(.caption, design: .serif).italic())
@@ -141,13 +118,10 @@ struct JharokhaView: View {
             return
         }
         let house = HouseClient(baseAddress: address)
-        async let label = try? house.painting()
-        async let picture = try? house.paintingImage()
+        async let picture: Void = gallery.load()
         async let cockpit = try? house.cockpit()
         async let board = try? house.board()
-        let (l, p, c, b) = await (label, picture, cockpit, board)
-        painting = l
-        if let p, let ui = UIImage(data: p) { image = ui }
+        let (_, c, b) = await (picture, cockpit, board)
         if let c { day = CockpitDay(c) }
         if let b { dated = BoardItem.upcoming(BoardParser.parse(b)) }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
@@ -187,7 +161,7 @@ private struct MeterRing: View {
                 Circle().stroke(.white.opacity(0.3), lineWidth: 3)
                 Circle()
                     .trim(from: 0, to: min(max(fraction, 0), 1))
-                    .stroke(fraction > 0.75 ? Theme.saffron : .white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .stroke(fraction > 0.75 ? Theme.saffron : Theme.bone, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                     .rotationEffect(.degrees(-90))
             }
             .frame(width: 24, height: 24)
