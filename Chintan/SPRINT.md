@@ -30,7 +30,12 @@ frame (the house door serves it: `GET /v1/painting` gives title, artist,
 year, credit and `image`; `GET /v1/painting.jpg` is the picture, from the
 house, so the app still talks to one host), with the day's few lines and
 any action placed on or beside it the way a museum places a label: small,
-exact, never shouting. The to-dos keep the day card's philosophy (only
+exact, never shouting. His word on the first painting Home (2026-09-22
+19:38): "freaking beautiful and exactly what I meant", with one change: the
+tab bar underneath is part of the art like the date and the label, the
+painting runs under it, never an opaque strip cutting the canvas; that is
+the standard every screen is held to from here. The to-dos keep the day
+card's philosophy (only
 dated things with a consequence, one screen, nothing habitual, done means
 gone) and, once the app is good enough, replace the daily mail card
 outright; mail that needs his hands and is a positive thing stays mail.
