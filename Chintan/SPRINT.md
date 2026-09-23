@@ -231,7 +231,8 @@ chunk is done when the fresh-eyes review says so against the look above.
    the hitch numbers (built, sprint 11: the walk prints them; Instruments
    has no hitches on the simulator, so the app meters its own frames),
    the audit (built, sprint 12: `see.sh --walk --audit OUT` runs it alone;
-   left: the contrast findings on the plaques, see the ledger); the house builds
+   the contrast findings waived by name, sprint 13; left: the partial
+   dynamic type and the unnamed element, see the ledger); the house builds
    `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
    subscriber and the long-press "a word for the house" come with chunk G.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
@@ -279,12 +280,49 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    and hold, with a soft impact, and folds back; the swipe between tabs as
    one continuous surface over one painting; the long-press "a word for
    the house"; the MetricKit subscriber. Judged by the walk's film and the
-   hitch numbers, and by him.
+   hitch numbers, and by him. Slice 1 built (sprint 13): one painting
+   under paged tabs, a swipe between them, the selection haptic on each
+   arrival. Left in slice 1: tab taps and first visits under 10 ms/s.
+   Next slices: touch to reveal, the word for the house, MetricKit.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 13 (e23be7f, 5c4a924): one painting, a swipe that
+  goes somewhere. The system TabView is gone: the painting is drawn once
+  under the whole app and Home, the Board and the Study are pages over it
+  (a paged horizontal scroll, all three built at launch, only the page in
+  view read out). A thumb's swipe slides to the next page and the picture
+  stays still behind it; a tap on the bar glides there (`.snappy`); each
+  arrival ticks the selection haptic. The bar is our own, lettered on the
+  art as before (bone, the open one in gilt and filled, names in small
+  serif capitals that now grow with text size), and steps aside only
+  under a keyboard tall enough to cover it. Each screen keeps only its own
+  shade. Home's label is three clean lines, title, artist, year ("Frieze
+  of Dancers / Edgar Degas / c. 1895"); "French, 1834-1917" waits with
+  the credit, on tap. Seen in both modes, at rest, swiped and in the
+  film: Home to the Board across one 250 ms frame, the painting unmoved;
+  Study to Home glides past the Board in about 500 ms. The walk's notes
+  now read Home, Board, Study where before a swipe went nowhere. The hitch
+  numbers, sprint 11 then now (ms/s): first visits 50.3 to 32.5, tab taps
+  38.5 to 32.2 (worst 49 to 29 ms), swipe 0.0 (it did nothing) to 11.9,
+  board scroll 19.2 to 16.4, study scroll 16.5 to 4.5. Under 10 for the
+  study only; not yet the steer's bar. A first try with every page in the
+  accessibility tree was worse (tabs 56): the walk's own taps snapshot
+  that tree on the main thread, so the pages off screen are now hidden
+  from it. Next suspects for the taps and first visits: the plaques'
+  shadows and the faded-edge masks rendered off screen while a page
+  moves (try `.compositingGroup()` on each page, or shadows drawn once as
+  an image). The audit: the contrast readings are waived by name in
+  `ChintanAudit.waiver` (they sample the painting, not the plaque; the
+  pictures say clean), with the board's two-line reasons, each kept with
+  its reason in audit-waived.tsv (91). Left open, 42: the bar's names and
+  "What does tomorrow hold?" read "Dynamic Type partially unsupported",
+  and one unnamed element ("Element has no description", type other,
+  probably the pager itself) on every screen; next, read
+  `detailedDescription` for both. No new door.
 
 - 2026-09-23 · sprint 12 (8e2605a): the audit, and what it found fixed.
   `ChintanAudit` (in the walk target) runs Apple's
