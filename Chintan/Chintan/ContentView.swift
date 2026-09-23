@@ -51,6 +51,9 @@ struct ContentView: View {
                     ForEach(Tab.allCases, id: \.self) { t in
                         screen(t)
                             .containerRelativeFrame(.horizontal)
+                            // A page keeps to its own width at any text size,
+                            // never lettering over its neighbour.
+                            .clipShape(Sides())
                             // Only the page in view is read out, by VoiceOver or anything else.
                             .accessibilityHidden(t != tab)
                             .id(t)
@@ -118,8 +121,20 @@ struct ContentView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(t.name)
                 .accessibilityAddTraits(open ? .isSelected : [])
+                // As the system's tab bar does: a press and hold shows the name large.
+                .accessibilityShowsLargeContentViewer()
             }
         }
+        // The bar holds the system tab bar's size; past it, the large viewer.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .padding(.top, 6)
+    }
+}
+
+// A page's clip at its left and right edges only; its shade still runs up
+// under the clock and down under the bar.
+private struct Sides: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path(rect.insetBy(dx: 0, dy: -rect.height))
     }
 }

@@ -121,10 +121,14 @@ struct StudyView: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: 22) {
-            ForEach(Voice.allCases) { v in
-                room(v)
+            // The three names side by side; at the largest text they slide
+            // under the thumb instead of running off the phone.
+            ViewThatFits(in: .horizontal) {
+                rooms
+                ScrollView(.horizontal) { rooms.padding(.vertical, 2) }
+                    .scrollIndicators(.hidden)
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
             Button {
                 showingSettings = true
             } label: {
@@ -139,6 +143,14 @@ struct StudyView: View {
         }
         .padding(.horizontal, 22)
         .padding(.top, 6)
+    }
+
+    private var rooms: some View {
+        HStack(alignment: .center, spacing: 22) {
+            ForEach(Voice.allCases) { v in
+                room(v)
+            }
+        }
     }
 
     // A room's name: gilt with a hairline under it when open, bone when not,

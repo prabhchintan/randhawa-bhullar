@@ -112,34 +112,49 @@ struct JharokhaView: View {
                     .transition(.opacity)
             }
 
-            HStack(alignment: .bottom) {
-                if !meters.isEmpty {
-                    HStack(alignment: .top, spacing: 16) {
-                        ForEach(meters, id: \.key) { meter in
-                            MeterRing(meter: meter, open: meter.key == openMeter)
-                                .accessibilityIdentifier("ring")
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        openMeter = openMeter == meter.key ? nil : meter.key
-                                    }
-                                }
-                        }
-                        Circle()
-                            .fill(day.raised ? Theme.saffron : Theme.giltOnArt)
-                            .frame(width: 7, height: 7)
-                            .padding(.top, 9)
-                            // The mark is small; what a finger or VoiceOver finds is not.
-                            .frame(width: 44, height: 44, alignment: .top)
-                            .contentShape(Rectangle())
-                            .accessibilityElement()
-                            .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
-                    }
+            // The rings beside the label while they fit; at the largest text
+            // the label steps under them, so the wall never runs off the phone.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .bottom) {
+                    rings
+                    Spacer(minLength: 12)
+                    museumLabel
                 }
-                Spacer(minLength: 12)
-                museumLabel
+                VStack(alignment: .trailing, spacing: 18) {
+                    rings.frame(maxWidth: .infinity, alignment: .leading)
+                    museumLabel
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // The house's meters as rings, and the mark for anything raised. The
+    // rings are a picture, so they stop growing at the first large size.
+    @ViewBuilder private var rings: some View {
+        if !meters.isEmpty {
+            HStack(alignment: .top, spacing: 16) {
+                ForEach(meters, id: \.key) { meter in
+                    MeterRing(meter: meter, open: meter.key == openMeter)
+                        .accessibilityIdentifier("ring")
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                openMeter = openMeter == meter.key ? nil : meter.key
+                            }
+                        }
+                }
+                Circle()
+                    .fill(day.raised ? Theme.saffron : Theme.giltOnArt)
+                    .frame(width: 7, height: 7)
+                    .padding(.top, 9)
+                    // The mark is small; what a finger or VoiceOver finds is not.
+                    .frame(width: 44, height: 44, alignment: .top)
+                    .contentShape(Rectangle())
+                    .accessibilityElement()
+                    .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
+            }
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        }
     }
 
     // Small and exact, never shouting: the title, the artist, the year, one

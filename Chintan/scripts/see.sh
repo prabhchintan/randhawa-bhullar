@@ -8,10 +8,17 @@
 #   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
 #                                                    (board@N: the Nth thing opened)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
+#   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
+#                                                    text size, then back to normal
 set -euo pipefail
 if [ "${1:-}" = "--walk" ]; then
   shift
   exec bash "$(dirname "$0")/walk.sh" "$@"
+fi
+TEXT=large
+if [ "${1:-}" = "--large" ]; then
+  TEXT=accessibility-extra-extra-extra-large
+  shift
 fi
 OUT=${1:?usage: see.sh OUTDIR [tab ...]}; shift
 TABS=${*:-jharokha board study}
@@ -39,6 +46,7 @@ xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
 APP=$(find "$DD/Build/Products" -name Chintan.app -path '*iphonesimulator*' | head -1)
 xcrun simctl install "$UDID" "$APP"
+xcrun simctl ui "$UDID" content_size "$TEXT"
 for mode in light dark; do
   xcrun simctl ui "$UDID" appearance "$mode"
   for tab in $TABS; do
@@ -52,5 +60,6 @@ for mode in light dark; do
   done
 done
 xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+xcrun simctl ui "$UDID" content_size large
 echo "BUILD OK, pictures:"
 ls "$OUT"/*.png

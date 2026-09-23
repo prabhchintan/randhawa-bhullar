@@ -286,7 +286,16 @@ final class ChintanAudit: XCTestCase {
     //   bar's names all read cleanly in both modes in every look since sprint 4.
     // - text clipped, the board: a thing's reasons stop at two lines by
     //   design; the rest is on tap.
-    private static func waiver(_ type: XCUIAccessibilityAuditType, on screen: String) -> String? {
+    // - dynamic type, the bar's names and the rings' names: held at a size on
+    //   purpose (the bar at the system tab bar's, with the large content viewer
+    //   on a press and hold; the rings, a picture, at the first large size), so
+    //   the largest text never runs them off the phone. Seen at the largest size.
+    private static let heldAtSize: Set<String> = ["Home", "Board", "Study", "hours", "week", "fable"]
+
+    private static func waiver(_ type: XCUIAccessibilityAuditType, on screen: String, element: String?) -> String? {
+        if type == .dynamicType, let element, heldAtSize.contains(element) {
+            return "held at a size by design, the large content viewer on the bar; seen at the largest text"
+        }
         if type == .contrast {
             return "samples the painting, not the plaque or shade under the letters; clean in the pictures"
         }
@@ -301,11 +310,14 @@ final class ChintanAudit: XCTestCase {
             try app.performAccessibilityAudit { issue in
                 let who = issue.element.map { el -> String in
                     let name = el.label.isEmpty ? el.identifier : el.label
-                    return "\(el.elementType.rawValue):\(name.prefix(40))"
+                    let f = el.frame
+                    return "\(el.elementType.rawValue):\(name.prefix(40)) @\(Int(f.minX)),\(Int(f.minY)) \(Int(f.width))x\(Int(f.height))"
                 } ?? "-"
-                let what = issue.compactDescription.replacingOccurrences(of: "\n", with: " ")
+                // The long word too, so a finding names what it measured.
+                let what = (issue.compactDescription + ": " + issue.detailedDescription)
+                    .replacingOccurrences(of: "\n", with: " ")
                 let line = "\(screen)\t\(self.look)\t\(Self.kind(issue.auditType))\t\(who)\t\(what)"
-                if let why = Self.waiver(issue.auditType, on: screen) {
+                if let why = Self.waiver(issue.auditType, on: screen, element: issue.element?.label) {
                     self.waived?.write(Data("\(line)\twaived: \(why)\n".utf8))
                 } else {
                     self.log?.write(Data((line + "\n").utf8))
