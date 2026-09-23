@@ -18,6 +18,8 @@ struct JharokhaView: View {
     @State private var turned = 0
     // The ring under a press and hold, its plaque grown over the wall.
     @State private var held: String?
+    // The thing under a press and hold, its plaque grown over the wall.
+    @State private var heldThing: UUID?
 
     var body: some View {
         GeometryReader { geo in
@@ -44,6 +46,7 @@ struct JharokhaView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: turned)
         // A soft impact as a plaque grows, none as it folds.
         .sensoryFeedback(.impact(flexibility: .soft), trigger: held) { _, now in now != nil }
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: heldThing) { _, now in now != nil }
         .sheet(isPresented: $showVisitors) {
             VisitorsView()
                 .presentationBackground(.ultraThinMaterial)
@@ -85,6 +88,16 @@ struct JharokhaView: View {
                     .font(.system(.largeTitle, design: .serif).weight(.semibold))
                     .foregroundStyle(Theme.bone)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .bottom) {
+                if let item = dated.first(where: { $0.id == heldThing }) {
+                    // It stands just above the leaves, over the day's line and
+                    // the painting, the whole width of the wall, and grows up.
+                    ThingPlaque(item: item)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
+                }
+            }
 
             if !dated.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
@@ -95,8 +108,17 @@ struct JharokhaView: View {
                                 ForEach(group.items) { item in
                                     Text(item.gist)
                                         .font(.callout)
-                                        .foregroundStyle(Theme.bone)
+                                        .foregroundStyle(heldThing == item.id ? Theme.giltOnArt : Theme.bone)
                                         .fixedSize(horizontal: false, vertical: true)
+                                        .contentShape(Rectangle())
+                                        .accessibilityIdentifier("thing")
+                                        // Pressed and held, the thing grows a plaque
+                                        // with the whole of it; let go, it folds back.
+                                        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
+                                            withAnimation(.snappy) { heldThing = item.id }
+                                        } onPressingChanged: { pressing in
+                                            if !pressing, heldThing != nil { withAnimation(.snappy) { heldThing = nil } }
+                                        }
                                 }
                             }
                             .padding(.top, 2)
@@ -104,6 +126,7 @@ struct JharokhaView: View {
                         }
                     }
                 }
+                .onAppear(perform: holdThingOnLaunch)
             }
 
             if let errorText {
@@ -184,6 +207,14 @@ struct JharokhaView: View {
             }
             .onAppear(perform: holdOnLaunch)
         }
+    }
+
+    // For the house's eyes: `--open tN` on Home holds the Nth thing pressed.
+    private func holdThingOnLaunch() {
+        let args = ProcessInfo.processInfo.arguments
+        guard heldThing == nil, Tab.launch == .jharokha, let i = args.firstIndex(of: "--open"), i + 1 < args.count,
+              args[i + 1].hasPrefix("t"), let n = Int(args[i + 1].dropFirst()), n < dated.count else { return }
+        heldThing = dated[n].id
     }
 
     // For the house's eyes: `--open N` on Home holds the Nth ring pressed.
@@ -391,6 +422,50 @@ private struct RingPlaque: View {
         .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .plaque(radius: 12)
         .accessibilityElement(children: .combine)
+    }
+}
+
+// A thing held: its day in words, the thing itself, and the whole of its
+// why, on a small plaque.
+private struct ThingPlaque: View {
+    let item: BoardItem
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let day = item.day {
+                let due = Calendar.current.startOfDay(for: day) <= Calendar.current.startOfDay(for: .now)
+                Text(Self.when(day))
+                    .font(Theme.label(.caption))
+                    .tracking(0.8)
+                    .foregroundStyle(due ? Theme.saffron : Theme.gilt)
+            }
+            Text(item.gist.plainDashes)
+                .font(.system(.title3, design: .serif))
+                .foregroundStyle(Theme.ink)
+            if !item.why.isEmpty {
+                Text(item.why.plainDashes)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.ink.opacity(0.8))
+                    // A long why keeps to the painting above the leaves.
+                    .lineLimit(12)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // Whole, like the ring's: the wall's lines stand right under it.
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .plaque(radius: 12)
+        .accessibilityElement(children: .combine)
+    }
+
+    private static func when(_ day: Date) -> String {
+        let cal = Calendar.current
+        let words = day.formatted(.dateTime.weekday(.wide).month(.wide).day())
+        if cal.isDateInToday(day) { return "Today, " + words }
+        if cal.isDateInTomorrow(day) { return "Tomorrow, " + words }
+        if day < cal.startOfDay(for: .now) { return "Past, " + words }
+        return words
     }
 }
 
