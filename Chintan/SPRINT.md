@@ -179,8 +179,11 @@ B. The board on the canvas. Today, This week, Later on leaves over the
    when this chunk opens); the why on tap; the empty board is the painting
    alone with one line. The day card's philosophy, nothing more. Slice 1
    built (sprint 6): the shelves by date, the why on tap, Done in the app.
-   Left: the house side of `POST /v1/done` (then see a thing lift off),
-   and the plaque on leaves by day rather than one long list.
+   Slice 2 built (sprint 7): the list ends cleanly above the tabs, and
+   This week closes on Sunday. Left: the house side of `POST /v1/done`
+   (in the chintan repo, not buildable from yantar's sprint; then see a
+   thing lift off), and the plaque on leaves by day rather than one long
+   list.
 C. The study, three voices. The conversation legible over the painting
    (ink on a plaque or glass, never a raw bubble on the picture); the
    voice chosen at the top the way a gallery names its room: chintan,
@@ -203,6 +206,22 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 7 (c7241a3): the board ends cleanly. At rest the
+  last thing on the plaque no longer stops mid-word on the tab bar
+  ("Ogden DMV" half lettered); the foot of the list eases into the
+  painting over 96 points and is clear for its last stretch, so the last
+  leaf dissolves, and the end of the list carries an inset of the same
+  height so it scrolls up whole, the plaque's foot closing above the
+  tabs. This week now ends on Sunday (a Monday week), so Monday's
+  Union Walk bill sits alone under a Later shelf, seen opened with its
+  Done at the foot of the board (see.sh's `board@N` now scrolls to the
+  thing it opens). The Study's foot takes the same eased fade, seen
+  unharmed. Seen in both modes against the real house over three looks.
+  The house side of `POST /v1/done` was steered first but lives in the
+  chintan repo (`ghar/app.py`), which this sprint cannot reach; the door
+  is still the one written under sprint 6, and the phone still says
+  "The house cannot take this from the phone yet." until it is built.
 
 - 2026-09-22 · sprint 6 (8f99774): the board by when things fall. The
   house's single "This week" heading in its own order (Wed, Mon, Fri) is
