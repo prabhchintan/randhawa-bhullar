@@ -47,7 +47,7 @@ import urllib.request
 import jwt
 
 API = "https://api.appstoreconnect.apple.com/v1"
-CONFIG_PATH = os.path.expanduser("~/.config/appstoreconnect/config.json")
+CONFIG_PATH = os.environ.get("ASC_CONFIG") or os.path.expanduser("~/.config/appstoreconnect/config.json")
 
 # Screenshot folders in this repo map to these display types. iPhone shots are
 # 1284x2778, which Apple files under the 6.5 inch set (the 6.7 inch set wants
@@ -495,6 +495,10 @@ def main(argv=None):
     p.add_argument("--app", required=True)
     p.add_argument("--out", required=True)
 
+    p = sub.add_parser("certificates", help="list signing certificates; --revoke-newer-than HOURS deletes "
+                       "Apple Development certificates made in the last HOURS (the ones a build machine "
+                       "left behind in a keychain that is gone)")
+    p.add_argument("--revoke-newer-than", type=float, default=None, metavar="HOURS")
     p = sub.add_parser("testflight")
     p.add_argument("--app", required=True)
     p.add_argument("--group", default="house")
@@ -547,6 +551,23 @@ def main(argv=None):
         print(f"{len(new)} new report files")
         for path in new:
             print("  " + path)
+        return
+
+    if args.command == "certificates":
+        import datetime as _dt
+        certs = asc.get_all("/v1/certificates")
+        now = _dt.datetime.now(_dt.timezone.utc)
+        for c in certs:
+            a = c["attributes"]
+            exp = _dt.datetime.fromisoformat(a["expirationDate"].replace("Z", "+00:00"))
+            made = exp - _dt.timedelta(days=365)
+            fresh = (now - made).total_seconds() / 3600
+            mark = ""
+            if args.revoke_newer_than is not None and a.get("name", "").startswith("Apple Development") \
+                    and 0 <= fresh <= args.revoke_newer_than:
+                asc.delete(f"/v1/certificates/{c['id']}")
+                mark = "  REVOKED"
+            print(f"{c['id']}  {a.get('certificateType')}  {a.get('name')}  made about {made:%Y-%m-%d %H:%M}Z{mark}")
         return
 
     if args.command == "testflight":

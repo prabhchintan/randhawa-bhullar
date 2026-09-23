@@ -65,8 +65,16 @@ jobs:
       # seen 09-22). So the job signs in a keychain of its own, the way a
       # GitHub Mac does: empty, unlocked, first in the search list; Xcode's
       # cloud signing puts a fresh certificate in it and the sweep removes it.
-      - name: A keychain of its own
+      - name: Ship from yantar
         if: ${{ needs.pick.outputs.runner == 'yantar' }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: bash Chintan/scripts/ship.sh
+
+      - name: A keychain of its own (unused since ship.sh; hosted Macs need none)
+        if: ${{ false }}
         run: |
           KC="$RUNNER_TEMP/build.keychain-db"
           security create-keychain -p "" "$KC"
@@ -77,6 +85,7 @@ jobs:
           echo "BUILD_KEYCHAIN=$KC" >> "$GITHUB_ENV"
 
       - name: The key
+        if: ${{ needs.pick.outputs.runner != 'yantar' }}
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -91,6 +100,7 @@ jobs:
           echo "BUILD=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_ENV"
 
       - name: Archive
+        if: ${{ needs.pick.outputs.runner != 'yantar' }}
         run: |
           set -o pipefail
           echo "chintan 1.0 ($BUILD)"
@@ -107,6 +117,7 @@ jobs:
           grep -E "warning:|\*\* ARCHIVE|BUILD (SUCCEEDED|FAILED)" "$RUNNER_TEMP/archive.log" | tail -20
 
       - name: Upload to TestFlight
+        if: ${{ needs.pick.outputs.runner != 'yantar' }}
         run: |
           set -o pipefail
           cat > "$RUNNER_TEMP/exportOptions.plist" <<'PLIST'
