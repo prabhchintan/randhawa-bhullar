@@ -51,6 +51,8 @@ struct ContentView: View {
                     ForEach(Tab.allCases, id: \.self) { t in
                         screen(t)
                             .containerRelativeFrame(.horizontal)
+                            // Only the page in view is read out, by VoiceOver or anything else.
+                            .accessibilityHidden(t != tab)
                             .id(t)
                     }
                 }
@@ -74,7 +76,12 @@ struct ContentView: View {
         .environmentObject(store)
         .environmentObject(gallery)
         .task { await gallery.load() }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboard = true }
+        // Hidden only under a keyboard tall enough to cover it, not a
+        // hardware keyboard's thin strip.
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
+            guard let end = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            keyboard = UIScreen.main.bounds.height - end.minY > 120
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboard = false }
     }
 
@@ -98,10 +105,10 @@ struct ContentView: View {
                     VStack(spacing: 4) {
                         Image(systemName: t.symbol)
                             .symbolVariant(open ? .fill : .none)
-                            .font(.system(size: 21))
-                            .frame(height: 26)
+                            .font(.title3)
+                            .frame(minHeight: 26)
                         Text(t.name)
-                            .font(.system(size: 11, weight: .medium, design: .serif).lowercaseSmallCaps())
+                            .font(.system(.caption2, design: .serif).weight(.medium).lowercaseSmallCaps())
                             .tracking(0.6)
                     }
                     .foregroundStyle(open ? Theme.giltOnArt : Theme.bone.opacity(0.72))

@@ -112,7 +112,7 @@ STATUS=${STATUS:-0}
 
 # The audit: Apple's accessibility audit on every screen, light then dark.
 # Each line a real defect a person would feel; zero is the bar.
-rm -f "$OUT/audit.tsv"
+rm -f "$OUT/audit.tsv" "$OUT/audit-waived.tsv"
 for LOOK in light dark; do
   xcrun simctl ui "$UDID" appearance "$LOOK"
   TEST_RUNNER_WALK_OUT="$OUT" TEST_RUNNER_AUDIT_LOOK="$LOOK" TEST_RUNNER_CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" \
@@ -123,6 +123,8 @@ xcrun simctl ui "$UDID" appearance light
 if [ -f "$OUT/audit.tsv" ]; then
   echo "The audit: $(grep -c . "$OUT/audit.tsv" || true) findings (screen, look, kind, element, word)"
   sort "$OUT/audit.tsv"
+  # Waived by name in ChintanAudit, each with its reason, kept beside the list.
+  echo "Waived: $(cat "$OUT/audit-waived.tsv" 2>/dev/null | grep -c . || true) (audit-waived.tsv)"
 else
   echo "The audit: did not run (see audit-light.log)"
 fi
