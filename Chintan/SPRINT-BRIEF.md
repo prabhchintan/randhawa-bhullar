@@ -11,7 +11,11 @@ Read, in this order, nothing more: Chintan/SPRINT.md (vision, rules, backlog,
 ledger), Chintan/BRIEF.md, then the app as it is: run
 `bash Chintan/scripts/see.sh /tmp/see/0` and Read each PNG it prints (light
 and dark, one per tab; they show real house data). Then the Swift under
-Chintan/Chintan/.
+Chintan/Chintan/. When `Chintan/scripts/walk.sh` exists (SPRINT.md, "The
+eyes, deeper"), run it too for anything that moves or is touched: it films
+a scripted walk and cuts a contact sheet of frames across each transition;
+read the frames the way you read the stills, and print the hitch numbers
+in the ledger line when the walk has them.
 
 Then one sprint: take the top backlog item that is not done (or its next
 slice if the item is larger than one run), design it in a sentence, build

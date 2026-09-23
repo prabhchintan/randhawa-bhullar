@@ -161,11 +161,74 @@ stops the sprints until the maintainer's word, enough rests them until a
 named time, flat slows them. The nightly TestFlight build stays as the
 catch-all.
 
+## The eyes, deeper (Prab, 2026-09-23 02:55, the study line)
+
+His word, at three in the morning: swiping between screens and the general
+UX "seems janky"; the icon needs the polish the app now has; the deeper UX
+is haptics and touch to reveal ("the thing itself can be extremely short and
+aesthetic until pressed, at which point the user gets haptic feedback and a
+bubble showing more details"); and above all "we will need a much better
+way of doing this than screenshots ... question the underlying meta layer
+and how to improve it, then the actual thing itself." So the loop grows
+eyes for motion, feel and the lived experience, in this order:
+
+1. **The walk** (`scripts/walk.sh`, an XCUITest target `ChintanWalk`): a
+   scripted walk through the app that swipes between tabs, scrolls each
+   shelf, opens a leaf, presses and holds what reveals, types a word in a
+   room, turns the phone dark, and photographs every state it passes
+   through, not just the three resting tabs. `xcrun simctl io recordVideo`
+   runs under it so the transitions exist as a film; the job keeps the film
+   and a contact sheet of frames (every 250 ms across each transition) that
+   the hand and the fresh eyes can read. see.sh stays for the quick look.
+2. **The numbers Apple uses**: hitches. Instruments' Animation Hitches
+   template through `xctrace record` over the walk, exported to one line
+   per screen: hitch time ratio in ms per second. Apple's own bar: under 5
+   is good, over 10 is a visible jank. A sprint that touches motion prints
+   the before and after ratios in its ledger line; the review reads them.
+   Add `XCTOSSignpostMetric` scroll and animation metrics to the walk when
+   the hitch export is in.
+3. **The audit**: `XCUIApplication.performAccessibilityAudit()` (iOS 17)
+   on every screen in the walk: contrast, dynamic type, hit targets,
+   element descriptions. Its findings are a list, not a picture, and each
+   one is a real defect a person would feel. Zero findings is the bar.
+4. **His phone, the only judge of feel**: haptics and the weight of a
+   gesture cannot be seen in a simulator. Two doors close the loop. (a)
+   MetricKit: the app subscribes to `MXMetricManager` and posts each daily
+   payload to `POST /v1/metrics` on the house door (launch times, hang
+   rate, scroll hitch ratios, from the device itself; the house files them
+   and the review reads the trend). (b) His word from inside the app: a
+   long press on the museum label anywhere opens "a word for the house", a
+   one-line composer; what he types goes to `POST /v1/word {"screen": ...,
+   "text": ...}` and becomes the next sprint's steer, logged, so the lived
+   experience is the signal and he never has to open Telegram to say "this
+   swipe is janky".
+5. **The rubric widens**: the fresh-eyes review reads the film's frames,
+   the hitch ratios, the audit list and his words alongside the stills,
+   and judges motion (does a transition feel like one continuous surface),
+   feel (does a press answer, does a reveal breathe), and the walk's
+   honesty (does every state it passes look designed).
+
+The likely cause of the jank tonight, for the hand to confirm with the
+numbers before touching it: each tab draws its own copy of the painting, so
+a swipe decodes and lays out a full-screen image again; the fix is one
+painting layer under all tabs (decoded once, cached, `.drawingGroup()` or a
+prerendered UIImage at screen scale), the tabs as content over it, and a
+page-style swipe between them with the standard iOS spring. The HIG is the
+standard for the rest: the system tab bar's gestures and timings, standard
+spring animations (`.snappy`, `.smooth`), `.sensoryFeedback` (iOS 17) for
+haptics with the system's own kinds (selection on a tab, impact soft on a
+reveal, success on done), a reveal as a plaque that grows from the thing
+pressed with `matchedGeometryEffect`, never a modal.
+
 ## The roadmap, in chunks (2026-09-22 19:44; each chunk is a few sprints)
 
 Take them in order; a sprint takes the next slice of the open chunk. The
 chunk is done when the fresh-eyes review says so against the look above.
 
+0. The eyes, deeper (next, before more polish): the walk with its film and
+   contact sheet, then the hitch numbers, then the audit; the house builds
+   `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
+   subscriber and the long-press "a word for the house" come with chunk G.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
    graphite, gilt hairlines; the brown gone from every screen and the
    asset catalog); the tab bar drawn on the art; the painting under every
@@ -204,6 +267,13 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    side: Cleveland as a second source and the Indian and Sikh themes live
    09-22 evening; architecture next); a keep gesture that files today's
    painting in the vault's baithak; yesterday's painting one swipe away.
+G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
+   system kinds only); touch to reveal everywhere a thing is short: a leaf,
+   a meter, a label, a room name grows a plaque with the detail on a press
+   and hold, with a soft impact, and folds back; the swipe between tabs as
+   one continuous surface over one painting; the long-press "a word for
+   the house"; the MetricKit subscriber. Judged by the walk's film and the
+   hitch numbers, and by him.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri.
