@@ -235,8 +235,10 @@ chunk is done when the fresh-eyes review says so against the look above.
    the hitch numbers (built, sprint 11: the walk prints them; Instruments
    has no hitches on the simulator, so the app meters its own frames),
    the audit (built, sprint 12: `see.sh --walk --audit OUT` runs it alone;
-   the contrast findings waived by name, sprint 13; left: the partial
-   dynamic type and the unnamed element, see the ledger); the house builds
+   the contrast findings waived by name, sprint 13; the largest text
+   seen and fixed, sprint 14, `see.sh --large`; left: the unnamed
+   full-screen element, and the label's and bubbles' dynamic type
+   readings, see the ledger); the house builds
    `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
    subscriber and the long-press "a word for the house" come with chunk G.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
@@ -320,6 +322,33 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 14 (c384cc0): the largest text, seen and fixed.
+  The audit's "partially unsupported" readings sent the eyes to the phone's
+  largest text size (`see.sh --large OUT`, which sets it, looks, and sets
+  it back), and there the app came apart: Home's rings and museum label
+  sat side by side wider than the phone, so the whole page widened, its
+  things ran off the right edge ("Call Huntzinge") and its lines lettered
+  over the Board next door, with the Study's "CHIN" showing at the Board's
+  right edge; the study's rooms ran off screen; the bar's names grew
+  until they crowded. Now each page is clipped at its sides only (the
+  shade still runs under the clock and the bar; a plain clip left seams,
+  seen and undone), Home's label steps under the rings when the two cannot
+  share a line and every thing on Home wraps, the rings stop growing at
+  the first large size, the study's three rooms slide under the thumb when
+  they do not fit, and the bar holds the system tab bar's size with the
+  large content viewer on a press and hold, as iOS does. Seen at the
+  largest size in both modes on all three pages, and at the normal size
+  unchanged. The audit now writes each finding's long word and the
+  element's frame. The audit: 42 to 20; the bar's and rings' names waived
+  by name (held at a size by design). Left: the unnamed element is the
+  full screen (0,0 402x874, type other) on every screen, and naming the
+  pager did not clear it (tried, undone); next, suspect the hosting view
+  or the painting's lamp black ground. Home's label and next and two
+  study bubbles still read "partially", though the large pictures show
+  them growing; likely they grow past the visible part of a scroll, not
+  yet proven. No hitch numbers (nothing that moves was touched). No new
+  door.
 
 - 2026-09-23 · the house, by hand (the guest book and the shelf; chunks H
   and E2): Home gains "Visitors" at the head of the wall, a sheet on glass
