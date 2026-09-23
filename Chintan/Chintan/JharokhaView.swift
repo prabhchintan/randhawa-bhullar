@@ -9,8 +9,10 @@ struct JharokhaView: View {
     @EnvironmentObject private var gallery: Gallery
     @State private var day = CockpitDay()
     @State private var dated: [BoardItem] = []
+    @State private var pulse: [CockpitDay.Meter] = []
     @State private var errorText: String?
     @State private var showCredit = false
+    @State private var openMeter: String?
 
     var body: some View {
         GeometryReader { geo in
@@ -54,11 +56,13 @@ struct JharokhaView: View {
                                 ForEach(group.items) { item in
                                     Text(item.gist)
                                         .font(.callout)
-                                        .foregroundStyle(.white.opacity(0.92))
-                                        .lineLimit(1)
+                                        .foregroundStyle(Theme.bone.opacity(0.94))
+                                        .lineLimit(2)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
-                            .frame(minHeight: 42)
+                            .padding(.top, 2)
+                            .frame(minHeight: 44, alignment: .top)
                         }
                     }
                 }
@@ -70,15 +74,28 @@ struct JharokhaView: View {
                     .foregroundStyle(.white.opacity(0.8))
             }
 
+            if let open = meters.first(where: { $0.key == openMeter }) {
+                Text(open.sentence)
+                    .font(.system(.footnote, design: .serif).italic())
+                    .foregroundStyle(Theme.bone.opacity(0.85))
+                    .transition(.opacity)
+            }
+
             HStack(alignment: .bottom) {
-                if !day.meters.isEmpty {
-                    HStack(spacing: 14) {
-                        ForEach(day.meters, id: \.name) { meter in
-                            MeterRing(name: meter.name, fraction: meter.fraction)
+                if !meters.isEmpty {
+                    HStack(alignment: .top, spacing: 16) {
+                        ForEach(meters, id: \.key) { meter in
+                            MeterRing(meter: meter, open: meter.key == openMeter)
+                                .onTapGesture {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        openMeter = openMeter == meter.key ? nil : meter.key
+                                    }
+                                }
                         }
                         Circle()
                             .fill(day.raised ? Theme.saffron : Theme.giltOnArt)
-                            .frame(width: 9, height: 9)
+                            .frame(width: 7, height: 7)
+                            .padding(.top, 9)
                             .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
                     }
                 }
@@ -112,6 +129,9 @@ struct JharokhaView: View {
         }
     }
 
+    // The pulse's meters when the house serves them, else the cockpit's.
+    private var meters: [CockpitDay.Meter] { pulse.isEmpty ? day.meters : pulse }
+
     private func refresh() async {
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errorText = "No house address yet. Add it in Settings."
@@ -121,8 +141,10 @@ struct JharokhaView: View {
         async let picture: Void = gallery.load()
         async let cockpit = try? house.cockpit()
         async let board = try? house.board()
-        let (_, c, b) = await (picture, cockpit, board)
+        async let beat = try? house.pulse()
+        let (_, c, b, p) = await (picture, cockpit, board, beat)
         if let c { day = CockpitDay(c) }
+        if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
         if let b { dated = BoardItem.upcoming(BoardParser.parse(b)) }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
     }
@@ -135,42 +157,49 @@ private struct DateTile: View {
 
     var body: some View {
         let soon = date.map { Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: .now) } ?? false
-        VStack(spacing: 0) {
-            Text(date?.formatted(.dateTime.weekday(.abbreviated)).uppercased() ?? "")
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(soon ? Theme.saffron : .white.opacity(0.7))
+        VStack(spacing: 1) {
+            Text(date?.formatted(.dateTime.weekday(.abbreviated)).lowercased() ?? "")
+                .font(.system(size: 11, weight: .medium, design: .serif).smallCaps())
+                .tracking(0.8)
+                .foregroundStyle(soon ? Theme.saffron : Theme.giltOnArt)
             Text(date?.formatted(.dateTime.day()) ?? "")
-                .font(.system(.title3, design: .serif).weight(.semibold))
-                .foregroundStyle(.white)
+                .font(.system(.title3, design: .serif))
+                .foregroundStyle(Theme.bone)
         }
-        .frame(width: 40, height: 42)
-        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.white.opacity(0.18)))
+        .frame(width: 42, height: 46)
+        .background(Theme.lampBlack.opacity(0.35), in: RoundedRectangle(cornerRadius: 3))
+        .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(Theme.giltOnArt.opacity(0.6), lineWidth: 0.5))
     }
 }
 
 // A meter as a ring: how much of the window is spent, saffron past three
-// quarters.
+// quarters, its name lettered under it. Tapped, its name turns gilt and
+// Home says it in words.
 private struct MeterRing: View {
-    let name: String
-    let fraction: Double
+    let meter: CockpitDay.Meter
+    let open: Bool
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 5) {
             ZStack {
-                Circle().stroke(.white.opacity(0.3), lineWidth: 3)
+                Circle().stroke(Theme.bone.opacity(0.22), lineWidth: 2.5)
                 Circle()
-                    .trim(from: 0, to: min(max(fraction, 0), 1))
-                    .stroke(fraction > 0.75 ? Theme.saffron : Theme.bone, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .trim(from: 0, to: min(max(meter.fraction, 0), 1))
+                    .stroke(meter.fraction > 0.75 ? Theme.saffron : Theme.bone,
+                            style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
                     .rotationEffect(.degrees(-90))
             }
             .frame(width: 24, height: 24)
-            Text(name)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundStyle(.white.opacity(0.7))
+            Text(meter.label)
+                .font(.system(size: 11, weight: .medium, design: .serif).smallCaps())
+                .tracking(0.6)
+                .foregroundStyle(open ? Theme.giltOnArt : Theme.bone.opacity(0.7))
+                .fixedSize()
         }
+        .contentShape(Rectangle())
         .accessibilityElement()
-        .accessibilityLabel("\(name) \(Int(fraction * 100)) percent")
+        .accessibilityLabel(meter.sentence)
+        .accessibilityAddTraits(.isButton)
     }
 }
 
@@ -178,7 +207,53 @@ private struct MeterRing: View {
 // headline (its first sentence), the usage meters, and whether anything
 // is raised. Anything it cannot find it leaves out.
 struct CockpitDay {
-    struct Meter { let name: String; let fraction: Double }
+    struct Meter {
+        let key: String
+        let label: String
+        let fraction: Double
+        var words: String?
+        var resets: Date?
+
+        init(key: String, label: String, fraction: Double) {
+            self.key = key; self.label = label; self.fraction = fraction
+        }
+
+        init(_ m: HouseClient.Pulse.Meter) {
+            key = m.key
+            fraction = m.fraction
+            words = m.words
+            resets = m.resets.flatMap(Self.parse)
+            label = Self.names[m.key] ?? Self.shortName(m.name ?? m.key)
+        }
+
+        // What the ring says in words, and when the window comes back.
+        var sentence: String {
+            var line = words ?? "\(Int((fraction * 100).rounded())) percent of \(label)"
+            if let resets {
+                let when = Calendar.current.isDateInToday(resets)
+                    ? resets.formatted(date: .omitted, time: .shortened)
+                    : resets.formatted(.dateTime.weekday(.wide).hour().minute())
+                line += ", fresh again \(when)"
+            }
+            return line.prefix(1).uppercased() + line.dropFirst() + "."
+        }
+
+        private static let names = ["session": "hours", "weekly": "week", "fable": "fable"]
+
+        private static func shortName(_ name: String) -> String {
+            var n = name.hasPrefix("the ") ? String(name.dropFirst(4)) : name
+            if let comma = n.range(of: ", ") { n = String(n[comma.upperBound...]) }
+            return n.lowercased()
+        }
+
+        private static func parse(_ s: String) -> Date? {
+            let f = ISO8601DateFormatter()
+            f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let d = f.date(from: s) { return d }
+            f.formatOptions = [.withInternetDateTime]
+            return f.date(from: s)
+        }
+    }
     var headline: String?
     var meters: [Meter] = []
     var raised = false
@@ -205,9 +280,10 @@ struct CockpitDay {
         }
         raised = !text.contains("nothing raised")
         if let match = text.firstMatch(of: /meters s(\d+) w(\d+) f(\d+)/) {
-            meters = [("s", match.1), ("w", match.2), ("f", match.3)].compactMap { name, value in
-                Double(value).map { Meter(name: name, fraction: $0 / 100) }
-            }
+            meters = [("session", "hours", match.1), ("weekly", "week", match.2), ("fable", "fable", match.3)]
+                .compactMap { key, label, value in
+                    Double(value).map { Meter(key: key, label: label, fraction: $0 / 100) }
+                }
         }
     }
 }

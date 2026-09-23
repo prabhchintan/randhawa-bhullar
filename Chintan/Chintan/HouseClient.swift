@@ -66,6 +66,26 @@ struct HouseClient {
         return data
     }
 
+    // The usage meters, each with its name, how much is spent, and when it
+    // comes back.
+    struct Pulse: Decodable {
+        struct Meter: Decodable {
+            let key: String
+            let name: String?
+            let fraction: Double
+            let resets: String?
+            let words: String?
+        }
+        let meters: [Meter]
+    }
+
+    func pulse() async throws -> Pulse {
+        guard let url = url("/v1/pulse") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
+        return try JSONDecoder().decode(Pulse.self, from: data)
+    }
+
     func board() async throws -> String {
         guard let url = url("/v1/board") else { throw HouseError.noAddress }
         let (data, _) = try await Self.session.data(from: url)
