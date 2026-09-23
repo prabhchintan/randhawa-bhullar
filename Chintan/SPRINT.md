@@ -190,7 +190,10 @@ C. The study, three voices. The conversation legible over the painting
    darban, yaar; history kept per voice; a thinking state that breathes;
    time stamps; failures said plainly; retry; the composer above the
    keyboard. Uses `to` on `/v1/say` and `/v1/voices` (house side live
-   09-22 evening).
+   09-22 evening). Slice 1 built (sprint 9): the three rooms named at the
+   top, history per voice, `to` sent, the empty room in the voice's own
+   line, the thinking mark breathing. Left: time stamps, retry on a failed
+   word, the composer seen above the keyboard.
 D. The house. The household seen: darban, yaar, the hands, the timers,
    each with its last run and state as marks not words; the meters as
    bars; the doctor's word. `/v1/cockpit.json` when the tiles need
@@ -206,6 +209,22 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 9 (a16489e): the study has three rooms. "The
+  study" at the head is gone; chintan, darban and yaar are named there in
+  small serif capitals, the open room in gilt with a hairline under it
+  that slides to the next, a saffron mark on a voice the house says is not
+  home. Each room keeps its own conversation on the device (chintan's in
+  the file it always had, the others beside it), a word goes to the room's
+  voice (`to` on `/v1/say`), and a reply finds its room even if he has
+  walked into another. An empty room says what the voice is for in the
+  house's own line from `/v1/voices` ("The door: the day to day, what the
+  house is doing, a quick word.") under a gilt hairline; the composer
+  reads "A word for darban"; the thinking state is a gilt mark that
+  breathes beside "darban is thinking". The room last open is kept. Seen
+  in both modes against the real house: chintan's room with its
+  conversation, darban's and yaar's empty. No new door (see.sh's
+  `study@darban` opens a room).
 
 - 2026-09-23 · sprint 8 (8d2e25d): the board on leaves by day. The one
   long plaque is gone; each shelf (Today, This week, Later) is named in
