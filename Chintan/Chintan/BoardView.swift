@@ -30,25 +30,39 @@ struct BoardView: View {
     @State private var gone: Set<String> = []
     @State private var sending: UUID?
     @State private var refused: [UUID: String] = [:]
+    @State private var launchOpened = false
+
+    // How tall the board dissolves into the painting above the tabs: a
+    // line that runs under the bar fades out as a leaf, not cut mid-word.
+    private static let foot: CGFloat = 96
 
     private var shelves: [BoardSection] { BoardSection.shelves(sections, without: gone) }
     private var count: Int { shelves.reduce(0) { $0 + $1.items.count } }
 
     var body: some View {
         GeometryReader { geo in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    heading
-                        .padding(.top, geo.size.height * 0.30)
-                        .padding(.horizontal, 6)
-                    if !shelves.isEmpty || errorText != nil {
-                        board.plaque()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        heading
+                            .padding(.top, geo.size.height * 0.30)
+                            .padding(.horizontal, 6)
+                        if !shelves.isEmpty || errorText != nil {
+                            board.plaque()
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    // The last leaf clears the fade whole, never cut above the tabs.
+                    .padding(.bottom, Self.foot + 8)
+                }
+                .fadedEdges(bottom: Self.foot)
+                .onChange(of: open) {
+                    if launchOpened, let id = open.first {
+                        launchOpened = false
+                        proxy.scrollTo(id, anchor: .center)
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 24)
             }
-            .fadedEdges()
         }
         .background { PaintedGround(head: 160) }
         .toolbar(.hidden, for: .navigationBar)
@@ -114,6 +128,7 @@ struct BoardView: View {
                             Rectangle().fill(Theme.gilt.opacity(0.28)).frame(height: 0.5)
                         }
                     }
+                    .id(item.id)
                     .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .offset(y: -18))))
                 }
             }
@@ -226,7 +241,10 @@ struct BoardView: View {
             let args = ProcessInfo.processInfo.arguments
             if let i = args.firstIndex(of: "--open"), i + 1 < args.count, let n = Int(args[i + 1]) {
                 let all = shelves.flatMap(\.items)
-                if n < all.count { open = [all[n].id] }
+                if n < all.count {
+                    launchOpened = true
+                    open = [all[n].id]
+                }
             }
         } catch {
             errorText = "The house is not answering. Are you on the tailnet?"
@@ -273,12 +291,15 @@ extension BoardItem {
 
 extension BoardSection {
     // The open things by when they fall, soonest first: Today (and anything
-    // already past), This week, Later. Things without a date close Later in
-    // the house's own order. Done means gone.
+    // already past), This week (through Sunday), Later. Things without a
+    // date close Later in the house's own order. Done means gone.
     static func shelves(_ sections: [BoardSection], without gone: Set<String>) -> [BoardSection] {
-        let cal = Calendar.current
+        var cal = Calendar.current
+        cal.firstWeekday = 2
         let today = cal.startOfDay(for: .now)
-        let week = cal.date(byAdding: .day, value: 7, to: today) ?? today
+        // The week ends on Sunday: Monday's bill belongs to the next one.
+        let week = cal.dateInterval(of: .weekOfYear, for: today)?.end
+            ?? cal.date(byAdding: .day, value: 7, to: today) ?? today
         let open = sections.flatMap(\.items).filter { !$0.done && !gone.contains($0.line) }
         let dated = open.filter { $0.day != nil }.sorted { $0.day! < $1.day! }
         let undated = open.filter { $0.day == nil }

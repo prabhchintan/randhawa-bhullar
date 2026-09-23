@@ -143,13 +143,16 @@ extension View {
     }
 
     // A scroll that dissolves into the painting at its edges instead of
-    // sliding hard under the bars.
+    // sliding hard under the bars. The foot eases out and is clear for its
+    // last stretch, so no half-lettered line sits on the bar's edge.
     func fadedEdges(top: CGFloat = 24, bottom: CGFloat = 28) -> some View {
         mask {
             VStack(spacing: 0) {
                 LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom).frame(height: top)
                 Color.black
-                LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom).frame(height: bottom)
+                LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black.opacity(0.5), location: 0.4),
+                                       .init(color: .black.opacity(0.1), location: 0.75), .init(color: .clear, location: 0.92)],
+                               startPoint: .top, endPoint: .bottom).frame(height: bottom)
             }
         }
     }
