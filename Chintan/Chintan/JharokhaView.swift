@@ -15,6 +15,8 @@ struct JharokhaView: View {
     @State private var openMeter: String?
     @State private var showVisitors = false
     @State private var turned = 0
+    // The ring under a press and hold, its plaque grown over the wall.
+    @State private var held: String?
 
     var body: some View {
         GeometryReader { geo in
@@ -24,11 +26,13 @@ struct JharokhaView: View {
                     overlay
                         .padding(.horizontal, 22)
                         .padding(.top, 80)
-                        .padding(.bottom, 20)
+                        // The Board's foot: the last line clears the fade whole.
+                        .padding(.bottom, Theme.foot + 8)
                 }
                 .frame(minHeight: geo.size.height)
             }
             .scrollBounceBehavior(.basedOnSize)
+            .fadedEdges(top: 0, bottom: Theme.foot)
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
             .overlay(alignment: .topLeading) { guestBook }
@@ -37,6 +41,8 @@ struct JharokhaView: View {
         .refreshable { await refresh() }
         .task { await refresh() }
         .sensoryFeedback(.impact(weight: .light), trigger: turned)
+        // A soft impact as a plaque grows, none as it folds.
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: held) { _, now in now != nil }
         .sheet(isPresented: $showVisitors) {
             VisitorsView()
                 .presentationBackground(.ultraThinMaterial)
@@ -135,12 +141,19 @@ struct JharokhaView: View {
         if !meters.isEmpty {
             HStack(alignment: .top, spacing: 16) {
                 ForEach(meters, id: \.key) { meter in
-                    MeterRing(meter: meter, open: meter.key == openMeter)
+                    MeterRing(meter: meter, open: meter.key == openMeter || meter.key == held)
                         .accessibilityIdentifier("ring")
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 openMeter = openMeter == meter.key ? nil : meter.key
                             }
+                        }
+                        // Pressed and held, the ring grows a plaque with the
+                        // whole of it; let go, the plaque folds back.
+                        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
+                            withAnimation(.snappy) { held = meter.key }
+                        } onPressingChanged: { pressing in
+                            if !pressing, held != nil { withAnimation(.snappy) { held = nil } }
                         }
                 }
                 Circle()
@@ -154,7 +167,27 @@ struct JharokhaView: View {
                     .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
             }
             .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            .overlay(alignment: .bottomLeading) {
+                if let i = meters.firstIndex(where: { $0.key == held }) {
+                    // It grows out of the ring pressed, standing just above the
+                    // rings (the row is the raised mark's 44 points tall).
+                    RingPlaque(meter: meters[i])
+                        .fixedSize(horizontal: false, vertical: true)
+                        .offset(y: -(44 + 12))
+                        .transition(.scale(scale: 0.4, anchor: UnitPoint(x: (CGFloat(i) * 56 + 22) / RingPlaque.width, y: 1))
+                            .combined(with: .opacity))
+                }
+            }
+            .onAppear(perform: holdOnLaunch)
         }
+    }
+
+    // For the house's eyes: `--open N` on Home holds the Nth ring pressed.
+    private func holdOnLaunch() {
+        let args = ProcessInfo.processInfo.arguments
+        guard held == nil, Tab.launch == .jharokha, let i = args.firstIndex(of: "--open"), i + 1 < args.count,
+              let n = Int(args[i + 1]), n < meters.count else { return }
+        held = meters[n].key
     }
 
     // Small and exact, never shouting: the title, the artist, the year, one
@@ -309,6 +342,54 @@ private struct MeterRing: View {
     }
 }
 
+// A ring held: the ring itself larger with its number, the window's name in
+// gilt, what it says, and when it comes back, on a small plaque.
+private struct RingPlaque: View {
+    static let width: CGFloat = 248
+    let meter: CockpitDay.Meter
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                Circle().stroke(Theme.ink.opacity(0.18), lineWidth: 3)
+                Circle()
+                    .trim(from: 0, to: min(max(meter.fraction, 0), 1))
+                    .stroke(meter.fraction > 0.75 ? Theme.saffron : Theme.gilt,
+                            style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text("\(meter.percent)")
+                    .font(.system(.callout, design: .serif).monospacedDigit())
+                    .foregroundStyle(Theme.ink)
+            }
+            .frame(width: 46, height: 46)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(meter.title)
+                    .font(Theme.label(.caption))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.gilt)
+                // The ring has the number and the title the window; the
+                // house's words only where they say more than both.
+                if let words = meter.words, !words.lowercased().contains(meter.title.lowercased()) {
+                    Text(words.prefix(1).uppercased() + words.dropFirst())
+                        .font(.footnote)
+                        .foregroundStyle(Theme.ink)
+                }
+                Text(meter.fresh.map { "Fresh again \($0)" } ?? "\(meter.percent) percent used")
+                    .font(.system(.callout, design: .serif).italic())
+                    .foregroundStyle(Theme.ink.opacity(0.85))
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(width: Self.width)
+        // Whole, not the leaves' 97 percent: the wall's lines stand right under it.
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .plaque(radius: 12)
+        .accessibilityElement(children: .combine)
+    }
+}
+
 // The few things Home reads out of the house's cockpit text: the day's
 // headline (its first sentence), the usage meters, and whether anything
 // is raised. Anything it cannot find it leaves out.
@@ -319,6 +400,7 @@ struct CockpitDay {
         let fraction: Double
         var words: String?
         var resets: Date?
+        var name: String?
 
         init(key: String, label: String, fraction: Double) {
             self.key = key; self.label = label; self.fraction = fraction
@@ -329,18 +411,28 @@ struct CockpitDay {
             fraction = m.fraction
             words = m.words
             resets = m.resets.flatMap(Self.parse)
+            name = m.name?.plainDashes
             label = Self.names[m.key] ?? Self.shortName(m.name ?? m.key)
         }
 
+        var percent: Int { Int((min(max(fraction, 0), 1) * 100).rounded()) }
+
+        // The window's own name as the house gives it ("the five hours").
+        var title: String { name ?? label }
+
         // What the ring says in words, and when the window comes back.
+        var said: String { words ?? "\(percent) percent of \(label)" }
+
+        var fresh: String? {
+            guard let resets else { return nil }
+            return Calendar.current.isDateInToday(resets)
+                ? resets.formatted(date: .omitted, time: .shortened)
+                : resets.formatted(.dateTime.weekday(.wide).hour().minute())
+        }
+
         var sentence: String {
-            var line = words ?? "\(Int((fraction * 100).rounded())) percent of \(label)"
-            if let resets {
-                let when = Calendar.current.isDateInToday(resets)
-                    ? resets.formatted(date: .omitted, time: .shortened)
-                    : resets.formatted(.dateTime.weekday(.wide).hour().minute())
-                line += ", fresh again \(when)"
-            }
+            var line = said
+            if let fresh { line += ", fresh again \(fresh)" }
             return line.prefix(1).uppercased() + line.dropFirst() + "."
         }
 

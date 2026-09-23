@@ -32,9 +32,7 @@ struct BoardView: View {
     @State private var refused: [UUID: String] = [:]
     @State private var launchOpened = false
 
-    // How tall the board dissolves into the painting above the tabs: a
-    // line that runs under the bar fades out as a leaf, not cut mid-word.
-    private static let foot: CGFloat = 96
+    private static let foot = Theme.foot
 
     private var shelves: [BoardSection] { BoardSection.shelves(sections, without: gone) }
     private var count: Int { shelves.reduce(0) { $0 + $1.items.count } }

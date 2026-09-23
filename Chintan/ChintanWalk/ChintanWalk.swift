@@ -47,6 +47,10 @@ final class ChintanWalk: XCTestCase {
             shot("home-ring")
             ring.tap()
             pause(0.6)
+            // Held, the ring grows its plaque; the film sees it grow and fold.
+            mark("hold-ring")
+            ring.press(forDuration: 1.5)
+            pause(0.8)
         } else {
             note("home: no ring to tap")
         }
@@ -372,6 +376,17 @@ final class ChintanHitches: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 20))
         Thread.sleep(forTimeInterval: 5)
+
+        // A ring held and let go: the plaque grows and folds.
+        let ring = app.descendants(matching: .any).matching(identifier: "ring").firstMatch
+        if ring.exists {
+            window("reveal") {
+                for _ in 0..<3 {
+                    ring.press(forDuration: 1.0)
+                    Thread.sleep(forTimeInterval: 0.5)
+                }
+            }
+        }
 
         // The first visit to each tab, where a screen builds and fetches.
         window("first visits") {

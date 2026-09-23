@@ -13,6 +13,9 @@ enum Theme {
     static let gilt = Color("AccentColor")
     static let saffron = Color("Saffron")
     static let spacing: CGFloat = 16
+    // How tall a scroll dissolves into the painting above the bar: a line
+    // that runs under it fades out as a leaf, never cut mid-word.
+    static let foot: CGFloat = 96
 
     // What is lettered straight onto the art, in either mode.
     static let bone = Color(red: 0.925, green: 0.910, blue: 0.875)
