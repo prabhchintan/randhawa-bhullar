@@ -207,3 +207,81 @@ final class ChintanWalk: XCTestCase {
         return "none"
     }
 }
+
+// The hitches: the number Apple uses for jank, the hitch time ratio in ms
+// per s (under 5 is good, over 10 is a visible jank). The simulator has no
+// Instruments hitches, so the app times its own frames (--hitches) and this
+// walk gives each gesture a window in hitches-steps.tsv; walk.sh sums the
+// late frames in each window. Run apart from the walk, off the film.
+final class ChintanHitches: XCTestCase {
+    private var app: XCUIApplication!
+    private var log: FileHandle?
+
+    override func setUpWithError() throws {
+        continueAfterFailure = true
+        let env = ProcessInfo.processInfo.environment
+        let out = URL(fileURLWithPath: env["WALK_OUT"] ?? NSTemporaryDirectory() + "walk")
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let url = out.appendingPathComponent("hitches-steps.tsv")
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        log = try FileHandle(forWritingTo: url)
+        app = XCUIApplication()
+        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha", "--hitches"]
+    }
+
+    override func tearDown() {
+        try? log?.close()
+    }
+
+    func testHitches() throws {
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 20))
+        Thread.sleep(forTimeInterval: 5)
+
+        // The first visit to each tab, where a screen builds and fetches.
+        window("first visits") {
+            for tab in ["Board", "Study", "Home"] {
+                app.tabBars.buttons[tab].tap()
+                Thread.sleep(forTimeInterval: 1.5)
+            }
+        }
+        window("tabs") {
+            for _ in 0..<3 {
+                for tab in ["Board", "Study", "Home"] {
+                    app.tabBars.buttons[tab].tap()
+                    Thread.sleep(forTimeInterval: 0.6)
+                }
+            }
+        }
+        window("swipe") {
+            for _ in 0..<3 {
+                app.swipeLeft(velocity: .fast)
+                app.swipeRight(velocity: .fast)
+            }
+        }
+        app.tabBars.buttons["Board"].tap()
+        Thread.sleep(forTimeInterval: 2)
+        window("board scroll") { fling(app.scrollViews.firstMatch) }
+        app.tabBars.buttons["Study"].tap()
+        Thread.sleep(forTimeInterval: 2)
+        window("study scroll") { fling(app.scrollViews.firstMatch) }
+    }
+
+    private func fling(_ shelf: XCUIElement) {
+        guard shelf.exists else { return }
+        for _ in 0..<5 {
+            shelf.swipeUp(velocity: .fast)
+            shelf.swipeDown(velocity: .fast)
+        }
+    }
+
+    // A gesture's window: its name, when it began and when the screen had
+    // settled after it, on the wall clock the app's meter also writes.
+    private func window(_ name: String, _ body: () -> Void) {
+        let start = Date().timeIntervalSince1970
+        body()
+        Thread.sleep(forTimeInterval: 0.8)
+        let end = Date().timeIntervalSince1970
+        log?.write(Data(String(format: "%.3f\t%.3f\t%@\n", start, end, name).utf8))
+    }
+}

@@ -89,8 +89,20 @@ final class Gallery: ObservableObject {
         let (l, p) = await (label, picture)
         if let l { painting = l }
         if let p, let ui = UIImage(data: p) {
-            withAnimation(.easeInOut(duration: 0.6)) { image = ui }
+            let prepared = await Self.prepared(ui)
+            withAnimation(.easeInOut(duration: 0.6)) { image = prepared }
         }
+    }
+
+    // Decoded once, off the main thread, at the size the screen fills with
+    // it: a full scan left lazy is decoded and scaled again by every tab
+    // that shows it, a stall of a tenth of a second on each tap.
+    private static func prepared(_ ui: UIImage) async -> UIImage {
+        let screen = UIScreen.main
+        let fill = max(screen.bounds.width / ui.size.width, screen.bounds.height / ui.size.height) * 1.04
+        guard fill < 1 else { return await ui.byPreparingForDisplay() ?? ui }
+        let size = CGSize(width: (ui.size.width * fill).rounded(.up), height: (ui.size.height * fill).rounded(.up))
+        return await ui.byPreparingThumbnail(ofSize: CGSize(width: size.width * screen.scale, height: size.height * screen.scale)) ?? ui
     }
 }
 
