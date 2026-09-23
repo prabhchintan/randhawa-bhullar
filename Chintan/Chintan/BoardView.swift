@@ -28,6 +28,7 @@ struct BoardView: View {
                     Text(errorText)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .listRowBackground(Theme.card)
                 }
             }
             ForEach(sections) { section in
@@ -43,18 +44,22 @@ struct BoardView: View {
                             }
                         }
                         .padding(.vertical, 2)
+                        .listRowBackground(Theme.card)
                     }
                 }
             }
             if loaded && sections.isEmpty && errorText == nil {
                 Text("Nothing on the board.")
                     .foregroundStyle(.secondary)
+                    .listRowBackground(Theme.card)
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .paperBackground()
         .refreshable { await refresh() }
         .task { await refresh() }
-        .navigationTitle("The board")
+        .navigationTitle("Board")
     }
 
     private func refresh() async {

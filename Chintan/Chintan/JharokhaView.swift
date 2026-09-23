@@ -3,7 +3,7 @@ import SwiftUI
 // The house's one-screen view, as plain monospaced text. Refreshed on open
 // and by pull.
 struct JharokhaView: View {
-    @State private var text = "Pull to refresh."
+    @State private var text = ""
     @State private var errorText: String?
 
     var body: some View {
@@ -16,12 +16,16 @@ struct JharokhaView: View {
                 Text(errorText)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(Theme.spacing)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
             }
         }
+        .paperBackground()
         .refreshable { await refresh() }
         .task { await refresh() }
-        .navigationTitle("The jharokha")
+        .navigationTitle("Home")
     }
 
     private func refresh() async {

@@ -42,24 +42,33 @@ struct StudyView: View {
             Divider()
             HStack(alignment: .bottom) {
                 TextField("Say something", text: $draft, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
                     .lineLimit(1...5)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 9)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 18))
                     .onSubmit(send)
-                Button("Send", action: send)
-                    .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isThinking)
+                Button(action: send) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 32))
+                }
+                .accessibilityLabel("Send")
+                .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isThinking)
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 10)
         }
-        .navigationTitle("The study")
+        .paperBackground()
+        .navigationTitle("Study")
     }
 
     private func bubble(for message: ChintanMessage) -> some View {
         HStack {
             if !message.fromHouse { Spacer(minLength: 40) }
             Text(message.text)
-                .padding(10)
-                .background(message.fromHouse ? Color.gray.opacity(0.15) : Color.accentColor.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(message.fromHouse ? Theme.card : Color.accentColor.opacity(0.18))
+                .clipShape(RoundedRectangle(cornerRadius: 18))
             if message.fromHouse { Spacer(minLength: 40) }
         }
     }

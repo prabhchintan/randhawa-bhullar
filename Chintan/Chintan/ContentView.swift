@@ -1,7 +1,9 @@
 import SwiftUI
 
+// The raw values are the names the house's screenshots pass on the command
+// line, so they stay as they are even where the tab's own name has moved on.
 enum Tab: String {
-    case study, board, jharokha
+    case jharokha, board, study
 
     // The tab named on the command line, for the house's screenshots.
     static var launch: Tab {
@@ -9,7 +11,7 @@ enum Tab: String {
         if let i = args.firstIndex(of: "--tab"), i + 1 < args.count, let tab = Tab(rawValue: args[i + 1]) {
             return tab
         }
-        return .study
+        return .jharokha
     }
 }
 
@@ -20,6 +22,18 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $tab) {
+            NavigationStack {
+                JharokhaView()
+            }
+            .tabItem { Label("Home", systemImage: "house") }
+            .tag(Tab.jharokha)
+
+            NavigationStack {
+                BoardView()
+            }
+            .tabItem { Label("Board", systemImage: "checklist") }
+            .tag(Tab.board)
+
             NavigationStack {
                 StudyView()
                     .toolbar {
@@ -32,20 +46,8 @@ struct ContentView: View {
                         }
                     }
             }
-            .tabItem { Label("The study", systemImage: "text.bubble") }
+            .tabItem { Label("Study", systemImage: "bubble.left.and.text.bubble.right") }
             .tag(Tab.study)
-
-            NavigationStack {
-                BoardView()
-            }
-            .tabItem { Label("The board", systemImage: "checklist") }
-            .tag(Tab.board)
-
-            NavigationStack {
-                JharokhaView()
-            }
-            .tabItem { Label("The jharokha", systemImage: "rectangle.split.3x1") }
-            .tag(Tab.jharokha)
         }
         .environmentObject(store)
         .sheet(isPresented: $showingSettings) {
