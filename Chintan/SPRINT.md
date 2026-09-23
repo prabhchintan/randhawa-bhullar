@@ -177,7 +177,10 @@ A. The canvas (now). The palette re-cut to the look (bone, lamp black,
 B. The board on the canvas. Today, This week, Later on leaves over the
    picture; a thing done lifts off (`POST /v1/done`, house side to build
    when this chunk opens); the why on tap; the empty board is the painting
-   alone with one line. The day card's philosophy, nothing more.
+   alone with one line. The day card's philosophy, nothing more. Slice 1
+   built (sprint 6): the shelves by date, the why on tap, Done in the app.
+   Left: the house side of `POST /v1/done` (then see a thing lift off),
+   and the plaque on leaves by day rather than one long list.
 C. The study, three voices. The conversation legible over the painting
    (ink on a plaque or glass, never a raw bubble on the picture); the
    voice chosen at the top the way a gallery names its room: chintan,
@@ -200,6 +203,22 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 6 (8f99774): the board by when things fall. The
+  house's single "This week" heading in its own order (Wed, Mon, Fri) is
+  gone; the app shelves the open things Today (and anything past), This
+  week, Later, soonest first, the undated closing Later, so Friday's four
+  sit together under one date and Monday's bill comes last. A thing
+  opened on tap shows its whole why and, under it, a gilt hairline circle
+  and DONE in small capitals; it lifts off only when the house says yes,
+  and otherwise says in italic "The house cannot take this from the phone
+  yet." or "The house did not answer; still open." Seen in both modes
+  against the real house, shut and opened (see.sh now takes `board@N` to
+  open the Nth thing). The door needed from the house, not yet there (404
+  today): `POST /v1/done {"text": LINE}` where LINE is the task line after
+  its checkbox exactly as `/v1/board` printed it (📅 date included); runs
+  `ghar done` on it and answers 200 {"ok": true}; 404 or 405 reads as
+  "no door yet", any other non-2xx as "did not answer".
 
 - 2026-09-22 · sprint 5 (2d3354f): the canvas finished. Home's rings are
   named from `/v1/pulse` (hours, week, Fable in small serif capitals under
