@@ -109,12 +109,30 @@ struct HouseClient {
         guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
     }
 
-    func say(_ text: String) async throws -> String {
+    // The three voices, each with its line and whether it is home. A house
+    // without this door answers 404 and the study names the rooms alone.
+    struct Voices: Decodable {
+        struct Entry: Decodable {
+            let name: String
+            let line: String?
+            let home: Bool?
+        }
+        let voices: [Entry]
+    }
+
+    func voices() async throws -> Voices {
+        guard let url = url("/v1/voices") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
+        return try JSONDecoder().decode(Voices.self, from: data)
+    }
+
+    func say(_ text: String, to voice: String = "chintan") async throws -> String {
         guard let sayURL = url("/v1/say") else { throw HouseError.noAddress }
         var request = URLRequest(url: sayURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(["text": text])
+        request.httpBody = try JSONEncoder().encode(["text": text, "to": voice])
         let (data, response) = try await Self.session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         struct SayResponse: Decodable { let id: String?; let reply: String? }
