@@ -510,7 +510,7 @@ def main(argv=None):
     asc = ASC()
     if args.command == "certificates":
         import datetime as _dt
-        certs = asc.get_all("/v1/certificates")
+        certs = asc.get_all("/certificates")
         now = _dt.datetime.now(_dt.timezone.utc)
         for c in certs:
             a = c["attributes"]
@@ -520,7 +520,7 @@ def main(argv=None):
             mark = ""
             if args.revoke_newer_than is not None and a.get("name", "").startswith("Apple Development") \
                     and 0 <= fresh <= args.revoke_newer_than:
-                asc.delete(f"/v1/certificates/{c['id']}")
+                asc.delete(f"/certificates/{c['id']}")
                 mark = "  REVOKED"
             print(f"{c['id']}  {a.get('certificateType')}  {a.get('name')}  made about {made:%Y-%m-%d %H:%M}Z{mark}")
         return
