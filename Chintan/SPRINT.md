@@ -226,7 +226,9 @@ Take them in order; a sprint takes the next slice of the open chunk. The
 chunk is done when the fresh-eyes review says so against the look above.
 
 0. The eyes, deeper (next, before more polish): the walk with its film and
-   contact sheet, then the hitch numbers, then the audit; the house builds
+   contact sheet (built, sprint 10: `bash Chintan/scripts/see.sh --walk
+   /tmp/see/walk` until the sprint job's tool list names walk.sh itself),
+   then the hitch numbers, then the audit; the house builds
    `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
    subscriber and the long-press "a word for the house" come with chunk G.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
@@ -256,7 +258,8 @@ C. The study, three voices. The conversation legible over the painting
    09-22 evening). Slice 1 built (sprint 9): the three rooms named at the
    top, history per voice, `to` sent, the empty room in the voice's own
    line, the thinking mark breathing. Left: time stamps, retry on a failed
-   word, the composer seen above the keyboard.
+   word (the composer above the keyboard, and the keyboard put away by a
+   drag, seen in the walk, sprint 10).
 D. The house. The household seen: darban, yaar, the hands, the timers,
    each with its last run and state as marks not words; the meters as
    bars; the doctor's word. `/v1/cockpit.json` when the tiles need
@@ -279,6 +282,40 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 10 (8f573b6): the walk, and the keyboard let go.
+  The eyes: `ChintanWalk`, an XCUITest target (in the scheme's tests only,
+  never the archive), walks the app while `simctl io recordVideo` films
+  it: Home's ring and label, a press and hold, a swipe from Home and from
+  the Board, the shelves scrolled, a leaf opened and held, the study's
+  three rooms, a word typed and taken back unsent, the phone turned dark
+  mid-walk (walk.sh flips it on the walk's mark), Home and the Board in
+  dark. It photographs 21 states and logs every gesture with the clock;
+  `scripts/frames.swift` (AVFoundation, no ffmpeg on yantar) cuts one
+  contact sheet per gesture, a frame every 250 ms from just before to
+  1.75 s after. The job's tool list allows only see.sh, so `see.sh --walk
+  OUT` hands over to walk.sh; the job may name walk.sh directly later.
+  What the film says about the swipe: it does nothing. The tabs are the
+  system TabView, which has no swipe; a swipe left or right on Home or the
+  Board leaves the tab where it was (the walk's notes: selected Home,
+  Board, Board) and nothing on screen moves. A tap on a tab is a hard cut
+  inside one 250 ms frame. The painting does not visibly reload on a
+  return visit (the same picture, the same place, no flash, in light and
+  dark). The one frame between states is the Board's first visit: at
+  +500 ms the painting stands bare and brighter (its own ground, the shade
+  not yet on), "The board" lettered, the plaques missing and Home's line
+  ghosting through, then the board lands; that is the Board fetching its
+  list on first appearance, not the painting. So the jank he feels is
+  most likely the swipe that goes nowhere plus the hard cut; the fix
+  (chunk G) is a paged swipe over one painting layer. Press and hold
+  reveals nothing anywhere yet (chunk G). The walk found a real defect:
+  once the study's keyboard was up nothing put it away (the keyboard
+  covers the tabs, and the conversation did not dismiss it), so the only
+  way out was to send a word. Now a drag down the conversation takes the
+  keyboard down with the thumb, as Messages does, seen in the film across
+  about a second. The composer does sit above the keyboard (seen), so C's
+  "composer above the keyboard" is done. No hitch numbers yet (next
+  sprint). No new door.
 
 - 2026-09-23 · sprint 9 (a16489e): the study has three rooms. "The
   study" at the head is gone; chintan, darban and yaar are named there in
