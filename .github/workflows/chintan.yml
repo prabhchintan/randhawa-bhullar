@@ -72,7 +72,7 @@ jobs:
           security create-keychain -p "" "$KC"
           security set-keychain-settings -lut 7200 "$KC"
           security unlock-keychain -p "" "$KC"
-          security list-keychains -d user -s "$KC" "$HOME/Library/Keychains/login.keychain-db"
+          security list-keychains -d user -s "$KC"
           security default-keychain -d user -s "$KC"
           echo "BUILD_KEYCHAIN=$KC" >> "$GITHUB_ENV"
 
