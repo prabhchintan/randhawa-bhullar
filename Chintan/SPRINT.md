@@ -290,9 +290,9 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    under paged tabs, a swipe between them, the selection haptic on each
    arrival. Left in slice 1: tab taps and first visits under 10 ms/s.
    Slice 2 begun (sprint 15): touch to reveal on Home's rings, with the
-   soft impact. Next: the same on a leaf, a room name and the label (the
-   plaque in JharokhaView's RingPlaque is the pattern), then the word for
-   the house, MetricKit.
+   soft impact. A thing on Home held, sprint 16 (ThingPlaque). Next: the
+   same on a room name and the label (RingPlaque and ThingPlaque are the
+   pattern), then the word for the house, MetricKit.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -325,6 +325,24 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-23 · sprint 16 (862de91): a thing on Home, held. Home's things
+  were only their gist ("Call Ogden Clinic"); the why lived a swipe away
+  on the Board. Now a thing pressed and held grows a plaque just above the
+  leaves, the whole width of the wall, over the day's line and the
+  painting (`.snappy`, scale up from its foot and fade): the day in gilt
+  capitals, in words ("Friday, September 25"; saffron and "Today, ..."
+  once the day has come), the thing in the serif, and every reason the
+  house wrote in the body, twelve lines at most. The thing held turns
+  gilt; a soft impact as it grows, none as it folds; let go and it folds
+  back. First look had the plaque pinned inside the day's own row, the
+  width of the text and under the later leaves and the rings, which
+  lettered through it; now it hangs from the foot of the day's line, so
+  nothing draws over it. Seen in both modes, Wednesday's call and Friday's
+  script held (`see.sh OUT jharokha@t0`, the Nth thing held; `jharokha@N`
+  still holds the Nth ring). The walk does not yet hold a thing on Home,
+  so no hitch numbers; the ring's reveal was 50.2 ms/s last sprint and
+  this plaque is built the same way. No new door.
 
 - 2026-09-23 · sprint 15 (77388ec, b5f45dd): a ring held, and Home's
   foot. A ring on Home, pressed and held, now grows a small opaque plaque
