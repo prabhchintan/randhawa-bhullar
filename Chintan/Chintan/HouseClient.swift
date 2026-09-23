@@ -44,6 +44,28 @@ struct HouseClient {
         return try JSONDecoder().decode(Cockpit.self, from: data).text
     }
 
+    // The day's painting: its label from the house, the picture itself from
+    // the house too, so the app still talks to one host.
+    struct Painting: Decodable {
+        let title: String?
+        let artist: String?
+        let year: String?
+        let credit: String?
+    }
+
+    func painting() async throws -> Painting {
+        guard let url = url("/v1/painting") else { throw HouseError.noAddress }
+        let (data, _) = try await Self.session.data(from: url)
+        return try JSONDecoder().decode(Painting.self, from: data)
+    }
+
+    func paintingImage() async throws -> Data {
+        guard let url = url("/v1/painting.jpg") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
+        return data
+    }
+
     func board() async throws -> String {
         guard let url = url("/v1/board") else { throw HouseError.noAddress }
         let (data, _) = try await Self.session.data(from: url)
