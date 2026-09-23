@@ -172,7 +172,10 @@ A. The canvas (now). The palette re-cut to the look (bone, lamp black,
    tab with the right surface for its text; the rings under Home named
    from `/v1/pulse` or removed; the cut-off to-do line fixed. Slices: 1)
    palette and tab bar, 2) Board and Study get the painting and a surface,
-   3) rings and the label.
+   3) rings and the label. Slices 1 and 2 done in sprint 4 (2477828); left
+   for slice 3: the rings named from `/v1/pulse`, Home's calendar leaf and
+   its cut-off first line re-cut in the new ink, and the study's plaques
+   seen with a real conversation (the eyes had none).
 B. The board on the canvas. Today, This week, Later on leaves over the
    picture; a thing done lifts off (`POST /v1/done`, house side to build
    when this chunk opens); the why on tap; the empty board is the painting
@@ -199,6 +202,23 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-22 · sprint 4 (2477828): the canvas. The brown paper is gone
+  from every screen and the asset catalog (Ground in bone and lamp black,
+  Plaque, Ink in graphite and bone, the accent now old gold, Saffron kept
+  for the single mark); the tab bar is transparent on the art, bone icons,
+  the active one in gilt, labels in small serif capitals; the painting is
+  fetched once and stands under all three tabs. The board keeps the top
+  third of the picture, "Five things open." lettered over it, and the
+  things on one plaque with a gilt hairline, each by its gist with the
+  reasons small (the rest on tap) and the date lettered once per day,
+  saffron once the day comes. The study stands on the painting too:
+  chintan's words on plaques, his on smoked glass, a glass composer with a
+  gilt send, the gear in the head, "The study is quiet." when empty. The
+  dark sliver at the top edge is gone and Home's foot is one shade into
+  the tab bar. Seen in both modes against the real house over three looks;
+  the study's bubbles were not seen (no conversation on the simulator).
+  No new door.
 
 - 2026-09-22 · sprint 3 (8d9ae91): Home is the day's painting. The wall
   of monospaced text is gone; the house's painting fills the screen, the
