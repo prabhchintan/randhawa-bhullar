@@ -28,8 +28,8 @@ enum Theme {
         .system(style, design: .serif).smallCaps()
     }
 
-    // The bars are drawn by UIKit, so they are set there once: both
-    // transparent, so the painting runs under them.
+    // The navigation bar is drawn by UIKit, so it is set there once,
+    // transparent, so the painting runs under it. The tab bar is our own.
     @MainActor static func apply() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
@@ -38,24 +38,6 @@ enum Theme {
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-
-        let bone = UIColor(Theme.bone)
-        let gilt = UIColor(Theme.giltOnArt)
-        let item = UITabBarItemAppearance()
-        let font = smallCaps(size: 11)
-        item.normal.iconColor = bone.withAlphaComponent(0.72)
-        item.normal.titleTextAttributes = [.foregroundColor: bone.withAlphaComponent(0.72), .font: font, .kern: 0.6]
-        item.selected.iconColor = gilt
-        item.selected.titleTextAttributes = [.foregroundColor: gilt, .font: font, .kern: 0.6]
-
-        let tabs = UITabBarAppearance()
-        tabs.configureWithTransparentBackground()
-        tabs.shadowColor = .clear
-        tabs.stackedLayoutAppearance = item
-        tabs.inlineLayoutAppearance = item
-        tabs.compactInlineLayoutAppearance = item
-        UITabBar.appearance().standardAppearance = tabs
-        UITabBar.appearance().scrollEdgeAppearance = tabs
     }
 
     private static func serif(_ style: UIFont.TextStyle, weight: UIFont.Weight) -> UIFont {
@@ -63,15 +45,6 @@ enum Theme {
         let weighted = base.fontDescriptor.addingAttributes([.traits: [UIFontDescriptor.TraitKey.weight: weight.rawValue]])
         let descriptor = weighted.withDesign(.serif) ?? weighted
         return UIFont(descriptor: descriptor, size: base.pointSize)
-    }
-
-    private static func smallCaps(size: CGFloat) -> UIFont {
-        let base = UIFont.systemFont(ofSize: size, weight: .medium).fontDescriptor
-        let serif = base.withDesign(.serif) ?? base
-        let caps = serif.addingAttributes([.featureSettings: [
-            [UIFontDescriptor.FeatureKey.type: kLowerCaseType, UIFontDescriptor.FeatureKey.selector: kLowerCaseSmallCapsSelector],
-        ]])
-        return UIFont(descriptor: caps, size: size)
     }
 }
 
@@ -106,15 +79,10 @@ final class Gallery: ObservableObject {
     }
 }
 
-// The painting as a screen's ground, full bleed, running under both bars.
-// A soft shade at the head where a screen letters its name, and always at
-// the foot, so the tab bar's bone icons read on any picture. While the
-// picture is missing, the gallery wall after hours.
-struct PaintedGround: View {
+// The painting itself, drawn once under every tab, full bleed, the tabs
+// sliding over it. While the picture is missing, the gallery wall after hours.
+struct Painting: View {
     @EnvironmentObject private var gallery: Gallery
-    var head: CGFloat = 0
-    var foot: CGFloat = 200
-    var footShade: Double = 0.7
 
     var body: some View {
         Theme.lampBlack
@@ -129,6 +97,21 @@ struct PaintedGround: View {
                 }
             }
             .clipped()
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
+    }
+}
+
+// A screen's own shade over the one painting: soft at the head where a
+// screen letters its name, and always at the foot, so the tab bar's bone
+// icons read on any picture. It slides with its screen; the picture stays.
+struct PaintedGround: View {
+    var head: CGFloat = 0
+    var foot: CGFloat = 200
+    var footShade: Double = 0.7
+
+    var body: some View {
+        Color.clear
             .overlay(alignment: .top) {
                 if head > 0 {
                     LinearGradient(colors: [.black.opacity(0.6), .clear], startPoint: .top, endPoint: .bottom)

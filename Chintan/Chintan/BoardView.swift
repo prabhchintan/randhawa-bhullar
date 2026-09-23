@@ -56,6 +56,7 @@ struct BoardView: View {
                     .padding(.bottom, Self.foot + 8)
                 }
                 .fadedEdges(bottom: Self.foot)
+                .accessibilityIdentifier("shelves")
                 .onChange(of: open) {
                     if launchOpened, let id = open.first {
                         launchOpened = false
@@ -65,7 +66,6 @@ struct BoardView: View {
             }
         }
         .background { PaintedGround(head: 160) }
-        .toolbar(.hidden, for: .navigationBar)
         .refreshable { await refresh() }
         .task { await refresh() }
     }

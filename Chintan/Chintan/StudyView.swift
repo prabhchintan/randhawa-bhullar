@@ -50,6 +50,7 @@ struct StudyView: View {
                 // tabs are under it, so it is the only way out unsent.
                 .scrollDismissesKeyboard(.interactively)
                 .fadedEdges()
+                .accessibilityIdentifier("conversation")
                 .overlay(alignment: .bottom) {
                     if messages.isEmpty && !isThinking {
                         quiet
@@ -71,7 +72,6 @@ struct StudyView: View {
             composer
         }
         .background { PaintedGround(head: 150, foot: 260) }
-        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }

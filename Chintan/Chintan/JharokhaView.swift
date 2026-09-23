@@ -30,7 +30,6 @@ struct JharokhaView: View {
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(foot: geo.size.height * 0.75, footShade: 0.82) }
         }
-        .toolbar(.hidden, for: .navigationBar)
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
@@ -110,18 +109,33 @@ struct JharokhaView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // Small and exact, never shouting; the credit on tap.
+    // Small and exact, never shouting: the title, the artist, the year, one
+    // to a line. The artist's nationality and dates wait with the credit, on tap.
     @ViewBuilder private var museumLabel: some View {
         if let painting = gallery.painting, let title = painting.title {
+            let artist = (painting.artist ?? "").plainDashes
+            let (name, about) = Self.split(artist)
             VStack(alignment: .trailing, spacing: 2) {
                 Text(title.plainDashes)
                     .font(.system(.caption, design: .serif).italic())
-                Text([painting.artist, painting.year].compactMap { $0 }.joined(separator: ", ").plainDashes)
-                    .font(.system(.caption, design: .serif))
-                if showCredit, let credit = painting.credit {
-                    Text(credit.plainDashes)
-                        .font(.caption)
+                if !name.isEmpty {
+                    Text(name)
+                        .font(.system(.caption, design: .serif))
+                }
+                if let year = painting.year, !year.isEmpty {
+                    Text(year.plainDashes)
+                        .font(.system(.caption, design: .serif))
                         .foregroundStyle(.white.opacity(0.75))
+                }
+                if showCredit {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        if let about { Text(about) }
+                        if let credit = painting.credit { Text(credit.plainDashes) }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.75))
+                    .padding(.top, 4)
+                    .transition(.opacity)
                 }
             }
             .multilineTextAlignment(.trailing)
@@ -132,6 +146,14 @@ struct JharokhaView: View {
             .accessibilityIdentifier("label")
             .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
         }
+    }
+
+    // "Edgar Degas (French, 1834-1917)" is the name on the label and the
+    // rest for the credit.
+    private static func split(_ artist: String) -> (String, String?) {
+        guard let open = artist.range(of: " ("), artist.hasSuffix(")") else { return (artist, nil) }
+        let about = artist[open.upperBound...].dropLast()
+        return (String(artist[..<open.lowerBound]), about.isEmpty ? nil : String(about))
     }
 
     // The pulse's meters when the house serves them, else the cockpit's.

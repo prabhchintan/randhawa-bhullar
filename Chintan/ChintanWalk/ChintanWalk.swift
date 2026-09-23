@@ -34,7 +34,7 @@ final class ChintanWalk: XCTestCase {
     func testWalk() throws {
         mark("launch")
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 20))
         pause(5) // the painting and the day come from the house
         shot("home")
 
@@ -74,7 +74,7 @@ final class ChintanWalk: XCTestCase {
         note("after swipe left from Home, selected: " + selectedTab())
 
         mark("tab-board")
-        app.tabBars.buttons["Board"].tap()
+        app.buttons["Board"].tap()
         pause(3)
         shot("board")
 
@@ -116,7 +116,7 @@ final class ChintanWalk: XCTestCase {
         note("after swipe right from Board, selected: " + selectedTab())
 
         mark("tab-study")
-        app.tabBars.buttons["Study"].tap()
+        app.buttons["Study"].tap()
         pause(2)
         shot("study")
 
@@ -166,11 +166,11 @@ final class ChintanWalk: XCTestCase {
         pause(3)
         shot("study-dark")
         mark("tab-home-dark")
-        app.tabBars.buttons["Home"].tap()
+        app.buttons["Home"].tap()
         pause(2)
         shot("home-dark")
         mark("tab-board-dark")
-        app.tabBars.buttons["Board"].tap()
+        app.buttons["Board"].tap()
         pause(2)
         shot("board-dark")
         mark("light")
@@ -201,7 +201,7 @@ final class ChintanWalk: XCTestCase {
     }
 
     private func selectedTab() -> String {
-        for name in ["Home", "Board", "Study"] where app.tabBars.buttons[name].isSelected {
+        for name in ["Home", "Board", "Study"] where app.buttons[name].isSelected {
             return name
         }
         return "none"
@@ -241,11 +241,11 @@ final class ChintanAudit: XCTestCase {
 
     func testAudit() throws {
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 20))
         Thread.sleep(forTimeInterval: 5)
         audit("home")
 
-        app.tabBars.buttons["Board"].tap()
+        app.buttons["Board"].tap()
         Thread.sleep(forTimeInterval: 3)
         audit("board")
         let leaf = app.descendants(matching: .any).matching(identifier: "leaf").firstMatch
@@ -257,7 +257,7 @@ final class ChintanAudit: XCTestCase {
             Thread.sleep(forTimeInterval: 0.6)
         }
 
-        app.tabBars.buttons["Study"].tap()
+        app.buttons["Study"].tap()
         Thread.sleep(forTimeInterval: 2)
         audit("study")
         let darban = app.buttons["darban"].firstMatch
@@ -327,20 +327,20 @@ final class ChintanHitches: XCTestCase {
 
     func testHitches() throws {
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 20))
         Thread.sleep(forTimeInterval: 5)
 
         // The first visit to each tab, where a screen builds and fetches.
         window("first visits") {
             for tab in ["Board", "Study", "Home"] {
-                app.tabBars.buttons[tab].tap()
+                app.buttons[tab].tap()
                 Thread.sleep(forTimeInterval: 1.5)
             }
         }
         window("tabs") {
             for _ in 0..<3 {
                 for tab in ["Board", "Study", "Home"] {
-                    app.tabBars.buttons[tab].tap()
+                    app.buttons[tab].tap()
                     Thread.sleep(forTimeInterval: 0.6)
                 }
             }
@@ -351,12 +351,12 @@ final class ChintanHitches: XCTestCase {
                 app.swipeRight(velocity: .fast)
             }
         }
-        app.tabBars.buttons["Board"].tap()
+        app.buttons["Board"].tap()
         Thread.sleep(forTimeInterval: 2)
-        window("board scroll") { fling(app.scrollViews.firstMatch) }
-        app.tabBars.buttons["Study"].tap()
+        window("board scroll") { fling(app.scrollViews["shelves"]) }
+        app.buttons["Study"].tap()
         Thread.sleep(forTimeInterval: 2)
-        window("study scroll") { fling(app.scrollViews.firstMatch) }
+        window("study scroll") { fling(app.scrollViews["conversation"]) }
     }
 
     private func fling(_ shelf: XCUIElement) {
