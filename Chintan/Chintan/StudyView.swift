@@ -8,6 +8,7 @@ import SwiftUI
 // he has walked into another.
 struct StudyView: View {
     @EnvironmentObject var store: ConversationStore
+    @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage("studyVoice") private var kept = Voice.chintan.rawValue
     @State private var voice: Voice = StudyView.launchVoice ?? .chintan
     @State private var draft = ""
@@ -123,11 +124,19 @@ struct StudyView: View {
     private var header: some View {
         HStack(alignment: .center, spacing: 22) {
             // The three names side by side; at the largest text they slide
-            // under the thumb instead of running off the phone.
-            ViewThatFits(in: .horizontal) {
-                rooms
-                ScrollView(.horizontal) { rooms.padding(.vertical, 2) }
-                    .scrollIndicators(.hidden)
+            // under the thumb instead of running off the phone. Measured only
+            // at the large sizes: ViewThatFits lays the rooms out twice on
+            // every turn of a page, the Study's share of a two-frame stall.
+            Group {
+                if typeSize >= .xxLarge {
+                    ViewThatFits(in: .horizontal) {
+                        rooms
+                        ScrollView(.horizontal) { rooms.padding(.vertical, 2) }
+                            .scrollIndicators(.hidden)
+                    }
+                } else {
+                    rooms
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Button {

@@ -79,6 +79,11 @@ struct ContentView: View {
         .environmentObject(store)
         .environmentObject(gallery)
         .task { await gallery.load() }
+        .task {
+            // The hitch meter's walk with no hand; a phone never passes this.
+            guard ProcessInfo.processInfo.arguments.contains("--self-walk") else { return }
+            await HitchMeter.shared.walk { t in withAnimation(.snappy) { page = t } }
+        }
         // Hidden only under a keyboard tall enough to cover it, not a
         // hardware keyboard's thin strip.
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in

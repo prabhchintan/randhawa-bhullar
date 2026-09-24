@@ -51,6 +51,45 @@ final class HitchMeter: NSObject {
         self.link = link
     }
 
+    // The walk with no hand (launched with --hitches --self-walk, by walk.sh
+    // through simctl, never a test): the app turns its own pages the way a
+    // tap on the bar does and logs each window beside the frames, so the
+    // numbers hold the app's own cost alone. A test's hand reads the whole
+    // accessibility tree on the main thread at every gesture; a phone's never does.
+    @MainActor func walk(turn: @escaping (Tab) -> Void) async {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let url = caches.appendingPathComponent("self-steps.tsv")
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        let log = try? FileHandle(forWritingTo: url)
+        func window(_ name: String, _ body: () async -> Void) async {
+            let start = Date().timeIntervalSince1970
+            await body()
+            try? await Task.sleep(for: .seconds(0.8))
+            let line = String(format: "%.3f\t%.3f\t%@\n", start, Date().timeIntervalSince1970, name)
+            log?.write(Data(line.utf8))
+        }
+        try? await Task.sleep(for: .seconds(6))
+        await window("rest, no hand") { try? await Task.sleep(for: .seconds(3)) }
+        await window("tabs, no hand") {
+            for _ in 0..<3 {
+                for t in [Tab.board, .study, .jharokha] {
+                    turn(t)
+                    try? await Task.sleep(for: .seconds(0.6))
+                }
+            }
+        }
+        await window("neighbours, no hand") {
+            for _ in 0..<3 {
+                for t in [Tab.board, .jharokha] {
+                    turn(t)
+                    try? await Task.sleep(for: .seconds(0.6))
+                }
+            }
+        }
+        try? log?.close()
+        FileManager.default.createFile(atPath: caches.appendingPathComponent("self-done").path, contents: nil)
+    }
+
     @objc private func frame(_ link: CADisplayLink) {
         defer { last = link.timestamp }
         guard last > 0, link.duration > 0 else { return }
