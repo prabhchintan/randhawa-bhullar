@@ -56,9 +56,9 @@ descriptive as they can be while carrying the highest information density";
 the art library "seemingly infinite" (the house: a third museum, Chicago,
 and a seen ledger so nothing returns within a year) and every picture
 covering the entire screen, never "weirdly re sized or cropped" (the house
-now composes each picture for the phone's frame: a tall work cropped
-gently from above the middle, anything else whole over its own blurred
-ground; the app shows it edge to edge, scaledToFill, no crop of its own);
+now composes each picture for the phone's frame the way his example shows:
+cropped to fill from a little above the middle, never letterboxed; the app
+shows it edge to edge with its own dimming, no crop of its own);
 the usage circles kept but "placed neatly below", the art given the room;
 the app icon "classy like the app now"; the Board's week broken by day and
 "later for the rest of them combined"; and the app made by the latest
@@ -366,14 +366,17 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
 J. The Board by day. This week broken by day, one gilt date per leaf as
    now, Later for the rest combined (one shelf, undated things and the
    weeks beyond, sorted by date); the title rule of I applies everywhere.
-K. The picture whole. The app assumes every picture from the house is
-   already the phone's frame (1179 by 2556, composed by the house): show it
-   edge to edge under the safe areas with scaledToFill and no offset, the
-   label and the plaques over the ground where the work does not reach,
-   never over a face. A picture that is not the frame's ratio (an old
-   cache) is refit by the house on request (`ghar painting refit`), the app
-   just re-fetches the shelf. The shelf keeps growing (fourteen days,
-   three museums); the "next" tap never shows a repeat.
+K. The picture edge to edge (his example, 2026-09-23 20:15: A Cosey Corner
+   filling the screen under the app's own dimming, "perfect"). Every picture
+   from the house is already the phone's frame (1179 by 2556): the work
+   scaled to the width and cropped to the height from a little above the
+   middle, never letterboxed, never stretched; only works at least 1.25
+   tall for their width are picked. The app shows it edge to edge under the
+   safe areas with scaledToFill and no offset of its own, and keeps its
+   scrim for the text exactly as it is. An old cached picture that is not
+   the frame's ratio is the house's to refit (`ghar painting refit`); the
+   app just re-fetches the shelf. Three museums now, a seen ledger, no
+   repeat within a year.
 L. Where he is. CoreLocation with significant-change monitoring (the
    phone wakes the app a handful of times a day, near free on battery), the
    When In Use then Always permission asked in the house's own words on the
