@@ -3,9 +3,10 @@ import UIKit
 
 // Home is the day's painting, full bleed, with the day laid over its foot
 // the way a museum places a label: the date, the day in a few words, today's
-// things in their fewest words, and under a hairline the house's meters as
-// rings beside the label. Today only; the week is the Board's. Refreshed on
-// open and by pull.
+// things in their fewest words; and on the bar itself, under a hairline, the
+// house's meters as rings beside the label, so the painting has the height
+// of the screen (his word, 2026-09-24). Today only; the week is the Board's.
+// Refreshed on open and by pull.
 struct JharokhaView: View {
     @EnvironmentObject private var gallery: Gallery
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -26,19 +27,24 @@ struct JharokhaView: View {
 
     var body: some View {
         GeometryReader { geo in
-            ScrollView {
-                VStack(spacing: 0) {
-                    Spacer(minLength: 0)
-                    overlay
-                        .padding(.horizontal, 22)
-                        .padding(.top, 80)
-                        // The Board's foot: the last line clears the fade whole.
-                        .padding(.bottom, Theme.foot + 8)
+            VStack(spacing: 0) {
+                GeometryReader { wall in
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            Spacer(minLength: 0)
+                            overlay
+                                .padding(.horizontal, 22)
+                                .padding(.top, 80)
+                                // The last line clears the fade whole, above the foot.
+                                .padding(.bottom, 28)
+                        }
+                        .frame(minHeight: wall.size.height)
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                    .fadedEdges(top: 0, bottom: 36)
                 }
-                .frame(minHeight: geo.size.height)
+                foot
             }
-            .scrollBounceBehavior(.basedOnSize)
-            .fadedEdges(top: 0, bottom: Theme.foot)
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
             .overlay(alignment: .topLeading) { guestBook }
@@ -149,16 +155,21 @@ struct JharokhaView: View {
                     .foregroundStyle(Theme.bone.opacity(0.85))
                     .transition(.opacity)
             }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 
-            // The foot of the wall, under a gilt hairline: the rings together
-            // beside the label; at the accessibility sizes the label steps
-            // under them, so the wall never runs off the phone. Chosen by the
-            // text size, not the label's width, so the credit opening on a tap
-            // never throws the whole wall into the other shape.
+    // The foot of the wall, standing on the bar so the day's lines and the
+    // painting have the rest: under a gilt hairline the rings together at
+    // the left, the label and the turn at the right. At the accessibility
+    // sizes the label steps under the rings, so the foot never runs off the
+    // phone; chosen by the text size, not the label's width, so the credit
+    // opening on a tap never throws the foot into the other shape.
+    private var foot: some View {
+        VStack(alignment: .leading, spacing: 14) {
             Rectangle()
                 .fill(Theme.giltOnArt.opacity(0.45))
                 .frame(height: 0.5)
-                .padding(.top, 6)
                 .accessibilityHidden(true)
             if typeSize.isAccessibilitySize {
                 VStack(alignment: .trailing, spacing: 18) {
@@ -173,7 +184,9 @@ struct JharokhaView: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 22)
+        .padding(.bottom, 2)
+        .accessibilityIdentifier("foot")
     }
 
     // The house's meters as rings, and the mark for anything raised. The

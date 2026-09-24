@@ -50,6 +50,8 @@ struct HouseClient {
     // house too, so the app still talks to one host. The shelf (since
     // 2026-09-23) is today's and the days ahead; each has an id and the path
     // of its picture, and the phone keeps them all so they are there offline.
+    // `fit` names how the house composed the picture for the frame (since
+    // 2026-09-24); a recut picture is a new key, so the kept one is let go.
     struct Painting: Codable, Equatable {
         let id: String?
         let title: String?
@@ -58,8 +60,9 @@ struct HouseClient {
         let credit: String?
         let date: String?
         let image: String?
+        let fit: String?
 
-        var key: String { id ?? "today" }
+        var key: String { (id ?? "today") + (fit.map { "-" + $0 } ?? "") }
         var imagePath: String { image ?? "/v1/painting.jpg" }
     }
 

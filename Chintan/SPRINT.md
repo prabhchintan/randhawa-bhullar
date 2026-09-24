@@ -373,7 +373,10 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
    pressed, and by the label reading in one breath. Built (sprint 17):
    today and past only, each thing in the phone's own cut ("Caremark,
    call") with its hour apart in gilt, the rings and the label under a
-   gilt hairline. Left, the house's: `GET /v1/titles` (shape in the
+   gilt hairline. Since 2026-09-24 (his word at 03:56) the rings, the
+   hairline and the label stand on the bar itself, a foot below the scroll,
+   so the day's lines sit lower and the painting has the height of the
+   screen. Left, the house's: `GET /v1/titles` (shape in the
    ledger), whose cuts the app already prefers to its own; the place in
    the day's line (from the cockpit, as now).
 J. The Board by day. This week broken by day, one gilt date per leaf as
@@ -385,21 +388,28 @@ J. The Board by day. This week broken by day, one gilt date per leaf as
    (sprint 19): Today, Tomorrow, then each weekday left through Sunday on a
    shelf of its own, Later for the rest; the date mark only where the
    shelf's name is not the day (Later, a thing past). J is whole.
-K. The picture edge to edge (his example, 2026-09-23 20:15: A Cosey Corner
-   filling the screen under the app's own dimming, "perfect"). Every picture
-   from the house is already the phone's frame (1179 by 2556): the work
-   scaled to the width and cropped to the height from a little above the
-   middle, never letterboxed, never stretched; only works at least 1.25
-   tall for their width are picked. The app shows it edge to edge under the
-   safe areas with scaledToFill and no offset of its own, and keeps its
-   scrim for the text exactly as it is. An old cached picture that is not
-   the frame's ratio is the house's to refit (`ghar painting refit`); the
-   app just re-fetches the shelf. Three museums now, a seen ledger, no
-   repeat within a year. App side built (sprint 17): a kept picture that
-   is not the frame's shape is fetched again. The app's 4 percent trim
-   stays until the house trims each scan's border before composing (the
-   pictures showed the border the moment it went; see the ledger); then
-   it goes, and K is whole.
+K. The picture edge to edge. Every picture from the house is already the
+   phone's frame (1179 by 2556). The composition since 2026-09-24 (his word
+   at 03:56, seeing Portrait of an Officer drawn out tall on Home: keep
+   "the original aspect ratio and somehow make it edge to edge", with
+   "reflections on all sides"): the work whole at the frame's width, never
+   stretched, never cropped, sitting high (three tenths of the free height
+   above it), and the frame filled to its edges with the work's own
+   reflection on every open side, as in a mirrored case, the reflection
+   softened and dimmed and darker toward the edge so the work reads as the
+   work. The scan's border (a black line, a mount, a miniature's page) is
+   trimmed by the house before composing. Only works at least 1.25 tall for
+   their width are picked, so the mirror never outweighs the work. Each
+   record carries `fit` (the composition's name, "mirror") and its picture
+   path carries it too (`/v1/paintings/ID.mirror.jpg`), so a recut picture
+   is a new key and a new URL to the phone and its caches; the app keys its
+   kept pictures by id and fit. The app shows the picture edge to edge with
+   scaledToFill and no offset of its own, keeps its scrim, and keeps its 4
+   percent trim (it now cuts only the mirror's edge). Before 09-24 the
+   composer cropped from a little above the middle, and a bug in it (the
+   height forced up to the frame's) stretched every work shorter than the
+   frame; the ledger of sprint 17 had named the officer. Three museums, a
+   seen ledger, no repeat within a year.
 L. Where he is. CoreLocation with significant-change monitoring (the
    phone wakes the app a handful of times a day, near free on battery), the
    When In Use then Always permission asked in the house's own words on the
@@ -473,6 +483,21 @@ F. Settings and the edges. The health dot; settings one tap away; a
   null}], "doctor": {"ok": true, "words": ["one line per finding"]}};
   404 or 405 reads as no door and the page shows voices and meters alone.
   The pulse's `tended` is now read (it was served, unused).
+- 2026-09-24 · by the house, on his word at 03:56 (a photo of Home, Portrait
+  of an Officer stretched tall): the picture is never stretched again, and
+  the foot stands on the bar. House side: the composer's crop branch forced
+  every work shorter than the frame up to the frame's height (the ledger of
+  sprint 17 had named the officer); the composition is now the work whole at
+  the frame's width in a mirrored ground, its own reflection on every open
+  side, softened and dimmed, darker toward the edge, the scan's border
+  trimmed first (K above); records carry `fit` and the picture path carries
+  it, so the phone fetches every picture again; the shelf refitted. App side:
+  `Painting.fit` in the key, so the kept pictures are let go; Home's rings,
+  hairline and label leave the scroll for a foot below it, standing on the
+  bar, and the day's lines sit lower with a shorter fade. The door's session
+  that wrote this cannot push, so the patch went to yantar as the steer of
+  the next sprint, which applied it, looked, and shipped (its own line
+  follows above). The shelf on the house was refitted the same hour.
 
 - 2026-09-24 · sprint 20 (39d7d82): where he is (L), and Settings on the
   wall. The Settings sheet (the gear in the Study) was the stock grey
