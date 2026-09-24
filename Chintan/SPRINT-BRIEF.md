@@ -48,6 +48,8 @@ Swift files go into project.pbxproj by hand (a PBXBuildFile, a
 PBXFileReference, the group's children, the Sources phase, fresh ids in the
 CA... family). Keep the change small enough to be whole.
 
-End with two lines, exactly:
+Nobody reads this run as it goes: never end on an offer to continue or a
+next step named and not taken; take it, or narrow the backlog item in
+SPRINT.md. End with two lines, exactly:
 NOTE: one sentence for the house (what changed, whether the pictures confirmed it)
 SHIP: yes or no (yes only when a person would notice the change on the phone)

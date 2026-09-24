@@ -83,7 +83,9 @@ inside scope (write a report anyway and say what stopped you).
    improvements inside LOOP.md scope: first whatever the inbox asks for, then the next open item of the loop's
    backlog in ROADMAP.md, informed by the feeds and the standing questions in
    LOOP.md. Zero is a fine answer on a quiet day. When you finish a backlog
-   item, mark it done in ROADMAP.md with the date, in one line. Prefer the smallest change that answers a real
+   item, mark it done in ROADMAP.md with the date, in one line. Nobody
+   reads this run as it goes: never end on an offer to continue or a next
+   step named and not taken; take it, or write it into ROADMAP.md. Prefer the smallest change that answers a real
    question over the largest change that would look impressive.
 
 4. Build. Implement, then build both apps for the simulator. Keep the

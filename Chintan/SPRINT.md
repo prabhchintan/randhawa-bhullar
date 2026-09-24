@@ -103,6 +103,15 @@ hairline, the quiet of a gallery at night. The warm brown paper is retired.
   depicting the Gurus are left out of the daily rotation, his to overrule),
   nothing lurid, nothing kitsch, no clip-art Khanda, no orange gradients.
   The label is the only decoration: title, artist, year, credit, on tap.
+- Left out, by name (the Opus 5.5 playbook, 2026-09-23: with no direction the
+  model falls back on a few default styles, and a list of named patterns
+  works where "avoid a generic look" does not): brown or beige anywhere,
+  card grids and drop-shadow cards, pill-shaped buttons, numbered 01 / 02 /
+  03 section labels, italic accent words inside headings, monospace labels,
+  gradients as decoration, stock grouped-list grey, emoji as icons, badges
+  and counters, progress bars where a ring or a bar of ink would do, and
+  any strip that cuts the painting edge to edge. When a look shows a new
+  default nobody asked for, add it here and re-cut.
 - Motion: none for its own sake. A painting fades in; a done thing lifts
   off its leaf; the thinking state breathes.
 
