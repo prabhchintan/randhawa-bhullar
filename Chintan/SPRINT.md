@@ -299,9 +299,11 @@ C. The study, three voices. The conversation legible over the painting
    keyboard. Uses `to` on `/v1/say` and `/v1/voices` (house side live
    09-22 evening). Slice 1 built (sprint 9): the three rooms named at the
    top, history per voice, `to` sent, the empty room in the voice's own
-   line, the thinking mark breathing. Left: time stamps, retry on a failed
-   word (the composer above the keyboard, and the keyboard put away by a
-   drag, seen in the walk, sprint 10).
+   line, the thinking mark breathing. The composer above the keyboard, and
+   the keyboard put away by a drag, seen in the walk (sprint 10). Time
+   stamps and retry on a failed word built (sprint 22). C is whole on the
+   app side; left, a reply the house finished while the app was closed
+   (the id of a 202 is not kept, so today it reads as unanswered).
 D. The house. CUT (his word, 2026-09-24 04:46, seeing the fourth tab:
    "I don't understand the point of the house vs the home, the speedometer
    circles on the home tab already give me highlights of the usage so I
@@ -461,6 +463,35 @@ F. Settings and the edges. The health dot; settings one tap away; a
   contact sheet of six (Velázquez, El Greco, a Kangra nayika, a Mandi lady
   with doves, the British officer, Shirlaw) in the phone's rounded square
   on a dark ground, sent to him. The checked-in icon is the Velázquez.
+- 2026-09-24 · sprint 22 (b1470bb): the study tells the hour, and a word
+  that went unanswered says so. Each run of the conversation carries its
+  day and time in gilt small capitals on a small mount, centred over the
+  first word, and again wherever an hour has passed or the day has turned
+  ("Today 4:54 AM", "Yesterday 9:10 PM", "Tuesday 9:01 PM", then "Sep 12
+  7:41 PM" past a week). A word of his with nothing after it, and the
+  house not thinking on it, is unanswered: under it, on a mount at the
+  right, "The house did not answer." in italic (or the plain reason, "The
+  house is not answering. Are you on the tailnet?", "No house address
+  yet. Add it in Settings.") and Try again in gilt small capitals in a
+  square hairline frame, which sends the same word once more where it
+  stands, no copy of it added. It is read from the conversation itself, so
+  it holds after the app was closed mid-wait. The old wifi line over the
+  composer is gone. Seen in both modes: chintan's room ("Tuesday 9:01 PM"
+  over the sample), darban's staged on the simulator only with a word
+  answered two hours ago and one unanswered (two stamps, the mark). At the
+  largest text the first look broke "Try again" mid-word ("AGAI / N");
+  now at the accessibility sizes the button stands under the words, whole.
+  Retry was not tapped against the real house (it would send darban a
+  real word). The hitch numbers, before then after, same machine, same
+  hour, median of three (ms/s): study scroll 4.7 to 6.2 (runs 4.7 7.7 1.8,
+  then 4.9 7.9 6.2, within the meter's spread, under 10); untouched, board
+  scroll 14.9 to 13.8, tabs 30.8 to 33.6, swipe 19.6 to 19.4, first visits
+  35.0 to 41.5, no hand 6.5 to 7.8. The Mac read higher than sprint 21 on
+  every line today (first visits 23.8 then), so read these against each
+  other, not against the older lines. No new door. Seen and not the app's:
+  the house's Adoration of the Christ Child still carries a hard line near
+  the top and a dark band from about three quarters down (sprint 21's
+  note, K's refit, the house's to check).
 
 - 2026-09-24 · by the house, on his word at 04:46 (a photo of Home with the
   day's lines circled and an arrow down: "This could move down"; and the
