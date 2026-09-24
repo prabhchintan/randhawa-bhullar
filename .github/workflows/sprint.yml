@@ -91,7 +91,13 @@ jobs:
           git status --short | head -5
           git add -A Chintan && git commit -q -m "sprint: leftovers" 2>/dev/null || true
           if [ -n "$(git log --oneline origin/main..HEAD)" ]; then
-            git pull --rebase -q origin main && git push -q origin HEAD:main && echo "pushed: $(git log --oneline -1)"
+            if ! git pull --rebase -q origin main; then
+              # a conflict the union driver could not settle: keep the sprint's work on a branch, never lose it
+              git rebase --abort || true
+              B="sprint-$(date +%Y%m%d-%H%M)"; git branch "$B" && git push -q origin "$B" && echo "conflict: pushed $B for the house to merge"
+              exit 0
+            fi
+            git push -q origin HEAD:main && echo "pushed: $(git log --oneline -1)"
           else
             echo "nothing to push"
           fi

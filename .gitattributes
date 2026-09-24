@@ -1,0 +1,5 @@
+# The sprint on yantar and the house on chintan both write the ledger and the
+# backlog; when both add lines in the same place, keep both (a rebase used to
+# stop on a conflict and the run failed, 2026-09-23 06:58).
+Chintan/SPRINT.md merge=union
+ROADMAP.md merge=union
