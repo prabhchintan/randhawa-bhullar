@@ -149,7 +149,8 @@ screen explains its own shape.
 `/v1/health`, `/v1/cockpit` (text), `/v1/board` (the to-dos as text),
 `/v1/painting` and `/v1/painting.jpg` (the day's painting), `/v1/pulse`
 (meters[] with key, name, fraction 0 to 1, resets, words; tended = the last
-round's time), `/v1/paintings` (the shelf: today's first then the days ahead, each with an id and
+round's time), `/v1/household` (asked for by sprint 21, not yet built),
+`/v1/paintings` (the shelf: today's first then the days ahead, each with an id and
 its `image` path; `/v1/paintings/ID.jpg` is the picture at the phone's size; the
 phone keeps the whole shelf, since 09-23), `/v1/visitors` (the site's visitors as
 people, newest last seen first; `/v1/visitors/VID` is one person with `visitList`,
@@ -304,9 +305,13 @@ C. The study, three voices. The conversation legible over the painting
    drag, seen in the walk, sprint 10).
 D. The house. The household seen: darban, yaar, the hands, the timers,
    each with its last run and state as marks not words; the meters as
-   bars; the doctor's word. `/v1/cockpit.json` when the tiles need
-   structure (shape: {"headline", "raised": [], "meters": {"s","w","f"},
-   "tiles": [{"name","value","of","state"}]}).
+   bars; the doctor's word. Slice 1 built (sprint 21): the fourth tab,
+   House, on the painting; the three voices as marks on one leaf, the
+   meters as bars of ink with the hour each comes back, the last round;
+   the hands and the doctor built against `GET /v1/household` (shape in
+   the ledger), shown only once the house answers. Next: the house builds
+   that door; then a hand held grows its plaque (RingPlaque's pattern)
+   with its last runs; a voice tapped opens its room in the Study.
 E. The collection. The painting alone on tap (label away, pinch to look);
    the subcontinent's art and architecture woven into the rotation (house
    side: Cleveland as a second source and the Indian and Sikh themes live
@@ -320,7 +325,10 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    the house"; the MetricKit subscriber. Judged by the walk's film and the
    hitch numbers, and by him. Slice 1 built (sprint 13): one painting
    under paged tabs, a swipe between them, the selection haptic on each
-   arrival. Left in slice 1: tab taps and first visits under 10 ms/s.
+   arrival. The stall on every turn of a page found and gone (sprint 21);
+   with no test hand, a turn is 7.6 ms/s. Left in slice 1: the walk's own
+   numbers are now mostly the test hand reading the accessibility tree;
+   read them against the no-hand lines, and first visits (28.6) next.
    Slice 2 begun (sprint 15): touch to reveal on Home's rings, with the
    soft impact. A thing on Home held, sprint 16 (ThingPlaque). Next: the
    same on a room name and the label (RingPlaque and ThingPlaque are the
@@ -410,9 +418,61 @@ M. The icon. Re-cut to the look: a small work of art in a frame, bone
    and tinted.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
-   notifications (an APNs key, his hands), Siri.
+   notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
+   when Settings is next touched, its actions should look pressable (not
+   bare gilt words) and its wall should stand on the painting like every
+   other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 21 (813d73c, 45752e2): the stall on a turn found,
+  and the House opens. The hitches first, on the steer. The frame log
+  showed the cost was not in the slide: every change of page, tap or
+  swipe, lost one frame of 20 to 40 ms at the moment it began, then slid
+  clean. Taking suspects out one build at a time (Instruments needs a
+  permission this run cannot give): the haptic, no; the bar, no; empty
+  pages, gone; the Board alone and Home alone, clean; the Study alone,
+  the whole stall, even on a turn from Home to the Board far from it. In
+  the Study, the header and the composer: the three rooms sat in a
+  ViewThatFits, which laid them out twice on every turn of any page. Now
+  they are measured only at the large text sizes (seen: unchanged at
+  normal size, and still sliding under the thumb at the largest); the
+  composer's growing field costs a little and stays. The meter grew a
+  second reading: `walk.sh --hitches OUT [RUNS]` runs the hitches alone
+  RUNS times and prints the median, and after the test's walk the app,
+  launched plainly with `--self-walk`, turns its own pages as a tap does,
+  with no test hand reading its accessibility tree (hiding that tree's
+  pages from the hand sent every number up, the scrolls to about 32:
+  the hand's reading is a large share of the old numbers, and a phone
+  never pays it). Before then after, median of three (ms/s): swipe 57.3
+  to 11.4, tabs 40.5 to 27.2, first visits 34.5 to 23.8, reveal 36.2 to
+  34.5, board scroll 11.8 to 12.0, study scroll 3.1 to 3.1; with no hand,
+  tabs 37.4 to 7.7 and Home to the Board 25.4 to 0.0, resting 0.0. Then
+  the House, the fourth tab ("building.columns", lettered like the
+  rest): the painting above, "The house" and a line ("All three home.";
+  "darban is not home."; "The round failed." once hands report) over the
+  shade, and on leaves: the voices as three names on one leaf, each
+  beside a mark (gilt home, saffron not), the meters as bars of ink
+  (gilt, saffron past three quarters) with the hour each comes back in
+  gilt capitals, and "Last round Wed 9:08 PM" in italic under them. The
+  first look gave each voice its line from `/v1/voices` and pushed the
+  meters under the bar; the lines are the Study's, so the voices became
+  marks and the whole page reads above the bar. With four pages, median
+  of three: no hand unchanged (tabs 7.6, neighbours 0.0), so the page
+  costs nothing of its own; with the hand, tabs 35.2 and swipe 18.9, the
+  hand reading one more page's tree. Seen in both modes and at the
+  largest text (the voices stand one under another). Two things seen
+  and not the app's: once in dark, Home's museum label was missing for
+  one shot and back in the next; and between 4:23 and 4:30 the house
+  began serving The Adoration of the Christ Child composed whole, with a
+  hard line near the top and a darkened band from about two thirds down,
+  which is letterboxing that K forbids (the house's refit, to check). The
+  door the House needs: `GET /v1/household` returning {"hands": [{"name":
+  "the round", "last": ISO 8601, "next": ISO 8601 or null, "state":
+  "ok"|"late"|"failed"|"off", "line": "what it does, a few words" or
+  null}], "doctor": {"ok": true, "words": ["one line per finding"]}};
+  404 or 405 reads as no door and the page shows voices and meters alone.
+  The pulse's `tended` is now read (it was served, unused).
 
 - 2026-09-24 · sprint 20 (39d7d82): where he is (L), and Settings on the
   wall. The Settings sheet (the gear in the Study) was the stock grey
