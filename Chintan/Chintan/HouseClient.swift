@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 
 // The one host this app ever talks to: the house, on the maintainer's own
@@ -198,6 +199,30 @@ struct HouseClient {
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
         guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
+    }
+
+    // Where the phone is, told to the house and forgotten: {"lat", "lon",
+    // "acc", "at"}. The house answers with the place it knows it by (home,
+    // work, out) or none yet. A house without this door answers 404.
+    struct Heard: Decodable { let place: String? }
+
+    func location(_ fix: CLLocation) async throws -> Heard {
+        guard let whereURL = url("/v1/location") else { throw HouseError.noAddress }
+        var request = URLRequest(url: whereURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 20
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        struct Fix: Encodable { let lat: Double; let lon: Double; let acc: Double; let at: String }
+        request.httpBody = try JSONEncoder().encode(Fix(
+            lat: fix.coordinate.latitude,
+            lon: fix.coordinate.longitude,
+            acc: fix.horizontalAccuracy,
+            at: ISO8601DateFormatter().string(from: fix.timestamp)))
+        let (data, response) = try await Self.session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
+        guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
+        return (try? JSONDecoder().decode(Heard.self, from: data)) ?? Heard(place: nil)
     }
 
     // The three voices, each with its line and whether it is home. A house

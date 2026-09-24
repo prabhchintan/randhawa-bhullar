@@ -14,11 +14,18 @@ struct ChintanApp: App {
         if args.contains("--hitches") {
             HitchMeter.shared.start()
         }
+        // Made at launch, so a wake for a move finds its delegate.
+        _ = Whereabouts.shared
     }
+
+    @Environment(\.scenePhase) private var phase
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+        }
+        .onChange(of: phase) { _, now in
+            if now == .active { Whereabouts.shared.freshen() }
         }
     }
 }

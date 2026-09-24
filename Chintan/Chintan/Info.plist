@@ -42,6 +42,10 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>So the day's line can say at home, at work or out. Only the house hears where the phone is; the phone keeps nothing.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>A few times a day, even with the app closed, the phone tells the house roughly where it is, so the day's line knows home from work. Only the house hears it.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

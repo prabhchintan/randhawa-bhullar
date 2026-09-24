@@ -15,7 +15,8 @@ struct StudyView: View {
     @State private var errors: [Voice: String] = [:]
     @State private var lines: [Voice: String] = [:]
     @State private var away: Set<Voice> = []
-    @State private var showingSettings = false
+    // Opened on launch with --settings, for the house's screenshots.
+    @State private var showingSettings = ProcessInfo.processInfo.arguments.contains("--settings")
     @Namespace private var rule
 
     // The room named on the command line, for the house's screenshots.

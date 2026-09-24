@@ -35,6 +35,22 @@ enum Keychain {
         SecItemDelete(query as CFDictionary)
         var attributes = query
         attributes[kSecValueData as String] = Data(address.utf8)
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         SecItemAdd(attributes as CFDictionary, nil)
+    }
+
+    // A wake for a move comes with the phone locked more often than not, so
+    // the address is readable after the first unlock, as the house's fixes
+    // need; an address kept before this is moved over once, while unlocked.
+    static func keepAfterFirstUnlock() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+        ]
+        let change: [String: Any] = [
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
+        SecItemUpdate(query as CFDictionary, change as CFDictionary)
     }
 }

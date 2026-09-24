@@ -6,7 +6,8 @@
 # fails. Needs CHINTAN_HOUSE in the environment (the house address).
 #
 #   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
-#                                                    (board@N: the Nth thing opened)
+#                                                    (board@N: the Nth thing opened;
+#                                                    settings: the Settings sheet)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
 #   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
 #                                                    text size, then back to normal
@@ -53,10 +54,28 @@ for mode in light dark; do
     xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
     # A tab written board@N is the board with its Nth thing opened on launch.
     EXTRA=()
+    # settings is the study with its Settings sheet open.
+    NAME=${tab%@*}
     case "$tab" in *@*) EXTRA=(--open "${tab#*@}") ;; esac
-    xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "${tab%@*}" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
+    [ "$NAME" = settings ] && NAME=study && EXTRA=(--settings)
+    # settings@on: location granted always, telling, a place heard. The app
+    # the eyes launch never monitors and never posts, so the house hears nothing.
+    if [ "$tab" = settings@on ]; then
+      xcrun simctl privacy "$UDID" grant location-always Prabhchintan.Chintan
+      xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.telling -bool YES
+      xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.place home
+      xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
+    fi
+    xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "$NAME" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
     sleep 6
     xcrun simctl io "$UDID" screenshot "$OUT/$tab-$mode.png" >/dev/null
+    if [ "$tab" = settings@on ]; then
+      xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+      xcrun simctl privacy "$UDID" reset location-always Prabhchintan.Chintan 2>/dev/null || true
+      for key in telling place heard; do
+        xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan "where.$key" 2>/dev/null || true
+      done
+    fi
   done
 done
 xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
