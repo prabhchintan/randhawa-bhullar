@@ -362,7 +362,12 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
    meters as small rings placed neatly below, together, never floating on
    the art; the week and everything later leaves Home for the Board. The
    sprint measures Home by how much painting is visible with nothing
-   pressed, and by the label reading in one breath.
+   pressed, and by the label reading in one breath. Built (sprint 17):
+   today and past only, each thing in the phone's own cut ("Caremark,
+   call") with its hour apart in gilt, the rings and the label under a
+   gilt hairline. Left, the house's: `GET /v1/titles` (shape in the
+   ledger), whose cuts the app already prefers to its own; the place in
+   the day's line (from the cockpit, as now).
 J. The Board by day. This week broken by day, one gilt date per leaf as
    now, Later for the rest combined (one shelf, undated things and the
    weeks beyond, sorted by date); the title rule of I applies everywhere.
@@ -376,7 +381,11 @@ K. The picture edge to edge (his example, 2026-09-23 20:15: A Cosey Corner
    scrim for the text exactly as it is. An old cached picture that is not
    the frame's ratio is the house's to refit (`ghar painting refit`); the
    app just re-fetches the shelf. Three museums now, a seen ledger, no
-   repeat within a year.
+   repeat within a year. App side built (sprint 17): a kept picture that
+   is not the frame's shape is fetched again. The app's 4 percent trim
+   stays until the house trims each scan's border before composing (the
+   pictures showed the border the moment it went; see the ledger); then
+   it goes, and K is whole.
 L. Where he is. CoreLocation with significant-change monitoring (the
    phone wakes the app a handful of times a day, near free on battery), the
    When In Use then Always permission asked in the house's own words on the
@@ -393,6 +402,37 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 17 (3359a41, ac61086): Home is today. The week's
+  calendar leaves are gone from Home; it holds only what is due today or
+  already past, each in its fewest words in the serif, the thing before
+  the deed and no articles ("Caremark, call" where it read "Call
+  Caremark" on a leaf), the first hour the house wrote set apart in gilt
+  small capitals ("8 AM", "before 5 PM"), and "since Tue" in saffron for a
+  thing whose day has passed. Under the thing a gilt hairline, and under it
+  the rings together beside the label, top-aligned, the foot of the wall.
+  With nothing pressed the date now starts about 110 points lower, so
+  more of the painting shows; held, the thing still grows its plaque with
+  the whole why. Seen in both modes, held, and at the largest text (the
+  title wraps, the rings stay together, the label scrolls up out of the
+  foot as before). The week and later are the Board's (J, next). K: the
+  app's 1.04 trim was taken off and the pictures showed why it exists:
+  measured on the shelf, the Met's scans carry a 1 pixel black line and
+  the frame's lip to about 24 pixels on each side (The Adoration of the
+  Christ Child showed dark strips down both sides), miniatures carry their
+  page to about 40 pixels (A Lady Gazing at Doves), so the trim is back,
+  named for the scan's edge. The app now fetches again any kept picture
+  not 1179 by 2556 (every picture on today's shelf already is). No hitch
+  numbers (nothing that moves was touched). Doors needed from the house:
+  (1) `GET /v1/titles` returning {"titles": [{"line": LINE, "title":
+  "Caremark, call", "hour": "before 5 PM" or null}]}, LINE the task line
+  after its checkbox exactly as `/v1/board` prints it; the app prefers
+  these to its own cut and cuts its own on a 404 (today it is 404). (2)
+  `ghar painting refit` trims the scan's border (uniform rows and columns
+  at each edge) before composing, so the app's trim can go. (3) Portrait
+  of an Officer (met-435792) looks stretched tall on the shelf, the
+  locket's oval and the face drawn out, against K's "never stretched":
+  the house to check its ratio gate, and for the small grey Met scans.
 
 - 2026-09-23 · sprint 16 (862de91): a thing on Home, held. Home's things
   were only their gist ("Call Ogden Clinic"); the why lived a swipe away
