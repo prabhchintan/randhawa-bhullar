@@ -157,6 +157,38 @@ struct HouseClient {
             let words: String?
         }
         let meters: [Meter]
+        // When the house last made its round.
+        let tended: String?
+    }
+
+    // The household itself: each hand and timer with its last run, its next,
+    // and its state, and the doctor's word. {"hands": [{"name", "last",
+    // "next", "state": "ok"|"late"|"failed"|"off", "line"}], "doctor":
+    // {"ok", "words": []}}. A house without this door answers 404.
+    struct Household: Decodable {
+        struct Hand: Decodable, Identifiable {
+            let name: String
+            let last: String?
+            let next: String?
+            let state: String?
+            let line: String?
+            var id: String { name }
+        }
+        struct Doctor: Decodable {
+            let ok: Bool
+            let words: [String]?
+        }
+        let hands: [Hand]?
+        let doctor: Doctor?
+    }
+
+    func household() async throws -> Household {
+        guard let url = url("/v1/household") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
+        guard http.statusCode == 200 else { throw HouseError.unreachable }
+        return try JSONDecoder().decode(Household.self, from: data)
     }
 
     func pulse() async throws -> Pulse {

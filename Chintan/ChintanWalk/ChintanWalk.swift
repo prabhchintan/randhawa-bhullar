@@ -205,7 +205,7 @@ final class ChintanWalk: XCTestCase {
     }
 
     private func selectedTab() -> String {
-        for name in ["Home", "Board", "Study"] where app.buttons[name].isSelected {
+        for name in ["Home", "Board", "Study", "House"] where app.buttons[name].isSelected {
             return name
         }
         return "none"

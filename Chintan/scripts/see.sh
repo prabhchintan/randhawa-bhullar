@@ -5,7 +5,7 @@
 # and dark. Prints the picture paths; exits 1 with the errors when the build
 # fails. Needs CHINTAN_HOUSE in the environment (the house address).
 #
-#   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
+#   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study house
 #                                                    (board@N: the Nth thing opened;
 #                                                    settings: the Settings sheet)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
@@ -22,7 +22,7 @@ if [ "${1:-}" = "--large" ]; then
   shift
 fi
 OUT=${1:?usage: see.sh OUTDIR [tab ...]}; shift
-TABS=${*:-jharokha board study}
+TABS=${*:-jharokha board study house}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 DD=${SEE_DERIVED:-$HOME/Library/Developer/Xcode/DerivedData/chintan-see}
 DEVICE=${SEE_DEVICE:-iPhone 16 Pro}
