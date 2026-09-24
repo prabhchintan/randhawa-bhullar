@@ -75,16 +75,16 @@ inside scope (write a report anyway and say what stopped you).
    the report and do what you can. A message that asks a question deserves an
    answer in the report even if nothing else happens today.
 
-3. Decide. Sort what the inbox asks for into the two tempos in LOOP.md:
-   site and worker requests are done and deployed in this run; app requests
+3. Decide. Sort what the inbox asks for into two tempos: site and worker
+   requests from the inbox (the maintainer's own asks, the only website work
+   the loop does) are done and deployed in this run; app requests
    are built in this run and go out with the next release that is earned
    (see step 5), which may be today or weeks away. Then pick zero to three
    improvements inside LOOP.md scope: first whatever the inbox asks for, then the next open item of the loop's
    backlog in ROADMAP.md, informed by the feeds and the standing questions in
    LOOP.md. Zero is a fine answer on a quiet day. When you finish a backlog
    item, mark it done in ROADMAP.md with the date, in one line. Prefer the smallest change that answers a real
-   question over the largest change that would look impressive. Write your
-   reasoning down before you code.
+   question over the largest change that would look impressive.
 
 4. Build. Implement, then build both apps for the simulator. Keep the
    no-dashes rule (no em or en dashes anywhere), keep every privacy claim
@@ -117,8 +117,8 @@ inside scope (write a report anyway and say what stopped you).
    state (approved, live, rejected); the inbox had something to answer;
    something failed or needs the maintainer; or it is Sunday, when a weekly
    summary goes out regardless (the Wednesday run is silent unless it has
-   news). It must begin with `## Short version` and at
-   most six bullet lines a person reads on a phone in ten seconds, each
+   news). It must begin with `## Short version` and a few bullet lines a
+   person takes in at a glance on a phone, each
    starting with "- ". The first of them is the only line about him: either
    `- For you: <one action, as few words as possible>` (repeat the form for
    a second action, never a third) or exactly `- Nothing for you.` The email
@@ -142,7 +142,7 @@ inside scope (write a report anyway and say what stopped you).
    (`git -C $LOOP_PRIVATE push`). On a day with none of the above, write no
    report; the transcript is enough.
 
-Rules of the road: never install anything on the maintainer's devices; never
-touch the website; never widen the trail's five constraints; never add
+Rules of the road: never install anything on the maintainer's devices; touch
+the website only for what the inbox asks; never widen the trail's five constraints; never add
 analytics to the apps; never put his words, coordinates or place names in
 the public repository or on stdout. When in doubt, ship less and write more.

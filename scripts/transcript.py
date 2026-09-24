@@ -29,6 +29,9 @@ for raw in sys.stdin:
         for block in event.get("message", {}).get("content", []):
             if block.get("type") == "text" and block.get("text", "").strip():
                 print("\n" + block["text"].strip())
+            elif block.get("type") == "thinking" and (block.get("thinking") or "").strip():
+                # Opus 5.5 puts its between-tool narration here (prompt audit 2026-09-23)
+                print("\n(between tools) " + trim(block["thinking"].strip()))
             elif block.get("type") == "tool_use":
                 inp = block.get("input", {})
                 shown = inp.get("command") or inp.get("file_path") or inp.get("pattern") or json.dumps(inp)

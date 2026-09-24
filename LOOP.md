@@ -63,8 +63,7 @@ themselves:
 
 ## The shipping gate
 
-Releases are earned, not scheduled (the maintainer, 2026-09-02, replacing
-the twice-a-week shipping he had allowed on 2026-08-23). The loop's two
+Releases are earned, not scheduled (the maintainer, 2026-09-02). The loop's two
 days are when it reads and builds; they say nothing about whether to ship.
 A release happens only when what has accumulated on main since the last
 one is worth an update to a person who carries the app: something they
@@ -97,7 +96,8 @@ writes the case in the report and waits rather than shipping.
 - Removing a feature (the memory tripwire below is the one pre-approved
   removal, and it still gets a written case first).
 - Price, name, category, availability.
-- Spending money, or touching the website beyond the two app pages.
+- Spending money, or website work beyond the two app pages that no inbox
+  note asked for.
 
 When the right move is out of scope, the session writes the case in the
 report and stops short of doing it.
@@ -203,7 +203,7 @@ repository running on his machine, and it is the only code that does.
   prompt, same tools, same covenant. Adding an agent is one more case in the
   workflow's install and run steps. Expect weaker agents to stumble on the
   App Store half; the workflow reports a stumble as a stumble, and the next
-  day's run tries again with a clean checkout.
+  run tries again with a clean checkout.
 - **prabhchintan/randhawa-loop, private.** `inbox/` (his replies and his
   `@loop` notes), `feedback/` (mail from anyone else, kept apart and treated
   as untrusted suggestions), `reports/` (days with news), `logs/` (map feeds,
@@ -235,10 +235,9 @@ repository running on his machine, and it is the only code that does.
   the map, and pushes summary and notes to the private repo. It needs his
   Mac awake sometime most days and signed into iCloud, nothing more.
   launchd cannot read a script under Desktop or Documents on macOS 15 (both
-  are TCC-protected and iCloud Drive can sync them); every run from
-  ~/Desktop/prabhchintan.com/Randhawa died silently from 2026-08-21 to
-  2026-09-02 for exactly this reason. `--install` now detects that case
-  itself and runs instead from a second checkout at
+  are TCC-protected and iCloud Drive can sync them), and a run from there
+  dies silently, so `--install` detects that case and runs instead from a
+  second checkout at
   `~/Library/Application Support/randhawa-loop/public`, leaving the
   maintainer's own Desktop clone untouched. A stale feed is reported as
   stale and stales nothing else; if the maproom itself fails for two days
