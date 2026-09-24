@@ -2,7 +2,7 @@ import SwiftUI
 
 // The board: his to-dos as the house keeps them, read from the house door
 // and lettered on a plaque over the painting, soonest first under Today,
-// This week and Later. A thing opened on tap can be marked done.
+// each day left in the week, and Later. A thing opened on tap can be marked done.
 struct BoardItem: Identifiable {
     let id = UUID()
     let text: String
@@ -16,6 +16,8 @@ struct BoardSection: Identifiable {
     let id = UUID()
     let title: String
     let items: [BoardItem]
+    // A shelf named by its day (Today, Tomorrow, Friday): the name is the date.
+    var named = false
 }
 
 // The painting holds the top of the screen; the board is lettered on one
@@ -126,13 +128,15 @@ struct BoardView: View {
                     .mount()
                     .padding(.top, index == 0 ? 6 : 18)
                 ForEach(section.days) { day in
-                    leaf(day.items)
+                    leaf(day.items, named: section.named)
                 }
             }
         }
     }
 
-    private func leaf(_ items: [BoardItem]) -> some View {
+    // Where the shelf's own name is the day, the leaf carries no date of its
+    // own; only a thing whose day has passed still says when it fell.
+    private func leaf(_ items: [BoardItem], named: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { i, item in
                 // The date is lettered once, at the head of its leaf.
@@ -140,7 +144,7 @@ struct BoardView: View {
                     if i > 0 {
                         Rectangle().fill(Theme.gilt.opacity(0.28)).frame(height: 0.5)
                     }
-                    row(item, dated: i == 0)
+                    row(item, dated: i == 0, marked: !named || item.since != nil)
                 }
                 .id(item.id)
                 .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .offset(y: -18))))
@@ -152,7 +156,7 @@ struct BoardView: View {
         .plaque()
     }
 
-    private func row(_ item: BoardItem, dated: Bool) -> some View {
+    private func row(_ item: BoardItem, dated: Bool, marked: Bool) -> some View {
         let isOpen = open.contains(item.id)
         return HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
@@ -181,7 +185,7 @@ struct BoardView: View {
                 }
             }
             Spacer(minLength: 0)
-            if let day = item.day {
+            if marked, let day = item.day {
                 DueMark(day: day).opacity(dated ? 1 : 0)
             }
         }
@@ -336,8 +340,10 @@ extension BoardSection {
     }
 
     // The open things by when they fall, soonest first: Today (and anything
-    // already past), This week (through Sunday), Later. Things without a
-    // date close Later in the house's own order. Done means gone.
+    // already past), then each day left in the week (through Sunday) on a
+    // shelf of its own, Tomorrow and then the weekday by name, and Later for
+    // the rest combined. Things without a date close Later in the house's
+    // own order. Done means gone.
     static func shelves(_ sections: [BoardSection], without gone: Set<String>) -> [BoardSection] {
         var cal = Calendar.current
         cal.firstWeekday = 2
@@ -348,11 +354,16 @@ extension BoardSection {
         let open = sections.flatMap(\.items).filter { !$0.done && !gone.contains($0.line) }
         let dated = open.filter { $0.day != nil }.sorted { $0.day! < $1.day! }
         let undated = open.filter { $0.day == nil }
-        let shelves = [
-            BoardSection(title: "Today", items: dated.filter { $0.day! <= today }),
-            BoardSection(title: "This week", items: dated.filter { $0.day! > today && $0.day! < week }),
-            BoardSection(title: "Later", items: dated.filter { $0.day! >= week } + undated),
-        ]
+        var shelves = [BoardSection(title: "Today", items: dated.filter { $0.day! <= today }, named: true)]
+        let tomorrow = cal.date(byAdding: .day, value: 1, to: today) ?? today
+        var day = tomorrow
+        while day < week {
+            let items = dated.filter { cal.isDate($0.day!, inSameDayAs: day) }
+            let title = day == tomorrow ? "Tomorrow" : day.formatted(.dateTime.weekday(.wide))
+            shelves.append(BoardSection(title: title, items: items, named: true))
+            day = cal.date(byAdding: .day, value: 1, to: day) ?? week
+        }
+        shelves.append(BoardSection(title: "Later", items: dated.filter { $0.day! >= week } + undated))
         return shelves.filter { !$0.items.isEmpty }
     }
 }
