@@ -19,8 +19,8 @@ struct BoardSection: Identifiable {
 }
 
 // The painting holds the top of the screen; the board is lettered on one
-// plaque below it, each thing by its gist with the reasons in a smaller
-// hand, the rest on tap.
+// plaque below it, each thing by Home's short name with the reasons in a
+// smaller hand, the rest on tap.
 struct BoardView: View {
     @State private var sections: [BoardSection] = []
     @State private var errorText: String?
@@ -31,6 +31,8 @@ struct BoardView: View {
     @State private var sending: UUID?
     @State private var refused: [UUID: String] = [:]
     @State private var launchOpened = false
+    // The house's own short titles, by the line, when it serves them.
+    @State private var titles: [String: BoardItem.Short] = [:]
 
     private static let foot = Theme.foot
 
@@ -121,8 +123,7 @@ struct BoardView: View {
                     .font(Theme.label())
                     .tracking(1)
                     .foregroundStyle(Theme.giltOnArt)
-                    .shadow(color: .black.opacity(0.8), radius: 6)
-                    .padding(.horizontal, 6)
+                    .mount()
                     .padding(.top, index == 0 ? 6 : 18)
                 ForEach(section.days) { day in
                     leaf(day.items)
@@ -155,10 +156,18 @@ struct BoardView: View {
         let isOpen = open.contains(item.id)
         return HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.gist)
-                    .font(.body)
+                // Named by Home's cut, the hour in gilt after its last word,
+                // so a title that wraps never splits around it.
+                let short = titles[item.line] ?? item.short
+                (Text(short.title.plainDashes)
                     .foregroundStyle(Theme.ink.opacity(item.done ? 0.45 : 1))
                     .strikethrough(item.done, color: Theme.ink.opacity(0.45))
+                 + Text(short.hour.map { "   " + $0 } ?? "")
+                    .font(Theme.label())
+                    .tracking(0.6)
+                    .foregroundStyle(Theme.gilt))
+                    .font(.body)
+                    .fixedSize(horizontal: false, vertical: true)
                 if !item.why.isEmpty {
                     Text(item.why)
                         .font(.footnote)
@@ -246,8 +255,11 @@ struct BoardView: View {
             loaded = true
             return
         }
+        let house = HouseClient(baseAddress: address)
+        async let short = try? house.titles()
         do {
-            let text = try await HouseClient(baseAddress: address).board()
+            let text = try await house.board()
+            if let s = await short { titles = s }
             sections = BoardParser.parse(text)
             gone = []
             refused = [:]

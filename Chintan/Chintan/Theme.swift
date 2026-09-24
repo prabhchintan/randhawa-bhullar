@@ -259,6 +259,21 @@ extension View {
         .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(Theme.gilt.opacity(0.55), lineWidth: 0.5))
     }
 
+    // A name lettered on the art stands on a small mount of smoked glass,
+    // square cornered like a wall label, so a bright passage of the picture
+    // (a face, a sky) never swallows it; the picture is still seen through.
+    func mount() -> some View {
+        padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .overlay(Theme.lampBlack.opacity(0.42))
+                    .environment(\.colorScheme, .dark)
+                    .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+            }
+    }
+
     // A scroll that dissolves into the painting at its edges instead of
     // sliding hard under the bars. The foot eases out and is clear for its
     // last stretch, so no half-lettered line sits on the bar's edge.

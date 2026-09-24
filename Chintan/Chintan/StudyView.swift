@@ -145,12 +145,16 @@ struct StudyView: View {
         .padding(.top, 6)
     }
 
+    // The three names share one mount, its edge on the bubbles' edge.
     private var rooms: some View {
         HStack(alignment: .center, spacing: 22) {
             ForEach(Voice.allCases) { v in
                 room(v)
             }
         }
+        .padding(.top, 3)
+        .mount()
+        .padding(.leading, -6)
     }
 
     // A room's name: gilt with a hairline under it when open, bone when not,
@@ -182,7 +186,6 @@ struct StudyView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .shadow(color: .black.opacity(0.5), radius: 6)
         .accessibilityLabel(v.rawValue)
         .accessibilityAddTraits(open ? .isSelected : [])
     }

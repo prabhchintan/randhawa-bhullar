@@ -96,7 +96,7 @@ struct JharokhaView: View {
                 if let item = dated.first(where: { $0.id == heldThing }) {
                     // It stands just above the leaves, over the day's line and
                     // the painting, the whole width of the wall, and grows up.
-                    ThingPlaque(item: item)
+                    ThingPlaque(item: item, short: titles[item.line] ?? item.short)
                         .fixedSize(horizontal: false, vertical: true)
                         .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
                 }
@@ -417,10 +417,11 @@ private struct RingPlaque: View {
     }
 }
 
-// A thing held: its day in words, the thing itself, and the whole of its
-// why, on a small plaque.
+// A thing held: its day in words, the thing by the name Home gives it, and
+// the whole of its why, on a small plaque.
 private struct ThingPlaque: View {
     let item: BoardItem
+    let short: BoardItem.Short
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -431,7 +432,7 @@ private struct ThingPlaque: View {
                     .tracking(0.8)
                     .foregroundStyle(due ? Theme.saffron : Theme.gilt)
             }
-            Text(item.gist.plainDashes)
+            Text(short.title.plainDashes)
                 .font(.system(.title3, design: .serif))
                 .foregroundStyle(Theme.ink)
             if !item.why.isEmpty {
