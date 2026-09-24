@@ -9,6 +9,7 @@ import SwiftUI
 struct StudyView: View {
     @EnvironmentObject var store: ConversationStore
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var phase
     @AppStorage("studyVoice") private var kept = Voice.chintan.rawValue
     @State private var voice: Voice = StudyView.launchVoice ?? .chintan
     @State private var draft = ""
@@ -87,7 +88,13 @@ struct StudyView: View {
             if StudyView.launchVoice == nil, let v = Voice(rawValue: kept) { voice = v }
         }
         .onChange(of: voice) { kept = voice.rawValue }
-        .task { await loadVoices() }
+        .onChange(of: phase) {
+            if phase == .active { Voice.allCases.forEach(resume) }
+        }
+        .task {
+            Voice.allCases.forEach(resume)
+            await loadVoices()
+        }
     }
 
     // An empty room says what the voice is for, in its own line from the house.
@@ -332,32 +339,69 @@ struct StudyView: View {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
         draft = ""
-        store.append(ChintanMessage(id: UUID(), text: text, fromHouse: false, date: Date()), to: voice)
-        ask(text, in: voice)
+        let word = ChintanMessage(id: UUID(), text: text, fromHouse: false, date: Date())
+        store.append(word, to: voice)
+        ask(word, in: voice)
     }
 
     // The unanswered word sent once more, where it already stands.
     private func retry() {
         guard let word = unanswered else { return }
-        ask(word.text, in: voice)
+        ask(word, in: voice)
     }
 
-    private func ask(_ text: String, in room: Voice) {
+    // The word goes with an id kept on the device until its reply lands, so
+    // a wait cut short (the app put away, the line dropped) is taken up again.
+    private func ask(_ word: ChintanMessage, in room: Voice) {
         errors[room] = nil
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errors[room] = "No house address yet. Add it in Settings."
             return
         }
+        let id = UUID().uuidString
+        store.wait(.init(id: id, word: word.id, since: .now), in: room)
         thinking.insert(room)
         Task {
             do {
-                let reply = try await HouseClient(baseAddress: address).say(text, to: room.rawValue)
-                store.append(ChintanMessage(id: UUID(), text: reply, fromHouse: true, date: Date()), to: room)
+                let reply = try await HouseClient(baseAddress: address).say(word.text, to: room.rawValue, id: id) { houseID in
+                    store.wait(.init(id: houseID, word: word.id, since: .now), in: room)
+                }
+                land(reply, in: room)
+                thinking.remove(room)
+            } catch {
+                thinking.remove(room)
+                resume(room)
+            }
+        }
+    }
+
+    // A word still waiting when the study opens or the app comes back: ask
+    // the house for its reply. A house that does not know the word lets it
+    // go, and it reads as unanswered.
+    private func resume(_ room: Voice) {
+        guard !thinking.contains(room), let w = store.waiting[room] else { return }
+        guard let last = store.messages(room).last, last.id == w.word else {
+            store.wait(nil, in: room)
+            return
+        }
+        guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        errors[room] = nil
+        thinking.insert(room)
+        Task {
+            do {
+                land(try await HouseClient(baseAddress: address).awaitReply(id: w.id), in: room)
+            } catch HouseError.noDoor {
+                store.wait(nil, in: room)
             } catch {
                 errors[room] = "The house is not answering. Are you on the tailnet?"
             }
             thinking.remove(room)
         }
+    }
+
+    private func land(_ reply: String, in room: Voice) {
+        store.append(ChintanMessage(id: UUID(), text: reply, fromHouse: true, date: Date()), to: room)
+        store.wait(nil, in: room)
     }
 }
 

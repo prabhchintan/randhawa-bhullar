@@ -248,32 +248,45 @@ struct HouseClient {
         return try JSONDecoder().decode(Voices.self, from: data)
     }
 
-    func say(_ text: String, to voice: String = "chintan") async throws -> String {
+    // A word carries an id of the phone's own making, so the phone can ask
+    // after the reply even if it was closed before the house said 202. On a
+    // 202 the house's id is handed to `waiting` before the wait goes on.
+    func say(_ text: String, to voice: String = "chintan", id: String,
+             waiting: @MainActor (String) -> Void = { _ in }) async throws -> String {
         guard let sayURL = url("/v1/say") else { throw HouseError.noAddress }
         var request = URLRequest(url: sayURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(["text": text, "to": voice])
-        let (data, response) = try await Self.session.data(for: request)
+        request.httpBody = try JSONEncoder().encode(["text": text, "to": voice, "id": id])
+        var (data, response) = try await Self.session.data(for: request)
+        // A house that refuses the id is asked again without it.
+        if (response as? HTTPURLResponse)?.statusCode == 400 {
+            request.httpBody = try JSONEncoder().encode(["text": text, "to": voice])
+            (data, response) = try await Self.session.data(for: request)
+        }
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         struct SayResponse: Decodable { let id: String?; let reply: String? }
         let decoded = try JSONDecoder().decode(SayResponse.self, from: data)
         if http.statusCode == 202, let id = decoded.id {
-            return try await pollSay(id: id)
+            await waiting(id)
+            return try await awaitReply(id: id)
         }
         return decoded.reply ?? ""
     }
 
-    private func pollSay(id: String) async throws -> String {
+    // The reply to a word already sent, asked after every two seconds while
+    // the house thinks. A house that does not know the id throws noDoor.
+    func awaitReply(id: String) async throws -> String {
         guard let pollURL = url("/v1/say/\(id)") else { throw HouseError.noAddress }
         struct SayResponse: Decodable { let reply: String? }
         while true {
-            try await Task.sleep(nanoseconds: 2_000_000_000)
             let (data, response) = try await Self.session.data(from: pollURL)
             guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
             if http.statusCode == 200, let reply = try? JSONDecoder().decode(SayResponse.self, from: data).reply {
                 return reply
             }
+            guard http.statusCode == 202 else { throw HouseError.noDoor }
+            try await Task.sleep(nanoseconds: 2_000_000_000)
         }
     }
 }

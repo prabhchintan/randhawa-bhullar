@@ -7,7 +7,9 @@
 #
 #   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
 #                                                    (board@N: the Nth thing opened;
-#                                                    settings: the Settings sheet)
+#                                                    settings: the Settings sheet;
+#                                                    study@waiting: a word left
+#                                                    waiting, taken up again)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
 #   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
 #                                                    text size, then back to normal
@@ -66,9 +68,47 @@ for mode in light dark; do
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.place home
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
     fi
+    # study@waiting: darban's room with a word left waiting when the app was
+    # closed, its id one the house never gave; photographed as the study
+    # opens and again once the house has said. The room is put back after.
+    if [ "$tab" = study@waiting ]; then
+      EXTRA=(--open darban)
+      DATA=$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan data)
+      STAGE_DIR="$DATA/Library/Application Support" python3 - <<'PY'
+import json, os, shutil, time, uuid
+d = os.environ["STAGE_DIR"]
+os.makedirs(d, exist_ok=True)
+for f in ("conversation-darban.json", "waiting.json"):
+    p = os.path.join(d, f)
+    if os.path.exists(p): shutil.copy(p, p + ".kept")
+now = time.time() - 978307200
+word = str(uuid.uuid4()).upper()
+room = [
+    {"id": str(uuid.uuid4()).upper(), "text": "Is the round done?", "fromHouse": False, "date": now - 7300},
+    {"id": str(uuid.uuid4()).upper(), "text": "Done at nine, nothing raised.", "fromHouse": True, "date": now - 7280},
+    {"id": word, "text": "Anything from the clinic?", "fromHouse": False, "date": now - 200},
+]
+json.dump(room, open(os.path.join(d, "conversation-darban.json"), "w"))
+json.dump({"darban": {"id": "eyes-" + str(uuid.uuid4()), "word": word, "since": now - 200}},
+          open(os.path.join(d, "waiting.json"), "w"))
+PY
+    fi
     xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "$NAME" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
+    if [ "$tab" = study@waiting ]; then
+      sleep 1.5
+      xcrun simctl io "$UDID" screenshot "$OUT/$tab-opening-$mode.png" >/dev/null
+    fi
     sleep 6
     xcrun simctl io "$UDID" screenshot "$OUT/$tab-$mode.png" >/dev/null
+    if [ "$tab" = study@waiting ]; then
+      xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+      # What the app still waits on after the look: {} once the house has said.
+      cp "$DATA/Library/Application Support/waiting.json" "$OUT/$tab-$mode.json" 2>/dev/null || true
+      for f in conversation-darban.json waiting.json; do
+        P="$DATA/Library/Application Support/$f"
+        if [ -f "$P.kept" ]; then mv "$P.kept" "$P"; else rm -f "$P"; fi
+      done
+    fi
     if [ "$tab" = settings@on ]; then
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       xcrun simctl privacy "$UDID" reset location-always Prabhchintan.Chintan 2>/dev/null || true
