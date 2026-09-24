@@ -301,9 +301,12 @@ C. The study, three voices. The conversation legible over the painting
    top, history per voice, `to` sent, the empty room in the voice's own
    line, the thinking mark breathing. The composer above the keyboard, and
    the keyboard put away by a drag, seen in the walk (sprint 10). Time
-   stamps and retry on a failed word built (sprint 22). C is whole on the
-   app side; left, a reply the house finished while the app was closed
-   (the id of a 202 is not kept, so today it reads as unanswered).
+   stamps and retry on a failed word built (sprint 22). A word left
+   waiting taken up again on opening (sprint 23): the phone keeps each
+   word's id until its reply lands. C is whole on the app side; left, the
+   house's: adopt the phone's `id` on `POST /v1/say` (shape in sprint 23's
+   line), so a word whose app was closed inside the first 280 seconds is
+   found too.
 D. The house. CUT (his word, 2026-09-24 04:46, seeing the fourth tab:
    "I don't understand the point of the house vs the home, the speedometer
    circles on the home tab already give me highlights of the usage so I
@@ -449,6 +452,38 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 23 (b28e239): a word left waiting is taken up
+  again. Before, a word to any voice whose app was put away or closed
+  mid-wait came back as "The house did not answer." even when the house
+  had answered, and Try again sent it twice. Now every word goes with an
+  id of the phone's own making, kept on the device (waiting.json beside
+  the conversations, one per room, let go after a day) and replaced by
+  the house's own id the moment a 202 names one. When the study opens or
+  the app comes back to the front, a room with a word still waiting
+  thinks on it again ("darban is thinking") and asks `GET /v1/say/ID`
+  until the reply lands in its place; a wait cut short in flight (the
+  line dropped, the app put away) is taken up the same way. A house that
+  does not know the id (any answer but 200 or 202) lets it go, and the
+  word reads as unanswered with Try again, as before; the house out of
+  reach keeps the wait for next time and says so. A house that refuses
+  the phone's id with a 400 is asked again without it. Seen in both modes
+  with `see.sh OUT study@waiting` (new: darban's room staged on the
+  simulator only with a word three minutes old and an id the house never
+  gave, photographed at 1.5 s and 6 s, the room put back after, and the
+  app's waiting file kept beside the pictures): the house answered the
+  unknown id with a no at once, both shots read "The house did not
+  answer." with Try again, and the kept file was `{}`, so the wait was
+  taken up and let go as meant. The resumed thinking state itself was not
+  photographed (it needs a word the house is really thinking on; none was
+  sent). Chintan's room and the other tabs unchanged. No hitch numbers
+  (nothing that moves was touched). The door needed from the house: `POST
+  /v1/say {"text", "to", "id"}` where id is the phone's (a UUID string):
+  when present and not in use, the house keys the word's reply by it, so
+  `GET /v1/say/ID` answers 200 {"reply": ...} once done, 202 while
+  thinking, 404 when it never heard the word; replies kept at least a
+  day. Without it, a word whose app closed before the house's 202 still
+  reads as unanswered (the 202's own id is kept today).
 
 - 2026-09-24 · by the house, on his word at 05:04 (the TestFlight card with
   the saffron jharokha: an icon as classy as the app, his concept kept, the
