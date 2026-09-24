@@ -172,6 +172,19 @@ struct HouseClient {
         return try JSONDecoder().decode(Board.self, from: data).text
     }
 
+    // The house's short title for each open thing, by the line as the board
+    // printed it: {"titles": [{"line", "title", "hour"}]}. A house without
+    // this door answers 404 and the phone cuts its own.
+    func titles() async throws -> [String: BoardItem.Short] {
+        guard let url = url("/v1/titles") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
+        struct Entry: Decodable { let line: String; let title: String; let hour: String? }
+        struct Titles: Decodable { let titles: [Entry] }
+        let entries = try JSONDecoder().decode(Titles.self, from: data).titles
+        return Dictionary(entries.map { ($0.line, BoardItem.Short(title: $0.title, hour: $0.hour)) }) { a, _ in a }
+    }
+
     // A thing marked done from the phone; the house runs `ghar done` with the
     // line as it printed it. A house without this door answers 404.
     func done(_ text: String) async throws {

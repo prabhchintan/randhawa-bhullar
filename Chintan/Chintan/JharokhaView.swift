@@ -2,14 +2,17 @@ import SwiftUI
 import UIKit
 
 // Home is the day's painting, full bleed, with the day laid over its foot
-// the way a museum places a label: the date, the day in a few words, the
-// dated things coming up as small calendar tiles, the house's meters as
-// rings. Refreshed on open and by pull.
+// the way a museum places a label: the date, the day in a few words, today's
+// things in their fewest words, and under a hairline the house's meters as
+// rings beside the label. Today only; the week is the Board's. Refreshed on
+// open and by pull.
 struct JharokhaView: View {
     @EnvironmentObject private var gallery: Gallery
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var day = CockpitDay()
     @State private var dated: [BoardItem] = []
+    // The house's own short titles, by the line, when it serves them.
+    @State private var titles: [String: BoardItem.Short] = [:]
     @State private var pulse: [CockpitDay.Meter] = []
     @State private var errorText: String?
     @State private var showCredit = false
@@ -99,30 +102,35 @@ struct JharokhaView: View {
                 }
             }
 
+            // Today's things only, each in its fewest words, the hour apart in
+            // gilt; a thing whose day has passed says so in saffron.
             if !dated.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(DayGroup.of(dated)) { group in
-                        HStack(alignment: .top, spacing: 12) {
-                            DateTile(date: group.day)
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(group.items) { item in
-                                    Text(item.gist)
-                                        .font(.callout)
-                                        .foregroundStyle(heldThing == item.id ? Theme.giltOnArt : Theme.bone)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                        .contentShape(Rectangle())
-                                        .accessibilityIdentifier("thing")
-                                        // Pressed and held, the thing grows a plaque
-                                        // with the whole of it; let go, it folds back.
-                                        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
-                                            withAnimation(.snappy) { heldThing = item.id }
-                                        } onPressingChanged: { pressing in
-                                            if !pressing, heldThing != nil { withAnimation(.snappy) { heldThing = nil } }
-                                        }
-                                }
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(dated) { item in
+                        let short = titles[item.line] ?? item.short
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Text(short.title.plainDashes)
+                                .font(.system(.title3, design: .serif))
+                                .foregroundStyle(heldThing == item.id ? Theme.giltOnArt : Theme.bone)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if let when = item.since ?? short.hour {
+                                Text(when)
+                                    .font(Theme.label(.subheadline))
+                                    .tracking(0.6)
+                                    .foregroundStyle(item.since != nil ? Theme.saffron : Theme.giltOnArt)
+                                    .fixedSize()
                             }
-                            .padding(.top, 2)
-                            .frame(minHeight: 44, alignment: .top)
+                        }
+                        .frame(minHeight: 32, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("thing")
+                        // Pressed and held, the thing grows a plaque with the
+                        // whole of it; let go, it folds back.
+                        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
+                            withAnimation(.snappy) { heldThing = item.id }
+                        } onPressingChanged: { pressing in
+                            if !pressing, heldThing != nil { withAnimation(.snappy) { heldThing = nil } }
                         }
                     }
                 }
@@ -142,17 +150,23 @@ struct JharokhaView: View {
                     .transition(.opacity)
             }
 
-            // The rings beside the label; at the accessibility sizes the label
-            // steps under them, so the wall never runs off the phone. Chosen by
-            // the text size, not the label's width, so the credit opening on a
-            // tap never throws the whole wall into the other shape.
+            // The foot of the wall, under a gilt hairline: the rings together
+            // beside the label; at the accessibility sizes the label steps
+            // under them, so the wall never runs off the phone. Chosen by the
+            // text size, not the label's width, so the credit opening on a tap
+            // never throws the whole wall into the other shape.
+            Rectangle()
+                .fill(Theme.giltOnArt.opacity(0.45))
+                .frame(height: 0.5)
+                .padding(.top, 6)
+                .accessibilityHidden(true)
             if typeSize.isAccessibilitySize {
                 VStack(alignment: .trailing, spacing: 18) {
                     rings.frame(maxWidth: .infinity, alignment: .leading)
                     museumLabel
                 }
             } else {
-                HStack(alignment: .bottom) {
+                HStack(alignment: .top) {
                     rings
                     Spacer(minLength: 12)
                     museumLabel
@@ -314,35 +328,13 @@ struct JharokhaView: View {
         async let cockpit = try? house.cockpit()
         async let board = try? house.board()
         async let beat = try? house.pulse()
-        let (_, c, b, p) = await (picture, cockpit, board, beat)
+        async let short = try? house.titles()
+        let (_, c, b, p, s) = await (picture, cockpit, board, beat, short)
         if let c { day = CockpitDay(c) }
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
-        if let b { dated = BoardItem.upcoming(BoardParser.parse(b)) }
+        if let s { titles = s }
+        if let b { dated = BoardItem.today(BoardParser.parse(b)) }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
-    }
-}
-
-// A calendar leaf: the weekday over the day of the month, saffron when it
-// is today or past.
-private struct DateTile: View {
-    let date: Date?
-
-    var body: some View {
-        let soon = date.map { Calendar.current.startOfDay(for: $0) <= Calendar.current.startOfDay(for: .now) } ?? false
-        VStack(spacing: 1) {
-            Text(date?.formatted(.dateTime.weekday(.abbreviated)).lowercased() ?? "")
-                .font(.system(.caption, design: .serif).weight(.medium).smallCaps())
-                .tracking(0.8)
-                .foregroundStyle(soon ? Theme.saffron : Theme.giltOnArt)
-            Text(date?.formatted(.dateTime.day()) ?? "")
-                .font(.system(.title3, design: .serif))
-                .foregroundStyle(Theme.bone)
-        }
-        .fixedSize()
-        .padding(.vertical, 4)
-        .frame(minWidth: 42, minHeight: 46)
-        .background(Theme.lampBlack.opacity(0.35), in: RoundedRectangle(cornerRadius: 3))
-        .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(Theme.giltOnArt.opacity(0.6), lineWidth: 0.5))
     }
 }
 
@@ -584,33 +576,44 @@ extension BoardItem {
         return cut
     }
 
-    // The dated, open things inside the coming week, soonest first, three at most.
-    static func upcoming(_ sections: [BoardSection]) -> [BoardItem] {
-        let horizon = Calendar.current.date(byAdding: .day, value: 8, to: .now) ?? .now
+    // Home is today (Prab, 2026-09-23 20:05): the open things due today and
+    // any already past, the oldest first. The week and later are the Board's.
+    static func today(_ sections: [BoardSection]) -> [BoardItem] {
+        let end = Calendar.current.startOfDay(for: .now)
         return sections.flatMap(\.items)
-            .filter { !$0.done && ($0.day.map { $0 < horizon } ?? false) }
-            .sorted { ($0.day ?? .distantFuture) < ($1.day ?? .distantFuture) }
-            .prefix(3)
-            .map { $0 }
+            .filter { !$0.done && ($0.day.map { $0 <= end } ?? false) }
+            .sorted { $0.day! < $1.day! }
     }
-}
 
-// Things due the same day share one calendar leaf.
-struct DayGroup: Identifiable {
-    let day: Date?
-    let items: [BoardItem]
-    var id: String { items.first?.date ?? "" }
+    // A thing in the fewest words that carry the most, and its hour apart.
+    struct Short: Decodable {
+        let title: String
+        let hour: String?
+    }
 
-    static func of(_ items: [BoardItem]) -> [DayGroup] {
-        var groups: [DayGroup] = []
-        for item in items {
-            if let last = groups.last, last.items.first?.date == item.date {
-                groups[groups.count - 1] = DayGroup(day: last.day, items: last.items + [item])
-            } else {
-                groups.append(DayGroup(day: item.day, items: [item]))
-            }
+    private static let deeds: Set<String> = ["call", "pay", "book", "email", "text", "send", "submit", "check",
+                                             "renew", "cancel", "schedule", "file", "order", "return", "confirm", "ask"]
+
+    // The house's line cut on the phone when the house gives no title: the
+    // gist, the articles gone, the thing before the deed ("Caremark, call"),
+    // and the first hour the house wrote ("8 AM", "before 5 PM").
+    var short: Short {
+        var words = gist.split(separator: " ").map(String.init)
+            .filter { !["the", "a", "an"].contains($0.lowercased()) }
+        if let deed = words.first?.lowercased(), Self.deeds.contains(deed), (2...6).contains(words.count) {
+            words = Array(words.dropFirst()) + [deed]
+            words[words.count - 2] += ","
         }
-        return groups
+        let hour = text.firstMatch(of: /(?:(?:before|by|at|until) )?\d{1,2}(?::\d{2})? ?[AP]M\b/)
+        return Short(title: words.joined(separator: " "), hour: hour.map { String($0.output) })
+    }
+
+    // A thing whose day has passed says when it fell.
+    var since: String? {
+        guard let day, day < Calendar.current.startOfDay(for: .now) else { return nil }
+        let days = Calendar.current.dateComponents([.day], from: day, to: .now).day ?? 0
+        return "since " + (days < 7 ? day.formatted(.dateTime.weekday(.abbreviated))
+                                    : day.formatted(.dateTime.month(.abbreviated).day()))
     }
 }
 
