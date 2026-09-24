@@ -148,7 +148,7 @@ screen explains its own shape.
 `/v1/health`, `/v1/cockpit` (text), `/v1/board` (the to-dos as text),
 `/v1/painting` and `/v1/painting.jpg` (the day's painting), `/v1/pulse`
 (meters[] with key, name, fraction 0 to 1, resets, words; tended = the last
-round's time),
+round's time), `/v1/icon.png?seed=B` (the build's icon, since 09-24),
 `/v1/paintings` (the shelf: today's first then the days ahead, each with an id and
 its `image` path; `/v1/paintings/ID.jpg` is the picture at the phone's size; the
 phone keeps the whole shelf, since 09-23), `/v1/visitors` (the site's visitors as
@@ -421,10 +421,24 @@ L. Where he is. CoreLocation with significant-change monitoring (the
    most every 15 minutes, the place last named shown there. Left: seen on
    his phone (the simulator's eyes never post), and the place on Home
    itself once the house's day's line carries it.
-M. The icon. Re-cut to the look: a small work of art in a frame, bone
-   and lamp black with a gilt hairline, no glyph, no gradient, no text;
-   judged in the home screen grid beside Apple's own icons, light and dark
-   and tinted.
+M. The icon. Built by the house 2026-09-24 05:04 on his word ("as classy
+   as the app is now ... I did the concept, the colors just feel cheap ...
+   how crazy is it for the app icon itself to change as works of art
+   randomized to fit this frame, and have it be different every time with
+   new builds, so it's never constant"). His jharokha kept as the concept,
+   the saffron and paper gone: the pointed arch as a gilt hairline frame
+   with a gilt sill on lamp black, and through the arch a work of art,
+   cropped close and high (the face), from the shelf. A phone cannot change
+   its own icon quietly (an alternate icon rings a system alert every
+   time), so the icon is cut per build: `GET /v1/icon.png?seed=BUILD` on
+   the house (painting.py `icon`, the work chosen by the build number from
+   the shelf's forty or so), fetched by ship.sh before the archive, the
+   checked-in icon (a Velázquez) standing when the house is out of reach.
+   Every build, nightly or a sprint's, carries a new work; the icon on his
+   phone changes as often as TestFlight installs. makeicon.swift retired.
+   Left: seen in the home screen grid on his phone beside Apple's own; the
+   dark and tinted variants (iOS 18) if he wants them; a title on the
+   TestFlight card is Apple's, not ours.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -433,6 +447,20 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · by the house, on his word at 05:04 (the TestFlight card with
+  the saffron jharokha: an icon as classy as the app, his concept kept, the
+  colours re-cut, and a different work of art in it on every build). Chunk
+  M built as it says: painting.py `icon` composes 1024 square, lamp black,
+  the arch in gilt (frame and sill), the work through the opening cropped
+  to 86 percent of its width and high, where a face sits; `ghar painting
+  icon [--seed S | --id ID] [--out P]`; the door `/v1/icon.png?seed=B`;
+  ship.sh fetches it with the build number as the seed, so one build has
+  one work and the next another, and keeps the checked-in icon when the
+  house does not answer; both ship steps carry CHINTAN_HOUSE. Seen on a
+  contact sheet of six (Velázquez, El Greco, a Kangra nayika, a Mandi lady
+  with doves, the British officer, Shirlaw) in the phone's rounded square
+  on a dark ground, sent to him. The checked-in icon is the Velázquez.
 
 - 2026-09-24 · by the house, on his word at 04:46 (a photo of Home with the
   day's lines circled and an arrow down: "This could move down"; and the

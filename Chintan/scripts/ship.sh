@@ -34,6 +34,21 @@ printf '{"key_id": "%s", "issuer_id": "%s", "key_path": "%s/AuthKey.p8", "team_i
 KEY=(-allowProvisioningUpdates -authenticationKeyPath "$TMP/AuthKey.p8" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 BUILD=$(date -u +%Y%m%d%H%M)
 echo "chintan 1.0 ($BUILD)"
+# The icon is cut by the house for this build (Prab, 2026-09-24 05:04: a
+# different work of art through his arch on every build, never constant):
+# GET /v1/icon.png?seed=BUILD. The checked-in icon stands when the house is
+# out of reach, so a build never waits on it.
+ICON="$ROOT/Chintan/Chintan/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
+if [ -n "${CHINTAN_HOUSE:-}" ]; then
+  HOUSE="${CHINTAN_HOUSE%/}"; case "$HOUSE" in http*) ;; *) HOUSE="http://$HOUSE" ;; esac
+  if curl -fsS --max-time 200 -D "$TMP/icon.h" -o "$TMP/icon.png" "$HOUSE/v1/icon.png?seed=$BUILD" \
+     && [ "$(file -b --mime-type "$TMP/icon.png")" = "image/png" ]; then
+    cp "$TMP/icon.png" "$ICON"
+    echo "icon for this build: $(sed -n 's/^X-Work: //Ip' "$TMP/icon.h" | tr -d '\r')"
+  else
+    echo "the house gave no icon; the checked-in one stands"
+  fi
+fi
 archive() {
   xcodebuild -project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -destination 'generic/platform=iOS' \
     -archivePath "$TMP/Chintan.xcarchive" CURRENT_PROJECT_VERSION="$BUILD" "${KEY[@]}" archive > "$TMP/archive.log" 2>&1

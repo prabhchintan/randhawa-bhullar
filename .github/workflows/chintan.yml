@@ -71,6 +71,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          CHINTAN_HOUSE: ${{ secrets.CHINTAN_HOUSE }}
         run: bash Chintan/scripts/ship.sh
 
       - name: A keychain of its own (unused since ship.sh; hosted Macs need none)
