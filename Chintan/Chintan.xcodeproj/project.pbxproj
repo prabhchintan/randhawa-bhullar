@@ -16,7 +16,6 @@
 		CA0000000000000000000007 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000007 /* SettingsView.swift */; };
 		CA0000000000000000000008 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000008 /* KeychainHelper.swift */; };
 		CA000000000000000000000A /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA100000000000000000000C /* BoardView.swift */; };
-		CA00000000000000000000F1 /* HouseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000F1 /* HouseView.swift */; };
 		CA000000000000000000000B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA100000000000000000000D /* Theme.swift */; };
 		CA0000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000009 /* Assets.xcassets */; };
 		CA000000000000000000000C /* ChintanWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA100000000000000000000E /* ChintanWalk.swift */; };
@@ -41,7 +40,6 @@
 		CA1000000000000000000004 /* ConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationStore.swift; sourceTree = "<group>"; };
 		CA1000000000000000000005 /* StudyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyView.swift; sourceTree = "<group>"; };
 		CA100000000000000000000C /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
-		CA10000000000000000000F1 /* HouseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseView.swift; sourceTree = "<group>"; };
 		CA100000000000000000000D /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		CA1000000000000000000006 /* JharokhaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JharokhaView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000007 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -90,7 +88,6 @@
 				CA1000000000000000000005 /* StudyView.swift */,
 				CA1000000000000000000006 /* JharokhaView.swift */,
 				CA100000000000000000000C /* BoardView.swift */,
-				CA10000000000000000000F1 /* HouseView.swift */,
 				CA1000000000000000000010 /* VisitorsView.swift */,
 				CA100000000000000000000D /* Theme.swift */,
 				CA1000000000000000000007 /* SettingsView.swift */,
@@ -225,7 +222,6 @@
 				CA0000000000000000000005 /* StudyView.swift in Sources */,
 				CA0000000000000000000006 /* JharokhaView.swift in Sources */,
 				CA000000000000000000000A /* BoardView.swift in Sources */,
-				CA00000000000000000000F1 /* HouseView.swift in Sources */,
 				CA000000000000000000000D /* VisitorsView.swift in Sources */,
 				CA000000000000000000000E /* Whereabouts.swift in Sources */,
 				CA000000000000000000000B /* Theme.swift in Sources */,

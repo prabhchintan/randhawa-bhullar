@@ -65,7 +65,9 @@ the app icon "classy like the app now"; the Board's week broken by day and
 models on the house's latest refinements, biased to high effort unless the
 meters are low (the sprint workflow carries `effort`, from the gear).
 
-The shape to grow into (four tabs, in this order):
+The shape to grow into (three tabs, in this order; the fourth, the House,
+was built in sprint 21 and cut on his word of 2026-09-24 04:46: the rings
+on Home already give him the house's pulse, so a tab for it had no point):
 
 1. **Home** (the jharokha, reborn native). One screen: the date and the day
    in a sentence, today's to-dos with their consequence, the next thing on
@@ -79,9 +81,6 @@ The shape to grow into (four tabs, in this order):
 3. **The study.** The conversation with chintan: readable bubbles, time
    stamps, a thinking state that feels alive, history kept, failures said
    plainly, retry, the composer never lost under the keyboard.
-4. **The house.** The household itself: darban, yaar, the hands, the
-   timers, each with its last run and state; the usage meters as bars; the
-   doctor's list. The system seen, which is the point of the app.
 
 The maintainer's word, 2026-09-22 19:44, on the whole app: every tab works
 the way Home works, the painting under everything, the conversation too,
@@ -149,7 +148,7 @@ screen explains its own shape.
 `/v1/health`, `/v1/cockpit` (text), `/v1/board` (the to-dos as text),
 `/v1/painting` and `/v1/painting.jpg` (the day's painting), `/v1/pulse`
 (meters[] with key, name, fraction 0 to 1, resets, words; tended = the last
-round's time), `/v1/household` (asked for by sprint 21, not yet built),
+round's time),
 `/v1/paintings` (the shelf: today's first then the days ahead, each with an id and
 its `image` path; `/v1/paintings/ID.jpg` is the picture at the phone's size; the
 phone keeps the whole shelf, since 09-23), `/v1/visitors` (the site's visitors as
@@ -303,15 +302,15 @@ C. The study, three voices. The conversation legible over the painting
    line, the thinking mark breathing. Left: time stamps, retry on a failed
    word (the composer above the keyboard, and the keyboard put away by a
    drag, seen in the walk, sprint 10).
-D. The house. The household seen: darban, yaar, the hands, the timers,
-   each with its last run and state as marks not words; the meters as
-   bars; the doctor's word. Slice 1 built (sprint 21): the fourth tab,
-   House, on the painting; the three voices as marks on one leaf, the
-   meters as bars of ink with the hour each comes back, the last round;
-   the hands and the doctor built against `GET /v1/household` (shape in
-   the ledger), shown only once the house answers. Next: the house builds
-   that door; then a hand held grows its plaque (RingPlaque's pattern)
-   with its last runs; a voice tapped opens its room in the Study.
+D. The house. CUT (his word, 2026-09-24 04:46, seeing the fourth tab:
+   "I don't understand the point of the house vs the home, the speedometer
+   circles on the home tab already give me highlights of the usage so I
+   don't see the point of the house tab, remove"). Sprint 21 had built it
+   (the voices as marks, the meters as bars, the last round); the house
+   took it out the same hour, with the `/v1/household` door it had asked
+   for, never built. The household's state stays the rings on Home and
+   darban's word at the door; the system is felt, not displayed. Do not
+   rebuild a house tab, a status page or a dashboard under any name.
 E. The collection. The painting alone on tap (label away, pinch to look);
    the subcontinent's art and architecture woven into the rotation (house
    side: Cleveland as a second source and the Indian and Sikh themes live
@@ -434,6 +433,20 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · by the house, on his word at 04:46 (a photo of Home with the
+  day's lines circled and an arrow down: "This could move down"; and the
+  House tab: "remove"). The lines: sprint 21's patch had meant them lower,
+  and its NOTE said the pictures showed them lower, but its own Home shot
+  (and his phone) had them hanging mid-painting with a third of the wall
+  empty beneath: the scroll's content was a frame with a minimum height and
+  no alignment, so SwiftUI centred the day inside it. Now the frame is
+  aligned to its foot and the day stands just above the hairline, the
+  painting whole above it. A slip of the eyes, in the house's ledger. The
+  House tab: cut whole (the case, the view, the Household door in the
+  client, the project file, the walk's and see.sh's tab lists); chunk D
+  closed as CUT. Committed from chintan on the study line and shipped by
+  hand through the chintan job on yantar, no sprint.
 
 - 2026-09-24 · sprint 21 (813d73c, 45752e2): the stall on a turn found,
   and the House opens. The hitches first, on the steer. The frame log

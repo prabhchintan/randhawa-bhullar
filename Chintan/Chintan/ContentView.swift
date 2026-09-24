@@ -4,7 +4,7 @@ import UIKit
 // The raw values are the names the house's screenshots pass on the command
 // line, so they stay as they are even where the tab's own name has moved on.
 enum Tab: String, CaseIterable {
-    case jharokha, board, study, house
+    case jharokha, board, study
 
     // The tab named on the command line, for the house's screenshots.
     static var launch: Tab {
@@ -20,7 +20,6 @@ enum Tab: String, CaseIterable {
         case .jharokha: return "Home"
         case .board: return "Board"
         case .study: return "Study"
-        case .house: return "House"
         }
     }
 
@@ -29,12 +28,11 @@ enum Tab: String, CaseIterable {
         case .jharokha: return "house"
         case .board: return "checklist"
         case .study: return "bubble.left.and.text.bubble.right"
-        case .house: return "building.columns"
         }
     }
 }
 
-// One painting under the whole app, drawn once; the four screens are pages
+// One painting under the whole app, drawn once; the three screens are pages
 // over it, a thumb's swipe or a tap on the bar moving between them, the
 // picture staying still behind. A tick of the selection haptic on each arrival.
 struct ContentView: View {
@@ -48,7 +46,7 @@ struct ContentView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
-                // All four built at launch, so a first visit is a slide, not a fetch.
+                // All three built at launch, so a first visit is a slide, not a fetch.
                 HStack(spacing: 0) {
                     ForEach(Tab.allCases, id: \.self) { t in
                         screen(t)
@@ -100,7 +98,6 @@ struct ContentView: View {
         case .jharokha: JharokhaView()
         case .board: BoardView()
         case .study: StudyView()
-        case .house: HouseView()
         }
     }
 

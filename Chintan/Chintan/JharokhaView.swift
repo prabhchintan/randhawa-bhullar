@@ -30,15 +30,16 @@ struct JharokhaView: View {
             VStack(spacing: 0) {
                 GeometryReader { wall in
                     ScrollView {
-                        VStack(spacing: 0) {
-                            Spacer(minLength: 0)
-                            overlay
-                                .padding(.horizontal, 22)
-                                .padding(.top, 80)
-                                // The last line clears the fade whole, above the foot.
-                                .padding(.bottom, 28)
-                        }
-                        .frame(minHeight: wall.size.height)
+                        // The day stands on the wall's foot, just above the
+                        // hairline (his word, 2026-09-24 04:46: the lines hung
+                        // mid-painting; a frame with no alignment had centred
+                        // them). Only a day too tall for the wall scrolls.
+                        overlay
+                            .padding(.horizontal, 22)
+                            .padding(.top, 80)
+                            // The last line clears the fade whole, above the foot.
+                            .padding(.bottom, 40)
+                            .frame(minHeight: wall.size.height, alignment: .bottomLeading)
                     }
                     .scrollBounceBehavior(.basedOnSize)
                     .fadedEdges(top: 0, bottom: 36)
