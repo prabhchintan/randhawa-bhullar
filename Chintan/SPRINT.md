@@ -42,6 +42,29 @@ outright; mail that needs his hands and is a positive thing stays mail.
 Later rungs, on his word: darban and yaar as voices in the study (each a
 door on the house), and Jev-style cheap judgments behind the scenes.
 
+The maintainer's word, 2026-09-23 20:05 (the study line), on the app as it
+stands: "Art work is an absolute home run"; the day's line ("quiet evening")
+"absolute chef's kiss"; "board study and visitors are amazing"; "incredible
+stuff on this app". Weights (BUTLER 31): the painting-first Home, the one
+line for the day, and the three rooms are the behaviours to keep. And his
+ideas, which set chunks I to L below: Home "should only worry about today"
+and be "the most calming place to be", an overview of the day and the date
+and a line that changes with what is going on and where he is (the house
+now learns home and work from the phone's fixes, POST /v1/location, and the
+line says "quiet evening at home"); the titles of the actions "as minimally
+descriptive as they can be while carrying the highest information density";
+the art library "seemingly infinite" (the house: a third museum, Chicago,
+and a seen ledger so nothing returns within a year) and every picture
+covering the entire screen, never "weirdly re sized or cropped" (the house
+now composes each picture for the phone's frame: a tall work cropped
+gently from above the middle, anything else whole over its own blurred
+ground; the app shows it edge to edge, scaledToFill, no crop of its own);
+the usage circles kept but "placed neatly below", the art given the room;
+the app icon "classy like the app now"; the Board's week broken by day and
+"later for the rest of them combined"; and the app made by the latest
+models on the house's latest refinements, biased to high effort unless the
+meters are low (the sprint workflow carries `effort`, from the gear).
+
 The shape to grow into (four tabs, in this order):
 
 1. **Home** (the jharokha, reborn native). One screen: the date and the day
@@ -329,6 +352,39 @@ E2. The shelf (Prab, 2026-09-23 07:15: "toggle to the next art ... some
    to the next painting with a soft tick; his choice holds for the day.
    Next slices: a swipe on the picture as the turn; yesterday's one turn
    back; the keep gesture (E).
+I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
+   screen, the calmest place in the app: the painting; the date and the
+   day's line from the house (its first sentence now says where he is when
+   the phone has said: at home, at work, out); today's things only, each
+   title cut to the fewest words that carry the most (the consequence and
+   the hour in the title itself when they matter, "Caremark, call, before
+   5" not "Call Caremark about the Zepbound prior authorization"); the
+   meters as small rings placed neatly below, together, never floating on
+   the art; the week and everything later leaves Home for the Board. The
+   sprint measures Home by how much painting is visible with nothing
+   pressed, and by the label reading in one breath.
+J. The Board by day. This week broken by day, one gilt date per leaf as
+   now, Later for the rest combined (one shelf, undated things and the
+   weeks beyond, sorted by date); the title rule of I applies everywhere.
+K. The picture whole. The app assumes every picture from the house is
+   already the phone's frame (1179 by 2556, composed by the house): show it
+   edge to edge under the safe areas with scaledToFill and no offset, the
+   label and the plaques over the ground where the work does not reach,
+   never over a face. A picture that is not the frame's ratio (an old
+   cache) is refit by the house on request (`ghar painting refit`), the app
+   just re-fetches the shelf. The shelf keeps growing (fourteen days,
+   three museums); the "next" tap never shows a repeat.
+L. Where he is. CoreLocation with significant-change monitoring (the
+   phone wakes the app a handful of times a day, near free on battery), the
+   When In Use then Always permission asked in the house's own words on the
+   Settings tab, never at launch; each fix posted to `POST /v1/location`
+   {"lat","lon","acc","at"} and forgotten by the app; the reply names the
+   place (home, work, out) for the app's own use. The house never sends a
+   coordinate anywhere and learns the places from the hours alone.
+M. The icon. Re-cut to the look: a small work of art in a frame, bone
+   and lamp black with a gilt hairline, no glyph, no gradient, no text;
+   judged in the home screen grid beside Apple's own icons, light and dark
+   and tinted.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri.

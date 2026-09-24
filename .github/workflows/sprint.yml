@@ -14,6 +14,10 @@ on:
         description: "the model for the sprint"
         default: claude-opus-5-5
         type: string
+      effort:
+        description: "the effort for the sprint (medium, high, xhigh); high unless the meters are low"
+        default: high
+        type: string
       cycles:
         description: "build-and-look cycles allowed"
         default: "4"
@@ -57,6 +61,7 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           CHINTAN_HOUSE: ${{ secrets.CHINTAN_HOUSE }}
           MODEL: ${{ inputs.model }}
+          EFFORT: ${{ inputs.effort }}
           CYCLES: ${{ inputs.cycles }}
           STEER: ${{ inputs.steer }}
         run: |
@@ -68,7 +73,7 @@ jobs:
 
           Cycles allowed this sprint: $CYCLES. Steer from the house: ${STEER:-none}."
           TOOLS="Read Glob Grep Edit Write Bash(bash Chintan/scripts/see.sh:*) Bash(git add:*) Bash(git commit:*) Bash(git status:*) Bash(git diff:*) Bash(git log:*) Bash(ls:*) Bash(cat:*) Bash(cp:*) Bash(mkdir:*) Bash(python3:*) Bash(plutil:*) Bash(swift:*) Bash(xcrun simctl:*) Bash(sleep:*)"
-          OUT=$(timeout 4200 claude -p "$PROMPT" --model "$MODEL" --output-format json \
+          OUT=$(timeout 4200 claude -p "$PROMPT" --model "$MODEL" --effort "${EFFORT:-high}" --output-format json \
                 --permission-mode acceptEdits --allowedTools "$TOOLS" < /dev/null 2>/tmp/see/claude.err || true)
           RESULT=$(python3 -c 'import json,sys
           try: print(json.load(sys.stdin).get("result",""))
