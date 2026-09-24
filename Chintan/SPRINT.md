@@ -373,7 +373,10 @@ J. The Board by day. This week broken by day, one gilt date per leaf as
    weeks beyond, sorted by date); the title rule of I applies everywhere.
    The title rule built on the Board and in Home's held plaque (sprint 18,
    both prefer `/v1/titles`); the shelves and the Study's rooms stand on a
-   smoked mount (`.mount()`) against a bright picture. Left: the days.
+   smoked mount (`.mount()`) against a bright picture. The days built
+   (sprint 19): Today, Tomorrow, then each weekday left through Sunday on a
+   shelf of its own, Later for the rest; the date mark only where the
+   shelf's name is not the day (Later, a thing past). J is whole.
 K. The picture edge to edge (his example, 2026-09-23 20:15: A Cosey Corner
    filling the screen under the app's own dimming, "perfect"). Every picture
    from the house is already the phone's frame (1179 by 2556): the work
@@ -405,6 +408,20 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 19 (a14f19a): the week by day. The Board's "This
+  week" shelf is gone; each day left in the week is a shelf of its own,
+  named on its mount the way Today is: "Tomorrow" for the next day, then
+  the weekday by name ("Saturday", "Sunday"), and Later for everything
+  beyond Sunday and the undated, combined and soonest first. Where the
+  shelf's name is the day, the leaf no longer letters the date at its
+  right ("Thu Sep 24" under Today, "Fri Sep 25" under Tomorrow), so the
+  title and its reasons take the whole width: the calcium scan's "1:30
+  PM" now sits beside its title on one line where it wrapped under it.
+  Later keeps a gilt date on each leaf, and a thing whose day has passed
+  keeps its saffron one under Today. Seen in both modes at rest, with a
+  leaf opened under Tomorrow, and scrolled to Later with a leaf opened.
+  No hitch numbers (nothing that moves was touched). No new door.
 
 - 2026-09-24 · sprint 18 (f6ce14a): names that hold, and one name for a
   thing. Over The Adoration of the Christ Child, the Board's "This week"
