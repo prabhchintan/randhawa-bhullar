@@ -398,7 +398,12 @@ L. Where he is. CoreLocation with significant-change monitoring (the
    Settings tab, never at launch; each fix posted to `POST /v1/location`
    {"lat","lon","acc","at"} and forgotten by the app; the reply names the
    place (home, work, out) for the app's own use. The house never sends a
-   coordinate anywhere and learns the places from the hours alone.
+   coordinate anywhere and learns the places from the hours alone. App side
+   built (sprint 20): "Where you are" on the Settings sheet, the phone's
+   choice kept apart from the permission, a fresh fix on opening the app at
+   most every 15 minutes, the place last named shown there. Left: seen on
+   his phone (the simulator's eyes never post), and the place on Home
+   itself once the house's day's line carries it.
 M. The icon. Re-cut to the look: a small work of art in a frame, bone
    and lamp black with a gilt hairline, no glyph, no gradient, no text;
    judged in the home screen grid beside Apple's own icons, light and dark
@@ -408,6 +413,36 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 20 (39d7d82): where he is (L), and Settings on the
+  wall. The Settings sheet (the gear in the Study) was the stock grey
+  grouped list, which the look leaves out by name; now it is a wall on bone
+  or lamp black: "The house" and "Where you are" in gilt small capitals over
+  a hairline, the address on a line of its own with Save beside it, "Is it
+  home?" under it with the answer in italic, every action lettered in small
+  serif capitals, no cards. "Where you are" says in one note what it does
+  and that only the house hears it; "Tell the house" asks the phone for
+  location while open, then "Tell it always" for always (the phone's own
+  prompt, in the house's words); from then on significant-change monitoring
+  wakes the app when he has moved, and each opening of the app asks for one
+  fix at most every 15 minutes. Each fix goes to `POST /v1/location`
+  {"lat","lon","acc","at"} (at in ISO 8601) and is forgotten; once on, the
+  room shows the place the house last named in the serif with its hour in
+  gilt ("At home 2:46 AM"), "The house hears a few times a day." in italic,
+  "Stop telling" in quiet ink, and the note shrinks to its promise. Refused
+  in the phone's Settings, the room says so and opens them. The house
+  address is now readable after the first unlock, since a wake for a move
+  mostly comes with the phone locked (the address kept before is moved over
+  when he says yes). Seen in both modes at rest (`see.sh OUT settings`) and
+  on (`settings@on`: location granted, a place heard, then reset); the
+  first look showed the tailnet address in plain view, so the eyes now
+  photograph it redacted; the tabs unchanged. The simulator never posts a
+  fix (the app launched with `--house` never monitors). No hitch numbers
+  (nothing that moves was touched). The door, as the app reads it: 200
+  {"ok": true, "place": "home"|"work"|"out"|null}; 404 or 405 reads as no
+  door yet and nothing is shown as heard. Not probed from this run (the
+  sprint's tools do not reach the house), so the first real fix from his
+  phone is the check.
 
 - 2026-09-24 · sprint 19 (a14f19a): the week by day. The Board's "This
   week" shelf is gone; each day left in the week is a shelf of its own,
