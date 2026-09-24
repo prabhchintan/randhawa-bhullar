@@ -30,14 +30,27 @@ struct StudyView: View {
     private var messages: [ChintanMessage] { store.messages(voice) }
     private var isThinking: Bool { thinking.contains(voice) }
 
+    // His last word, when nothing came back after it and the house is not
+    // thinking on it: it failed, or the app was closed while it waited.
+    private var unanswered: ChintanMessage? {
+        guard !isThinking, let last = messages.last, !last.fromHouse else { return nil }
+        return last
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
-                        ForEach(messages) { message in
+                        ForEach(Array(messages.enumerated()), id: \.element.id) { i, message in
+                            if let when = Self.stamp(message, after: i > 0 ? messages[i - 1] : nil) {
+                                stamp(when)
+                            }
                             bubble(for: message).id(message.id)
+                            if message.id == unanswered?.id {
+                                unansweredMark
+                            }
                         }
                         if isThinking {
                             Breathing(name: voice.rawValue)
@@ -63,13 +76,6 @@ struct StudyView: View {
                         withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                     }
                 }
-            }
-            if let errorText = errors[voice] {
-                Label(errorText, systemImage: "wifi.slash")
-                    .font(.footnote)
-                    .foregroundStyle(Theme.bone.opacity(0.85))
-                    .padding(.horizontal)
-                    .padding(.bottom, 6)
             }
             composer
         }
@@ -262,13 +268,82 @@ struct StudyView: View {
         }
     }
 
+    // The hour over a run of the conversation: over the first word, and
+    // wherever an hour has passed or the day has turned since the last.
+    static func stamp(_ message: ChintanMessage, after previous: ChintanMessage?) -> String? {
+        let calendar = Calendar.current
+        if let previous, message.date.timeIntervalSince(previous.date) < 3600,
+           calendar.isDate(message.date, inSameDayAs: previous.date) { return nil }
+        let hour = message.date.formatted(date: .omitted, time: .shortened)
+        if calendar.isDateInToday(message.date) { return "Today " + hour }
+        if calendar.isDateInYesterday(message.date) { return "Yesterday " + hour }
+        if let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: message.date), to: calendar.startOfDay(for: .now)).day,
+           days < 7 {
+            return message.date.formatted(.dateTime.weekday(.wide)) + " " + hour
+        }
+        return message.date.formatted(.dateTime.month(.abbreviated).day()) + " " + hour
+    }
+
+    private func stamp(_ when: String) -> some View {
+        Text(when)
+            .font(Theme.label(.caption))
+            .tracking(1.1)
+            .foregroundStyle(Theme.giltOnArt)
+            .mount()
+            .frame(maxWidth: .infinity)
+            .padding(.top, 4)
+    }
+
+    // Under a word that went unanswered: what happened, and the way to send
+    // it again, on a mount so it reads on any passage of the picture.
+    // At the accessibility sizes the button stands under the words, whole.
+    private var unansweredMark: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .trailing, spacing: 10))
+            : AnyLayout(HStackLayout(spacing: 12))
+        return layout {
+            Text(errors[voice] ?? "The house did not answer.")
+                .font(.system(.footnote, design: .serif).italic())
+                .foregroundStyle(Theme.bone.opacity(0.9))
+                .multilineTextAlignment(.trailing)
+            Button(action: retry) {
+                HStack(spacing: 5) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.caption.weight(.semibold))
+                    Text("Try again")
+                        .font(Theme.label(.footnote))
+                        .tracking(1.1)
+                }
+                .fixedSize()
+                .foregroundStyle(Theme.giltOnArt)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.7), lineWidth: 0.75))
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("retry")
+        }
+        .mount()
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
     private func send() {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
-        let room = voice
         draft = ""
+        store.append(ChintanMessage(id: UUID(), text: text, fromHouse: false, date: Date()), to: voice)
+        ask(text, in: voice)
+    }
+
+    // The unanswered word sent once more, where it already stands.
+    private func retry() {
+        guard let word = unanswered else { return }
+        ask(word.text, in: voice)
+    }
+
+    private func ask(_ text: String, in room: Voice) {
         errors[room] = nil
-        store.append(ChintanMessage(id: UUID(), text: text, fromHouse: false, date: Date()), to: room)
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errors[room] = "No house address yet. Add it in Settings."
             return
