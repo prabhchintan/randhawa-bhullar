@@ -1,3 +1,4 @@
+import ImageIO
 import SwiftUI
 import UIKit
 
@@ -102,6 +103,12 @@ final class Gallery: ObservableObject {
         guard !fresh.isEmpty else { return }
         shelf = fresh
         try? JSONEncoder().encode(fresh).write(to: Self.shelfFile, options: .atomic)
+        // A picture kept from before the house framed them for the phone
+        // comes down again, refitted.
+        for p in fresh where FileManager.default.fileExists(atPath: Self.file(p).path) && !Self.framed(Self.file(p)) {
+            try? FileManager.default.removeItem(at: Self.file(p))
+            pictures[p.key] = nil
+        }
         await show(chosen(in: fresh), animated: true)
         // The rest of the shelf comes down quietly, so next and an evening
         // without the house both have pictures; what left the shelf leaves the phone.
@@ -164,6 +171,16 @@ final class Gallery: ObservableObject {
         return ui
     }
 
+    // Whether a kept picture is the phone's frame (1179 by 2556), read from
+    // its header without decoding it.
+    private static func framed(_ url: URL) -> Bool {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let w = props[kCGImagePropertyPixelWidth] as? Double, let h = props[kCGImagePropertyPixelHeight] as? Double,
+              w > 0 else { return false }
+        return abs(h / w - 2556.0 / 1179.0) < 0.02
+    }
+
     // Decoded once, off the main thread, at the size the screen fills with
     // it: a full scan left lazy is decoded and scaled again by every tab
     // that shows it, a stall of a tenth of a second on each tap.
@@ -185,7 +202,11 @@ struct Painting: View {
         Theme.lampBlack
             .overlay {
                 if let image = gallery.image {
-                    // A touch past the edge, so a scan's dark border never shows.
+                    // The house composes each picture for the phone's frame, so
+                    // it fills the screen as it came, no offset of our own; a
+                    // touch past the edge only, since many scans still carry
+                    // their border (a black line, the frame's lip, the page),
+                    // until the house trims it before composing.
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
