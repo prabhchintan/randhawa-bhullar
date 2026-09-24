@@ -371,6 +371,9 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
 J. The Board by day. This week broken by day, one gilt date per leaf as
    now, Later for the rest combined (one shelf, undated things and the
    weeks beyond, sorted by date); the title rule of I applies everywhere.
+   The title rule built on the Board and in Home's held plaque (sprint 18,
+   both prefer `/v1/titles`); the shelves and the Study's rooms stand on a
+   smoked mount (`.mount()`) against a bright picture. Left: the days.
 K. The picture edge to edge (his example, 2026-09-23 20:15: A Cosey Corner
    filling the screen under the app's own dimming, "perfect"). Every picture
    from the house is already the phone's frame (1179 by 2556): the work
@@ -402,6 +405,33 @@ F. Settings and the edges. The health dot; settings one tap away; a
    notifications (an APNs key, his hands), Siri.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 18 (f6ce14a): names that hold, and one name for a
+  thing. Over The Adoration of the Christ Child, the Board's "This week"
+  was lettered straight across the angels' bright faces and could not be
+  read, and the Study's "darban" and "yaar" went into the cherubs. Now
+  each shelf name stands on a small mount of smoked glass (ultra thin
+  material with lamp black, square cornered like a wall label, its edge
+  on the leaves' edge), and the three rooms share one mount, its edge on
+  the bubbles'; the picture still shows through. The Board names each
+  thing by Home's cut ("Caremark, call" where it read "Call Caremark"),
+  the house's `/v1/titles` first when it answers, the hour in gilt small
+  capitals after the last word ("Testosterone draw 3 of 3 8 AM"); first
+  look had a long title split around its hour ("Coronary artery 1:30 PM /
+  calcium scan"), then cut to "1:30..."; now the hour wraps whole under
+  it. Home's held plaque names the thing by the same cut. Seen in both
+  modes at rest, a leaf opened, a thing held on Home, and in the walk's
+  film (the mounts ride with the shelves through the scroll; the rule
+  slides to darban with the names legible throughout). The hitch numbers,
+  before then after (ms/s): reveal 44.0 to 28.1, first visits 35.4 to
+  32.2, tab taps 51.4 to 46.1, swipe 54.5 to 53.8, board scroll 16.3 to
+  5.2 (the shelf names' text shadows are gone, the likely cause), study
+  scroll 1.5 to 1.5. The audit: 14 to 11, the 10 unnamed full-screen
+  elements left and one study bubble's "partially unsupported"; the
+  bubbles' readings came and went between the two runs with no change to
+  the study's bubbles, so they are the audit's noise, not this sprint's
+  fix. No new door; `/v1/titles` (sprint 17's shape) now serves the Board
+  as well as Home.
 
 - 2026-09-24 · sprint 17 (3359a41, ac61086): Home is today. The week's
   calendar leaves are gone from Home; it holds only what is due today or
