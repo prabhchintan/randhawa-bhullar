@@ -16,6 +16,7 @@ struct ChintanApp: App {
         }
         // Made at launch, so a wake for a move finds its delegate.
         _ = Whereabouts.shared
+        _ = PhoneWord.shared
     }
 
     @Environment(\.scenePhase) private var phase
@@ -26,6 +27,7 @@ struct ChintanApp: App {
         }
         .onChange(of: phase) { _, now in
             if now == .active { Whereabouts.shared.freshen() }
+            PhoneWord.shared.scene(now)
         }
     }
 }

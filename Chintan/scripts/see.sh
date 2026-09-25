@@ -60,13 +60,15 @@ for mode in light dark; do
     NAME=${tab%@*}
     case "$tab" in *@*) EXTRA=(--open "${tab#*@}") ;; esac
     [ "$NAME" = settings ] && NAME=study && EXTRA=(--settings)
-    # settings@on: location granted always, telling, a place heard. The app
+    # settings@on: location granted always, telling, a place heard, and the
+    # phone's word heard. The app
     # the eyes launch never monitors and never posts, so the house hears nothing.
     if [ "$tab" = settings@on ]; then
       xcrun simctl privacy "$UDID" grant location-always Prabhchintan.Chintan
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.telling -bool YES
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.place home
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
+      xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan phone.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
     fi
     # study@waiting: darban's room with a word left waiting when the app was
     # closed, its id one the house never gave; photographed as the study
@@ -115,6 +117,7 @@ PY
       for key in telling place heard; do
         xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan "where.$key" 2>/dev/null || true
       done
+      xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan phone.heard 2>/dev/null || true
     fi
   done
 done

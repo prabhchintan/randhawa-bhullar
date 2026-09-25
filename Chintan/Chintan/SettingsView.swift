@@ -51,6 +51,7 @@ struct SettingsView: View {
                         }
                     }
                     WhereaboutsSection()
+                    PhoneWordSection()
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
@@ -112,6 +113,31 @@ struct SettingsRoom<Content: View>: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+}
+
+// What the house last heard, in the serif, its hour in gilt beside it; at the
+// accessibility sizes the hour stands under the words, so neither breaks.
+struct HeardLine: View {
+    let words: String
+    let hour: String
+    @Environment(\.dynamicTypeSize) private var size
+
+    var body: some View {
+        let layout = size.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 10))
+        layout {
+            Text(words)
+                .font(.system(.title2, design: .serif))
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(hour)
+                .font(Theme.label(.subheadline))
+                .tracking(0.6)
+                .foregroundStyle(Theme.gilt)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

@@ -94,6 +94,8 @@ final class Whereabouts: NSObject, ObservableObject {
     private func send(_ fix: CLLocation) async {
         guard !eyes, let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
         lastSent = Date()
+        // A move that woke the app is a wake in the phone's word too.
+        if UIApplication.shared.applicationState == .background { PhoneWord.shared.say(.wake) }
         // A wake in the background has a few seconds; ask for them.
         let task = UIApplication.shared.beginBackgroundTask(withName: "where")
         defer { UIApplication.shared.endBackgroundTask(task) }
@@ -134,16 +136,7 @@ struct WhereaboutsSection: View {
         SettingsRoom("Where you are", note: note) {
             // The place the house last named, its hour in gilt, as Home sets one.
             if whereabouts.telling, let heard = whereabouts.heard {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(Self.words(whereabouts.place))
-                        .font(.system(.title2, design: .serif))
-                        .foregroundStyle(Theme.ink)
-                    Text(Self.time(heard))
-                        .font(Theme.label(.subheadline))
-                        .tracking(0.6)
-                        .foregroundStyle(Theme.gilt)
-                }
-                .accessibilityElement(children: .combine)
+                HeardLine(words: Self.words(whereabouts.place), hour: Self.time(heard))
             }
             if let line {
                 Text(line)

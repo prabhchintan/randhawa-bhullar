@@ -230,6 +230,24 @@ struct HouseClient {
         return (try? JSONDecoder().decode(Heard.self, from: data)) ?? Heard(place: nil)
     }
 
+    // The phone's own word, already in its shape (PhoneWord). Heard on a 2xx;
+    // refused on a 4xx, which is never sent again; unheard otherwise, kept
+    // for the next.
+    enum Told { case heard, refused, unheard }
+
+    func phone(_ body: Data) async -> Told {
+        guard let phoneURL = url("/v1/phone") else { return .unheard }
+        var request = URLRequest(url: phoneURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 15
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+        guard let (_, response) = try? await Self.session.data(for: request),
+              let http = response as? HTTPURLResponse else { return .unheard }
+        if (200..<300).contains(http.statusCode) { return .heard }
+        return (400..<500).contains(http.statusCode) ? .refused : .unheard
+    }
+
     // The three voices, each with its line and whether it is home. A house
     // without this door answers 404 and the study names the rooms alone.
     struct Voices: Decodable {
