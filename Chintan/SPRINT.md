@@ -546,7 +546,28 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    on the Settings wall, on from the first launch; the rooms stand one under
    another for now, gathered under "The senses" when Health joins them.
    Left in slice 1: seen on his phone (the simulator's eyes never post), and
-   `ghar desk` reading it. Next: slice 2, HealthKit.
+   `ghar desk` reading it. Next: slice 1b, then slice 2, HealthKit.
+
+   Slice 1b, Prab's word 2026-09-24 19:23 ("can it read wifi names and location
+   ... so you know when i'm home"), before slice 2: the phone's word carries
+   "ssid" (the Access WiFi Information entitlement in the target, no Apple
+   approval; NEHotspotNetwork.fetchCurrent needs location When In Use, so this
+   rides on the Where leaf's permission and is empty until it is granted) and
+   the app posts fixes to POST /v1/location {"lat","lon","acc","at"} on every
+   wake and on CoreLocation significant changes (the door is live; the house
+   pins home from the first fix that lands while the phone is on the home LAN,
+   where.py, and reads the home wifi's name from the word, desk.py; the name
+   itself lives in the house's state, never in the app or a commit). The Where
+   leaf in The senses asks for location in the house's words, When In Use
+   first, Always offered in the same leaf for the visits and wakes of slice 4.
+   Slice 1b built (sprint 25): "ssid" on every word once location is
+   granted, the entitlement in Chintan.entitlements, a wake's word sent
+   before its fix; fixes on opening (at most every 15 minutes) and on
+   significant changes, as L built them. Left: seen on his phone, and the
+   first archive with the entitlement (cloud signing adds Access WiFi
+   Information to the App ID; if ship.sh ever refuses it, turn it on for
+   Prabhchintan.Chintan on the developer site, his hands once). Next: slice 2,
+   HealthKit.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -555,6 +576,28 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · sprint 25 (d1748c1): the phone names its wifi, so the house
+  knows when he is home (N, slice 1b, on his word at 19:23). Slice 1b went
+  into N's roadmap as he gave it. Then built: the target now carries the
+  Access WiFi Information entitlement (Chintan.entitlements, the first
+  entitlements file the app has had), and each phone word asks
+  NEHotspotNetwork for the wifi's name and sends it as "ssid" on
+  `POST /v1/phone`. Apple gives the name only once location is allowed, so
+  until Where you are is granted the key is left out and the word is as it
+  was. Words are now put together one after another, so the name is asked
+  fresh each time and the order holds. A move that wakes the app sends its
+  "wake" word first and its fix to `/v1/location` after, so the house reads
+  each fix beside the network it came from and can pin home from a fix sent
+  on the home wifi. The notes on Where you are ("and names the wifi it is
+  on, so the house knows when you are home") and When you are on the phone
+  ("with Where you are on, the wifi's name too"), and the When In Use
+  string, say so and stay literally true. Seen in both modes, at rest and
+  with the senses on: only the notes changed, both whole. The tabs build and
+  photograph unchanged. No hitch numbers (nothing that moves was touched).
+  The simulator never posts and has no wifi name, so the first ssid comes
+  from his phone. No new door: "ssid" is one more optional key on the
+  `/v1/phone` contract, which the house reads already (desk.py).
 
 - 2026-09-24 · sprint 24 (7fd188a, 34f7480): the senses begin, and the
   phone tells the house when he is on it. First chunk N went into the
