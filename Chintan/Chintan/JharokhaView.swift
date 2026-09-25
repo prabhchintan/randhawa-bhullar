@@ -90,12 +90,37 @@ struct JharokhaView: View {
 
     private var overlay: some View {
         VStack(alignment: .leading, spacing: 18) {
+            dayLabel
+
+            if let errorText {
+                Label(errorText, systemImage: "wifi.slash")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+
+            if let open = meters.first(where: { $0.key == openMeter }) {
+                Text(open.sentence)
+                    .font(.system(.footnote, design: .serif).italic())
+                    .foregroundStyle(Theme.bone.opacity(0.85))
+                    .transition(.opacity)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // The date and the day's things read as one label: the date sits as
+    // close over the first thing as the things over one another.
+    private var dayLabel: some View {
+        VStack(alignment: .leading, spacing: 2) {
             // The date alone leads the wall (Prab, 2026-09-25 08:29 and 08:52:
             // the day's sentence, "2 raised this morning", goes entirely; the
             // date and today's things, blank when none).
             Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                .font(.system(.title2, design: .serif).weight(.semibold).smallCaps())
+                .font(.system(.title2, design: .serif).weight(.medium).smallCaps())
+                .tracking(0.4)
                 .foregroundStyle(Theme.bone)
+                // A thing held names its own day; the date steps aside.
+                .opacity(heldThing == nil ? 1 : 0)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottom) {
                 if let item = dated.first(where: { $0.id == heldThing }) {
@@ -103,6 +128,7 @@ struct JharokhaView: View {
                     // the painting, the whole width of the wall, and grows up.
                     ThingPlaque(item: item, short: titles[item.line] ?? item.short)
                         .fixedSize(horizontal: false, vertical: true)
+                        .offset(y: -8)
                         .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
                 }
             }
@@ -110,7 +136,7 @@ struct JharokhaView: View {
             // Today's things only, each in its fewest words, the hour apart in
             // gilt; a thing whose day has passed says so in saffron.
             if !dated.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
                     ForEach(dated) { item in
                         let short = titles[item.line] ?? item.short
                         HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -143,21 +169,7 @@ struct JharokhaView: View {
                 }
                 .onAppear(perform: holdThingOnLaunch)
             }
-
-            if let errorText {
-                Label(errorText, systemImage: "wifi.slash")
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.8))
-            }
-
-            if let open = meters.first(where: { $0.key == openMeter }) {
-                Text(open.sentence)
-                    .font(.system(.footnote, design: .serif).italic())
-                    .foregroundStyle(Theme.bone.opacity(0.85))
-                    .transition(.opacity)
-            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // The foot of the wall, standing on the bar so the day's lines and the
@@ -284,6 +296,9 @@ struct JharokhaView: View {
             }
             .multilineTextAlignment(.trailing)
             .foregroundStyle(.white.opacity(0.88))
+            // The label stops growing where the rings do, so at the largest
+            // text the day's things keep the wall.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: 200, alignment: .trailing)
             .contentShape(Rectangle())
@@ -329,6 +344,14 @@ struct JharokhaView: View {
         return (String(artist[..<open.lowerBound]), about.isEmpty ? nil : String(about))
     }
 
+    // For the house's eyes: `--open cut` on Home letters the phone's own cut
+    // as if the house were away; `--open empty` is a day with nothing on it.
+    private static var eyes: String? {
+        let args = ProcessInfo.processInfo.arguments
+        guard Tab.launch == .jharokha, let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return nil }
+        return args[i + 1]
+    }
+
     // The pulse's meters when the house serves them, else the cockpit's.
     private var meters: [CockpitDay.Meter] { pulse.isEmpty ? day.meters : pulse }
 
@@ -346,8 +369,8 @@ struct JharokhaView: View {
         let (_, c, b, p, s) = await (picture, cockpit, board, beat, short)
         if let c { day = CockpitDay(c) }
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
-        if let s { titles = s }
-        if let b { dated = BoardItem.today(BoardParser.parse(b)) }
+        if let s, Self.eyes != "cut" { titles = s }
+        if let b, Self.eyes != "empty" { dated = BoardItem.today(BoardParser.parse(b)) }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
     }
 }
@@ -436,6 +459,7 @@ private struct RingPlaque: View {
 private struct ThingPlaque: View {
     let item: BoardItem
     let short: BoardItem.Short
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -454,7 +478,7 @@ private struct ThingPlaque: View {
                     .font(.footnote)
                     .foregroundStyle(Theme.ink.opacity(0.8))
                     // A long why keeps to the painting above the leaves.
-                    .lineLimit(12)
+                    .lineLimit(typeSize.isAccessibilitySize ? 5 : 12)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
@@ -606,21 +630,85 @@ extension BoardItem {
         let hour: String?
     }
 
-    private static let deeds: Set<String> = ["call", "pay", "book", "email", "text", "send", "submit", "check",
-                                             "renew", "cancel", "schedule", "file", "order", "return", "confirm", "ask"]
+    // A deed as the word that follows the thing ("Caremark call"); an empty
+    // one goes, the thing alone says it ("Rent" for "Pay rent").
+    private static let deeds: [String: String] = [
+        "call": "call", "email": "email", "text": "text", "check": "check", "order": "order",
+        "return": "return", "renew": "renewal", "pay": "payment", "book": "", "schedule": "",
+        "send": "", "submit": "", "file": "", "confirm": "", "ask": "", "cancel": "", "get": "", "do": ""]
 
-    // The house's line cut on the phone when the house gives no title: the
-    // gist, the articles gone, the thing before the deed ("Caremark, call"),
-    // and the first hour the house wrote ("8 AM", "before 5 PM").
+    // Where the reasons begin: the thing is said before them.
+    private static let reasons: Set<String> = ["about", "for", "re", "regarding", "with", "before", "by",
+                                               "until", "from", "so", "because", "after", "via", "and"]
+
+    // The day and the hour are said apart, never in the title.
+    private static let times: Set<String> = [
+        "today", "tomorrow", "tonight", "morning", "afternoon", "evening", "noon", "this", "next",
+        "am", "pm", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+        "mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+    private static let hourWords = ["morning", "afternoon", "evening", "tonight", "noon"]
+
+    // The house's line cut on the phone when the house is away, the way the
+    // house cuts it: the noun of the thing in one to four words, the deed
+    // after it only when the noun alone says nothing ("Caremark call", "DMV
+    // plates", "Calcium scan"), and the hour apart, a clock time the house
+    // wrote ("8:30 AM", "before 5 PM") or a word ("evening").
     var short: Short {
-        var words = gist.split(separator: " ").map(String.init)
-            .filter { !["the", "a", "an"].contains($0.lowercased()) }
-        if let deed = words.first?.lowercased(), Self.deeds.contains(deed), (2...6).contains(words.count) {
-            words = Array(words.dropFirst()) + [deed]
-            words[words.count - 2] += ","
+        let hour: String? = {
+            if let clock = text.firstMatch(of: /(?:(?:before|by|until) )?\d{1,2}(?::\d{2})? ?[AP]M\b/) {
+                return String(clock.output)
+            }
+            let said = gist.lowercased().split(separator: " ").map(String.init)
+            return Self.hourWords.first(where: said.contains)
+        }()
+
+        var words = gist.split(separator: " ").map { $0.trimmingCharacters(in: .punctuationCharacters) }
+        // The thing is said before its reasons and before its hour.
+        let clock = words.indices.first { i in
+            words[i].firstMatch(of: /^\d{1,2}(:\d{2}|:\d{2}[ap]m|[ap]m)$/.ignoresCase()) != nil
+                || (Int(words[i]) != nil && i + 1 < words.count && ["am", "pm"].contains(words[i + 1].lowercased()))
         }
-        let hour = text.firstMatch(of: /(?:(?:before|by|at|until) )?\d{1,2}(?::\d{2})? ?[AP]M\b/)
-        return Short(title: words.joined(separator: " "), hour: hour.map { String($0.output) })
+        let reason = words.firstIndex { Self.reasons.contains($0.lowercased()) }
+        if let stop = [clock, reason].compactMap({ $0 }).min(), stop > 0 {
+            words = Array(words[..<stop])
+        }
+        words = words.filter { w in
+            let l = w.lowercased()
+            return !w.isEmpty && !["the", "a", "an", "his", "my"].contains(l) && !Self.times.contains(l)
+        }
+        var deed = ""
+        if let first = words.first?.lowercased(), let noun = Self.deeds[first], words.count > 1 {
+            deed = noun
+            words.removeFirst()
+        }
+        // "Plates at Ogden DMV": the place's own short name leads the thing.
+        var place: [String] = []
+        if let at = words.firstIndex(where: { $0.lowercased() == "at" }) {
+            place = Array(words[(at + 1)...])
+            words = Array(words[..<at])
+        }
+        // "Draw 3 of 3" is the count, for the plaque.
+        if words.count > 3, Int(words[words.count - 3]) != nil, words[words.count - 2] == "of",
+           Int(words[words.count - 1]) != nil {
+            words.removeLast(3)
+        }
+        // "Tacoma to Utah plates": the thing is after its last small word.
+        if let small = words.lastIndex(where: { ["to", "of", "on", "in", "into"].contains($0.lowercased()) }),
+           small < words.count - 1 {
+            words = Array(words[(small + 1)...])
+        }
+        if let initials = place.last(where: { $0.count > 1 && $0 == $0.uppercased() && $0.allSatisfy(\.isLetter) }),
+           !words.contains(initials), let noun = words.last {
+            words = [initials, noun]
+        } else if words.count > 3 {
+            // "Coronary artery calcium scan": the last two carry it.
+            words = Array(words.suffix(2))
+        }
+        if !deed.isEmpty { words.append(deed) }
+        var title = words.isEmpty ? gist : words.joined(separator: " ")
+        title = title.prefix(1).uppercased() + title.dropFirst()
+        return Short(title: title, hour: hour)
     }
 
     // A thing whose day has passed says when it fell.
