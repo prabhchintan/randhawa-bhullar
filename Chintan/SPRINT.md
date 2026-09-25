@@ -573,6 +573,14 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    Information to the App ID; if ship.sh ever refuses it, turn it on for
    Prabhchintan.Chintan on the developer site, his hands once). Next: slice 2,
    HealthKit.
+   Slice 2 built (sprint 27): Health.swift, "How you are" under a new
+   heading "The senses" on Settings; the read set above, totals by the hour and the heart by five minutes as
+   Health's own statistics (resent while the last six hours fill), the rest
+   anchored; observer queries with hourly background delivery; the
+   HealthKit and background-delivery entitlements. Left: seen on his phone
+   (the simulator's eyes never post), the house's upsert of the folded rows
+   (sprint 27's line), and the first archive with the entitlements. Next:
+   slice 3, CoreMotion.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -581,6 +589,41 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · sprint 27 (3660ff9): the phone tells the house how he is (N,
+  slice 2, HealthKit). Settings gathers its three senses under "The senses",
+  a serif heading, and adds "How you are": Tell the house asks Health for
+  the read set once (never at launch); then Heard with its hour in gilt, or
+  "The house has not heard from Health yet.", Stop telling in quiet ink, and
+  Ask Health only when Health says there is a type it has not been asked
+  about. The note says what goes and that what Health lets it read is his to
+  change in the Health app. What travels to `POST /v1/health`, at most 2,000
+  rows a post: steps, walking and cycling distance, flights, active and
+  resting energy, exercise and stand minutes and daylight as Health's own
+  totals by the hour (a watch and a phone counted once), meta {"fold":
+  "sum"}; the heart rate by five minutes, value the mean, meta {"fold":
+  "mean", "min", "max"}; a year back the first time, a window at a time.
+  Everything else from an anchor, so nothing travels twice: resting and
+  walking heart, HRV, one minute recovery, VO2 max, breathing, oxygen, wrist
+  temperature, weight and body fat, sound and headphone exposure, steadiness
+  and the gait set, glucose and blood pressure if ever written; sleep (value
+  minutes, meta {"stage": inBed|awake|core|deep|rem|asleep}), mindful
+  minutes, the watch's high, low and irregular heart and low fitness alerts
+  (minutes); workouts as "HKWorkoutTypeIdentifier" (minutes, meta
+  {"activity", "energy" kcal, "distance" m}). Health wakes the app hourly per
+  type (observer queries, background delivery); a wake says its "wake" word
+  first, drains for 22 seconds, and a locked phone waits for the next. A 404
+  is now a missing door, kept for later, never a refusal (both senses), so a
+  door not there yet cannot cost the history. Seen in both modes: the senses
+  on (`see.sh ... settings@senses`) and off (`settings@quiet`); Home, the
+  Board and the Study unchanged. No hitch numbers (nothing that moves was
+  touched). The door needed from the house: `/v1/health` should keep one row
+  per (type, start, end) for rows whose meta has "fold", the last one sent
+  winning, since the open six hours are sent again as they fill; unfolded
+  rows are never sent twice and can simply be filed. The first archive
+  carries the HealthKit entitlements; cloud signing should add the
+  capability to the App ID, and if ship.sh refuses, it is his hands once on
+  the developer site.
 
 - 2026-09-25 · sprint 26 (0a04e54): Home reads as one label, and the phone
   names things the house's way (I, on his word at 08:29 and 08:52). The date
