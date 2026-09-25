@@ -542,6 +542,11 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    history and pedometer to /v1/motion, the Motion leaf, and "motion" on the
    phone's word. 4) Visits on Where. 5) The background tasks and the nightly
    fold, then the Shortcut offered once in the room's words.
+   Slice 1 built (sprint 24): PhoneWord.swift, "When you are on the phone"
+   on the Settings wall, on from the first launch; the rooms stand one under
+   another for now, gathered under "The senses" when Health joins them.
+   Left in slice 1: seen on his phone (the simulator's eyes never post), and
+   `ghar desk` reading it. Next: slice 2, HealthKit.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -550,6 +555,39 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-24 · sprint 24 (7fd188a, 34f7480): the senses begin, and the
+  phone tells the house when he is on it. First chunk N went into the
+  roadmap as his word at the door gave it (after M, before F). Then its
+  slice 1: each time chintan comes to the front or is put away, each time a
+  move wakes it in the background ("wake"), and each lock or unlock it is
+  awake for, the phone posts `POST /v1/phone` {"event", "at", "unlocked",
+  "battery" (two places), "charging", "lowPower", "thermal", "network"
+  (left out until the path first answers, a moment after launch), "audio"
+  (headphones for wired, A2DP, HFP or LE; speaker for anything else that
+  plays; none), "source": "app"}. A glance at the notification centre is
+  not a new word (the same event twice running is said once). A word the
+  house did not hear waits in UserDefaults, 200 at most and a day at most,
+  and goes with the next; a 4xx is let go, never sent again. Posted under
+  beginBackgroundTask so the word on being put away gets out. It needs no
+  permission, so it is on from the first launch; Settings gains "When you
+  are on the phone" under "Where you are": "Heard" in the serif with its
+  hour in gilt, set as "At home" is, or "The house has not heard from the
+  phone yet." in italic, Stop telling in quiet ink, and a note that says
+  what is told and that the phone keeps a word only until the house has it.
+  The first look had the hour as a long italic sentence and the note only
+  the promise; since the room is on without his ever pressing Tell, the
+  note now always says what is told. At the largest text "At home" broke
+  as "At / home" beside its hour (there since sprint 20); both rooms now
+  share one heard line whose hour stands under the words at the
+  accessibility sizes, seen whole. Seen in both modes at rest and on
+  (`settings@on` now stages the phone's heard hour too), at the largest
+  text, and Home, the Board and the Study unchanged. The simulator's eyes
+  never post, so no word reached the house from this run; the first real
+  one comes from his phone once this build is on it. No hitch numbers
+  (nothing that moves was touched). No new door: `/v1/phone` is the
+  contract written in N, live on the house since this evening; the app
+  counts any 2xx as heard and does not read "filed".
 
 - 2026-09-24 · sprint 23 (b28e239): a word left waiting is taken up
   again. Before, a word to any voice whose app was put away or closed
