@@ -587,6 +587,12 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    the pedometer's steps; "motion" on the phone's word. Left: seen on his
    phone (the simulator has no motion and never posts). Next: slice 4,
    visits on Where.
+   Slice 4 built (sprint 29): visits on Where, with the always permission
+   only; each place he stays told to `/v1/location` on coming and again on
+   leaving with its dwell; a visit the house missed held in memory only
+   until the next send. Left: seen on his phone, and the house reading
+   "kind" (sprint 29's line). Next: slice 5, the background tasks and the
+   nightly fold, then the Shortcut offered once.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -601,6 +607,29 @@ F. Settings and the edges. The health dot; settings one tap away; a
    standardAppearance with the ground set only for this sheet's bar.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · sprint 29 (6d80fc9): the phone tells the house where he
+  stays (N, slice 4, visits on Where). With location allowed always, the
+  phone watches its visits (CLVisit, near free) beside the significant
+  changes, and tells `POST /v1/location` each place he stays twice: on
+  coming {"lat", "lon", "acc", "at", "kind": "visit", "arrived"} and on
+  leaving with "departed" and "dwell" (seconds) added, "at" the leaving.
+  A visit the house did not hear waits in memory only (never on disk, so
+  "the phone keeps nothing but the word" stays true) and goes ahead of the
+  next fix or visit; Stop telling stops the visits and drops what waits.
+  While-open permission gives no visits, as Apple rules. The Where leaf
+  now reads "The house hears a few times a day, and each place you stay."
+  and its note before he says yes is a line shorter and names the stays;
+  the always prompt says "and each place you stay" too. Seen in both
+  modes, on (`settings@senses`) and off (`settings@quiet`); Home, the
+  Board and the Study unchanged. No hitch numbers (nothing that moves was
+  touched). The door needed from the house: `/v1/location` should read
+  "kind": "visit" (absent means a plain fix, as now), file arrivals and
+  leavings as stays keyed by "arrived", the leaving replacing the arrival,
+  and may use the dwell to learn places faster than the hours alone; it
+  should keep answering {"place"} for a visit as for a fix. A house that
+  ignores the new keys files each visit as a fix, which is harmless. The
+  simulator never posts, so the first visits come from his phone.
 
 - 2026-09-25 · sprint 28 (42a75ff): the phone tells the house how he moves
   (N, slice 3, CoreMotion). Settings gains "How you move", last under The
