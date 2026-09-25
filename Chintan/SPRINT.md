@@ -382,9 +382,12 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
    gilt hairline. Since 2026-09-24 (his word at 03:56) the rings, the
    hairline and the label stand on the bar itself, a foot below the scroll,
    so the day's lines sit lower and the painting has the height of the
-   screen. Left, the house's: `GET /v1/titles` (shape in the
-   ledger), whose cuts the app already prefers to its own; the place in
-   the day's line (from the cockpit, as now).
+   screen. `GET /v1/titles` live 09-25 08:50; the day's line gone on his
+   word the same morning, the date alone leads. The phone's own cut
+   matches the house's and the date and things read as one label (sprint
+   26). Left: at the accessibility sizes the hour should stand under its
+   title (it takes half the line and splits "Care- mark"), and the held
+   plaque there rises under Visitors; seen in /tmp/see/last/large.
 J. The Board by day. This week broken by day, one gilt date per leaf as
    now, Later for the rest combined (one shelf, undated things and the
    weeks beyond, sorted by date); the title rule of I applies everywhere.
@@ -578,6 +581,30 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · sprint 26 (0a04e54): Home reads as one label, and the phone
+  names things the house's way (I, on his word at 08:29 and 08:52). The date
+  now sits as close over the first thing as the things sit over one another
+  (they were 40 points apart, the date further still), a weight lighter
+  (medium, not semibold), so the date and the list read as one museum label.
+  Held, the plaque lifts clear of the first line and the date steps aside,
+  since the plaque names the day itself; first look had the date's lower
+  half showing under the plaque. The phone's own cut, used only when the
+  house is away, follows the house's rule: the noun of the thing, one to
+  four words, the deed after it only when the noun alone says nothing, the
+  day and the hour never inside the name; a word hour ("evening") stands
+  apart like a clock time. Seen with the house's titles set aside
+  (`see.sh ... jharokha@cut`): Caremark call · evening, Testosterone draw
+  8:30 AM (the house says Blood draw), Calcium scan 1:30 PM, DMV plates
+  10:10 AM. An empty day (`jharokha@empty`) is the date alone above the
+  foot. At the largest text the painting's label ran most of the screen
+  and pushed the things out of the wall; it now stops growing where the
+  rings do, and a held thing's why keeps to five lines there. Left (I): at
+  the accessibility sizes the hour should stand under its title, and the
+  held plaque rises under Visitors. The Board is unchanged, the house's
+  titles as before. Seen in both modes at rest, empty, held, the Board, and
+  at the largest text. No hitch numbers (nothing that moves was touched). No
+  new door.
 
 - 2026-09-25 · by hand from the study, no sprint (chintan, 08:29 and 08:52,
   his word with two screenshots): Home's sentence ("2 raised this morning at
