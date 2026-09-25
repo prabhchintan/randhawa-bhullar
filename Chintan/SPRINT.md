@@ -444,6 +444,104 @@ M. The icon. Built by the house 2026-09-24 05:04 on his word ("as classy
    Left: seen in the home screen grid on his phone beside Apple's own; the
    dark and tinted variants (iOS 18) if he wants them; a title on the
    TestFlight card is Apple's, not ours.
+N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
+   passing on to chintan to detect it somehow via the chintan/Prab app, both
+   activity and location and as much data as we can squeeze out because it's
+   an audience of 1 and it's the opposite of protecting data, i want to export
+   as much data out and analyze it in real time as possible via my iphone.
+   other apps, usage, location, health, anything and everything apple allows,
+   the app should suck in, maybe clean and aggregate on device as needed so we
+   don't hoard junk, but we should use the opportunity to extract as much as
+   possible, as a side benefit to which you can know when i'm on the phone and
+   when i'm not, among other things"). The app is the phone's sensor for the
+   house: everything Apple lets an app read, read; cleaned and folded on the
+   phone; posted to the one host; forgotten by the phone. The house keeps what
+   it reads (BUTLER 14: every stream ships with its sweep). Nothing here is
+   shown in the app beyond the Settings room that turns each sense on; the
+   system is felt, not displayed (D).
+
+   What Apple allows, plainly, so no slice chases a wall:
+   - HealthKit: everything he has. Steps, distance, flights, active and
+     resting energy, heart rate, resting heart rate, HRV, walking heart rate
+     average, VO2 max, respiratory rate, blood oxygen, wrist temperature, sleep
+     analysis with stages, stand hours, exercise minutes, workouts, body mass
+     and body fat (a check against `ghar weight`, never the writer), headphone
+     and environmental audio exposure, time in daylight, mindful minutes,
+     walking steadiness and the gait set, blood glucose or pressure if a
+     device ever writes them. HKObserverQuery plus enableBackgroundDelivery
+     wakes the app when new samples land (hourly for most types); anchored
+     queries so only new samples travel, the anchor per type kept in
+     UserDefaults. The HealthKit capability needs no Apple approval.
+   - CoreMotion: CMMotionActivityManager history (seven days queryable:
+     stationary, walking, running, cycling, automotive, with confidence, as
+     segments) and CMPedometer by interval (steps, distance, floors, pace,
+     cadence). No background needed: on every wake, query since the last
+     anchor.
+   - CoreLocation: significant change (built, L) plus CLVisit monitoring
+     (arrivals and departures with the dwell, near free), posted as a fix with
+     "kind": "visit" and "dwell" seconds. The house learns places from hours,
+     never sends a coordinate anywhere (where.py).
+   - The phone's own state, at every scene change and every wake: foreground,
+     background, wake, unlocked or locked (isProtectedDataAvailable), battery
+     level and charging, low power, thermal state, network kind (wifi,
+     cellular, none), audio route (headphones or not), motion from the last
+     activity segment. POST /v1/phone, live on the house since 09-24 evening.
+   - Wakes the app can earn: HealthKit background delivery, significant
+     location, visits, BGAppRefreshTask (opportunistic) and a nightly
+     BGProcessingTask for the heavier folds; each wake drains the anchors and
+     posts its batches inside thirty seconds under beginBackgroundTask. No
+     APNs until his hands give a key (F).
+   - The walls, said once: Screen Time's per-app usage cannot leave the phone
+     (DeviceActivityReport is a sealed extension, no network, no shared
+     container); DeviceActivityMonitor gives only threshold events and its
+     Family Controls distribution entitlement is an Apple request form (his
+     hands, weeks) before TestFlight will carry it. No app can see which other
+     app is open, whether the screen is on, or another app's notifications.
+     So "on the phone" is inferred, never seen: the app in the foreground, a
+     wake that finds the phone unlocked and moving, or a Shortcuts personal
+     automation ("App opened", run immediately) that posts
+     {"event": "app", "app": "Telegram", "source": "shortcut"} to /v1/phone.
+     He found a Shortcut fiddly once (PHONE.md, 09-01), so the automation is
+     offered once in the Settings room's words and never chased.
+   - Cleaning on the phone, so the house never hoards junk: heart rate to
+     five minute mean, min and max; steps by hour; sleep as stages with spans;
+     motion as segments; location as places and visits; raw samples never
+     travel twice. Never a coordinate, a place name or a health number in a
+     commit message, a screenshot or a ledger line.
+
+   The doors (house side, chintan repo, live 09-24 evening; shapes below are
+   the contract): POST /v1/phone {"event": "foreground"|"background"|"wake"|
+   "unlocked"|"locked"|"app", "at": ISO8601, "unlocked": bool, "battery": 0..1,
+   "charging": bool, "lowPower": bool, "thermal": "nominal"|"fair"|"serious"|
+   "critical", "network": "wifi"|"cellular"|"none", "audio": "headphones"|
+   "speaker"|"none", "motion": "stationary"|"walking"|"running"|"cycling"|
+   "automotive"|"unknown", "app": NAME, "source": "app"|"shortcut"}, all but
+   event optional. POST /v1/health {"samples": [{"type": HK identifier string,
+   "start": ISO, "end": ISO, "value": number, "unit": string, "source": device
+   name, "meta": {..} optional}]} in batches of at most 2,000. POST /v1/motion
+   {"segments": [{"start": ISO, "end": ISO, "activity": string, "confidence":
+   "low"|"medium"|"high", "steps": n, "distance": m, "floors": n}]}. Every
+   post answers 200 {"ok": true} (the senses answer "filed": n); a 4xx means
+   the shape is wrong, never retry it; a network failure keeps the anchor so
+   the next wake carries it.
+
+   The Settings room "The senses": one leaf per sense (Health, Motion, Where,
+   The phone's word), each in the house's words like "Where you are", the
+   choice kept apart from the permission, asked there and never at launch;
+   Info.plist carries NSHealthShareUsageDescription, NSMotionUsageDescription
+   and the location strings in the same voice. The privacy claims stay
+   literally true: one host, nothing kept on the phone but anchors and the
+   word.
+
+   Slices, in order: 1) the phone's own word: /v1/phone on every scene change
+   and wake (foreground, background, wake with unlocked, battery, charging,
+   lowPower, thermal, network, audio), plus the Settings leaf that says what
+   it does and lets him stop it; small and whole, and the house's `ghar desk`
+   reads it the same day. 2) HealthKit: the read set above, background
+   delivery, anchored batches to /v1/health, the Health leaf. 3) CoreMotion
+   history and pedometer to /v1/motion, the Motion leaf, and "motion" on the
+   phone's word. 4) Visits on Where. 5) The background tasks and the nightly
+   fold, then the Shortcut offered once in the room's words.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
