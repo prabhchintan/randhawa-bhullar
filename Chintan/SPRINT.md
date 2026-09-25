@@ -157,7 +157,9 @@ each visit's `steps` as page and seconds; since 09-23), `/v1/say` and `/v1/say/I
 /v1/say {"text": ..., "to": "chintan"|"darban"|"yaar"}` reaches the voice
 named, chintan when unnamed, and `GET /v1/voices` lists the three with a line
 each and their state), `POST /v1/done {"text": ...}` when the board asks for
-it. Anything shown as a number, ring or bar comes from one of these or is
+it, `/v1/titles` (since 09-25 08:50: the house's own short name for every open
+thing, {"titles": [{"line", "title", "hour"}]}, a model names each line once,
+one to four words, the hour a clock time or a word like "evening"). Anything shown as a number, ring or bar comes from one of these or is
 not shown.
 
 ## The rules of a sprint
@@ -576,6 +578,17 @@ F. Settings and the edges. The health dot; settings one tap away; a
    other surface, not on plain bone or lamp black.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · by hand from the study, no sprint (chintan, 08:29 and 08:52,
+  his word with two screenshots): Home's sentence ("2 raised this morning at
+  home.", then "..., out.") is gone entirely; the date alone leads the wall, a
+  size up in the serif and small capitals, then today's things, and nothing
+  under the date when there is nothing today. The things a size down (body,
+  was title3; "the action font could be smaller a bit"). The titles are the
+  house's now: `/v1/titles` is live and the phone already preferred it, so the
+  wall reads Caremark call, Blood draw 8:30 AM, Calcium scan 1:30 PM, DMV
+  plates 10:10 AM ("much better"). Left for the next sprint: the phone's own
+  fallback cut tightened the same way for a house that is away.
 
 - 2026-09-25 · sprint 25 (d1748c1): the phone names its wifi, so the house
   knows when he is home (N, slice 1b, on his word at 19:23). Slice 1b went

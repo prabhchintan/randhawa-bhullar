@@ -90,14 +90,12 @@ struct JharokhaView: View {
 
     private var overlay: some View {
         VStack(alignment: .leading, spacing: 18) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                    .font(.system(.subheadline, design: .serif).smallCaps())
-                    .foregroundStyle(Theme.bone.opacity(0.88))
-                Text(day.headline ?? "The house is quiet.")
-                    .font(.system(.largeTitle, design: .serif).weight(.semibold))
-                    .foregroundStyle(Theme.bone)
-            }
+            // The date alone leads the wall (Prab, 2026-09-25 08:29 and 08:52:
+            // the day's sentence, "2 raised this morning", goes entirely; the
+            // date and today's things, blank when none).
+            Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                .font(.system(.title2, design: .serif).weight(.semibold).smallCaps())
+                .foregroundStyle(Theme.bone)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottom) {
                 if let item = dated.first(where: { $0.id == heldThing }) {
@@ -116,8 +114,10 @@ struct JharokhaView: View {
                     ForEach(dated) { item in
                         let short = titles[item.line] ?? item.short
                         HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            // A size down from title3 (his word 08:52: "the action
+                            // font could be smaller a bit").
                             Text(short.title.plainDashes)
-                                .font(.system(.title3, design: .serif))
+                                .font(.system(.body, design: .serif))
                                 .foregroundStyle(heldThing == item.id ? Theme.giltOnArt : Theme.bone)
                                 .fixedSize(horizontal: false, vertical: true)
                             if let when = item.since ?? short.hour {
