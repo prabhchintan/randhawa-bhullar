@@ -207,22 +207,55 @@ struct HouseClient {
     }
 
     // Where the phone is, told to the house and forgotten: {"lat", "lon",
-    // "acc", "at"}. The house answers with the place it knows it by (home,
+    // "acc", "at"}, nil keys left out. The house answers with the place it knows it by (home,
     // work, out) or none yet. A house without this door answers 404.
     struct Heard: Decodable { let place: String? }
 
+    private struct Fix: Encodable {
+        let lat: Double
+        let lon: Double
+        let acc: Double
+        let at: String
+        var kind: String?
+        var arrived: String?
+        var departed: String?
+        var dwell: Int?
+    }
+
     func location(_ fix: CLLocation) async throws -> Heard {
+        try await location(Fix(
+            lat: fix.coordinate.latitude,
+            lon: fix.coordinate.longitude,
+            acc: fix.horizontalAccuracy,
+            at: ISO8601DateFormatter().string(from: fix.timestamp)))
+    }
+
+    // A place he stayed, the same fix with "kind": "visit": told once on
+    // arriving (no "departed", no "dwell") and again on leaving, with the
+    // seconds stayed. "at" is the leaving when there is one, else the coming.
+    func location(_ visit: CLVisit) async throws -> Heard {
+        let iso = ISO8601DateFormatter()
+        let arrived = visit.arrivalDate == .distantPast ? nil : visit.arrivalDate
+        let departed = visit.departureDate == .distantFuture ? nil : visit.departureDate
+        var fix = Fix(
+            lat: visit.coordinate.latitude,
+            lon: visit.coordinate.longitude,
+            acc: visit.horizontalAccuracy,
+            at: iso.string(from: departed ?? arrived ?? Date()))
+        fix.kind = "visit"
+        fix.arrived = arrived.map(iso.string)
+        fix.departed = departed.map(iso.string)
+        if let arrived, let departed { fix.dwell = Int(departed.timeIntervalSince(arrived)) }
+        return try await location(fix)
+    }
+
+    private func location(_ fix: Fix) async throws -> Heard {
         guard let whereURL = url("/v1/location") else { throw HouseError.noAddress }
         var request = URLRequest(url: whereURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 20
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        struct Fix: Encodable { let lat: Double; let lon: Double; let acc: Double; let at: String }
-        request.httpBody = try JSONEncoder().encode(Fix(
-            lat: fix.coordinate.latitude,
-            lon: fix.coordinate.longitude,
-            acc: fix.horizontalAccuracy,
-            at: ISO8601DateFormatter().string(from: fix.timestamp)))
+        request.httpBody = try JSONEncoder().encode(fix)
         let (data, response) = try await Self.session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }

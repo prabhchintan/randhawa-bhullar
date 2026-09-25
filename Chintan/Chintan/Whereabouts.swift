@@ -6,9 +6,10 @@ import UIKit
 // at home, at work or out. Significant-change monitoring only: the phone wakes
 // the app when it has moved some distance, near free on battery. Each fix goes
 // to the house (`POST /v1/location`) and is forgotten; the phone keeps only
-// the place the house named and when. Asked for on the Settings sheet, never
-// at launch. Made at launch all the same, so a wake in the background finds
-// its delegate.
+// the place the house named and when. With the always permission, each place
+// he stays is told too, once on coming and once on leaving (CLVisit, near free
+// as well). Asked for on the Settings sheet, never at launch. Made at launch
+// all the same, so a wake in the background finds its delegate.
 @MainActor
 final class Whereabouts: NSObject, ObservableObject {
     static let shared = Whereabouts()
@@ -24,6 +25,8 @@ final class Whereabouts: NSObject, ObservableObject {
     private let manager = CLLocationManager()
     private let defaults = UserDefaults.standard
     private var lastSent: Date?
+    // Visits the house did not hear, held in memory only until the next send.
+    private var unheard: [CLVisit] = []
 
     // The house's eyes in the simulator never tell the house anything.
     private let eyes = ProcessInfo.processInfo.arguments.contains("--house")
@@ -62,6 +65,8 @@ final class Whereabouts: NSObject, ObservableObject {
         telling = false
         defaults.set(false, forKey: "where.telling")
         manager.stopMonitoringSignificantLocationChanges()
+        manager.stopMonitoringVisits()
+        unheard = []
     }
 
     func openSettings() {
@@ -80,6 +85,8 @@ final class Whereabouts: NSObject, ObservableObject {
     private func resume() {
         guard telling, !eyes, state == .always || state == .whileOpen else { return }
         manager.startMonitoringSignificantLocationChanges()
+        // Visits come only with always; the phone says when he stays.
+        if state == .always { manager.startMonitoringVisits() } else { manager.stopMonitoringVisits() }
     }
 
     private func read(_ status: CLAuthorizationStatus) {
@@ -92,7 +99,21 @@ final class Whereabouts: NSObject, ObservableObject {
     }
 
     private func send(_ fix: CLLocation) async {
+        await send { try await $0.location(fix) }
+    }
+
+    // A visit is told once it is known; one the house missed waits for the
+    // next send, a fix's or another visit's, while the app lives.
+    private func send(_ visit: CLVisit) async {
+        guard telling else { return }
+        unheard.append(visit)
+        if unheard.count > 20 { unheard.removeFirst(unheard.count - 20) }
+        await send { _ in nil }
+    }
+
+    private func send(_ told: (HouseClient) async throws -> HouseClient.Heard?) async {
         guard !eyes, let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        let house = HouseClient(baseAddress: address)
         lastSent = Date()
         // A wake in the background has a few seconds; ask for them.
         let task = UIApplication.shared.beginBackgroundTask(withName: "where")
@@ -103,7 +124,18 @@ final class Whereabouts: NSObject, ObservableObject {
         if UIApplication.shared.applicationState == .background {
             await PhoneWord.shared.say(.wake)?.value
         }
-        guard let reply = try? await HouseClient(baseAddress: address).location(fix) else { return }
+        var last: HouseClient.Heard?
+        // Taken out before the first await, so two sends never tell one twice.
+        var pending = unheard
+        unheard = []
+        while let visit = pending.first {
+            guard let reply = try? await house.location(visit) else { break }
+            pending.removeFirst()
+            last = reply
+        }
+        unheard = pending + unheard
+        if let reply = try? await told(house) { last = reply }
+        guard let reply = last else { return }
         heard = Date()
         defaults.set(heard, forKey: "where.heard")
         if let named = reply.place {
@@ -126,6 +158,10 @@ extension Whereabouts: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let fix = locations.last else { return }
         Task { @MainActor in await self.send(fix) }
+    }
+
+    nonisolated func locationManager(_ manager: CLLocationManager, didVisit visit: CLVisit) {
+        Task { @MainActor in await self.send(visit) }
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {}
@@ -164,7 +200,7 @@ struct WhereaboutsSection: View {
         case .whileOpen:
             return "The house hears only while the app is open."
         case .always:
-            return "The house hears a few times a day."
+            return "The house hears a few times a day, and each place you stay."
         case .unasked:
             return nil
         }
@@ -174,7 +210,7 @@ struct WhereaboutsSection: View {
     private var note: String {
         whereabouts.telling
             ? "Only the house hears it; the phone keeps nothing but the word."
-            : "A few times a day the phone tells the house roughly where it is, so the day's line can say at home, at work or out, and names the wifi it is on, so the house knows when you are home. Only the house hears it; the phone keeps nothing but the word."
+            : "A few times a day the phone tells the house roughly where it is and the wifi it is on, so the day's line can say at home, at work or out; told always, each place you stay and for how long too. Only the house hears it; the phone keeps nothing but the word."
     }
 
     static func time(_ heard: Date) -> String {
