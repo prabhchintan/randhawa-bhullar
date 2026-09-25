@@ -53,6 +53,7 @@
 		CA1000000000000000000010 /* VisitorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitorsView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000011 /* Whereabouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Whereabouts.swift; sourceTree = "<group>"; };
 		CA1000000000000000000012 /* PhoneWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWord.swift; sourceTree = "<group>"; };
+		CA1000000000000000000013 /* Chintan.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Chintan.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +101,7 @@
 				CA1000000000000000000008 /* KeychainHelper.swift */,
 				CA1000000000000000000009 /* Assets.xcassets */,
 				CA100000000000000000000A /* Info.plist */,
+				CA1000000000000000000013 /* Chintan.entitlements */,
 			);
 			path = Chintan;
 			sourceTree = "<group>";
@@ -379,6 +381,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Chintan/Chintan.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -404,6 +407,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Chintan/Chintan.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";

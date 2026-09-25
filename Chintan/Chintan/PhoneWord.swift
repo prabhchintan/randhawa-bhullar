@@ -1,16 +1,19 @@
 import AVFoundation
 import Network
+import NetworkExtension
 import SwiftUI
 import UIKit
 
-// The phone's own word (chunk N, slice 1): each time the app comes to the
-// front or is put away, each time a move wakes it, and each lock or unlock it
-// is awake for, the phone tells the house its state (`POST /v1/phone`):
+// The phone's own word (chunk N, slices 1 and 1b): each time the app comes to
+// the front or is put away, each time a move wakes it, and each lock or unlock
+// it is awake for, the phone tells the house its state (`POST /v1/phone`):
 // unlocked, battery and charging, low power, how warm it runs, wifi or
-// cellular, headphones or speaker. So the house can tell when he is on the
-// phone and when he is not. On unless he stops it on the Settings sheet; it
-// needs no permission. A word the house did not hear waits, a day at most,
-// and goes with the next; a word the house refused (4xx) is let go.
+// cellular and the wifi's name, headphones or speaker. So the house can tell
+// when he is on the phone and when he is home. On unless he stops it on the
+// Settings sheet; it needs no permission, but the wifi's name comes only once
+// Where you are has the location permission (Apple's rule). A word the house
+// did not hear waits, a day at most, and goes with the next; a word the house
+// refused (4xx) is let go.
 @MainActor
 final class PhoneWord: ObservableObject {
     static let shared = PhoneWord()
@@ -27,6 +30,8 @@ final class PhoneWord: ObservableObject {
     private var last: Event?
     private var pending: [Data]
     private var sending = false
+    // The last word still being put together, so the next waits its turn.
+    private var queued: Task<Void, Never>?
 
     // The house's eyes in the simulator never tell the house anything.
     private let eyes = ProcessInfo.processInfo.arguments.contains("--house")
@@ -78,24 +83,17 @@ final class PhoneWord: ObservableObject {
         }
     }
 
-    func say(_ event: Event) {
-        guard telling, !eyes else { return }
-        if event == last, event == .foreground || event == .background { return }
+    // Said now, in order: the state is read at once, the wifi's name is asked
+    // of the phone after the word before it, then the word joins the waiting
+    // and goes. The task returned ends when the house has had its chance to
+    // hear it, so a fix can follow its word.
+    @discardableResult
+    func say(_ event: Event) -> Task<Void, Never>? {
+        guard telling, !eyes else { return nil }
+        if event == last, event == .foreground || event == .background { return nil }
         last = event
-        struct Word: Encodable {
-            let event: String
-            let at: String
-            let unlocked: Bool
-            let battery: Double?
-            let charging: Bool?
-            let lowPower: Bool
-            let thermal: String
-            let network: String?
-            let audio: String
-            let source = "app"
-        }
         let device = UIDevice.current
-        let word = Word(
+        var word = Word(
             event: event.rawValue,
             at: ISO8601DateFormatter().string(from: Date()),
             unlocked: UIApplication.shared.isProtectedDataAvailable,
@@ -105,10 +103,23 @@ final class PhoneWord: ObservableObject {
             thermal: Self.thermal(ProcessInfo.processInfo.thermalState),
             network: network,
             audio: Self.audio())
-        guard let body = try? JSONEncoder().encode(word) else { return }
-        pending = Array((pending + [body]).suffix(200))
-        keep()
-        Task { await flush() }
+        // Put away, the phone has a few seconds; ask for them before asking the wifi.
+        let task = UIApplication.shared.beginBackgroundTask(withName: "phone.word")
+        let previous = queued
+        let joined = Task {
+            await previous?.value
+            word.ssid = await Self.wifi()
+            if let body = try? JSONEncoder().encode(word) {
+                pending = Array((pending + [body]).suffix(200))
+                keep()
+            }
+            UIApplication.shared.endBackgroundTask(task)
+        }
+        queued = joined
+        return Task {
+            await joined.value
+            await flush()
+        }
     }
 
     // Every word waiting, oldest first; stops at the first the house did not
@@ -153,6 +164,12 @@ final class PhoneWord: ObservableObject {
         return date < old
     }
 
+    // The wifi's name, when the phone is on one and location is allowed
+    // (Apple gives the name only then); nil otherwise, and in the simulator.
+    private static func wifi() async -> String? {
+        await NEHotspotNetwork.fetchCurrent()?.ssid
+    }
+
     private static func thermal(_ state: ProcessInfo.ThermalState) -> String {
         switch state {
         case .nominal: return "nominal"
@@ -171,6 +188,20 @@ final class PhoneWord: ObservableObject {
         let ears: Set<AVAudioSession.Port> = [.headphones, .bluetoothA2DP, .bluetoothHFP, .bluetoothLE]
         return outputs.contains { ears.contains($0.portType) } ? "headphones" : "speaker"
     }
+}
+
+private struct Word: Encodable {
+    let event: String
+    let at: String
+    let unlocked: Bool
+    let battery: Double?
+    let charging: Bool?
+    let lowPower: Bool
+    let thermal: String
+    let network: String?
+    let audio: String
+    var ssid: String?
+    var source = "app"
 }
 
 // The Settings sheet's section: when the house last heard the phone, set as
@@ -196,7 +227,7 @@ struct PhoneWordSection: View {
     }
 
     private var note: String {
-        let told = "Each time chintan opens or is put away, the phone tells the house whether it is unlocked, its battery, wifi or cellular, and headphones or speaker."
+        let told = "Each time chintan opens or is put away, the phone tells the house whether it is unlocked, its battery, wifi or cellular, and headphones or speaker; with Where you are on, the wifi's name too."
         return word.telling
             ? told + " Only the house hears it; the phone keeps a word only until the house has it."
             : told + " So the house knows when you are on the phone and when you are not. Only the house hears it."

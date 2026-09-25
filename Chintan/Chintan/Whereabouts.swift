@@ -94,11 +94,15 @@ final class Whereabouts: NSObject, ObservableObject {
     private func send(_ fix: CLLocation) async {
         guard !eyes, let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
         lastSent = Date()
-        // A move that woke the app is a wake in the phone's word too.
-        if UIApplication.shared.applicationState == .background { PhoneWord.shared.say(.wake) }
         // A wake in the background has a few seconds; ask for them.
         let task = UIApplication.shared.beginBackgroundTask(withName: "where")
         defer { UIApplication.shared.endBackgroundTask(task) }
+        // A move that woke the app is a wake in the phone's word too, and the
+        // word (with the wifi's name) goes first, so the house reads the fix
+        // beside the network it came from.
+        if UIApplication.shared.applicationState == .background {
+            await PhoneWord.shared.say(.wake)?.value
+        }
         guard let reply = try? await HouseClient(baseAddress: address).location(fix) else { return }
         heard = Date()
         defaults.set(heard, forKey: "where.heard")
@@ -170,7 +174,7 @@ struct WhereaboutsSection: View {
     private var note: String {
         whereabouts.telling
             ? "Only the house hears it; the phone keeps nothing but the word."
-            : "A few times a day the phone tells the house roughly where it is, so the day's line can say at home, at work or out. Only the house hears it; the phone keeps nothing but the word."
+            : "A few times a day the phone tells the house roughly where it is, so the day's line can say at home, at work or out, and names the wifi it is on, so the house knows when you are home. Only the house hears it; the phone keeps nothing but the word."
     }
 
     static func time(_ heard: Date) -> String {
