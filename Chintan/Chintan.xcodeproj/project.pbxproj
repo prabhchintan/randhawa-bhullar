@@ -22,6 +22,7 @@
 		CA000000000000000000000D /* VisitorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000010 /* VisitorsView.swift */; };
 		CA000000000000000000000E /* Whereabouts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000011 /* Whereabouts.swift */; };
 		CA000000000000000000000F /* PhoneWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000012 /* PhoneWord.swift */; };
+		CA00000000000000000000A1 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A1 /* Health.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		CA1000000000000000000010 /* VisitorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitorsView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000011 /* Whereabouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Whereabouts.swift; sourceTree = "<group>"; };
 		CA1000000000000000000012 /* PhoneWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWord.swift; sourceTree = "<group>"; };
+		CA10000000000000000000A1 /* Health.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Health.swift; sourceTree = "<group>"; };
 		CA1000000000000000000013 /* Chintan.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Chintan.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -96,6 +98,7 @@
 				CA1000000000000000000007 /* SettingsView.swift */,
 				CA1000000000000000000011 /* Whereabouts.swift */,
 				CA1000000000000000000012 /* PhoneWord.swift */,
+				CA10000000000000000000A1 /* Health.swift */,
 				CA1000000000000000000003 /* HouseClient.swift */,
 				CA1000000000000000000004 /* ConversationStore.swift */,
 				CA1000000000000000000008 /* KeychainHelper.swift */,
@@ -230,6 +233,7 @@
 				CA000000000000000000000D /* VisitorsView.swift in Sources */,
 				CA000000000000000000000E /* Whereabouts.swift in Sources */,
 				CA000000000000000000000F /* PhoneWord.swift in Sources */,
+				CA00000000000000000000A1 /* Health.swift in Sources */,
 				CA000000000000000000000B /* Theme.swift in Sources */,
 				CA0000000000000000000007 /* SettingsView.swift in Sources */,
 				CA0000000000000000000003 /* HouseClient.swift in Sources */,

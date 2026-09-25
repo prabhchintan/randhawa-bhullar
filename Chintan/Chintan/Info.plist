@@ -46,6 +46,8 @@
 	<string>So the day's line can say at home, at work or out, and the phone can name its wifi, so the house knows when you are home. Only the house hears it.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>A few times a day, even with the app closed, the phone tells the house roughly where it is, so the day's line knows home from work. Only the house hears it.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Now and then, even with the app closed, the phone tells the house what Health holds: steps, heart, sleep, workouts and the rest, folded on the phone first. Only the house hears it.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

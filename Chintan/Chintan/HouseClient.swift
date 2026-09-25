@@ -231,20 +231,31 @@ struct HouseClient {
     }
 
     // The phone's own word, already in its shape (PhoneWord). Heard on a 2xx;
-    // refused on a 4xx, which is never sent again; unheard otherwise, kept
-    // for the next.
+    // refused on a 4xx other than a missing door, which is never sent again;
+    // unheard otherwise, kept for the next.
     enum Told { case heard, refused, unheard }
 
     func phone(_ body: Data) async -> Told {
-        guard let phoneURL = url("/v1/phone") else { return .unheard }
-        var request = URLRequest(url: phoneURL)
+        await tell("/v1/phone", body, within: 15)
+    }
+
+    // A batch of Health's samples, already in their shape (Health), told the same way.
+    func health(_ body: Data) async -> Told {
+        await tell("/v1/health", body, within: 30)
+    }
+
+    private func tell(_ path: String, _ body: Data, within seconds: TimeInterval) async -> Told {
+        guard let doorURL = url(path) else { return .unheard }
+        var request = URLRequest(url: doorURL)
         request.httpMethod = "POST"
-        request.timeoutInterval = 15
+        request.timeoutInterval = seconds
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = body
         guard let (_, response) = try? await Self.session.data(for: request),
               let http = response as? HTTPURLResponse else { return .unheard }
         if (200..<300).contains(http.statusCode) { return .heard }
+        // No door yet is not a refusal; what waits goes when the door is there.
+        if http.statusCode == 404 || http.statusCode == 405 { return .unheard }
         return (400..<500).contains(http.statusCode) ? .refused : .unheard
     }
 

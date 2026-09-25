@@ -14,9 +14,10 @@ struct ChintanApp: App {
         if args.contains("--hitches") {
             HitchMeter.shared.start()
         }
-        // Made at launch, so a wake for a move finds its delegate.
+        // Made at launch, so a wake for a move or for Health finds its delegate.
         _ = Whereabouts.shared
         _ = PhoneWord.shared
+        _ = Health.shared
     }
 
     @Environment(\.scenePhase) private var phase
@@ -26,7 +27,10 @@ struct ChintanApp: App {
             ContentView()
         }
         .onChange(of: phase) { _, now in
-            if now == .active { Whereabouts.shared.freshen() }
+            if now == .active {
+                Whereabouts.shared.freshen()
+                Health.shared.freshen()
+            }
             PhoneWord.shared.scene(now)
         }
     }

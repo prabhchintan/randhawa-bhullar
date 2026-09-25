@@ -13,6 +13,7 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { reader in
             ScrollView {
                 VStack(alignment: .leading, spacing: 40) {
                     SettingsRoom("The house") {
@@ -50,12 +51,30 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    // What the phone tells the house, gathered: each sense its own
+                    // room, each asked for there and each his to stop.
+                    Text("The senses")
+                        .font(.system(.title2, design: .serif))
+                        .foregroundStyle(Theme.ink)
+                        .accessibilityAddTraits(.isHeader)
+                        .padding(.top, 12)
+                        .padding(.bottom, -16)
+                        .id("senses")
                     WhereaboutsSection()
                     PhoneWordSection()
+                    HealthSection()
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
                 .padding(.bottom, 40)
+            }
+            // For the house's eyes: `--open senses` opens on the senses.
+            .onAppear {
+                let args = ProcessInfo.processInfo.arguments
+                if let i = args.firstIndex(of: "--open"), i + 1 < args.count, args[i + 1] == "senses" {
+                    reader.scrollTo("senses", anchor: .top)
+                }
+            }
             }
             .background(Theme.ground)
             .navigationTitle("Settings")

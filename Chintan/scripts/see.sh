@@ -11,6 +11,10 @@
 #                                                    jharokha@cut: the phone's own cut;
 #                                                    jharokha@empty: a day with nothing;
 #                                                    settings: the Settings sheet;
+#                                                    settings@on: every sense on;
+#                                                    settings@senses: so, opened
+#                                                    on The senses;
+#                                                    settings@quiet: there, off;
 #                                                    study@waiting: a word left
 #                                                    waiting, taken up again)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
@@ -63,15 +67,20 @@ for mode in light dark; do
     NAME=${tab%@*}
     case "$tab" in *@*) EXTRA=(--open "${tab#*@}") ;; esac
     [ "$NAME" = settings ] && NAME=study && EXTRA=(--settings)
+    # settings@senses: as settings@on, the sheet opened on The senses;
+    # settings@quiet: opened there with nothing on.
+    case "$tab" in settings@senses|settings@quiet) EXTRA=(--settings --open senses) ;; esac
     # settings@on: location granted always, telling, a place heard, and the
     # phone's word heard. The app
     # the eyes launch never monitors and never posts, so the house hears nothing.
-    if [ "$tab" = settings@on ]; then
+    if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ]; then
       xcrun simctl privacy "$UDID" grant location-always Prabhchintan.Chintan
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.telling -bool YES
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.place home
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan phone.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
+      xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan health.telling -bool YES
+      xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan health.heard -date "$(date -u '+%Y-%m-%d %H:%M:%S +0000')"
     fi
     # study@waiting: darban's room with a word left waiting when the app was
     # closed, its id one the house never gave; photographed as the study
@@ -114,13 +123,16 @@ PY
         if [ -f "$P.kept" ]; then mv "$P.kept" "$P"; else rm -f "$P"; fi
       done
     fi
-    if [ "$tab" = settings@on ]; then
+    if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ]; then
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       xcrun simctl privacy "$UDID" reset location-always Prabhchintan.Chintan 2>/dev/null || true
       for key in telling place heard; do
         xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan "where.$key" 2>/dev/null || true
       done
       xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan phone.heard 2>/dev/null || true
+      for key in telling heard; do
+        xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan "health.$key" 2>/dev/null || true
+      done
     fi
   done
 done
