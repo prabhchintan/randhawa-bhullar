@@ -581,14 +581,55 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    (the simulator's eyes never post), the house's upsert of the folded rows
    (sprint 27's line), and the first archive with the entitlements. Next:
    slice 3, CoreMotion.
+   Slice 3 built (sprint 28): Motion.swift, "How you move" last under The
+   senses; the history folded into segments on the phone and posted to
+   `/v1/motion` on opening and on every wake the others earn, the walks with
+   the pedometer's steps; "motion" on the phone's word. Left: seen on his
+   phone (the simulator has no motion and never posts). Next: slice 4,
+   visits on Where.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
    when Settings is next touched, its actions should look pressable (not
    bare gilt words) and its wall should stand on the painting like every
-   other surface, not on plain bone or lamp black.
+   other surface, not on plain bone or lamp black. A defect to fix then
+   (seen sprint 28, `see.sh ... settings@move`): scrolled, the wall's text
+   runs under the transparent bar and through Done and the title. Tried and
+   dropped: `.toolbarBackground` (SwiftUI's own appearance replaces Theme's,
+   the serif titles go and a grey rule comes) and a zero-height ground
+   overlay ignoring the top safe area (no effect); next try a UIKit
+   standardAppearance with the ground set only for this sheet's bar.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · sprint 28 (42a75ff): the phone tells the house how he moves
+  (N, slice 3, CoreMotion). Settings gains "How you move", last under The
+  senses: Tell the house asks the phone's Motion and Fitness once (never at
+  launch); then Heard with its hour in gilt, or "The house has not heard how
+  you move yet.", or "Motion is off for chintan in the phone's Settings."
+  with Open the phone's Settings; Stop telling in quiet ink. What travels to
+  `POST /v1/motion` {"segments": [...]}, 2,000 a post: the phone's motion
+  history since the last segment the house had (seven days back the first
+  time), folded on the phone: a change starts a segment only when the phone
+  is at least medium sure and knows the kind (a low or unknown reading
+  carries the one before on), so a walk is one segment, not forty readings;
+  start, end, activity (stationary, walking, running, cycling, automotive),
+  confidence the highest seen; walks and runs carry the pedometer's steps,
+  distance (m) and floors. The segment still going is kept back and goes
+  once it ends. Sent on opening the app (at most every 15 minutes) and on
+  every wake a move or Health earns. The phone's word gains "motion" (the
+  last kind seen in ten minutes) once this is on; its note says so in
+  fewer words. Info.plist carries NSMotionUsageDescription in the same
+  voice. The eyes: `see.sh OUT settings@move` (every sense on, opened at
+  the foot) and `settings@still` (off, there). Seen in both modes, both
+  states, whole and in step with the rooms above; Home, the Board and the
+  Study unchanged. Seen and not fixed (older than this sprint, now hit by
+  anyone scrolling to the new room): scrolled, Settings' text runs through
+  Done and the title; two tries dropped, written into F. No hitch numbers
+  (nothing that moves was touched). No new door: `/v1/motion` is N's
+  contract, live since 09-24 evening; a 404 keeps the place for later. The
+  simulator has no motion and never posts, so the first segments come from
+  his phone.
 
 - 2026-09-25 · sprint 27 (3660ff9): the phone tells the house how he is (N,
   slice 2, HealthKit). Settings gathers its three senses under "The senses",
