@@ -244,6 +244,11 @@ struct HouseClient {
         await tell("/v1/health", body, within: 30)
     }
 
+    // A batch of motion segments, already in their shape (Motion), told the same way.
+    func motion(_ body: Data) async -> Told {
+        await tell("/v1/motion", body, within: 30)
+    }
+
     private func tell(_ path: String, _ body: Data, within seconds: TimeInterval) async -> Told {
         guard let doorURL = url(path) else { return .unheard }
         var request = URLRequest(url: doorURL)

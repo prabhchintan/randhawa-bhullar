@@ -8,7 +8,8 @@ import UIKit
 // the front or is put away, each time a move wakes it, and each lock or unlock
 // it is awake for, the phone tells the house its state (`POST /v1/phone`):
 // unlocked, battery and charging, low power, how warm it runs, wifi or
-// cellular and the wifi's name, headphones or speaker. So the house can tell
+// cellular and the wifi's name, headphones or speaker, still or moving (once
+// How you move is on). So the house can tell
 // when he is on the phone and when he is home. On unless he stops it on the
 // Settings sheet; it needs no permission, but the wifi's name comes only once
 // Where you are has the location permission (Apple's rule). A word the house
@@ -109,6 +110,7 @@ final class PhoneWord: ObservableObject {
         let joined = Task {
             await previous?.value
             word.ssid = await Self.wifi()
+            word.motion = await Motion.shared.now()
             if let body = try? JSONEncoder().encode(word) {
                 pending = Array((pending + [body]).suffix(200))
                 keep()
@@ -116,6 +118,8 @@ final class PhoneWord: ObservableObject {
             UIApplication.shared.endBackgroundTask(task)
         }
         queued = joined
+        // A wake the rest has earned is the motion's chance too.
+        if event == .wake { Motion.shared.freshen() }
         return Task {
             await joined.value
             await flush()
@@ -201,6 +205,7 @@ private struct Word: Encodable {
     let network: String?
     let audio: String
     var ssid: String?
+    var motion: String?
     var source = "app"
 }
 
@@ -227,7 +232,7 @@ struct PhoneWordSection: View {
     }
 
     private var note: String {
-        let told = "Each time chintan opens or is put away, the phone tells the house whether it is unlocked, its battery, wifi or cellular, and headphones or speaker; with Where you are on, the wifi's name too."
+        let told = "Each time chintan opens or is put away, the phone tells the house whether it is unlocked, its battery, wifi or cellular, and headphones or speaker; the wifi's name with Where you are on, still or moving with How you move on."
         return word.telling
             ? told + " Only the house hears it; the phone keeps a word only until the house has it."
             : told + " So the house knows when you are on the phone and when you are not. Only the house hears it."

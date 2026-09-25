@@ -63,16 +63,22 @@ struct SettingsView: View {
                     WhereaboutsSection()
                     PhoneWordSection()
                     HealthSection()
+                    MotionSection()
+                        .id("motion")
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
                 .padding(.bottom, 40)
             }
-            // For the house's eyes: `--open senses` opens on the senses.
+            // For the house's eyes: `--open senses` opens on the senses,
+            // `--open motion` at the foot, on How you move.
             .onAppear {
                 let args = ProcessInfo.processInfo.arguments
-                if let i = args.firstIndex(of: "--open"), i + 1 < args.count, args[i + 1] == "senses" {
-                    reader.scrollTo("senses", anchor: .top)
+                guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return }
+                switch args[i + 1] {
+                case "senses": reader.scrollTo("senses", anchor: .top)
+                case "motion": reader.scrollTo("motion", anchor: .bottom)
+                default: break
                 }
             }
             }

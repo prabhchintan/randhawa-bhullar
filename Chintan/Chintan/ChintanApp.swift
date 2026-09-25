@@ -18,6 +18,7 @@ struct ChintanApp: App {
         _ = Whereabouts.shared
         _ = PhoneWord.shared
         _ = Health.shared
+        _ = Motion.shared
     }
 
     @Environment(\.scenePhase) private var phase
@@ -30,6 +31,7 @@ struct ChintanApp: App {
             if now == .active {
                 Whereabouts.shared.freshen()
                 Health.shared.freshen()
+                Motion.shared.freshen()
             }
             PhoneWord.shared.scene(now)
         }

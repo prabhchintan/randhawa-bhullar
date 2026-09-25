@@ -48,6 +48,8 @@
 	<string>A few times a day, even with the app closed, the phone tells the house roughly where it is, so the day's line knows home from work. Only the house hears it.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Now and then, even with the app closed, the phone tells the house what Health holds: steps, heart, sleep, workouts and the rest, folded on the phone first. Only the house hears it.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Each time chintan opens, the phone tells the house when you were still, walking, running, cycling or driving, and the steps of each walk. Only the house hears it.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
