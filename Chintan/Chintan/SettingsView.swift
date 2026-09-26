@@ -93,7 +93,9 @@ struct SettingsView: View {
         .background {
             ZStack {
                 Painting()
-                PaintedGround(head: 220, foot: 260, footShade: 0.5)
+                // The head holds its dark under Done and the title, so the
+                // scan's edge that often lies there never cuts across the sheet.
+                PaintedGround(head: 220, headShade: 0.95, headHold: 0.3, foot: 260, footShade: 0.5)
             }
         }
     }

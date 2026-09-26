@@ -10,6 +10,8 @@
 #                                                    jharokha@tN: Home's Nth thing held;
 #                                                    jharokha@cut: the phone's own cut;
 #                                                    jharokha@empty: a day with nothing;
+#                                                    jharokha@label: the label held;
+#                                                    study@held: darban's name held;
 #                                                    settings: the Settings sheet;
 #                                                    settings@on: every sense on;
 #                                                    settings@senses: so, opened

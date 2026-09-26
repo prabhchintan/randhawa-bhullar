@@ -223,8 +223,12 @@ struct Painting: View {
 // A screen's own shade over the one painting: soft at the head where a
 // screen letters its name, and always at the foot, so the tab bar's bone
 // icons read on any picture. It slides with its screen; the picture stays.
+// A head that holds keeps its whole dark for that share of its height before
+// it dissolves, so a scan's pale border under the letters never shows as a band.
 struct PaintedGround: View {
     var head: CGFloat = 0
+    var headShade: Double = 0.6
+    var headHold: Double = 0
     var foot: CGFloat = 200
     var footShade: Double = 0.7
 
@@ -232,7 +236,11 @@ struct PaintedGround: View {
         Color.clear
             .overlay(alignment: .top) {
                 if head > 0 {
-                    LinearGradient(colors: [.black.opacity(0.6), .clear], startPoint: .top, endPoint: .bottom)
+                    LinearGradient(stops: [.init(color: .black.opacity(headShade), location: 0),
+                                           .init(color: .black.opacity(headShade), location: headHold),
+                                           .init(color: .black.opacity(headShade / 2), location: (headHold + 1) / 2),
+                                           .init(color: .clear, location: 1)],
+                                   startPoint: .top, endPoint: .bottom)
                         .frame(height: head)
                 }
             }

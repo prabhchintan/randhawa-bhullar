@@ -138,6 +138,16 @@ final class ChintanWalk: XCTestCase {
             shot("study-" + room)
         }
 
+        // A room's name held grows its plaque under the names; the film sees
+        // it grow and fold, and the room stays as it was.
+        let darbanName = app.buttons["darban"].firstMatch
+        if darbanName.exists {
+            mark("hold-room")
+            darbanName.press(forDuration: 1.5)
+            pause(0.8)
+            note("after holding darban, chintan is " + (app.buttons["chintan"].firstMatch.isSelected ? "still open" : "not open"))
+        }
+
         // A word typed in a room, the keyboard up, and taken back unsent.
         let composer = app.textViews["composer"].exists ? app.textViews["composer"] : app.textFields["composer"]
         if composer.waitForExistence(timeout: 3) {

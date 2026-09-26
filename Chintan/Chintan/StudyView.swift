@@ -24,14 +24,19 @@ struct StudyView: View {
     @State private var asking: [Voice: Task<Void, Never>] = [:]
     // Opened on launch with --settings, for the house's screenshots.
     @State private var showingSettings = ProcessInfo.processInfo.arguments.contains("--settings")
+    // The room whose name is pressed and held, its plaque grown under the
+    // names; `--open held` holds darban's, for the house's eyes.
+    @State private var heldRoom: Voice? = StudyView.launchArgument == "held" ? .darban : nil
     @Namespace private var rule
 
-    // The room named on the command line, for the house's screenshots.
-    private static var launchVoice: Voice? {
+    private static var launchArgument: String? {
         let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "--open"), i + 1 < args.count { return Voice(rawValue: args[i + 1]) }
-        return nil
+        guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return nil }
+        return args[i + 1]
     }
+
+    // The room named on the command line, for the house's screenshots.
+    private static var launchVoice: Voice? { launchArgument.flatMap(Voice.init(rawValue:)) }
 
     // A word said on launch, for the house's screenshots of a room answering.
     private static var launchWord: String? {
@@ -84,6 +89,16 @@ struct StudyView: View {
                         quiet
                     }
                 }
+                .overlay(alignment: .topLeading) {
+                    if let held = heldRoom {
+                        // It hangs from the names over the conversation, on
+                        // the bubbles' edge, and grows down from them.
+                        roomPlaque(held)
+                            .padding(.leading, 16)
+                            .padding(.top, 10)
+                            .transition(.scale(scale: 0.6, anchor: .topLeading).combined(with: .opacity))
+                    }
+                }
                 .onChange(of: messages) {
                     if let last = messages.last {
                         withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
@@ -93,6 +108,8 @@ struct StudyView: View {
             composer
         }
         .background { PaintedGround(head: 150, foot: 260) }
+        // A soft impact as a plaque grows, none as it folds.
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: heldRoom) { _, now in now != nil }
         .sheet(isPresented: $showingSettings) {
             // The sheet hangs on the same painting as the tabs.
             SettingsView()
@@ -206,35 +223,76 @@ struct StudyView: View {
 
     // A room's name: gilt with a hairline under it when open, bone when not,
     // a saffron mark when the voice is not home.
+    // Tapped, the room opens; pressed and held, its name grows a plaque with
+    // what the voice is for and when it last spoke, and folds back on letting go.
     private func room(_ v: Voice) -> some View {
         let open = v == voice
-        return Button {
-            withAnimation(.easeInOut(duration: 0.25)) { voice = v }
-        } label: {
-            VStack(spacing: 6) {
-                Text(v.rawValue)
-                    .font(Theme.label(.body))
-                    .tracking(1.2)
-                    .foregroundStyle(open ? Theme.giltOnArt : Theme.bone.opacity(0.62))
-                    .overlay(alignment: .topTrailing) {
-                        if away.contains(v) {
-                            Circle().fill(Theme.saffron).frame(width: 5, height: 5).offset(x: 7, y: 1)
-                        }
-                    }
-                ZStack {
-                    if open {
-                        Rectangle().fill(Theme.giltOnArt)
-                            .matchedGeometryEffect(id: "rule", in: rule)
+        return VStack(spacing: 6) {
+            Text(v.rawValue)
+                .font(Theme.label(.body))
+                .tracking(1.2)
+                .foregroundStyle(open || heldRoom == v ? Theme.giltOnArt : Theme.bone.opacity(0.62))
+                .overlay(alignment: .topTrailing) {
+                    if away.contains(v) {
+                        Circle().fill(Theme.saffron).frame(width: 5, height: 5).offset(x: 7, y: 1)
                     }
                 }
-                .frame(height: 0.75)
+            ZStack {
+                if open {
+                    Rectangle().fill(Theme.giltOnArt)
+                        .matchedGeometryEffect(id: "rule", in: rule)
+                }
             }
-            .fixedSize()
-            .contentShape(Rectangle())
+            .frame(height: 0.75)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(v.rawValue)
-        .accessibilityAddTraits(open ? .isSelected : [])
+        .fixedSize()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.25)) { voice = v }
+        }
+        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
+            withAnimation(.snappy) { heldRoom = v }
+        } onPressingChanged: { pressing in
+            if !pressing, heldRoom != nil { withAnimation(.snappy) { heldRoom = nil } }
+        }
+        // Combined, not replaced, so the name keeps its own text size to the audit.
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(lines[v].map(Self.sentence) ?? "")
+        .accessibilityAddTraits(open ? [.isButton, .isSelected] : .isButton)
+        .accessibilityAction { withAnimation(.easeInOut(duration: 0.25)) { voice = v } }
+    }
+
+    // A room's name held: the voice named in gilt, whether it is home, its
+    // own line from the house, and when it last spoke here.
+    private func roomPlaque(_ v: Voice) -> some View {
+        let last = store.messages(v).last(where: \.fromHouse)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(v.rawValue)
+                    .font(Theme.label(.caption))
+                    .tracking(1)
+                    .foregroundStyle(Theme.gilt)
+                if away.contains(v) {
+                    Text("not home just now")
+                        .font(Theme.label(.caption))
+                        .tracking(0.6)
+                        .foregroundStyle(Theme.saffron)
+                }
+            }
+            Text(v.kept ? lines[v].map(Self.sentence) ?? "A room of the house." : "Said here, gone.")
+                .font(.system(.title3, design: .serif))
+                .foregroundStyle(Theme.ink)
+            Text(!v.kept ? "The house keeps nothing from this room."
+                 : last.map { "Last spoke " + Self.spoke($0) } ?? "Nothing said here yet.")
+                .font(.system(.callout, design: .serif).italic())
+                .foregroundStyle(Theme.ink.opacity(0.8))
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(16)
+        .frame(maxWidth: 320, alignment: .leading)
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .plaque(radius: 12)
+        .accessibilityElement(children: .combine)
     }
 
     private var composer: some View {
@@ -313,6 +371,13 @@ struct StudyView: View {
             return message.date.formatted(.dateTime.weekday(.wide)) + " " + hour
         }
         return message.date.formatted(.dateTime.month(.abbreviated).day()) + " " + hour
+    }
+
+    // The stamp inside a sentence: "today 9:01 PM", "Tuesday 9:01 PM".
+    private static func spoke(_ message: ChintanMessage) -> String {
+        let when = stamp(message, after: nil) ?? ""
+        guard when.hasPrefix("Today") || when.hasPrefix("Yesterday") else { return when }
+        return when.prefix(1).lowercased() + when.dropFirst()
     }
 
     private func stamp(_ when: String) -> some View {

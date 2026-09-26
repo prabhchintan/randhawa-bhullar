@@ -24,6 +24,8 @@ struct JharokhaView: View {
     @State private var held: String?
     // The thing under a press and hold, its plaque grown over the wall.
     @State private var heldThing: UUID?
+    // The museum label under a press and hold, the whole of it on a plaque.
+    @State private var heldLabel = JharokhaView.eyes == "label"
 
     var body: some View {
         GeometryReader { geo in
@@ -44,6 +46,18 @@ struct JharokhaView: View {
                     .scrollBounceBehavior(.basedOnSize)
                     .fadedEdges(top: 0, bottom: 36)
                 }
+                .overlay(alignment: .bottomTrailing) {
+                    // The label held: its plaque stands on the hairline over
+                    // the label, and grows up from it.
+                    if heldLabel, let painting = gallery.painting, painting.title != nil {
+                        let (name, about) = Self.split((painting.artist ?? "").plainDashes)
+                        LabelPlaque(painting: painting, name: name, about: about)
+                            .padding(.trailing, 22)
+                            .padding(.bottom, 12)
+                            .transition(.scale(scale: 0.5, anchor: .bottomTrailing).combined(with: .opacity))
+                    }
+                }
+                .zIndex(1)
                 foot
             }
             // One shade from the day's line down through the tab bar, no seam.
@@ -57,6 +71,7 @@ struct JharokhaView: View {
         // A soft impact as a plaque grows, none as it folds.
         .sensoryFeedback(.impact(flexibility: .soft), trigger: held) { _, now in now != nil }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldThing) { _, now in now != nil }
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: heldLabel) { _, now in now }
         .sheet(isPresented: $showVisitors) {
             VisitorsView()
                 .presentationBackground(.ultraThinMaterial)
@@ -199,7 +214,8 @@ struct JharokhaView: View {
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 2)
-        .accessibilityIdentifier("foot")
+        // No identifier of its own here: one on the foot names every ring and
+        // the label "foot", and the walk could find none of them to hold.
     }
 
     // The house's meters as rings, and the mark for anything raised. The
@@ -303,7 +319,16 @@ struct JharokhaView: View {
             .frame(maxWidth: 200, alignment: .trailing)
             .contentShape(Rectangle())
             .accessibilityIdentifier("label")
+            // The label behind a held plaque steps back, so the two never read at once.
+            .opacity(heldLabel ? 0.25 : 1)
             .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
+            // Pressed and held, the label grows a plaque with the whole of
+            // it, the way the wall card reads close up; let go, it folds back.
+            .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
+                withAnimation(.snappy) { heldLabel = true }
+            } onPressingChanged: { pressing in
+                if !pressing, heldLabel { withAnimation(.snappy) { heldLabel = false } }
+            }
             .overlay(alignment: .bottomTrailing) { nextMark.offset(y: 24) }
             .padding(.bottom, 22)
         }
@@ -448,6 +473,59 @@ private struct RingPlaque: View {
         .padding(14)
         .frame(width: Self.width)
         // Whole, not the leaves' 97 percent: the wall's lines stand right under it.
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .plaque(radius: 12)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// The label held: the wall card read close up, the title in the serif, the
+// artist and who they were, the year in gilt, and under a hairline the credit.
+private struct LabelPlaque: View {
+    let painting: HouseClient.Painting
+    let name: String
+    let about: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let year = painting.year, !year.isEmpty {
+                Text(year.plainDashes)
+                    .font(Theme.label(.caption))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.gilt)
+            }
+            Text((painting.title ?? "").plainDashes)
+                .font(.system(.title3, design: .serif).italic())
+                .foregroundStyle(Theme.ink)
+            if !name.isEmpty || about != nil {
+                VStack(alignment: .leading, spacing: 2) {
+                    if !name.isEmpty {
+                        Text(name)
+                            .font(.system(.callout, design: .serif))
+                            .foregroundStyle(Theme.ink)
+                    }
+                    if let about {
+                        Text(about)
+                            .font(.footnote)
+                            .foregroundStyle(Theme.ink.opacity(0.75))
+                    }
+                }
+            }
+            if let credit = painting.credit, !credit.isEmpty {
+                Rectangle()
+                    .fill(Theme.gilt.opacity(0.5))
+                    .frame(width: 36, height: 0.5)
+                    .padding(.top, 2)
+                Text(credit.plainDashes)
+                    .font(.caption)
+                    .foregroundStyle(Theme.ink.opacity(0.7))
+            }
+        }
+        .multilineTextAlignment(.leading)
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(16)
+        .frame(width: 300, alignment: .leading)
+        // Whole, like the ring's: the label stands right under it.
         .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .plaque(radius: 12)
         .accessibilityElement(children: .combine)
