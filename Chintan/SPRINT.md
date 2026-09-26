@@ -621,10 +621,36 @@ F. Settings and the edges. The health dot; settings one tap away; a
    the serif titles go and a grey rule comes) and a zero-height ground
    overlay ignoring the top safe area (no effect). Fixed (sprint 30): the
    sheet draws its own head (Done, the serif title) on the ground above the
-   scroll, no navigation bar at all. Left of the steer: pressable actions
-   and the wall on the painting.
+   scroll, no navigation bar at all. Pressable actions and the wall on the
+   painting built (sprint 32): the sheet hangs on the day's painting, each
+   room named on a mount with its words on a plaque, every action a framed
+   gilt label (SettingsAction's Framed style) with the selection tick. The
+   steer is whole. Left of F: the version line, then a widget, notifications
+   and Siri on his word. Next: G, touch to reveal on a room name and the
+   label, then the word for the house.
 
 ## The ledger (newest first)
+
+- 2026-09-26 · sprint 32 (f41c386): Settings stands on the painting and
+  its actions look like things to press (F, his steer of 09-24). The sheet
+  now hangs on the day's painting, the same picture as the tabs, with a
+  shade at its head and foot: Done in gilt and the serif title lettered on
+  the art, "The senses" in bone, each room named in gilt small capitals on
+  a smoked mount (as the Board's shelves) and its words on a plaque, bone
+  in light and lamp black in dark, the picture seen between the rooms.
+  Every action (Save, Is it home?, Tell the house, Stop telling, Open
+  Shortcuts, Ask Health) is a framed label: small serif capitals in a 1 pt
+  gilt frame, square cornered like a wall label, no pill, a stop in quiet
+  ink; it darkens and settles under the thumb and gives the selection tick.
+  Two actions stand one under the other when the words are too large to
+  share a line. And a defect seen at the largest text: Done and the title
+  ran into each other ("DonSettings"); the head now holds at the system
+  bar's largest size. Seen in both modes at the top (`settings@on`), on the
+  senses on and off (`settings@senses`, `settings@quiet`), at the foot
+  (`settings@move`, `settings@apps`) and at the largest text (`see.sh
+  --large ... settings@on`, `settings@quiet`); Home, the Board and the Study
+  unchanged. No hitch numbers (a sheet over the app; nothing that moves
+  between tabs was touched). No new door.
 
 - 2026-09-26 · sprint 31 (7e474c8, 4865236): builds reach the phone again,
   and the house can hear which app he opens (the steer first, then N slice
