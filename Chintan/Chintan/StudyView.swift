@@ -255,11 +255,14 @@ struct StudyView: View {
         } onPressingChanged: { pressing in
             if !pressing, heldRoom != nil { withAnimation(.snappy) { heldRoom = nil } }
         }
-        // Combined, not replaced, so the name keeps its own text size to the audit.
-        .accessibilityElement(children: .combine)
-        .accessibilityHint(lines[v].map(Self.sentence) ?? "")
-        .accessibilityAddTraits(open ? [.isButton, .isSelected] : .isButton)
-        .accessibilityAction { withAnimation(.easeInOut(duration: 0.25)) { voice = v } }
+        // To VoiceOver and the audit it is the plain button it always was,
+        // the voice's line as its hint.
+        .accessibilityRepresentation {
+            Button(v.rawValue) { withAnimation(.easeInOut(duration: 0.25)) { voice = v } }
+                .font(Theme.label(.body))
+                .accessibilityHint(lines[v].map(Self.sentence) ?? "")
+                .accessibilityAddTraits(open ? .isSelected : [])
+        }
     }
 
     // A room's name held: the voice named in gilt, whether it is home, its
