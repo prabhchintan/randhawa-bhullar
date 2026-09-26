@@ -7,15 +7,19 @@ struct ChintanMessage: Codable, Identifiable, Equatable {
     let date: Date
 }
 
-// The three voices of the house, each a room in the study.
+// The four voices of the house, each a room in the study.
 enum Voice: String, CaseIterable, Identifiable {
-    case chintan, darban, yaar
+    case chintan, darban, yaar, hawa
     var id: String { rawValue }
+
+    // hawa, the air, is never written down: its room lives in memory alone.
+    var kept: Bool { self != .hawa }
 }
 
 // The conversations, kept on the device alone: one JSON file per voice in
 // Application Support, newest last, each trimmed to the last 500 turns.
-// chintan's stays in the file it always had. Never synced.
+// chintan's stays in the file it always had. Never synced. hawa's has no
+// file and no line in waiting.json; forget(_:) empties it.
 @MainActor
 final class ConversationStore: ObservableObject {
     @Published private(set) var rooms: [Voice: [ChintanMessage]] = [:]
@@ -25,7 +29,7 @@ final class ConversationStore: ObservableObject {
     init() {
         dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        for voice in Voice.allCases { load(voice) }
+        for voice in Voice.allCases where voice.kept { load(voice) }
         loadWaiting()
     }
 
@@ -57,13 +61,14 @@ final class ConversationStore: ObservableObject {
         guard let data = try? Data(contentsOf: waitingURL),
               let kept = try? JSONDecoder().decode([String: Waiting].self, from: data) else { return }
         for (name, w) in kept {
-            if let v = Voice(rawValue: name), w.since.timeIntervalSinceNow > -86_400 { waiting[v] = w }
+            if let v = Voice(rawValue: name), v.kept, w.since.timeIntervalSinceNow > -86_400 { waiting[v] = w }
         }
     }
 
     func wait(_ w: Waiting?, in voice: Voice) {
         waiting[voice] = w
-        let kept = Dictionary(uniqueKeysWithValues: waiting.map { ($0.key.rawValue, $0.value) })
+        guard voice.kept else { return }
+        let kept = Dictionary(uniqueKeysWithValues: waiting.filter { $0.key.kept }.map { ($0.key.rawValue, $0.value) })
         guard let data = try? JSONEncoder().encode(kept) else { return }
         try? data.write(to: waitingURL, options: .atomic)
     }
@@ -75,7 +80,14 @@ final class ConversationStore: ObservableObject {
             messages.removeFirst(messages.count - limit)
         }
         rooms[voice] = messages
-        guard let data = try? JSONEncoder().encode(messages) else { return }
+        guard voice.kept, let data = try? JSONEncoder().encode(messages) else { return }
         try? data.write(to: fileURL(voice), options: .atomic)
+    }
+
+    // A room that keeps nothing, emptied: its words and its wait let go.
+    func forget(_ voice: Voice) {
+        guard !voice.kept else { return }
+        rooms[voice] = nil
+        waiting[voice] = nil
     }
 }

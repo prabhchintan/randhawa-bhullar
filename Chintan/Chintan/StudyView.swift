@@ -1,12 +1,15 @@
 import SwiftUI
 
-// The study, three rooms over the day's painting: chintan, darban and yaar
-// named at the top the way a gallery names its rooms, the one open in gilt.
+// The study, four rooms over the day's painting: chintan, darban, yaar and
+// hawa named at the top the way a gallery names its rooms, the one open in gilt.
 // The voice's words on plaques at the left, his own on smoked glass at the
 // right, the composer resting on the foot of the picture, send on return.
 // Each room keeps its own conversation; a reply finds its room even when
-// he has walked into another.
+// he has walked into another. hawa's room keeps nothing: it empties when the
+// app is put away or the study is left.
 struct StudyView: View {
+    // Whether the study is the page in view.
+    var open = true
     @EnvironmentObject var store: ConversationStore
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.scenePhase) private var phase
@@ -17,6 +20,7 @@ struct StudyView: View {
     @State private var errors: [Voice: String] = [:]
     @State private var lines: [Voice: String] = [:]
     @State private var away: Set<Voice> = []
+    @State private var asking: [Voice: Task<Void, Never>] = [:]
     // Opened on launch with --settings, for the house's screenshots.
     @State private var showingSettings = ProcessInfo.processInfo.arguments.contains("--settings")
     @Namespace private var rule
@@ -25,6 +29,13 @@ struct StudyView: View {
     private static var launchVoice: Voice? {
         let args = ProcessInfo.processInfo.arguments
         if let i = args.firstIndex(of: "--open"), i + 1 < args.count { return Voice(rawValue: args[i + 1]) }
+        return nil
+    }
+
+    // A word said on launch, for the house's screenshots of a room answering.
+    private static var launchWord: String? {
+        let args = ProcessInfo.processInfo.arguments
+        if let i = args.firstIndex(of: "--say"), i + 1 < args.count { return args[i + 1] }
         return nil
     }
 
@@ -67,7 +78,7 @@ struct StudyView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .fadedEdges()
                 .accessibilityIdentifier("conversation")
-                .overlay(alignment: .bottom) {
+                .overlay(alignment: voice.kept ? .bottom : .top) {
                     if messages.isEmpty && !isThinking {
                         quiet
                     }
@@ -90,30 +101,40 @@ struct StudyView: View {
         .onChange(of: voice) { kept = voice.rawValue }
         .onChange(of: phase) {
             if phase == .active { Voice.allCases.forEach(resume) }
+            if phase == .background { letGo() }
+        }
+        .onChange(of: open) {
+            if !open { letGo() }
         }
         .task {
             Voice.allCases.forEach(resume)
+            if let word = Self.launchWord {
+                draft = word
+                send()
+            }
             await loadVoices()
         }
     }
 
-    // An empty room says what the voice is for, in its own line from the house.
+    // An empty room says what the voice is for, in its own line from the
+    // house; hawa's says, at the head of the room, that it keeps nothing.
     private var quiet: some View {
         VStack(spacing: 12) {
             Rectangle().fill(Theme.giltOnArt).frame(width: 36, height: 0.75)
-            Text(lines[voice].map(Self.sentence) ?? "The room is quiet.")
+            Text(voice.kept ? lines[voice].map(Self.sentence) ?? "The room is quiet." : "Said here, gone. The house keeps nothing from this room.")
                 .font(.system(.title3, design: .serif).italic())
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.bone)
         }
         .shadow(color: .black.opacity(0.7), radius: 10)
-        // A pool of shade under the line, so it reads on the brightest picture.
+        // A pool of shade under the line, so it reads on the brightest
+        // picture, gone to nothing inside its own bounds so it shows no edge.
         .background {
-            RadialGradient(colors: [.black.opacity(0.5), .clear], center: .center, startRadius: 0, endRadius: 190)
+            EllipticalGradient(colors: [.black.opacity(0.5), .clear], center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
                 .padding(-70)
         }
         .padding(.horizontal, 40)
-        .padding(.bottom, 24)
+        .padding(voice.kept ? .bottom : .top, 24)
     }
 
     private static func sentence(_ line: String) -> String {
@@ -136,12 +157,12 @@ struct StudyView: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: 22) {
-            // The three names side by side; at the largest text they slide
+            // The four names side by side; at the larger text they slide
             // under the thumb instead of running off the phone. Measured only
-            // at the large sizes: ViewThatFits lays the rooms out twice on
-            // every turn of a page, the Study's share of a two-frame stall.
+            // from x large, where four first crowd the gear: ViewThatFits lays
+            // the rooms out twice on every turn of a page, a stall to avoid.
             Group {
-                if typeSize >= .xxLarge {
+                if typeSize >= .xLarge {
                     ViewThatFits(in: .horizontal) {
                         rooms
                         ScrollView(.horizontal) { rooms.padding(.vertical, 2) }
@@ -168,7 +189,7 @@ struct StudyView: View {
         .padding(.top, 6)
     }
 
-    // The three names share one mount, its edge on the bubbles' edge.
+    // The four names share one mount, its edge on the bubbles' edge.
     private var rooms: some View {
         HStack(alignment: .center, spacing: 22) {
             ForEach(Voice.allCases) { v in
@@ -361,14 +382,17 @@ struct StudyView: View {
         let id = UUID().uuidString
         store.wait(.init(id: id, word: word.id, since: .now), in: room)
         thinking.insert(room)
-        Task {
+        asking[room] = Task {
             do {
                 let reply = try await HouseClient(baseAddress: address).say(word.text, to: room.rawValue, id: id) { houseID in
-                    store.wait(.init(id: houseID, word: word.id, since: .now), in: room)
+                    if store.waiting[room]?.word == word.id {
+                        store.wait(.init(id: houseID, word: word.id, since: .now), in: room)
+                    }
                 }
-                land(reply, in: room)
+                land(reply, answering: word.id, in: room)
                 thinking.remove(room)
             } catch {
+                if Task.isCancelled { return }
                 thinking.remove(room)
                 resume(room)
             }
@@ -387,21 +411,37 @@ struct StudyView: View {
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
         errors[room] = nil
         thinking.insert(room)
-        Task {
+        asking[room] = Task {
             do {
-                land(try await HouseClient(baseAddress: address).awaitReply(id: w.id), in: room)
+                land(try await HouseClient(baseAddress: address).awaitReply(id: w.id), answering: w.word, in: room)
             } catch HouseError.noDoor {
                 store.wait(nil, in: room)
             } catch {
+                if Task.isCancelled { return }
                 errors[room] = "The house is not answering. Are you on the tailnet?"
             }
             thinking.remove(room)
         }
     }
 
-    private func land(_ reply: String, in room: Voice) {
+    // A reply lands only while its word still waits; a room let go takes none.
+    private func land(_ reply: String, answering word: UUID, in room: Voice) {
+        guard store.waiting[room]?.word == word else { return }
         store.append(ChintanMessage(id: UUID(), text: reply, fromHouse: true, date: Date()), to: room)
         store.wait(nil, in: room)
+    }
+
+    // The rooms that keep nothing, let go: the wait cut, the words gone, and
+    // an unsent word in them with it.
+    private func letGo() {
+        for v in Voice.allCases where !v.kept {
+            asking[v]?.cancel()
+            asking[v] = nil
+            thinking.remove(v)
+            errors[v] = nil
+            store.forget(v)
+        }
+        if !voice.kept { draft = "" }
     }
 }
 

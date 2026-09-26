@@ -97,7 +97,7 @@ struct ContentView: View {
         switch t {
         case .jharokha: JharokhaView()
         case .board: BoardView()
-        case .study: StudyView()
+        case .study: StudyView(open: tab == .study)
         }
     }
 
