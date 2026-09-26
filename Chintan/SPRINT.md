@@ -345,11 +345,16 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    34): the held label's plaque ends in a framed gilt line, "A word for the
    house"; slid onto and let go there, a one-line composer rises over the
    painting alone and posts `/v1/word` {"screen": "home", "text"}
-   (HouseWord.swift; `see.sh OUT jharokha@onword jharokha@word`). Left: the
-   word reached by VoiceOver (an `.accessibilityAction` on the label as it
-   stands raised two "hit area" findings on Home; combine the label into one
-   element first, then add the action, and audit), the word from the Board
-   and the Study (screen "board", "study"), then MetricKit.
+   (HouseWord.swift; `see.sh OUT jharokha@onword jharokha@word`). The word
+   from every screen and by VoiceOver built (sprint 35): the Board's heading
+   held grows a plaque with the week in one line and the same gilt line, the
+   Study's room plaque ends in it too (screens "board", "study"); WordLine
+   and the wordStage modifier in HouseWord.swift carry the line and the
+   composer for all three; the label on Home is one VoiceOver card, and the
+   label, the heading and each room carry "A word for the house" as an
+   action (`see.sh OUT board@held board@onword board@word study@onword
+   study@word`). Left: the walk to slide onto the word in the Study and hold
+   the Board's heading, then MetricKit.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -638,10 +643,38 @@ F. Settings and the edges. The health dot; settings one tap away; a
    steer is whole. The band under the head gone (sprint 33): the head is a
    dark ground held through Done and the title, then dissolving
    (PaintedGround's headHold). Left of F: the version line, then a widget,
-   notifications and Siri on his word. Next: G, the word for the house's
-   last parts (VoiceOver, the other screens), then MetricKit.
+   notifications and Siri on his word. Next: G, MetricKit (the word for the
+   house is whole, sprint 35).
 
 ## The ledger (newest first)
+
+- 2026-09-26 · sprint 35 (94f4172): a word for the house from every screen,
+  and by VoiceOver (G, the word's last parts). On the Board, the heading
+  ("Ten things open.") held grows a plaque hanging from it over the shelves:
+  the week told in one line ("Two today, one tomorrow, seven later.") and
+  under it the framed gilt line, "A word for the house". In the Study, a
+  room's name held now ends its plaque in the same line. Slide onto it and
+  it fills with gilt and ticks; let go there and the screen's lettering
+  steps away and the composer rises over the painting alone, "on the Board"
+  or "on the Study", sending `/v1/word` with screen "board" or "study".
+  Home's plaque and composer look the same as before; the line and the
+  composer are one piece now for all three (WordLine, wordStage). VoiceOver:
+  Home's museum label reads as one card, a button whose double tap shows the
+  credit; the label, the Board's heading and each room name offer "A word
+  for the house" among their actions. Seen in both modes (`board@held`,
+  `board@onword`, `board@word`, `study@onword`, `study@word`, all new; the
+  resting tabs unchanged), and in the walk by real touches: Home's hold and
+  slide still open the word, and darban's hold grows the plaque with its
+  line. Look 2 cut a repeat: the Board's plaque had "The board" in gilt
+  under the heading saying the same. Audit 16 findings, down from 20, none
+  of them a hit area. Hitches, test hand, median of two (ms/s): reveal
+  32.8, first visits 49.5, tabs 85.0, swipe 102.3, board scroll 21.4, study
+  scroll 9.5; no hand, tabs 68.3, neighbours 46.1, rest 0.0. Tabs with no
+  hand read 9.0 in sprint 34; the same run with the new composer staging
+  taken off the Board and the Study read 62.9, so the staging is not the
+  cause, and a checkout of 0eaa531 to measure the old build needed an
+  approval this run could not get. The next sprint should measure 0eaa531
+  and 94f4172 back to back before trusting either number. No new door.
 
 - 2026-09-26 · sprint 34 (deb4026, 8265cab): a word for the house, from
   Home (G, the long press "a word for the house"). Held, the museum label's
