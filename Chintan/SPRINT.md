@@ -353,8 +353,15 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    composer for all three; the label on Home is one VoiceOver card, and the
    label, the heading and each room carry "A word for the house" as an
    action (`see.sh OUT board@held board@onword board@word study@onword
-   study@word`). Left: the walk to slide onto the word in the Study and hold
-   the Board's heading, then MetricKit.
+   study@word`). The turn's stall that came with it found and gone (sprint
+   36): a page holding `@GestureState(resetTransaction:)` cannot be compared
+   by SwiftUI, so every update of the pager lettered it again; each page is
+   now `.equatable()` in ContentView (Home and the Board always equal, the
+   Study by `open`). Any new input on a page goes into its `==`. The Board's
+   held plaque rebuilt: a leaf's width, opaque, on a dimmed board with the
+   shelves stepped back. Left: the walk to slide onto the word in the Study
+   and hold the Board's heading, the board scroll's test-hand number (20.7
+   against 13.6 at 0eaa531), then MetricKit.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -647,6 +654,37 @@ F. Settings and the edges. The health dot; settings one tap away; a
    house is whole, sprint 35).
 
 ## The ledger (newest first)
+
+- 2026-09-26 · sprint 36 (309962c): turning a page is smooth again, the
+  Board's held plaque stands alone, and the Study keeps the Board's margin
+  (the house's steer). Measured first, back to back, medians of three
+  (ms/s), 0eaa531 then 94f4172: tabs with no hand 10.7 then 67.1,
+  neighbours (Home and the Board) 0.0 then 46.3, tabs 53.6 then 90.3, swipe
+  58.4 then 99.1, first visits 31.6 then 56.9, board scroll 13.6 then 18.8,
+  reveal 30.7 then 29.8, study scroll 4.8 then 3.2. Sprint 35's number was
+  real. A bisect put it on the Board alone (its 0eaa531 copy: neighbours
+  3.6); the heading's `.zIndex(1)` was not it (still 46.8). The cause: the
+  held heading's `@GestureState(resetTransaction:)` holds a Transaction that
+  SwiftUI cannot compare, so every update of the pager lettered the whole
+  board again, spelled-out numbers and all; Home has carried the same since
+  sprint 34 (sprint 33's no-hand tabs were 4.8 to 7.5). Now each page is
+  `.equatable()`. After, medians of three: tabs with no hand 7.7,
+  neighbours 0.0, tabs 47.8, swipe 36.7, first visits 32.8, reveal 30.3,
+  study scroll 3.0; board scroll 20.7, still above 0eaa531's, left open.
+  Held, the Board's heading now dims the whole board, the shelves step back
+  to a ghost, and the plaque (the week in one line, the word for the house)
+  hangs from the heading at a leaf's own width and corners, opaque; before,
+  it stood at 320 points with the leaf under it reading round its edge.
+  The Study's four names and the gear were wider than the page at the
+  default text size, pushing the whole study, bubbles and composer, 6
+  points past each edge; the gaps are tighter and the names can no longer
+  widen the page, so bubbles, composer and names sit on the Board's 16
+  point margin. Seen in both modes (board, board@held, board@onword,
+  board@word, study, study@held, study@onword; Home unchanged) and in the
+  walk by real touches: Home's hold and slide, darban's hold growing its
+  plaque. Audit 20 findings, the set sprint 34 read (the Study's four
+  unnamed ones are not the new header: the same 20 with its guard taken
+  off). No new door.
 
 - 2026-09-26 · sprint 35 (94f4172): a word for the house from every screen,
   and by VoiceOver (G, the word's last parts). On the Board, the heading
