@@ -11,6 +11,7 @@ struct StudyView: View {
     // Whether the study is the page in view.
     var open = true
     @EnvironmentObject var store: ConversationStore
+    @EnvironmentObject private var gallery: Gallery
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.scenePhase) private var phase
     @AppStorage("studyVoice") private var kept = Voice.chintan.rawValue
@@ -93,7 +94,9 @@ struct StudyView: View {
         }
         .background { PaintedGround(head: 150, foot: 260) }
         .sheet(isPresented: $showingSettings) {
+            // The sheet hangs on the same painting as the tabs.
             SettingsView()
+                .environmentObject(gallery)
         }
         .onAppear {
             if StudyView.launchVoice == nil, let v = Voice(rawValue: kept) { voice = v }

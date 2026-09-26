@@ -225,7 +225,7 @@ struct MotionSection: View {
                     .foregroundStyle(Theme.ink.opacity(0.75))
                     .fixedSize(horizontal: false, vertical: true)
             }
-            HStack(spacing: 28) {
+            SettingsActions {
                 if !motion.telling {
                     SettingsAction("Tell the house", run: motion.tell)
                 } else {

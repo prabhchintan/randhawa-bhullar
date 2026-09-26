@@ -184,7 +184,7 @@ struct WhereaboutsSection: View {
                     .foregroundStyle(Theme.ink.opacity(0.75))
                     .fixedSize(horizontal: false, vertical: true)
             }
-            HStack(spacing: 28) {
+            SettingsActions {
                 ForEach(actions, id: \.title) { action in
                     SettingsAction(action.title, quiet: action.stop, run: action.run)
                 }
