@@ -49,7 +49,17 @@
 	<key>NSHealthShareUsageDescription</key>
 	<string>Now and then, even with the app closed, the phone tells the house what Health holds: steps, heart, sleep, workouts and the rest, folded on the phone first. Only the house hears it.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Each time chintan opens, the phone tells the house when you were still, walking, running, cycling or driving, and the steps of each walk. Only the house hears it.</string>
+	<string>Each time chintan opens, and now and then while it rests, the phone tells the house when you were still, walking, running, cycling or driving, and the steps of each walk. Only the house hears it.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>Prabhchintan.Chintan.refresh</string>
+		<string>Prabhchintan.Chintan.fold</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

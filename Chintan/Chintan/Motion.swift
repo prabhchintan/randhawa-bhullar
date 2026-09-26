@@ -7,7 +7,7 @@ import UIKit
 // segments, each walk and run with its steps, distance and floors from the
 // pedometer, posted to `POST /v1/motion` and forgotten. The phone keeps seven
 // days of it, so no background is needed: on opening the app and on every wake
-// the rest has earned (a move, Health), what is new since the last segment the
+// the rest has earned (a move, Health, the app's own), what is new since the last segment the
 // house had goes. The segment still going stays open and goes once it ends.
 // Asked for on the Settings sheet, never at launch.
 @MainActor
@@ -25,6 +25,8 @@ final class Motion: ObservableObject {
     private let defaults = UserDefaults.standard
     private var draining = false
     private var lastDrained: Date?
+    // The drain going, so a wake can wait for it rather than start a second.
+    private var running: Task<Void, Never>?
 
     // The house's eyes in the simulator never tell the house anything.
     private let eyes = ProcessInfo.processInfo.arguments.contains("--house")
@@ -41,7 +43,7 @@ final class Motion: ObservableObject {
         defaults.set(true, forKey: "motion.telling")
         Keychain.keepAfterFirstUnlock()
         lastDrained = nil
-        Task { await drain() }
+        Task { await drained() }
     }
 
     func stop() {
@@ -54,7 +56,16 @@ final class Motion: ObservableObject {
         read()
         guard telling, !eyes else { return }
         if let lastDrained, Date().timeIntervalSince(lastDrained) < 15 * 60 { return }
-        Task { await drain() }
+        Task { await drained() }
+    }
+
+    // What is new, now; returns once the house has had its chance.
+    func drained() async {
+        if let running { return await running.value }
+        let task = Task { await drain() }
+        running = task
+        await task.value
+        running = nil
     }
 
     // What he is doing now, for the phone's word: the last thing the phone
@@ -230,6 +241,6 @@ struct MotionSection: View {
     private var note: String {
         motion.telling
             ? "Only the house hears it; the phone keeps only where it left off."
-            : "Each time chintan opens, the phone tells the house when you were still, walking, running, cycling or driving since it last did, and the steps of each walk, from the seven days the phone keeps. Only the house hears it; the phone keeps only where it left off."
+            : "Each time chintan opens, and now and then while it rests, the phone tells the house when you were still, walking, running, cycling or driving since it last did, and the steps of each walk, from the seven days the phone keeps. Only the house hears it; the phone keeps only where it left off."
     }
 }

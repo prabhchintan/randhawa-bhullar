@@ -232,7 +232,7 @@ struct PhoneWordSection: View {
     }
 
     private var note: String {
-        let told = "Each time chintan opens or is put away, the phone tells the house whether it is unlocked, its battery, wifi or cellular, and headphones or speaker; the wifi's name with Where you are on, still or moving with How you move on."
+        let told = "Each time chintan opens or is put away, and now and then while it rests, the phone tells the house whether it is unlocked, its battery, wifi or cellular, and headphones or speaker; the wifi's name with Where you are on, still or moving with How you move on."
         return word.telling
             ? told + " Only the house hears it; the phone keeps a word only until the house has it."
             : told + " So the house knows when you are on the phone and when you are not. Only the house hears it."

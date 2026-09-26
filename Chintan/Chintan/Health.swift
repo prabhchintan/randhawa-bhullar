@@ -127,6 +127,17 @@ final class Health: ObservableObject {
         Task { await drain() }
     }
 
+    // A wake the app earned for itself (Wakes), its word already said: a
+    // drain within the time given, returning when it is over.
+    func catchUp(within seconds: TimeInterval) async {
+        guard telling, !eyes else { return }
+        await withCheckedContinuation { (over: CheckedContinuation<Void, Never>) in
+            waiting.append { over.resume() }
+            if draining { again = true; return }
+            Task { await drain(within: seconds, word: false) }
+        }
+    }
+
     private func readAsked() async {
         let status = try? await store.statusForAuthorizationRequest(toShare: [], read: Self.everything)
         unasked = status == .shouldRequest
@@ -157,7 +168,7 @@ final class Health: ObservableObject {
 
     // Everything new, in turn: the totals, the heart, then the rest. Stops
     // at the first batch the house did not hear, or when the time is spent.
-    private func drain() async {
+    private func drain(within seconds: TimeInterval = 22, word: Bool = true) async {
         if draining { again = true; return }
         guard telling, !eyes, let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             finish()
@@ -165,11 +176,11 @@ final class Health: ObservableObject {
         }
         draining = true
         let task = UIApplication.shared.beginBackgroundTask(withName: "health")
-        if UIApplication.shared.applicationState == .background {
+        if word, UIApplication.shared.applicationState == .background {
             await PhoneWord.shared.say(.wake)?.value
         }
         let client = HouseClient(baseAddress: address)
-        let until = Date().addingTimeInterval(22)
+        let until = Date().addingTimeInterval(seconds)
         repeat {
             again = false
             var going = true

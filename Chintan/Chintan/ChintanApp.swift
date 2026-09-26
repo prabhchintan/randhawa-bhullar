@@ -19,6 +19,8 @@ struct ChintanApp: App {
         _ = PhoneWord.shared
         _ = Health.shared
         _ = Motion.shared
+        Wakes.register()
+        Wakes.ask()
     }
 
     @Environment(\.scenePhase) private var phase
@@ -34,6 +36,7 @@ struct ChintanApp: App {
                 Motion.shared.freshen()
             }
             PhoneWord.shared.scene(now)
+            if now == .background { Wakes.ask() }
         }
     }
 }
