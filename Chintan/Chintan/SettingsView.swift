@@ -12,7 +12,8 @@ struct SettingsView: View {
     private var typed: String { address.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            head
             ScrollViewReader { reader in
             ScrollView {
                 VStack(alignment: .leading, spacing: 40) {
@@ -82,14 +83,26 @@ struct SettingsView: View {
                 }
             }
             }
-            .background(Theme.ground)
-            .navigationTitle("Settings")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
-                }
+        }
+        .background(Theme.ground)
+    }
+
+    // The sheet's head, drawn here on the ground rather than by a clear
+    // navigation bar, so the wall scrolls under it, never through Done.
+    private var head: some View {
+        ZStack {
+            Text("Settings")
+                .font(.system(.headline, design: .serif).weight(.semibold))
+                .foregroundStyle(Theme.ink)
+                .accessibilityAddTraits(.isHeader)
+            HStack {
+                Button("Done") { dismiss() }
+                    .frame(minHeight: 44)
+                Spacer()
             }
         }
+        .padding(.horizontal, 24)
+        .frame(minHeight: 56)
     }
 
     private func checkHealth() async {
