@@ -391,7 +391,6 @@ struct JharokhaView: View {
             // Pressed and held, the label grows a plaque with the whole of
             // it, the way the wall card reads close up; let go, it folds back.
             .gesture(labelHold)
-            .accessibilityAction(named: "A word for the house") { withAnimation(.snappy) { wording = true } }
             .overlay(alignment: .bottomTrailing) { nextMark.offset(y: 24) }
             .padding(.bottom, 22)
         }
