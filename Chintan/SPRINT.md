@@ -594,6 +594,16 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    until the next send. Left: seen on his phone, and the house reading
    "kind" (sprint 29's line). Next: slice 5, the background tasks and the
    nightly fold, then the Shortcut offered once.
+   Slice 5 built, the wakes (sprint 30): Wakes.swift, an app refresh asked
+   for half an hour on and a processing run each night from 02:00 on the
+   charger with a network; each says "wake", drains Motion, then Health
+   (25 s a refresh, 8 min a night). Left: seen on his phone (the simulator
+   never posts; the house's desk should show wakes with no foreground
+   around them), and the Shortcut offered once, which should be an App
+   Intent ("Tell the house an app opened", its app a parameter, run without
+   opening chintan, posting {"event": "app", "app", "source": "shortcut"}
+   to /v1/phone through PhoneWord) so his automation is two taps, not a
+   hand-built web request with the house's address in it.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -604,8 +614,10 @@ F. Settings and the edges. The health dot; settings one tap away; a
    runs under the transparent bar and through Done and the title. Tried and
    dropped: `.toolbarBackground` (SwiftUI's own appearance replaces Theme's,
    the serif titles go and a grey rule comes) and a zero-height ground
-   overlay ignoring the top safe area (no effect); next try a UIKit
-   standardAppearance with the ground set only for this sheet's bar.
+   overlay ignoring the top safe area (no effect). Fixed (sprint 30): the
+   sheet draws its own head (Done, the serif title) on the ground above the
+   scroll, no navigation bar at all. Left of the steer: pressable actions
+   and the wall on the painting.
 
 ## The ledger (newest first)
 
@@ -632,6 +644,32 @@ F. Settings and the edges. The health dot; settings one tap away; a
   six tries), so the word showed "The house is not answering." with Try
   again, honestly; the first answered word is his. No hitch numbers
   (nothing that moves was changed). No new door needed.
+- 2026-09-25 · sprint 30 (ca4ef8f, 8335e8d): the phone tells the house
+  while it rests, and Settings keeps its head (N, slice 5, the wakes; F's
+  scroll defect). The app now asks iOS for wakes of its own beside the
+  ones a move or Health gives it: an app refresh (`Prabhchintan.Chintan.
+  refresh`, half an hour after the last at the soonest, when iOS judges)
+  and a nightly processing run (`Prabhchintan.Chintan.fold`, from 02:00,
+  on the charger with a network), both asked at launch and each time the
+  app is put away. Each says the phone's "wake" word, drains Motion (a
+  wake waits for a drain already going rather than starting a second),
+  then Health with the wake's own time: 25 s for a refresh, eight minutes
+  a night, so a year's first backlog can go in one night instead of 22 s
+  a wake; cut short by iOS, the task ends at once and every sense keeps
+  its place. A locked phone keeps Health closed, so a night run while
+  locked tells the word and the motion, and Health waits for the next.
+  Info.plist carries UIBackgroundModes fetch and processing and the two
+  identifiers. The notes say it: "and now and then while it rests" on
+  When you are on the phone, How you move, and the motion prompt. And
+  Settings, scrolled, no longer runs its wall through Done and the title:
+  the sheet draws its own head on the ground above the scroll (the serif
+  title, Done at the wall's margin), no navigation bar. Seen in both modes
+  at the top (`settings@on`), opened on the senses and at the foot
+  (`settings@senses`, `settings@move`, `settings@quiet`); Home, the Board
+  and the Study unchanged. No hitch numbers (nothing that moves was
+  touched). No new door: /v1/phone, /v1/motion and /v1/health take a
+  wake's posts as they are; the house's desk may now see "wake" words with
+  no foreground around them, a few a day.
 
 - 2026-09-25 · sprint 29 (6d80fc9): the phone tells the house where he
   stays (N, slice 4, visits on Where). With location allowed always, the
