@@ -337,9 +337,13 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    numbers are now mostly the test hand reading the accessibility tree;
    read them against the no-hand lines, and first visits (28.6) next.
    Slice 2 begun (sprint 15): touch to reveal on Home's rings, with the
-   soft impact. A thing on Home held, sprint 16 (ThingPlaque). Next: the
-   same on a room name and the label (RingPlaque and ThingPlaque are the
-   pattern), then the word for the house, MetricKit.
+   soft impact. A thing on Home held, sprint 16 (ThingPlaque). A room name
+   and the label held, sprint 33 (the Study's roomPlaque, Home's
+   LabelPlaque; `see.sh OUT study@held jharokha@label`); place a plaque in
+   the layout (an overlay with padding), since an alignment guide inside an
+   overlay's `if` was not honoured. Next: the word for the house (a long
+   press on the label now reveals it, so the word needs its own gesture or
+   a line on the LabelPlaque), then MetricKit.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -625,11 +629,44 @@ F. Settings and the edges. The health dot; settings one tap away; a
    painting built (sprint 32): the sheet hangs on the day's painting, each
    room named on a mount with its words on a plaque, every action a framed
    gilt label (SettingsAction's Framed style) with the selection tick. The
-   steer is whole. Left of F: the version line, then a widget, notifications
-   and Siri on his word. Next: G, touch to reveal on a room name and the
-   label, then the word for the house.
+   steer is whole. The band under the head gone (sprint 33): the head is a
+   dark ground held through Done and the title, then dissolving
+   (PaintedGround's headHold). Left of F: the version line, then a widget,
+   notifications and Siri on his word. Next: G, the word for the house.
 
 ## The ledger (newest first)
+
+- 2026-09-26 · sprint 33 (223a2da, 9097f61): the band under Settings' head
+  is gone, and a room's name and the museum label open when held (his
+  steer, then G slice 2). The pale strip across the sheet under Done was
+  the scan's own top edge, not ours. The head is now a dark ground held
+  through Done and the title, then dissolving into the picture, so nothing
+  cuts the sheet edge to edge. Held in the Study, a room's name turns gilt
+  and grows a plaque under the names: the voice in gilt capitals, "not
+  home just now" in saffron when it is away, its line from /v1/voices
+  ("The door: the day to day, what the house is doing, a quick word."),
+  and "Last spoke Tuesday 9:01 PM" or "Nothing said here yet."; hawa's
+  says "Said here, gone." A tap still opens the room; a hold does not.
+  Held on Home, the label grows the whole wall card on a plaque standing
+  on the hairline: the year in gilt, the title in the serif, the artist and
+  who they were, and the credit under a gilt rule, while the small label
+  steps back. Both give the soft tap and fold back on letting go.
+  The walk had not held a ring or the label since 09-24: an identifier on
+  Home's foot renamed everything under it "foot". It is gone, so the walk
+  holds them again and the reveal hitch line is back; it now holds darban's
+  name too. VoiceOver still hears each name as a button, with the line as
+  its hint. Seen in both modes (`see.sh OUT study@held jharokha@label
+  settings@on`, the first two new) and on film (sheets hold-label,
+  hold-room). Hitches before and after, test hand (ms/s): reveal
+  none then 29.1, first visits 36.1 then 33.9, tabs 53.5 then 45.6, swipe 65.0
+  then 27.5, board scroll 27.1 then 10.8, study scroll 16.9 then 1.8; no
+  hand, tabs 4.8 then 7.5, rest 0.0. Single runs on the Mac, so read them
+  as noise, not a gain. Audit 20 findings before and after (a look mid-sprint
+  had 36: the names, no longer Buttons, read as partly fixed in size; fixed
+  in 9097f61). Not ours to fix: the same scan's bottom edge shows as a pale
+  line at the plaques' sides low on Settings and under Home's status bar.
+  The house should trim the Khan Dauran folio's border (the Met's Shah
+  Jahan Album scans carry it) when composing. No new door.
 
 - 2026-09-26 · sprint 32 (f41c386): Settings stands on the painting and
   its actions look like things to press (F, his steer of 09-24). The sheet
