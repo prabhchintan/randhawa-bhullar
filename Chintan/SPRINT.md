@@ -341,9 +341,15 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    and the label held, sprint 33 (the Study's roomPlaque, Home's
    LabelPlaque; `see.sh OUT study@held jharokha@label`); place a plaque in
    the layout (an overlay with padding), since an alignment guide inside an
-   overlay's `if` was not honoured. Next: the word for the house (a long
-   press on the label now reveals it, so the word needs its own gesture or
-   a line on the LabelPlaque), then MetricKit.
+   overlay's `if` was not honoured. The word for the house built (sprint
+   34): the held label's plaque ends in a framed gilt line, "A word for the
+   house"; slid onto and let go there, a one-line composer rises over the
+   painting alone and posts `/v1/word` {"screen": "home", "text"}
+   (HouseWord.swift; `see.sh OUT jharokha@onword jharokha@word`). Left: the
+   word reached by VoiceOver (an `.accessibilityAction` on the label as it
+   stands raised two "hit area" findings on Home; combine the label into one
+   element first, then add the action, and audit), the word from the Board
+   and the Study (screen "board", "study"), then MetricKit.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -632,9 +638,36 @@ F. Settings and the edges. The health dot; settings one tap away; a
    steer is whole. The band under the head gone (sprint 33): the head is a
    dark ground held through Done and the title, then dissolving
    (PaintedGround's headHold). Left of F: the version line, then a widget,
-   notifications and Siri on his word. Next: G, the word for the house.
+   notifications and Siri on his word. Next: G, the word for the house's
+   last parts (VoiceOver, the other screens), then MetricKit.
 
 ## The ledger (newest first)
+
+- 2026-09-26 · sprint 34 (deb4026, 8265cab): a word for the house, from
+  Home (G, the long press "a word for the house"). Held, the museum label's
+  plaque now ends in a framed gilt line, "A word for the house". Slide the
+  thumb up onto it and it fills with gilt with a selection tick, the way a
+  held menu's line is chosen; let go there and the plaque folds, the day's
+  lettering steps away, and a one-line composer rises above the keyboard on
+  the painting alone: "A word for the house, on Home", the field, Send
+  framed beside it, an x to put it away (a tap on the painting does too).
+  Sent, it says "The house has it." with the success tap and folds; unheard,
+  it says so in saffron ("The house has no door for words yet." or "The
+  house is not answering. Are you on the tailnet?") and keeps the words to
+  send again. Let go anywhere else and the plaque folds as before; a tap
+  still opens the credit. The composer follows the phone's mode (bone in
+  light, lamp black in dark). Seen in both modes (`jharokha@onword`,
+  `jharokha@word`, new) and by real touches in the walk: the hold, the
+  slide, the word typed above the keyboard (shots home-word, home-word-typed;
+  sheet slide-word). Look 3 fixed what the walk showed: the keyboard had
+  lifted the day's lines over the portrait behind the scrim. Hitches, test
+  hand (ms/s): reveal 27.8, first visits 28.6, tabs 48.6, swipe 55.9, board
+  scroll 7.1, study scroll 7.6; no hand, tabs 9.0, rest 0.0; single runs,
+  noise against sprint 33's. Audit 20 findings, as before; a VoiceOver
+  action for the word raised it to 22 (two "hit area too small" on Home),
+  so it is left for the next slice. The door, as SPRINT.md's eyes section
+  named it (live 09-23 03:30): `POST /v1/word {"screen": "home", "text":
+  ...}`, any 2xx is heard, 404 or 405 is "no door yet". No new door.
 
 - 2026-09-26 · sprint 33 (223a2da, 9097f61): the band under Settings' head
   is gone, and a room's name and the museum label open when held (his
