@@ -206,6 +206,21 @@ struct HouseClient {
         guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
     }
 
+    // His word on a screen, the next sprint's steer: {"screen", "text"}. A
+    // house without this door answers 404.
+    func word(_ text: String, on screen: String) async throws {
+        guard let wordURL = url("/v1/word") else { throw HouseError.noAddress }
+        var request = URLRequest(url: wordURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 20
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["screen": screen, "text": text])
+        let (_, response) = try await Self.session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
+        guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
+    }
+
     // Where the phone is, told to the house and forgotten: {"lat", "lon",
     // "acc", "at"}, nil keys left out. The house answers with the place it knows it by (home,
     // work, out) or none yet. A house without this door answers 404.

@@ -11,6 +11,9 @@
 #                                                    jharokha@cut: the phone's own cut;
 #                                                    jharokha@empty: a day with nothing;
 #                                                    jharokha@label: the label held;
+#                                                    jharokha@onword: held, the thumb
+#                                                    on its word for the house;
+#                                                    jharokha@word: that word open;
 #                                                    study@held: darban's name held;
 #                                                    settings: the Settings sheet;
 #                                                    settings@on: every sense on;

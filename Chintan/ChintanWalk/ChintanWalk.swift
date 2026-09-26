@@ -66,6 +66,25 @@ final class ChintanWalk: XCTestCase {
             label.press(forDuration: 1.5)
             pause(0.8)
             shot("home-held")
+            // Held again and slid up onto the plaque's last line, a word for
+            // the house opens; a word is typed and put away, never sent.
+            mark("slide-word")
+            let from = label.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            let onto = label.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: -40, dy: -62))
+            from.press(forDuration: 0.8, thenDragTo: onto)
+            pause(1)
+            let word = app.descendants(matching: .any).matching(identifier: "word").firstMatch
+            if word.waitForExistence(timeout: 2) {
+                shot("home-word")
+                word.typeText("the walk")
+                pause(0.5)
+                shot("home-word-typed")
+                mark("word-away")
+                app.buttons["Put away"].tap()
+                pause(1)
+            } else {
+                note("home: the slide did not open a word for the house")
+            }
         } else {
             note("home: no museum label")
         }

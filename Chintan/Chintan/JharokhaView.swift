@@ -24,10 +24,73 @@ struct JharokhaView: View {
     @State private var held: String?
     // The thing under a press and hold, its plaque grown over the wall.
     @State private var heldThing: UUID?
-    // The museum label under a press and hold, the whole of it on a plaque.
-    @State private var heldLabel = JharokhaView.eyes == "label"
+    // The museum label under a press and hold, the whole of it on a plaque,
+    // and whether the thumb has slid onto the plaque's word for the house.
+    @GestureState(resetTransaction: Transaction(animation: .snappy)) private var hold = LabelHold()
+    // Where that line stands on Home, so a slide can find it.
+    @State private var wordLine = CGRect.zero
+    // A word for the house being written, on its plaque above the keyboard.
+    @State private var wording = JharokhaView.eyes == "word"
+
+    private struct LabelHold: Equatable {
+        var held = false
+        var onWord = false
+    }
+
+    private var heldLabel: Bool { hold.held || Self.eyes == "label" || Self.eyes == "onword" }
+    private var onWord: Bool { hold.onWord || Self.eyes == "onword" }
 
     var body: some View {
+        ZStack(alignment: .bottom) {
+            wall
+                // While a word is written the wall's lettering steps away and
+                // the painting alone stands behind it; the keyboard would
+                // otherwise lift the day's lines over the picture.
+                .opacity(wording ? 0 : 1)
+            if wording {
+                // A tap on the painting puts the word away.
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture { putWordAway() }
+                    .accessibilityHidden(true)
+                    .transition(.opacity)
+                HouseWord(screen: "home", place: "Home", close: putWordAway)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 10)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+    }
+
+    private func putWordAway() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        withAnimation(.snappy) { wording = false }
+    }
+
+    // Held, the label grows its plaque; slid onto the plaque's last line and
+    // let go there, it opens a word for the house, the way a held icon's menu
+    // is chosen from. Let go anywhere else, it folds back.
+    private var labelHold: some Gesture {
+        LongPressGesture(minimumDuration: 0.3, maximumDistance: 24)
+            .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .named("home")))
+            .updating($hold) { value, state, transaction in
+                guard case .second(true, let drag) = value else { return }
+                if !state.held { transaction.animation = .snappy }
+                state.held = true
+                state.onWord = drag.map { overWord($0.location) } ?? false
+            }
+            .onEnded { value in
+                guard case .second(true, let drag?) = value, overWord(drag.location) else { return }
+                withAnimation(.snappy) { wording = true }
+            }
+    }
+
+    // The line and a little around it, so a thumb need not be exact.
+    private func overWord(_ point: CGPoint) -> Bool {
+        !wordLine.isEmpty && wordLine.insetBy(dx: -12, dy: -14).contains(point)
+    }
+
+    private var wall: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
                 GeometryReader { wall in
@@ -51,7 +114,7 @@ struct JharokhaView: View {
                     // the label, and grows up from it.
                     if heldLabel, let painting = gallery.painting, painting.title != nil {
                         let (name, about) = Self.split((painting.artist ?? "").plainDashes)
-                        LabelPlaque(painting: painting, name: name, about: about)
+                        LabelPlaque(painting: painting, name: name, about: about, onWord: onWord) { wordLine = $0 }
                             .padding(.trailing, 22)
                             .padding(.bottom, 12)
                             .transition(.scale(scale: 0.5, anchor: .bottomTrailing).combined(with: .opacity))
@@ -63,6 +126,7 @@ struct JharokhaView: View {
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
             .overlay(alignment: .topLeading) { guestBook }
+            .coordinateSpace(name: "home")
         }
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
@@ -72,6 +136,8 @@ struct JharokhaView: View {
         .sensoryFeedback(.impact(flexibility: .soft), trigger: held) { _, now in now != nil }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldThing) { _, now in now != nil }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldLabel) { _, now in now }
+        // A tick as the thumb comes onto the word for the house.
+        .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
         .sheet(isPresented: $showVisitors) {
             VisitorsView()
                 .presentationBackground(.ultraThinMaterial)
@@ -324,11 +390,8 @@ struct JharokhaView: View {
             .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
             // Pressed and held, the label grows a plaque with the whole of
             // it, the way the wall card reads close up; let go, it folds back.
-            .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
-                withAnimation(.snappy) { heldLabel = true }
-            } onPressingChanged: { pressing in
-                if !pressing, heldLabel { withAnimation(.snappy) { heldLabel = false } }
-            }
+            .gesture(labelHold)
+            .accessibilityAction(named: "A word for the house") { withAnimation(.snappy) { wording = true } }
             .overlay(alignment: .bottomTrailing) { nextMark.offset(y: 24) }
             .padding(.bottom, 22)
         }
@@ -480,11 +543,16 @@ private struct RingPlaque: View {
 }
 
 // The label held: the wall card read close up, the title in the serif, the
-// artist and who they were, the year in gilt, and under a hairline the credit.
+// artist and who they were, the year in gilt, and under a hairline the credit;
+// last, framed like a thing to press, a word for the house, which darkens
+// when the thumb slides onto it.
 private struct LabelPlaque: View {
     let painting: HouseClient.Painting
     let name: String
     let about: String?
+    let onWord: Bool
+    // Where the word's line stands on Home.
+    let placed: (CGRect) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -520,6 +588,27 @@ private struct LabelPlaque: View {
                     .font(.caption)
                     .foregroundStyle(Theme.ink.opacity(0.7))
             }
+            let shape = RoundedRectangle(cornerRadius: 4, style: .continuous)
+            HStack(spacing: 8) {
+                Image(systemName: "text.bubble")
+                    .font(.footnote)
+                Text("A word for the house")
+                    .font(.system(.subheadline, design: .serif).weight(.semibold).lowercaseSmallCaps())
+                    .tracking(0.8)
+            }
+            // Under the thumb it fills with gilt, the plaque's ink on it, as
+            // a chosen line in a held menu does.
+            .foregroundStyle(onWord ? Theme.plaque : Theme.gilt)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(shape.fill(Theme.gilt.opacity(onWord ? 1 : 0.07)))
+            .overlay(shape.strokeBorder(Theme.gilt.opacity(onWord ? 1 : 0.5), lineWidth: 1))
+            .scaleEffect(onWord ? 1.03 : 1)
+            .animation(.snappy(duration: 0.15), value: onWord)
+            .padding(.top, 6)
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .named("home")) } action: { placed($0) }
+            .onDisappear { placed(.zero) }
         }
         .multilineTextAlignment(.leading)
         .fixedSize(horizontal: false, vertical: true)
