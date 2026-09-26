@@ -18,6 +18,8 @@
 #                                                    settings@move: every sense on,
 #                                                    opened at the foot, How you move;
 #                                                    settings@still: there, off;
+#                                                    settings@apps: every sense on,
+#                                                    opened on Which app you open;
 #                                                    study@waiting: a word left
 #                                                    waiting, taken up again;
 #                                                    study@hawa: hawa's room
@@ -79,10 +81,12 @@ for mode in light dark; do
     case "$tab" in settings@senses|settings@quiet) EXTRA=(--settings --open senses) ;; esac
     # settings@move: as settings@on, opened at the foot; settings@still: there, off.
     case "$tab" in settings@move|settings@still) EXTRA=(--settings --open motion) ;; esac
+    # settings@apps: as settings@on, opened on Which app you open.
+    case "$tab" in settings@apps) EXTRA=(--settings --open apps) ;; esac
     # settings@on: location granted always, telling, a place heard, and the
     # phone's word, Health and motion heard. The app
     # the eyes launch never monitors and never posts, so the house hears nothing.
-    if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ] || [ "$tab" = settings@move ]; then
+    if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ] || [ "$tab" = settings@move ] || [ "$tab" = settings@apps ]; then
       xcrun simctl privacy "$UDID" grant location-always Prabhchintan.Chintan
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.telling -bool YES
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan where.place home
@@ -158,7 +162,7 @@ PY
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan studyVoice chintan
     fi
-    if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ] || [ "$tab" = settings@move ]; then
+    if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ] || [ "$tab" = settings@move ] || [ "$tab" = settings@apps ]; then
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       xcrun simctl privacy "$UDID" reset location-always Prabhchintan.Chintan 2>/dev/null || true
       for key in telling place heard; do

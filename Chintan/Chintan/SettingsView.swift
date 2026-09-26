@@ -72,13 +72,15 @@ struct SettingsView: View {
                 .padding(.bottom, 40)
             }
             // For the house's eyes: `--open senses` opens on the senses,
-            // `--open motion` at the foot, on How you move.
+            // `--open motion` at the foot, on How you move; `--open apps` on Which app
+            // you open.
             .onAppear {
                 let args = ProcessInfo.processInfo.arguments
                 guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return }
                 switch args[i + 1] {
                 case "senses": reader.scrollTo("senses", anchor: .top)
                 case "motion": reader.scrollTo("motion", anchor: .bottom)
+                case "apps": reader.scrollTo("apps", anchor: .top)
                 default: break
                 }
             }

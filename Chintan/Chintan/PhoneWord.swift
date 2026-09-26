@@ -19,7 +19,7 @@ import UIKit
 final class PhoneWord: ObservableObject {
     static let shared = PhoneWord()
 
-    enum Event: String { case foreground, background, wake, unlocked, locked }
+    enum Event: String { case foreground, background, wake, unlocked, locked, app }
 
     @Published private(set) var telling: Bool
     @Published private(set) var heard: Date?
@@ -87,12 +87,13 @@ final class PhoneWord: ObservableObject {
     // Said now, in order: the state is read at once, the wifi's name is asked
     // of the phone after the word before it, then the word joins the waiting
     // and goes. The task returned ends when the house has had its chance to
-    // hear it, so a fix can follow its word.
+    // hear it, so a fix can follow its word. An app opened (the Shortcut's
+    // word) names the app and says it came from the automation.
     @discardableResult
-    func say(_ event: Event) -> Task<Void, Never>? {
+    func say(_ event: Event, app: String? = nil) -> Task<Void, Never>? {
         guard telling, !eyes else { return nil }
         if event == last, event == .foreground || event == .background { return nil }
-        last = event
+        if event != .app { last = event }
         let device = UIDevice.current
         var word = Word(
             event: event.rawValue,
@@ -104,6 +105,10 @@ final class PhoneWord: ObservableObject {
             thermal: Self.thermal(ProcessInfo.processInfo.thermalState),
             network: network,
             audio: Self.audio())
+        if event == .app {
+            word.app = app
+            word.source = "shortcut"
+        }
         // Put away, the phone has a few seconds; ask for them before asking the wifi.
         let task = UIApplication.shared.beginBackgroundTask(withName: "phone.word")
         let previous = queued
@@ -206,6 +211,7 @@ private struct Word: Encodable {
     let audio: String
     var ssid: String?
     var motion: String?
+    var app: String?
     var source = "app"
 }
 
@@ -214,8 +220,22 @@ private struct Word: Encodable {
 // On from the first launch, so the note always says what is told.
 struct PhoneWordSection: View {
     @ObservedObject private var word = PhoneWord.shared
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
+        room
+        // Offered here once, in the room's words, never chased.
+        if word.telling {
+            SettingsRoom("Which app you open", note: "No app can see which other app you open; a Shortcuts automation can. In Shortcuts: Automation, App, the apps, Is Opened, Run Immediately, then chintan's Tell the house an app opened, with its name. Only the house hears it.") {
+                SettingsAction("Open Shortcuts") {
+                    if let url = URL(string: "shortcuts://") { openURL(url) }
+                }
+            }
+            .id("apps")
+        }
+    }
+
+    private var room: some View {
         SettingsRoom("When you are on the phone", note: note) {
             if word.telling, let heard = word.heard {
                 HeardLine(words: "Heard", hour: WhereaboutsSection.time(heard))
