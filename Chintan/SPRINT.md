@@ -154,9 +154,10 @@ its `image` path; `/v1/paintings/ID.jpg` is the picture at the phone's size; the
 phone keeps the whole shelf, since 09-23), `/v1/visitors` (the site's visitors as
 people, newest last seen first; `/v1/visitors/VID` is one person with `visitList`,
 each visit's `steps` as page and seconds; since 09-23), `/v1/say` and `/v1/say/ID` (the conversation; since 09-22 evening `POST
-/v1/say {"text": ..., "to": "chintan"|"darban"|"yaar"}` reaches the voice
-named, chintan when unnamed, and `GET /v1/voices` lists the three with a line
-each and their state), `POST /v1/done {"text": ...}` when the board asks for
+/v1/say {"text": ..., "to": "chintan"|"darban"|"yaar"|"hawa"}` reaches the voice
+named, chintan when unnamed, and `GET /v1/voices` lists them with a line
+each and their state; hawa since 09-25, the air, its spool in RAM and wiped
+when the conversation ends, and the app keeps it nowhere either), `POST /v1/done {"text": ...}` when the board asks for
 it, `/v1/titles` (since 09-25 08:50: the house's own short name for every open
 thing, {"titles": [{"line", "title", "hour"}]}, a model names each line once,
 one to four words, the hour a clock time or a word like "evening"). Anything shown as a number, ring or bar comes from one of these or is
@@ -607,6 +608,30 @@ F. Settings and the edges. The health dot; settings one tap away; a
    standardAppearance with the ground set only for this sheet's bar.
 
 ## The ledger (newest first)
+
+- 2026-09-25 · sprint 30 (4720131): the fourth voice, hawa, kept nowhere
+  (his steer of 13:44). The Study's header names four rooms, hawa after
+  yaar, in the same type; the names now slide under the thumb from x large
+  (four would crowd the gear there), not xx large. hawa's words live in
+  memory alone: no conversation-hawa.json, nothing loaded, and no line in
+  waiting.json; a reply still out is asked after while the room is open and
+  let go (the wait cancelled, a late answer dropped) when the app goes to
+  the background or the Study is left, and the room is empty on return.
+  Its empty room says at its head "Said here, gone. The house keeps
+  nothing from this room." and nothing else; composer and bubbles as the
+  other rooms. The shade under an empty room's line was a radial pool cut
+  square by its frame (a hard edge across the sky, seen in look 1); it now
+  fades inside its bounds, in every room. Seen in both modes (`see.sh OUT
+  study@hawa`, new: the empty room, a word said on launch with `--say`, the
+  app put behind the phone's Settings and brought back, then chintan's
+  room): four names; hawa empty with its line; back from Settings (the
+  "Settings" breadcrumb shows the same process, not a relaunch) the room
+  empty again, chintan's history whole; Application Support holds only
+  conversation.json. Not seen: an answer in hawa's room. The house door
+  refused every connection through the run (port 8082, connection refused,
+  six tries), so the word showed "The house is not answering." with Try
+  again, honestly; the first answered word is his. No hitch numbers
+  (nothing that moves was changed). No new door needed.
 
 - 2026-09-25 · sprint 29 (6d80fc9): the phone tells the house where he
   stays (N, slice 4, visits on Where). With location allowed always, the
