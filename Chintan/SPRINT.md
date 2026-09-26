@@ -603,7 +603,12 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    Intent ("Tell the house an app opened", its app a parameter, run without
    opening chintan, posting {"event": "app", "app", "source": "shortcut"}
    to /v1/phone through PhoneWord) so his automation is two taps, not a
-   hand-built web request with the house's address in it.
+   hand-built web request with the house's address in it. Built (sprint 31):
+   AppOpened.swift, the intent in Shortcuts with its app as text, and "Which
+   app you open" on Settings under the phone's word, with Open Shortcuts.
+   Left: seen on his phone (the simulator's eyes never post; an automation
+   is his hands once), and the house's desk reading "app" words. N is whole
+   on the app side; next, F's pressable actions, then G.
 F. Settings and the edges. The health dot; settings one tap away; a
    version line; then on his word a widget (App Group, extension target),
    notifications (an APNs key, his hands), Siri. His steer (2026-09-24):
@@ -620,6 +625,30 @@ F. Settings and the edges. The health dot; settings one tap away; a
    and the wall on the painting.
 
 ## The ledger (newest first)
+
+- 2026-09-26 · sprint 31 (7e474c8, 4865236): builds reach the phone again,
+  and the house can hear which app he opens (the steer first, then N slice
+  5's last part). Every ship since the Health slice (09-25 10:44) failed App
+  Store Connect validation for a missing NSHealthUpdateUsageDescription. The
+  app already asked Health for reading only (`toShare: []`, no write types,
+  the entitlement's access list empty); Apple wants the key whenever
+  HealthKit is linked, so Info.plist now says "chintan never writes to
+  Health. It only reads your totals so the house can hear them." (7e474c8).
+  Not confirmed from this run: ship.sh needs an approval this unattended
+  hand could not get, so the job's own ship after this sprint is the first
+  test; if it fails again, its export log names the next missing key. Then
+  (4865236): Shortcuts carries "Tell the house an app opened" (an App
+  Intent, its app a text parameter, run without opening chintan), which
+  says the phone's word with {"event": "app", "app": NAME, "source":
+  "shortcut"} through PhoneWord, and nothing when the phone's word is
+  stopped; the intent is in the build's App Intents metadata. Settings
+  offers it once, a room "Which app you open" under When you are on the
+  phone while that is on: Open Shortcuts, and a note saying how (Automation,
+  App, Is Opened, Run Immediately). Seen in both modes (`settings@senses`,
+  `settings@quiet`, and `settings@apps`, new: opened on the room); Home
+  unchanged. No hitch numbers (nothing that moves was touched). No new door:
+  /v1/phone takes "app" words as its contract already says; the house's
+  desk should read them as "on the phone, in NAME".
 
 - 2026-09-25 · sprint 30 (4720131): the fourth voice, hawa, kept nowhere
   (his steer of 13:44). The Study's header names four rooms, hawa after
