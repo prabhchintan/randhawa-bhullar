@@ -95,9 +95,10 @@ struct ContentView: View {
 
     @ViewBuilder private func screen(_ t: Tab) -> some View {
         switch t {
-        case .jharokha: JharokhaView()
-        case .board: BoardView()
-        case .study: StudyView(open: tab == .study)
+        // Each page says when it is unchanged, so a turn letters only what moved.
+        case .jharokha: JharokhaView().equatable()
+        case .board: BoardView().equatable()
+        case .study: StudyView(open: tab == .study).equatable()
         }
     }
 

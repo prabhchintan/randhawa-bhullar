@@ -200,7 +200,7 @@ struct StudyView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 22) {
+        HStack(alignment: .center, spacing: 12) {
             // The four names side by side; at the larger text they slide
             // under the thumb instead of running off the phone. Measured only
             // from x large, where four first crowd the gear: ViewThatFits lays
@@ -216,7 +216,9 @@ struct StudyView: View {
                     rooms
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // Never wider than the page: names too wide for it once pushed
+            // the whole study, bubbles and composer, past the Board's margin.
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             Button {
                 showingSettings = true
             } label: {
@@ -235,7 +237,7 @@ struct StudyView: View {
 
     // The four names share one mount, its edge on the bubbles' edge.
     private var rooms: some View {
-        HStack(alignment: .center, spacing: 22) {
+        HStack(alignment: .center, spacing: 17) {
             ForEach(Voice.allCases) { v in
                 room(v)
             }
@@ -585,4 +587,12 @@ private struct Breathing: View {
             withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { full = true }
         }
     }
+}
+
+// The study takes one thing from the pages around it, whether it is in
+// view; a turn that leaves that alone never letters it again. The held
+// name's gesture state cannot be compared by SwiftUI, and without this
+// every turn rebuilt the whole study.
+extension StudyView: Equatable {
+    static func == (a: StudyView, b: StudyView) -> Bool { a.open == b.open }
 }

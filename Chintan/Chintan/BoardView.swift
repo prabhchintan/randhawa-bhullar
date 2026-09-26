@@ -74,7 +74,10 @@ struct BoardView: View {
                             // The held plaque stands over the shelves.
                             .zIndex(1)
                         if !shelves.isEmpty || errorText != nil {
+                            // The shelves step back behind a held plaque, so
+                            // no leaf reads on with it.
                             board
+                                .opacity(heldHead ? 0.3 : 1)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -130,10 +133,13 @@ struct BoardView: View {
             WordLine(onWord: onWord, space: "board") { wordLine = $0 }
         }
         .fixedSize(horizontal: false, vertical: true)
-        .padding(16)
-        .frame(maxWidth: 320, alignment: .leading)
-        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .plaque(radius: 12)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        // A leaf's own width and corners, opaque, so no leaf shows round it
+        // or through it.
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .plaque()
         .accessibilityElement(children: .combine)
     }
 
@@ -181,14 +187,27 @@ struct BoardView: View {
             withAnimation(.snappy) { wording = true }
         }
         .gesture(headHold)
-        // Held, the plaque hangs from the heading's foot and grows down over
-        // the shelves; a frame of no height lets it run past the heading.
+        // Held, the board dims behind the heading, the painting and the
+        // shelves alike, so the plaque stands alone on it.
+        .background {
+            if heldHead {
+                Color.black.opacity(0.55)
+                    .frame(width: 4000, height: 4000)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                    .transition(.opacity)
+            }
+        }
+        // The plaque hangs from the heading's foot and grows down over the
+        // shelves, as wide as a leaf; a frame of no height lets it run past
+        // the heading.
         .overlay(alignment: .bottomLeading) {
             if heldHead {
                 headPlaque
+                    .padding(.horizontal, -6)
                     .frame(height: 0, alignment: .top)
-                    .offset(x: -6, y: 12)
-                    .transition(.scale(scale: 0.6, anchor: .topLeading).combined(with: .opacity))
+                    .offset(y: 14)
+                    .transition(.scale(scale: 0.92, anchor: .top).combined(with: .opacity))
             }
         }
     }
@@ -382,6 +401,14 @@ struct BoardView: View {
         }
         loaded = true
     }
+}
+
+// The board takes nothing from the pages around it, so a turn of a page
+// never letters it again; its own state still does. Without this, the held
+// heading's gesture state (which SwiftUI cannot compare) made every turn
+// rebuild the whole board.
+extension BoardView: Equatable {
+    static func == (_: BoardView, _: BoardView) -> Bool { true }
 }
 
 // When a thing is due, lettered small: the weekday over the day, saffron

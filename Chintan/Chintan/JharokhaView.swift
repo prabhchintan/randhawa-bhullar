@@ -855,3 +855,11 @@ extension String {
         replacingOccurrences(of: "\u{2013}", with: "-").replacingOccurrences(of: "\u{2014}", with: ", ")
     }
 }
+
+// Home takes nothing from the pages around it, so a turn of a page never
+// letters it again; its own state, the house's data and the phone's settings
+// still do. The held label's gesture state cannot be compared by SwiftUI,
+// and without this every turn rebuilt the whole wall.
+extension JharokhaView: Equatable {
+    static func == (_: JharokhaView, _: JharokhaView) -> Bool { true }
+}
