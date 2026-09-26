@@ -41,30 +41,7 @@ struct JharokhaView: View {
     private var onWord: Bool { hold.onWord || Self.eyes == "onword" }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            wall
-                // While a word is written the wall's lettering steps away and
-                // the painting alone stands behind it; the keyboard would
-                // otherwise lift the day's lines over the picture.
-                .opacity(wording ? 0 : 1)
-            if wording {
-                // A tap on the painting puts the word away.
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture { putWordAway() }
-                    .accessibilityHidden(true)
-                    .transition(.opacity)
-                HouseWord(screen: "home", place: "Home", close: putWordAway)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 10)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-    }
-
-    private func putWordAway() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        withAnimation(.snappy) { wording = false }
+        wall.wordStage($wording, screen: "home", place: "Home")
     }
 
     // Held, the label grows its plaque; slid onto the plaque's last line and
@@ -85,10 +62,7 @@ struct JharokhaView: View {
             }
     }
 
-    // The line and a little around it, so a thumb need not be exact.
-    private func overWord(_ point: CGPoint) -> Bool {
-        !wordLine.isEmpty && wordLine.insetBy(dx: -12, dy: -14).contains(point)
-    }
+    private func overWord(_ point: CGPoint) -> Bool { WordLine.over(wordLine, point) }
 
     private var wall: some View {
         GeometryReader { geo in
@@ -384,6 +358,15 @@ struct JharokhaView: View {
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: 200, alignment: .trailing)
             .contentShape(Rectangle())
+            // To VoiceOver the label is one card: read whole, a double tap
+            // for the credit, and the word for the house among its actions,
+            // since a slide on a held plaque is a thumb's way, not VoiceOver's.
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHint(showCredit ? "Puts the credit away" : "Shows the credit")
+            .accessibilityAction(named: "A word for the house") {
+                withAnimation(.snappy) { wording = true }
+            }
             .accessibilityIdentifier("label")
             // The label behind a held plaque steps back, so the two never read at once.
             .opacity(heldLabel ? 0.25 : 1)
@@ -587,27 +570,7 @@ private struct LabelPlaque: View {
                     .font(.caption)
                     .foregroundStyle(Theme.ink.opacity(0.7))
             }
-            let shape = RoundedRectangle(cornerRadius: 4, style: .continuous)
-            HStack(spacing: 8) {
-                Image(systemName: "text.bubble")
-                    .font(.footnote)
-                Text("A word for the house")
-                    .font(.system(.subheadline, design: .serif).weight(.semibold).lowercaseSmallCaps())
-                    .tracking(0.8)
-            }
-            // Under the thumb it fills with gilt, the plaque's ink on it, as
-            // a chosen line in a held menu does.
-            .foregroundStyle(onWord ? Theme.plaque : Theme.gilt)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(shape.fill(Theme.gilt.opacity(onWord ? 1 : 0.07)))
-            .overlay(shape.strokeBorder(Theme.gilt.opacity(onWord ? 1 : 0.5), lineWidth: 1))
-            .scaleEffect(onWord ? 1.03 : 1)
-            .animation(.snappy(duration: 0.15), value: onWord)
-            .padding(.top, 6)
-            .onGeometryChange(for: CGRect.self) { $0.frame(in: .named("home")) } action: { placed($0) }
-            .onDisappear { placed(.zero) }
+            WordLine(onWord: onWord, space: "home", placed: placed)
         }
         .multilineTextAlignment(.leading)
         .fixedSize(horizontal: false, vertical: true)

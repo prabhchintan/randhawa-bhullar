@@ -35,6 +35,28 @@ struct BoardView: View {
     @State private var launchOpened = false
     // The house's own short titles, by the line, when it serves them.
     @State private var titles: [String: BoardItem.Short] = [:]
+    // The heading pressed and held, its plaque grown over the shelves, and
+    // whether the thumb has slid onto its word for the house; `--open held`,
+    // `onword` and `word` show each for the house's eyes.
+    @GestureState(resetTransaction: Transaction(animation: .snappy)) private var hold = HeadHold()
+    // Where the plaque's word line stands on the board, so a slide can find it.
+    @State private var wordLine = CGRect.zero
+    // A word for the house being written, on its plaque above the keyboard.
+    @State private var wording = BoardView.eyes == "word"
+
+    private struct HeadHold: Equatable {
+        var held = false
+        var onWord = false
+    }
+
+    private var heldHead: Bool { hold.held || Self.eyes == "held" || Self.eyes == "onword" }
+    private var onWord: Bool { hold.onWord || Self.eyes == "onword" }
+
+    private static var eyes: String? {
+        let args = ProcessInfo.processInfo.arguments
+        guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return nil }
+        return args[i + 1]
+    }
 
     private static let foot = Theme.foot
 
@@ -49,6 +71,8 @@ struct BoardView: View {
                         heading
                             .padding(.top, geo.size.height * 0.30)
                             .padding(.horizontal, 6)
+                            // The held plaque stands over the shelves.
+                            .zIndex(1)
                         if !shelves.isEmpty || errorText != nil {
                             board
                         }
@@ -67,9 +91,66 @@ struct BoardView: View {
                 }
             }
         }
+        .coordinateSpace(name: "board")
         .background { PaintedGround(head: 160) }
+        .wordStage($wording, screen: "board", place: "the Board")
         .refreshable { await refresh() }
         .task { await refresh() }
+        // A soft impact as the plaque grows, a tick as the thumb comes onto
+        // the word for the house.
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: heldHead) { _, now in now }
+        .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
+    }
+
+    // Held, the heading grows its plaque; slid onto the plaque's last line
+    // and let go there, it opens a word for the house. Let go anywhere else,
+    // it folds back.
+    private var headHold: some Gesture {
+        LongPressGesture(minimumDuration: 0.3, maximumDistance: 24)
+            .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .named("board")))
+            .updating($hold) { value, state, transaction in
+                guard case .second(true, let drag) = value else { return }
+                if !state.held { transaction.animation = .snappy }
+                state.held = true
+                state.onWord = drag.map { WordLine.over(wordLine, $0.location) } ?? false
+            }
+            .onEnded { value in
+                guard case .second(true, let drag?) = value, WordLine.over(wordLine, drag.location) else { return }
+                withAnimation(.snappy) { wording = true }
+            }
+    }
+
+    // The heading held: the board's shelves told in one line, and last a
+    // word for the house. No name of its own; the heading stands over it.
+    private var headPlaque: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(tally)
+                .font(.system(.title3, design: .serif))
+                .foregroundStyle(Theme.ink)
+            WordLine(onWord: onWord, space: "board") { wordLine = $0 }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(16)
+        .frame(maxWidth: 320, alignment: .leading)
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .plaque(radius: 12)
+        .accessibilityElement(children: .combine)
+    }
+
+    // "Two today, one tomorrow, one Thursday, seven later."
+    private var tally: String {
+        guard count > 0 else { return summary }
+        let f = NumberFormatter()
+        f.numberStyle = .spellOut
+        let parts = shelves.filter { !$0.items.isEmpty }.map { shelf in
+            let n = f.string(from: shelf.items.count as NSNumber) ?? "\(shelf.items.count)"
+            switch shelf.title {
+            case "Today", "Tomorrow", "Later": return n + " " + shelf.title.lowercased()
+            default: return shelf.named ? n + " " + shelf.title : n + " under " + shelf.title
+            }
+        }
+        let line = parts.joined(separator: ", ")
+        return line.prefix(1).uppercased() + line.dropFirst() + "."
     }
 
     private var heading: some View {
@@ -90,6 +171,25 @@ struct BoardView: View {
                 .frame(height: 340)
                 .padding(.horizontal, -40)
                 .offset(y: 110)
+        }
+        .contentShape(Rectangle())
+        // To VoiceOver the heading is one line, the word for the house among
+        // its actions, since a slide on a held plaque is a thumb's way.
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityAction(named: "A word for the house") {
+            withAnimation(.snappy) { wording = true }
+        }
+        .gesture(headHold)
+        // Held, the plaque hangs from the heading's foot and grows down over
+        // the shelves; a frame of no height lets it run past the heading.
+        .overlay(alignment: .bottomLeading) {
+            if heldHead {
+                headPlaque
+                    .frame(height: 0, alignment: .top)
+                    .offset(x: -6, y: 12)
+                    .transition(.scale(scale: 0.6, anchor: .topLeading).combined(with: .opacity))
+            }
         }
     }
 

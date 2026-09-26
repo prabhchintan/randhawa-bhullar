@@ -25,8 +25,14 @@ struct StudyView: View {
     // Opened on launch with --settings, for the house's screenshots.
     @State private var showingSettings = ProcessInfo.processInfo.arguments.contains("--settings")
     // The room whose name is pressed and held, its plaque grown under the
-    // names; `--open held` holds darban's, for the house's eyes.
-    @State private var heldRoom: Voice? = StudyView.launchArgument == "held" ? .darban : nil
+    // names, and whether the thumb has slid onto its word for the house;
+    // `--open held` holds darban's for the house's eyes, `--open onword`
+    // with the thumb on the word.
+    @GestureState(resetTransaction: Transaction(animation: .snappy)) private var hold = RoomHold()
+    // Where the plaque's word line stands in the study, so a slide can find it.
+    @State private var wordLine = CGRect.zero
+    // A word for the house being written, on its plaque above the keyboard.
+    @State private var wording = StudyView.launchArgument == "word"
     @Namespace private var rule
 
     private static var launchArgument: String? {
@@ -45,6 +51,16 @@ struct StudyView: View {
         return nil
     }
 
+    private struct RoomHold: Equatable {
+        var room: Voice?
+        var onWord = false
+    }
+
+    private var heldRoom: Voice? {
+        hold.room ?? (["held", "onword"].contains(StudyView.launchArgument) ? .darban : nil)
+    }
+    private var onWord: Bool { hold.onWord || StudyView.launchArgument == "onword" }
+
     private var messages: [ChintanMessage] { store.messages(voice) }
     private var isThinking: Bool { thinking.contains(voice) }
 
@@ -56,6 +72,13 @@ struct StudyView: View {
     }
 
     var body: some View {
+        walls
+            .wordStage($wording, screen: "study", place: "the Study")
+            // A tick as the thumb comes onto the word for the house.
+            .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
+    }
+
+    private var walls: some View {
         VStack(spacing: 0) {
             header
             ScrollViewReader { proxy in
@@ -107,6 +130,7 @@ struct StudyView: View {
             }
             composer
         }
+        .coordinateSpace(name: "study")
         .background { PaintedGround(head: 150, foot: 260) }
         // A soft impact as a plaque grows, none as it folds.
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldRoom) { _, now in now != nil }
@@ -250,23 +274,42 @@ struct StudyView: View {
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.25)) { voice = v }
         }
-        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
-            withAnimation(.snappy) { heldRoom = v }
-        } onPressingChanged: { pressing in
-            if !pressing, heldRoom != nil { withAnimation(.snappy) { heldRoom = nil } }
-        }
+        .gesture(roomHold(v))
         // To VoiceOver and the audit it is the plain button it always was,
-        // the voice's line as its hint.
+        // the voice's line as its hint, and the word for the house among
+        // its actions.
         .accessibilityRepresentation {
             Button(v.rawValue) { withAnimation(.easeInOut(duration: 0.25)) { voice = v } }
                 .font(Theme.label(.body))
                 .accessibilityHint(lines[v].map(Self.sentence) ?? "")
                 .accessibilityAddTraits(open ? .isSelected : [])
+                .accessibilityAction(named: "A word for the house") {
+                    withAnimation(.snappy) { wording = true }
+                }
         }
     }
 
+    // Held, the name grows its plaque; slid onto the plaque's last line and
+    // let go there, it opens a word for the house. Let go anywhere else, it
+    // folds back.
+    private func roomHold(_ v: Voice) -> some Gesture {
+        LongPressGesture(minimumDuration: 0.3, maximumDistance: 24)
+            .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .named("study")))
+            .updating($hold) { value, state, transaction in
+                guard case .second(true, let drag) = value else { return }
+                if state.room == nil { transaction.animation = .snappy }
+                state.room = v
+                state.onWord = drag.map { WordLine.over(wordLine, $0.location) } ?? false
+            }
+            .onEnded { value in
+                guard case .second(true, let drag?) = value, WordLine.over(wordLine, drag.location) else { return }
+                withAnimation(.snappy) { wording = true }
+            }
+    }
+
     // A room's name held: the voice named in gilt, whether it is home, its
-    // own line from the house, and when it last spoke here.
+    // own line from the house, when it last spoke here, and last a word for
+    // the house.
     private func roomPlaque(_ v: Voice) -> some View {
         let last = store.messages(v).last(where: \.fromHouse)
         return VStack(alignment: .leading, spacing: 6) {
@@ -289,6 +332,7 @@ struct StudyView: View {
                  : last.map { "Last spoke " + Self.spoke($0) } ?? "Nothing said here yet.")
                 .font(.system(.callout, design: .serif).italic())
                 .foregroundStyle(Theme.ink.opacity(0.8))
+            WordLine(onWord: onWord, space: "study") { wordLine = $0 }
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(16)

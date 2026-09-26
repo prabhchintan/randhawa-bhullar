@@ -7,6 +7,9 @@
 #
 #   bash Chintan/scripts/see.sh OUTDIR [tab ...]     tabs: jharokha board study
 #                                                    (board@N: the Nth thing opened;
+#                                                    board@held: the heading held;
+#                                                    board@onword: held, the thumb
+#                                                    on its word; board@word: open;
 #                                                    jharokha@tN: Home's Nth thing held;
 #                                                    jharokha@cut: the phone's own cut;
 #                                                    jharokha@empty: a day with nothing;
@@ -15,6 +18,9 @@
 #                                                    on its word for the house;
 #                                                    jharokha@word: that word open;
 #                                                    study@held: darban's name held;
+#                                                    study@onword: held, the thumb
+#                                                    on its word for the house;
+#                                                    study@word: that word open;
 #                                                    settings: the Settings sheet;
 #                                                    settings@on: every sense on;
 #                                                    settings@senses: so, opened
