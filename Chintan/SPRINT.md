@@ -690,6 +690,65 @@ F. Settings and the edges. The health dot; settings one tap away; a
    (PaintedGround's headHold). Left of F: the version line, then a widget,
    notifications and Siri on his word. MetricKit built (sprint 37). Next:
    the version line, the smallest open thing here; the rest waits on his word.
+O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
+   the app, by the way can we do a mac OS version so i can have the app as a
+   full screen thing that always displays art, to dos and emails (for this we
+   would need some kind of live refresh no?), and absolutely love the feature
+   where i can click the art and it just displays full screen without any
+   distractions, AMAZING chef's kiss, that is WONDERFUL"). Weights (BUTLER
+   31): the painting alone on tap is the behaviour to keep; the Mac is a
+   wall, not a second phone. The shape:
+   - The destination. A Mac Catalyst destination on the Chintan target, not
+     "Designed for iPad": yantar, the Mac on his desk that builds the app,
+     is a 2018 MacBook Pro (Intel, macOS 15.8, Xcode 26.3), and iPhone
+     apps run unchanged only on Apple silicon. Deployment iOS 17 maps to
+     macOS 14; Catalyst keeps UIKit, SwiftUI and the notification names the
+     app already uses. The phone's senses stay the phone's: HealthKit,
+     CoreMotion, CoreLocation's significant change, BackgroundTasks, the
+     MetricKit subscriber and the phone's own word go behind
+     `#if !targetEnvironment(macCatalyst)` (or a protocol with a Mac no-op),
+     and the Mac never posts to /v1/health, /v1/motion, /v1/location or
+     /v1/phone. NetworkExtension's tailnet check reads the same on both.
+   - The wall. Full screen (the window's toolbar hidden, `.windowStyle` or
+     the Catalyst scene's fullscreen on launch, the menu bar away), the
+     painting composed for a landscape frame: the house serves
+     `GET /v1/paintings/ID.wall.jpg` since 2026-09-27 (1920 by 1080, the
+     work whole at the frame's height, its own softened reflections on the
+     open sides, the same mirrored ground the phone knows), cut on first
+     ask and cached; the Mac asks for `.wall.jpg` where the phone asks for
+     `.mirror.jpg`, and falls back to the phone's cut if the house says 404.
+     The day's set, the tap to the painting alone (the chef's kiss, kept
+     exactly), a swipe or arrow key through the set: all as on the phone.
+   - The labels. On the wall, the way a museum letters a room: the date and
+     the day's line at the head; the board's Today and This week as a
+     narrow column at one side, done by a click (`POST /v1/done` as now);
+     the Imbox as a second short column, sender and subject and when, from
+     the new door `GET /v1/mail` ({"mail": [{id, who, subject, at}],
+     "count"}; the house lists his Imbox from HEY, cached five minutes, the
+     house's own cards left out; a label, never a to-do surface, BUTLER
+     37). Text over the painting through the same glass and scrim; the
+     column narrow enough that the work is still the room. A click on a
+     mail line opens it in HEY in the browser (app.hey.com/topics/ID);
+     nothing is sent or filed from the wall.
+   - Live. His own word: "we would need some kind of live refresh no?"
+     Yes: the Mac polls, no push. The board and the mail every 60 seconds
+     while the window is on screen (both doors are cheap and cached), the
+     painting record every ten minutes and at the day's turn (04:30 is
+     when the house stocks the new set), the whole thing paused when the
+     window is hidden or the Mac sleeps, resumed on wake. Nothing
+     animates on a poll unless something changed; a new mail line fades in.
+     ETag or a compare on the JSON keeps the wall still.
+   - Shipping. Built and run on yantar itself: the sprint's runner builds
+     the Catalyst destination, signs for development and leaves the .app in
+     /Applications on yantar, opened full screen; TestFlight for Mac only
+     if he wants it on another Mac (ASC is his hands). The phone build and
+     its TestFlight lane untouched: one target, two destinations, the
+     phone's screens and walk unchanged and re-seen after the split.
+   The first slice: the destination compiling green on yantar with the
+   senses guarded, Home full screen on the wall cut, the painting alone on
+   tap; the columns and the poll the second slice; the mail column the
+   third.
+
 
 ## The ledger (newest first)
 
