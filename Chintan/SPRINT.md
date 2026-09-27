@@ -757,6 +757,24 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    build has no Keychain; the look passes `--house`; a development signed
    build in /Applications is the Shipping item), and the first launch's
    crash seen once (a segfault, no report, not seen again in three).
+   The house's steer, 12:36 (his word first): the wall turns through the
+   day's set on its own, a Mac setting of 5, 15, 30 or 60 minutes, 15 by
+   default; each turn a slow classic crossfade, two to three seconds,
+   nothing sliding; the label (title, artist, year, credit) stays bottom
+   right with the painting alone, small over a short shade; the phone
+   untouched. Built (sprint 44): the Wall menu in the menu bar (Turn Every,
+   `wall.minutes` in UserDefaults), a turn by hand starting the wait again;
+   the crossfade 2.6 s with the old picture whole under the new one (the
+   Mac's Painting and Gallery.under); ContentView's WallLabel. The eyes:
+   `--turn S` paces the wall in seconds; wall.sh times the full screen turn
+   and waits for it, and calls a photograph CONFIRMED only when the wall
+   itself says (`--say-window`, Caches/wall-state) its window is full
+   screen, in front and on the space in view. The runner's session sees no
+   windows (System Events and the window server's list both came back
+   empty over a full screen wall), so the wall says it. Left of the steer:
+   a CONFIRMED look with the full screen time measured, and a frame inside
+   the crossfade (sprint 44's ledger). Next: the columns
+   (the board, then `GET /v1/mail`), the 60 s poll, the wall's own lettering size.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -807,6 +825,30 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
 
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 44 (1b5adbc, e09a120): the Mac wall turns (the house's
+  12:36 steer). The wall now moves through the day's set by itself, every 15
+  minutes. A Wall menu in the menu bar (Turn Every: 5 Minutes, 15, 30, 1
+  Hour) changes that, and a swipe by hand starts the wait again. Each turn is
+  a slow crossfade of 2.6 s: the new picture comes up over the old one, which
+  stays whole underneath, so nothing dips to black and nothing slides. With
+  the painting alone, the label stays in the bottom right corner (title in
+  italic, artist, year in gilt, credit), small, over a short corner shade,
+  and changes with the painting at the same pace. The phone is untouched:
+  all six stills are the same as before (/tmp/see/1). Seen on yantar at about
+  12:55 (/tmp/see/2, the wall in full screen in every photograph): Lady in
+  Black alone with its label in the corner, then Cezanne's Vase of Tulips
+  after the wall turned on its own with `--turn 30`, the label following it.
+  Not seen: a frame in the middle of the crossfade. The window check took 60
+  s to give up, so every "turn" photograph came after the fade. Those
+  photographs were marked NO WINDOW although the wall filled them. Asked for
+  "Chintan", System Events finds nothing from the runner's session, and so
+  does the window server's list, which came back empty. The wall now reports
+  its own window state (e09a120), but that fix has not been seen, because
+  yantar was in use for the rest of the run (touched 64 to 420 s before each
+  of three tries). So the full screen time on the 2018 Mac is still not
+  measured; it is the first thing the next look prints. No walk (no touch on
+  the phone moved), no hitch numbers. No new door.
 
 - 2026-09-27 · the house's look at sprint 43 (12:15 to 12:32). The sprint's
   "Mac photos" held HEY and iPhone Mirroring, not the wall: run as a bare
