@@ -39,18 +39,20 @@ fi
 
 # Whether chintan's window is on the screen, full screen and in front:
 # prints "full", "window" (there, not yet full screen or not in front) or "none".
+# The runner's session sees no windows: System Events said "none" and the
+# window server's list came back empty over a full screen wall (2026-09-27).
+# So the wall says it itself (`--say-window`): Caches/wall-state in its
+# sandbox, rewritten twice a second while it runs; older than 3 s is none.
+STATE_GLOB="$HOME/Library/Containers/*Chintan*/Data/Library/Caches/wall-state"
 state() {
-  osascript 2>/dev/null <<'OSA' || echo none
-tell application "System Events"
-  if not (exists process "Chintan") then return "none"
-  tell process "Chintan"
-    if (count of windows) is 0 then return "none"
-    set full to value of attribute "AXFullScreen" of window 1
-    if full and frontmost then return "full"
-    return "window"
-  end tell
-end tell
-OSA
+  local f
+  for f in $STATE_GLOB; do
+    [ -f "$f" ] || continue
+    [ $(( $(date +%s) - $(stat -f %m "$f") )) -le 3 ] || continue
+    [ -n "$(pgrep -x Chintan)" ] || continue
+    cat "$f"; return
+  done
+  echo none
 }
 
 # One photograph, called confirmed only when the window stood full screen
@@ -78,7 +80,8 @@ shoot() {
   # 12:15 and 12:29 photos on 2026-09-27 showed HEY and Telegram, not the
   # wall); `open` hands it to the user's GUI session, where the window is.
   local t0; t0=$(date +%s)
-  open -n "$APP" --args --house "${CHINTAN_HOUSE:-}" --tab jharokha "$@" >"$OUT/$name.log" 2>&1
+  rm -f $STATE_GLOB
+  open -n "$APP" --args --house "${CHINTAN_HOUSE:-}" --tab jharokha --say-window "$@" >"$OUT/$name.log" 2>&1
   local s=none waited=0
   while [ "$waited" -lt "${WALL_LIMIT:-60}" ]; do
     s=$(state)

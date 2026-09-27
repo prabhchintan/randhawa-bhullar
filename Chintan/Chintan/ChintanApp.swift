@@ -97,6 +97,33 @@ enum Wall {
                 if mask & (1 << 14) == 0 { window.perform(NSSelectorFromString("toggleFullScreen:"), with: nil) }
             }
         }
+        if ProcessInfo.processInfo.arguments.contains("--say-window") { say() }
+    }
+
+    // For the house's eyes (`--say-window`, wall.sh only): twice a second the
+    // wall writes Caches/wall-state, "full" when its window is full screen,
+    // in front and on the space in view, "window" when it is up but not that.
+    // The runner cannot read the window server's list, so the wall says it.
+    private static func say() {
+        let file = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("wall-state")
+        Task { @MainActor in
+            while true {
+                var state = "window"
+                if let app = (NSClassFromString("NSApplication") as? NSObject.Type)?.value(forKey: "sharedApplication") as? NSObject,
+                   (app.value(forKey: "isActive") as? Bool) == true,
+                   let windows = app.value(forKey: "windows") as? [NSObject] {
+                    let full = windows.contains { w in
+                        ((w.value(forKey: "styleMask") as? UInt) ?? 0) & (1 << 14) != 0
+                            && (w.value(forKey: "isOnActiveSpace") as? Bool) == true
+                            && (w.value(forKey: "isVisible") as? Bool) == true
+                    }
+                    if full { state = "full" }
+                }
+                try? Data(state.utf8).write(to: file, options: .atomic)
+                try? await Task.sleep(for: .seconds(0.5))
+            }
+        }
     }
 }
 #endif
