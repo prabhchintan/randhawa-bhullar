@@ -58,8 +58,17 @@ fi
 # So the wall says it itself (`--say-window`): Caches/wall-state in its
 # sandbox, rewritten twice a second while it runs; older than 3 s is none.
 STATE_GLOB="$HOME/Library/Containers/*Chintan*/Data/Library/Caches/wall-state"
+# The runner is not let into the wall's container (2026-09-27, sprint 45:
+# every photograph said NO WINDOW over the wall), so the wall also says each
+# change on its standard output, which `open --stdout` writes to STATE_OUT;
+# its last line counts while the app runs.
+STATE_OUT=""
 state() {
   local f
+  if [ -n "$STATE_OUT" ] && [ -s "$STATE_OUT" ] && [ -n "$(pgrep -x Chintan)" ]; then
+    f=$(grep '^wall-state ' "$STATE_OUT" | tail -1 | cut -d' ' -f2)
+    [ -n "$f" ] && { echo "$f"; return; }
+  fi
   for f in $STATE_GLOB; do
     [ -f "$f" ] || continue
     [ $(( $(date +%s) - $(stat -f %m "$f") )) -le 3 ] || continue
@@ -95,7 +104,8 @@ shoot() {
   # wall); `open` hands it to the user's GUI session, where the window is.
   local t0; t0=$(date +%s)
   rm -f $STATE_GLOB
-  open -n "$APP" --args --house "${CHINTAN_HOUSE:-}" --tab jharokha --say-window "$@" >"$OUT/$name.log" 2>&1
+  STATE_OUT="$OUT/$name.state"; : > "$STATE_OUT"
+  open -n --stdout "$STATE_OUT" "$APP" --args --house "${CHINTAN_HOUSE:-}" --tab jharokha --say-window "$@" >"$OUT/$name.log" 2>&1
   local s=none waited=0
   while [ "$waited" -lt "${WALL_LIMIT:-60}" ]; do
     s=$(state)

@@ -104,10 +104,15 @@ enum Wall {
     // wall writes Caches/wall-state, "full" when its window is full screen,
     // in front and on the space in view, "window" when it is up but not that.
     // The runner cannot read the window server's list, so the wall says it.
+    // It says it on its standard output too, one line at each change, since
+    // the runner is not let into the wall's container either (2026-09-27:
+    // "NO WINDOW" over a photograph full of the wall); `open --stdout` hands
+    // that line to a file the runner owns.
     private static func say() {
         let file = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("wall-state")
         Task { @MainActor in
+            var said = ""
             while true {
                 var state = "window"
                 if let app = (NSClassFromString("NSApplication") as? NSObject.Type)?.value(forKey: "sharedApplication") as? NSObject,
@@ -121,6 +126,11 @@ enum Wall {
                     if full { state = "full" }
                 }
                 try? Data(state.utf8).write(to: file, options: .atomic)
+                if state != said {
+                    said = state
+                    print("wall-state", state)
+                    fflush(stdout)
+                }
                 try? await Task.sleep(for: .seconds(0.5))
             }
         }

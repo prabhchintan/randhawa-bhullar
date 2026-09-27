@@ -810,6 +810,11 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    `/v1/paintings/ID.wall.jpg`; the Mac asks for that shelf and falls back
    to the phone's shelf when the house has no wide set yet. The phone's
    shelf and its portrait pool are untouched.
+   Done (sprint 45): (d) one WallLabel over the wall and the painting alone
+   alike, Home's foot keeping its room unseen; (e) kept; (f) the Mac asks
+   `?frame=wall` first. Left: a CONFIRMED look (the wall now says its
+   window state on stdout, `open --stdout`, not yet seen working), a frame
+   inside the crossfade, then the columns.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -860,6 +865,33 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
 
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 45 (cbfe4bd, and the commit carrying this line): the
+  Mac wall's label holds still, and the wall hangs wide works (the house's
+  13:14 steer, d and f). The label in the bottom right is now one view over
+  the wall and the painting alone alike. A click that puts the wall away
+  leaves the title, artist, year and credit where they stood, at the same
+  size, and only the date, the things and the rings go. Home's foot keeps
+  the label's room unseen, so its hairline stands above the label and never
+  runs through it. The wall no longer has a "next" under the label, since
+  it turns itself. The Mac asks `GET /v1/paintings?frame=wall` first and
+  hangs the phone's shelf only when that comes back empty or 404. Seen on
+  yantar (/tmp/see/1, the wall filling every photograph): the Bhagavata
+  Purana page (Shankachura, Bikaner) on the wall and then alone, its label
+  in the same place in both (the title at y 1125, the credit at 1204, the
+  right edge at 1952 of 2000). After the turn, Caillebotte's Paris Street;
+  Rainy Day hung with its label in the same corner. The phone's today is
+  still the court ladies, so the wide shelf answered. The phone is
+  untouched: all six stills match (/tmp/see/0). The eyes still called every
+  photograph NO WINDOW while the wall filled it. The runner seems not to be
+  allowed into the wall's sandbox container, so the wall now also prints
+  each change of its window state to standard output, and wall.sh reads it
+  through `open --stdout`. That fix was built but not seen: yantar was
+  touched 41 and 56 s before the two later tries. So there is still no
+  CONFIRMED photograph, no timed full screen turn and no frame inside the
+  crossfade; those are the next look's first job. No walk (nothing on the
+  phone moved), no hitch numbers. No new door; `?frame=wall` is already
+  served.
 
 - 2026-09-27 · sprint 44 (1b5adbc, e09a120): the Mac wall turns (the house's
   12:36 steer). The wall now moves through the day's set by itself, every 15
