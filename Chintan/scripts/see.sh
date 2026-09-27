@@ -20,6 +20,10 @@
 #                                                    jharokha@alone: the painting alone;
 #                                                    jharokha@alone-back: so, then
 #                                                    the wall back after 2 s;
+#                                                    jharokha@alone-yesterday: alone,
+#                                                    then a swipe back to a staged
+#                                                    yesterday; ...-back: then the
+#                                                    wall back over it;
 #                                                    study@held: darban's name held;
 #                                                    study@onword: held, the thumb
 #                                                    on its word for the house;
@@ -136,6 +140,21 @@ json.dump({"darban": {"id": "eyes-" + str(uuid.uuid4()), "word": word, "since": 
           open(os.path.join(d, "waiting.json"), "w"))
 PY
     fi
+    # jharokha@alone-yesterday: a yesterday staged from the shelf's last
+    # picture under an id of its own, taken away after the look.
+    case "$tab" in jharokha@alone-yesterday*)
+      DATA=$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan data)
+      STAGE_DIR="$DATA/Library/Caches/paintings" python3 - <<'PY'
+import json, os, shutil
+d = os.environ["STAGE_DIR"]
+last = json.load(open(os.path.join(d, "shelf.json")))[-1]
+key = lambda p: (p.get("id") or "today") + ("-" + p["fit"] if p.get("fit") else "")
+kept = dict(last, id="eyes-yesterday")
+shutil.copy(os.path.join(d, key(last) + ".jpg"), os.path.join(d, key(kept) + ".jpg"))
+json.dump(kept, open(os.path.join(d, "yesterday.json"), "w"))
+PY
+      ;;
+    esac
     xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "$NAME" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
     if [ "$tab" = study@waiting ]; then
       sleep 1.5
@@ -143,6 +162,12 @@ PY
     fi
     sleep 6
     xcrun simctl io "$UDID" screenshot "$OUT/$tab-$mode.png" >/dev/null
+    case "$tab" in jharokha@alone-yesterday*)
+      xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+      rm -f "$DATA/Library/Caches/paintings/yesterday.json" "$DATA/Library/Caches/paintings/eyes-yesterday"*.jpg
+      xcrun simctl spawn "$UDID" defaults delete Prabhchintan.Chintan gallery.chosen 2>/dev/null || true
+      ;;
+    esac
     if [ "$tab" = study@waiting ]; then
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       # What the app still waits on after the look: {} once the house has said.

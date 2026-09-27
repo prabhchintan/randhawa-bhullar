@@ -336,6 +336,13 @@ struct JharokhaView: View {
             let artist = (painting.artist ?? "").plainDashes
             let (name, about) = Self.split(artist)
             VStack(alignment: .trailing, spacing: 2) {
+                // Yesterday's painting, walked back to, says so over its title.
+                if gallery.showingYesterday {
+                    Text("Yesterday")
+                        .font(Theme.label(.caption2))
+                        .tracking(1)
+                        .foregroundStyle(Theme.giltOnArt)
+                }
                 Text(title.plainDashes)
                     .font(.system(.caption, design: .serif).italic())
                 if !name.isEmpty {

@@ -46,6 +46,8 @@ struct ContentView: View {
     @State private var clockAway = Tab.launch == .jharokha && ContentView.eyes?.hasPrefix("alone") == true
     // A pinch on the painting alone: how far in, and from where.
     @GestureState(resetTransaction: Transaction(animation: .smooth)) private var pinch = Pinch()
+    // A turn along the paintings while the painting stands alone.
+    @State private var turned = 0
 
     private struct Pinch: Equatable {
         var zoom: CGFloat = 1
@@ -94,6 +96,7 @@ struct ContentView: View {
         .onChange(of: alone) { _, now in if now { clockAway = true } }
         .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
+        .sensoryFeedback(.impact(weight: .light), trigger: turned)
         .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
         .tint(Theme.giltOnArt)
@@ -102,10 +105,16 @@ struct ContentView: View {
         .task { await gallery.load() }
         .task {
             // For the house's eyes: `--open alone-back` leaves the painting
-            // alone, then brings the wall back, as a tap would.
-            guard ContentView.eyes == "alone-back" else { return }
+            // alone, then brings the wall back, as a tap would;
+            // `--open alone-yesterday` swipes back a painting instead, and
+            // `alone-yesterday-back` then brings the wall back over it.
+            guard let eyes = ContentView.eyes, eyes.hasPrefix("alone-") else { return }
             try? await Task.sleep(for: .seconds(2))
-            back()
+            if eyes.hasPrefix("alone-yesterday") {
+                walk(-1)
+                try? await Task.sleep(for: .seconds(1.5))
+            }
+            if eyes.hasSuffix("back") { back() }
         }
         .task {
             // The hitch meter's walk with no hand; a phone never passes this.
@@ -131,7 +140,9 @@ struct ContentView: View {
     }
 
     // The painting alone: a pinch looks closer and springs back when let go;
-    // a tap anywhere brings the wall back.
+    // a swipe walks the paintings the phone holds, to the right back to
+    // yesterday's, to the left on to the days ahead; a tap anywhere brings
+    // the wall back.
     private var looking: some View {
         Color.clear
             .contentShape(Rectangle())
@@ -144,11 +155,31 @@ struct ContentView: View {
                         state.zoom = min(max(value.magnification, 1), 4)
                     }
             )
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 30)
+                    .onEnded { value in
+                        let dx = value.translation.width
+                        guard pinch.zoom == 1, abs(dx) > 60, abs(dx) > abs(value.translation.height) * 1.5 else { return }
+                        walk(dx > 0 ? -1 : 1)
+                    }
+            )
             .accessibilityElement()
             .accessibilityLabel(gallery.painting?.title ?? "The painting")
-            .accessibilityHint("Double tap to bring the day back.")
+            .accessibilityValue(gallery.showingYesterday ? "Yesterday's" : "")
+            .accessibilityHint("Double tap to bring the day back. Swipe up or down to turn.")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { back() }
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment: walk(1)
+                case .decrement: walk(-1)
+                @unknown default: break
+                }
+            }
+    }
+
+    private func walk(_ by: Int) {
+        Task { if await gallery.turn(by) { turned += 1 } }
     }
 
     private func back() {

@@ -63,6 +63,8 @@ final class Gallery: ObservableObject {
     @Published var image: UIImage?
     @Published var painting: HouseClient.Painting?
     @Published var shelf: [HouseClient.Painting] = []
+    // The painting that stood the day before today's, kept on the phone.
+    @Published private(set) var yesterday: HouseClient.Painting?
 
     private var pictures: [String: UIImage] = [:]
     private var fetching = false
@@ -74,6 +76,7 @@ final class Gallery: ObservableObject {
         return url
     }()
     private static let shelfFile = folder.appendingPathComponent("shelf.json")
+    private static let yesterdayFile = folder.appendingPathComponent("yesterday.json")
     private static let chosenKey = "gallery.chosen"
     private static let dayFormat: DateFormatter = {
         let f = DateFormatter()
@@ -91,6 +94,9 @@ final class Gallery: ObservableObject {
         // What the phone already holds is shown at once, house or no house.
         if shelf.isEmpty, let data = try? Data(contentsOf: Self.shelfFile),
            let saved = try? JSONDecoder().decode([HouseClient.Painting].self, from: data), !saved.isEmpty {
+            if let kept = try? Data(contentsOf: Self.yesterdayFile) {
+                yesterday = try? JSONDecoder().decode(HouseClient.Painting.self, from: kept)
+            }
             shelf = saved
             await show(chosen(in: saved), animated: image == nil)
         }
@@ -101,6 +107,7 @@ final class Gallery: ObservableObject {
         var fresh = (try? await house.paintings()) ?? []
         if fresh.isEmpty, let one = try? await house.painting() { fresh = [one] }   // an older house
         guard !fresh.isEmpty else { return }
+        keepYesterday(before: fresh)
         shelf = fresh
         try? JSONEncoder().encode(fresh).write(to: Self.shelfFile, options: .atomic)
         // A picture kept from before the house framed them for the phone
@@ -115,7 +122,7 @@ final class Gallery: ObservableObject {
         for p in fresh where !FileManager.default.fileExists(atPath: Self.file(p).path) {
             _ = await picture(p, from: house)
         }
-        let keep = Set(fresh.map { $0.key + ".jpg" } + ["shelf.json"])
+        let keep = Set((fresh + [yesterday].compactMap { $0 }).map { $0.key + ".jpg" } + ["shelf.json", "yesterday.json"])
         for name in (try? FileManager.default.contentsOfDirectory(atPath: Self.folder.path)) ?? [] where !keep.contains(name) {
             try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(name))
         }
@@ -125,19 +132,57 @@ final class Gallery: ObservableObject {
     // remembered for the day. False when there is nothing to turn to yet.
     @discardableResult
     func next() async -> Bool {
-        let ready = shelf.filter { pictures[$0.key] != nil || FileManager.default.fileExists(atPath: Self.file($0).path) }
+        await turn(1, wrap: true)
+    }
+
+    // One step along the paintings the phone holds, yesterday's first, then
+    // today's and the days ahead. A swipe stops at either end; the label's
+    // next goes round. False when there is nowhere to turn.
+    @discardableResult
+    func turn(_ by: Int, wrap: Bool = false) async -> Bool {
+        let ready = walk.filter { pictures[$0.key] != nil || FileManager.default.fileExists(atPath: Self.file($0).path) }
         guard ready.count > 1 else { return false }
-        let at = ready.firstIndex { $0.key == painting?.key } ?? -1
-        let p = ready[(at + 1) % ready.count]
+        let at = ready.firstIndex { $0.key == painting?.key } ?? (by > 0 ? -1 : ready.count)
+        var to = at + by
+        if wrap { to = (to + ready.count) % ready.count }
+        guard ready.indices.contains(to) else { return false }
+        let p = ready[to]
         UserDefaults.standard.set(p.key + "|" + Self.today, forKey: Self.chosenKey)
         await show(p, animated: true)
         return true
     }
 
+    // Whether the painting on the wall is yesterday's, kept by the phone.
+    var showingYesterday: Bool { painting != nil && painting?.key == yesterday?.key }
+
+    private var walk: [HouseClient.Painting] {
+        guard let yesterday, !shelf.contains(where: { $0.key == yesterday.key }) else { return shelf }
+        return [yesterday] + shelf
+    }
+
+    // When the house's shelf has moved on a day, the painting that stood
+    // before today's is kept, picture and all, so it is one swipe back. A
+    // shelf that has moved further than the phone knew keeps nothing.
+    private func keepYesterday(before fresh: [HouseClient.Painting]) {
+        guard let old = shelf.first, old.key != fresh[0].key else { return }
+        var kept: HouseClient.Painting?
+        if let i = shelf.firstIndex(where: { $0.key == fresh[0].key }), i > 0 {
+            kept = shelf[i - 1]
+        }
+        if let k = kept, !FileManager.default.fileExists(atPath: Self.file(k).path) { kept = nil }
+        yesterday = kept
+        if let kept, let data = try? JSONEncoder().encode(kept) {
+            try? data.write(to: Self.yesterdayFile, options: .atomic)
+        } else {
+            try? FileManager.default.removeItem(at: Self.yesterdayFile)
+        }
+    }
+
     private func chosen(in list: [HouseClient.Painting]) -> HouseClient.Painting {
         if let saved = UserDefaults.standard.string(forKey: Self.chosenKey) {
             let parts = saved.split(separator: "|", maxSplits: 1).map(String.init)
-            if parts.count == 2, parts[1] == Self.today, let p = list.first(where: { $0.key == parts[0] }) {
+            if parts.count == 2, parts[1] == Self.today,
+               let p = (list + [yesterday].compactMap { $0 }).first(where: { $0.key == parts[0] }) {
                 return p
             }
         }
