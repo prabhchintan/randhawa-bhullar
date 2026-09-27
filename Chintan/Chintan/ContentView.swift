@@ -41,7 +41,11 @@ struct ContentView: View {
     @State private var page: Tab? = Tab.launch
     @State private var keyboard = false
     // The painting alone, asked for by a tap on Home's bare picture.
-    @State private var alone = Tab.launch == .jharokha && ContentView.eyes == "alone"
+    @State private var alone = Tab.launch == .jharokha && ContentView.eyes?.hasPrefix("alone") == true
+    // The clock goes with the wall and comes back only once the wall has: the
+    // system letters it for what stands under it as it returns, and over the
+    // bare picture that is dark, black on the shade.
+    @State private var clockAway = Tab.launch == .jharokha && ContentView.eyes?.hasPrefix("alone") == true
     // A pinch on the painting alone: how far in, and from where.
     @GestureState(resetTransaction: Transaction(animation: .smooth)) private var pinch = Pinch()
 
@@ -89,7 +93,8 @@ struct ContentView: View {
         .allowsHitTesting(!alone)
         .overlay { if alone { looking } }
         .background { Painting(zoom: pinch.zoom, anchor: pinch.anchor) }
-        .statusBarHidden(alone)
+        .statusBarHidden(clockAway)
+        .onChange(of: alone) { _, now in if now { clockAway = true } }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
         .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
@@ -97,6 +102,13 @@ struct ContentView: View {
         .environmentObject(store)
         .environmentObject(gallery)
         .task { await gallery.load() }
+        .task {
+            // For the house's eyes: `--open alone-back` leaves the painting
+            // alone, then brings the wall back, as a tap would.
+            guard ContentView.eyes == "alone-back" else { return }
+            try? await Task.sleep(for: .seconds(2))
+            back()
+        }
         .task {
             // The hitch meter's walk with no hand; a phone never passes this.
             guard ProcessInfo.processInfo.arguments.contains("--self-walk") else { return }
@@ -126,7 +138,7 @@ struct ContentView: View {
         Color.clear
             .contentShape(Rectangle())
             .ignoresSafeArea()
-            .onTapGesture { withAnimation(.smooth) { alone = false } }
+            .onTapGesture { back() }
             .gesture(
                 MagnifyGesture()
                     .updating($pinch) { value, state, _ in
@@ -138,7 +150,11 @@ struct ContentView: View {
             .accessibilityLabel(gallery.painting?.title ?? "The painting")
             .accessibilityHint("Double tap to bring the day back.")
             .accessibilityAddTraits(.isButton)
-            .accessibilityAction { withAnimation(.smooth) { alone = false } }
+            .accessibilityAction { back() }
+    }
+
+    private func back() {
+        withAnimation(.smooth) { alone = false } completion: { clockAway = false }
     }
 
     // For the house's eyes: `--open alone` on Home opens on the painting alone.
