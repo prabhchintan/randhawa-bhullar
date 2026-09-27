@@ -178,7 +178,9 @@ not shown.
   otherwise, restart the service, and note the door here.
 - TestFlight: the nightly job ships at 03:00 Mountain. A sprint fires a
   TestFlight build itself only when the change is something he would notice
-  on the phone and no build has gone up in the last four hours.
+  on the phone and no build has gone up in the last four hours, and never
+  while it knows of a defect a person would see (the house's steer,
+  2026-09-27): mend it first or say SHIP: no.
 - Never touch Randhawa or Bhullar. No third-party code, no analytics, no
   crash reporting, no phone-home. Only the one host. The brief in BRIEF.md
   binds this file.
@@ -330,14 +332,11 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    fingers began, to four times, and springs back when let go; a tap
    anywhere brings the wall back. `see.sh OUT jharokha@alone
    jharokha@alone-back` (the second opens alone and comes back after two
-   seconds). Left, a defect first: after coming back the clock is lettered
-   black, not bone, on Home's dark head and on every page after, until the
-   app is opened again. Tried and not it: the dark scheme on the painting
-   and the overlay; showing the clock only once the wall's fade has ended.
-   Launched plainly the clock is bone, so the system chose it from the pages
-   at launch; the next try is to never hide it (see whether it stays bone
-   with the pages at opacity 0) or to keep the pages at a trace of opacity.
-   Then: the keep gesture, yesterday's painting one swipe back.
+   seconds). The black clock after coming back mended (sprint 39): the
+   clock's style is the app's (Info.plist, light content, no screen asked),
+   hidden alone through UIApplication's own switch (ContentView's Clock);
+   a screen's `.statusBarHidden` or style is now ignored, so never add one.
+   Next: the keep gesture, yesterday's painting one swipe back.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -674,6 +673,26 @@ F. Settings and the edges. The health dot; settings one tap away; a
    the version line, the smallest open thing here; the rest waits on his word.
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 39 (5a25c60): the clock mended (the house's steer).
+  Back from the painting alone in light mode, the clock came back black on
+  Home's dark head and on every page after; it failed only in light mode
+  because each time the clock was shown again the system asked the screen
+  for its style and got the phone's scheme. Now the clock is the app's:
+  light content for the whole app in Info.plist, no screen asked, and
+  hidden while the painting stands alone through the app's own switch. Seen
+  in both modes: bone at launch, gone over the painting alone, bone again
+  after (`jharokha@alone`, `jharokha@alone-back`), and bone on Home, the
+  Board, the Study and Settings (whose head is dark in both modes). The
+  steer's suspect cleared: medians of three, the same day, 6c882ec's app
+  then this one (ms/s): reveal 34.0 then 37.4, first visits 38.2 then 36.3,
+  tabs 45.0 then 47.3, swipe 51.3 then 46.0, board scroll 29.1 then 29.6,
+  study scroll 8.8 then 7.8; no hand, tabs 10.3 then 7.7, neighbours 0.0 and
+  0.0, rest 0.0 and 0.0. Every pair sits inside its own run to run spread,
+  so the painting alone and the `\.paintingAlone` binding in the environment
+  cost the turns nothing measurable, and nothing was changed for them. A
+  rule added: no sprint fires its own TestFlight build while it knows of a
+  defect a person would see. No new door.
 
 - 2026-09-27 · sprint 38 (71b48e1, c296cc0): the painting alone (E, its
   first slice). A tap on Home's bare picture, above the day's lines, lets
