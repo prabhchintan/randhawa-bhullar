@@ -49,12 +49,18 @@
 #                                                    put away and back, then
 #                                                    chintan's room)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
+#   bash Chintan/scripts/see.sh --wall [--build] OUTDIR
+#                                                    the Mac wall instead (wall.sh)
 #   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
 #                                                    text size, then back to normal
 set -euo pipefail
 if [ "${1:-}" = "--walk" ]; then
   shift
   exec bash "$(dirname "$0")/walk.sh" "$@"
+fi
+if [ "${1:-}" = "--wall" ]; then
+  shift
+  exec bash "$(dirname "$0")/wall.sh" "$@"
 fi
 TEXT=large
 if [ "${1:-}" = "--large" ]; then

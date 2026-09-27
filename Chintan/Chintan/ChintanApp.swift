@@ -15,6 +15,9 @@ struct ChintanApp: App {
             HitchMeter.shared.start()
         }
         // Made at launch, so a wake for a move or for Health finds its delegate.
+        // The phone's senses are the phone's: the Mac is a wall and tells the
+        // house nothing of where, how or what.
+        #if !targetEnvironment(macCatalyst)
         _ = Whereabouts.shared
         _ = PhoneWord.shared
         _ = Health.shared
@@ -22,6 +25,7 @@ struct ChintanApp: App {
         _ = Metrics.shared
         Wakes.register()
         Wakes.ask()
+        #endif
     }
 
     @Environment(\.scenePhase) private var phase
@@ -31,6 +35,9 @@ struct ChintanApp: App {
             ContentView()
         }
         .onChange(of: phase) { _, now in
+            #if targetEnvironment(macCatalyst)
+            if now == .active { Wall.fill() }
+            #else
             if now == .active {
                 Whereabouts.shared.freshen()
                 Health.shared.freshen()
@@ -39,9 +46,39 @@ struct ChintanApp: App {
             }
             PhoneWord.shared.scene(now)
             if now == .background { Wakes.ask() }
+            #endif
         }
     }
 }
+
+#if targetEnvironment(macCatalyst)
+// The Mac is a wall: no title, no toolbar, and the window full screen on
+// launch, so the menu bar and the Dock step away and the painting is the room.
+// Catalyst has no word for full screen of its own; AppKit's window is asked
+// by name, once.
+@MainActor
+enum Wall {
+    private static var filled = false
+
+    static func fill() {
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+            scene.titlebar?.titleVisibility = .hidden
+            scene.titlebar?.toolbar = nil
+        }
+        guard !filled, !ProcessInfo.processInfo.arguments.contains("--windowed") else { return }
+        filled = true
+        // The window is made a beat after the scene says it is active.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            guard let app = (NSClassFromString("NSApplication") as? NSObject.Type)?.value(forKey: "sharedApplication") as? NSObject,
+                  let windows = app.value(forKey: "windows") as? [NSObject] else { return }
+            for window in windows where (window.value(forKey: "canBecomeMainWindow") as? Bool) == true {
+                let mask = (window.value(forKey: "styleMask") as? UInt) ?? 0
+                if mask & (1 << 14) == 0 { window.perform(NSSelectorFromString("toggleFullScreen:"), with: nil) }
+            }
+        }
+    }
+}
+#endif
 
 // The hitch meter, for the walk only (launched with --hitches; a phone never
 // is). The simulator has no Instruments hitches, so the app times its own

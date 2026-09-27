@@ -82,6 +82,16 @@ struct HouseClient {
     }
 
     func paintingImage(_ painting: Painting? = nil) async throws -> Data {
+        #if targetEnvironment(macCatalyst)
+        // The Mac asks for the landscape cut (since 2026-09-27, 1920 by 1080:
+        // the work whole at the frame's height, its reflections on the open
+        // sides); a house without it answers 404 and the phone's cut is shown.
+        if let id = painting?.id, let url = url("/v1/paintings/\(id).wall.jpg"),
+           let answer = try? await Self.session.data(from: url),
+           (answer.1 as? HTTPURLResponse)?.statusCode == 200 {
+            return answer.0
+        }
+        #endif
         guard let url = url(painting?.imagePath ?? "/v1/painting.jpg") else { throw HouseError.noAddress }
         let (data, response) = try await Self.session.data(from: url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }

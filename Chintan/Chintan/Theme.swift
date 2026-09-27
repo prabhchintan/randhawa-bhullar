@@ -245,13 +245,18 @@ final class Gallery: ObservableObject {
     }
 
     // Whether a kept picture is the phone's frame (1179 by 2556), read from
-    // its header without decoding it.
+    // its header without decoding it. On the Mac, the wall's (1920 by 1080);
+    // a phone's cut kept while the house had no wall cut comes down again.
     private static func framed(_ url: URL) -> Bool {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
               let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let w = props[kCGImagePropertyPixelWidth] as? Double, let h = props[kCGImagePropertyPixelHeight] as? Double,
               w > 0 else { return false }
+        #if targetEnvironment(macCatalyst)
+        return abs(h / w - 1080.0 / 1920.0) < 0.02
+        #else
         return abs(h / w - 2556.0 / 1179.0) < 0.02
+        #endif
     }
 
     // Decoded once, off the main thread, at the size the screen fills with

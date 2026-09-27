@@ -15,6 +15,15 @@ enum Tab: String, CaseIterable {
         return .jharokha
     }
 
+    // The pages the app turns through. The Mac is a wall: Home alone, no bar.
+    static var shown: [Tab] {
+        #if targetEnvironment(macCatalyst)
+        [.jharokha]
+        #else
+        allCases
+        #endif
+    }
+
     var name: String {
         switch self {
         case .jharokha: return "Home"
@@ -64,7 +73,7 @@ struct ContentView: View {
             ScrollView(.horizontal) {
                 // All three built at launch, so a first visit is a slide, not a fetch.
                 HStack(spacing: 0) {
-                    ForEach(Tab.allCases, id: \.self) { t in
+                    ForEach(Tab.shown, id: \.self) { t in
                         screen(t)
                             .containerRelativeFrame(.horizontal)
                             // A page keeps to its own width at any text size,
@@ -89,7 +98,7 @@ struct ContentView: View {
         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         // The keyboard covers the bar, as the system's own tab bar lets it.
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !keyboard { bar }
+            if !keyboard && Tab.shown.count > 1 { bar }
         }
         // Alone, every page, its shade and the bar step away; the picture stays.
         .opacity(alone ? 0 : 1)
@@ -324,7 +333,10 @@ private enum Clock: ClockHiding {
 private enum Old: ClockHiding {
     @available(iOS, deprecated: 9.0)
     static func hide(_ away: Bool) {
+        // The Mac's wall has no clock of the app's to hide.
+        #if !targetEnvironment(macCatalyst)
         UIApplication.shared.setStatusBarHidden(away, with: .fade)
+        #endif
     }
 }
 

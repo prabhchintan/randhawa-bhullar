@@ -19,10 +19,13 @@ struct TellAppOpened: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
+        // The phone's word only; the Mac's wall says nothing of the apps he opens.
+        #if !targetEnvironment(macCatalyst)
         let name = app.trimmingCharacters(in: .whitespacesAndNewlines)
         if !name.isEmpty {
             await PhoneWord.shared.say(.app, app: String(name.prefix(80)))?.value
         }
+        #endif
         return .result()
     }
 }

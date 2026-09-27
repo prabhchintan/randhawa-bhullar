@@ -446,12 +446,15 @@ struct JharokhaView: View {
             return
         }
         let house = HouseClient(baseAddress: address)
-        async let picture: Void = gallery.load()
+        // The day never waits on the shelf: a first open fetches every
+        // picture (on the Mac, each wall cut made on first ask), so the
+        // pictures come down on their own.
+        Task { await gallery.load() }
         async let cockpit = try? house.cockpit()
         async let board = try? house.board()
         async let beat = try? house.pulse()
         async let short = try? house.titles()
-        let (_, c, b, p, s) = await (picture, cockpit, board, beat, short)
+        let (c, b, p, s) = await (cockpit, board, beat, short)
         if let c { day = CockpitDay(c) }
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
         if let s, Self.eyes != "cut" { titles = s }

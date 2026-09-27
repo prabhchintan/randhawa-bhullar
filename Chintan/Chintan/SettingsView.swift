@@ -54,7 +54,8 @@ struct SettingsView: View {
                         }
                     }
                     // What the phone tells the house, gathered: each sense its own
-                    // room, each asked for there and each his to stop.
+                    // room, each asked for there and each his to stop. The Mac has none.
+                    #if !targetEnvironment(macCatalyst)
                     Text("The senses")
                         .font(.system(.title, design: .serif).weight(.semibold))
                         .foregroundStyle(Theme.bone)
@@ -68,6 +69,7 @@ struct SettingsView: View {
                     HealthSection()
                     MotionSection()
                         .id("motion")
+                    #endif
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
