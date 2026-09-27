@@ -808,6 +808,19 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
 
 ## The ledger (newest first)
 
+- 2026-09-27 · the house's look at sprint 43 (12:15 to 12:32). The sprint's
+  "Mac photos" held HEY and iPhone Mirroring, not the wall: run as a bare
+  binary from the runner's context the app came up with no window on the
+  screen, and the eyes did not notice. wall.sh now opens the app through
+  LaunchServices (`open`) and prints NO WINDOW when System Events sees none
+  before the photograph; wall.yml (new) lets the house dispatch the look,
+  with `wait` and `idle` inputs. At 12:32, 30 s after launch, the wall stood
+  as a window over yantar's desk with the court ladies in their landscape
+  cut and the painting alone on `--open alone`; it had not yet gone full
+  screen, so the next slice measures how long the full-screen turn takes on
+  the 2018 Intel Mac and waits for it. The build is in /Applications on
+  yantar as Chintan.app.
+
 - 2026-09-27 · sprint 43 (2136afa): the Mac wall (O, its first slice).
   chintan now builds for the Mac through Catalyst (Mac idiom, not Designed
   for iPad) and builds green on yantar. Opened, it goes full screen by itself,
