@@ -48,8 +48,29 @@ struct ChintanApp: App {
             if now == .background { Wakes.ask() }
             #endif
         }
+        #if targetEnvironment(macCatalyst)
+        .commands { WallMenu() }
+        #endif
     }
 }
+
+#if targetEnvironment(macCatalyst)
+// The wall's one setting, in the menu bar that comes down over the full
+// screen: how often it turns to the next painting.
+struct WallMenu: Commands {
+    @AppStorage(WallPace.key) private var minutes = WallPace.standard
+
+    var body: some Commands {
+        CommandMenu("Wall") {
+            Picker("Turn Every", selection: $minutes) {
+                ForEach(WallPace.choices, id: \.self) { m in
+                    Text(m == 60 ? "1 Hour" : "\(m) Minutes").tag(m)
+                }
+            }
+        }
+    }
+}
+#endif
 
 #if targetEnvironment(macCatalyst)
 // The Mac is a wall: no title, no toolbar, and the window full screen on

@@ -37,26 +37,78 @@ if [ "${IDLE:-0}" -lt "${WALL_IDLE:-600}" ]; then
   exit 0
 fi
 
-# One look: the wall at rest, then the painting alone (as a tap would).
+# Whether chintan's window is on the screen, full screen and in front:
+# prints "full", "window" (there, not yet full screen or not in front) or "none".
+state() {
+  osascript 2>/dev/null <<'OSA' || echo none
+tell application "System Events"
+  if not (exists process "Chintan") then return "none"
+  tell process "Chintan"
+    if (count of windows) is 0 then return "none"
+    set full to value of attribute "AXFullScreen" of window 1
+    if full and frontmost then return "full"
+    return "window"
+  end tell
+end tell
+OSA
+}
+
+# One photograph, called confirmed only when the window stood full screen
+# in front as it was taken; otherwise the eyes say what was there instead.
+photo() {
+  local name=$1 s
+  s=$(state)
+  screencapture -x "$OUT/$name.png" || return
+  case "$s" in
+    full) echo "$OUT/$name.png CONFIRMED" ;;
+    window) echo "$OUT/$name.png NOT CONFIRMED: the window is there but not full screen in front" ;;
+    *) echo "$OUT/$name.png NOT CONFIRMED: NO WINDOW, the photograph is not of the wall" ;;
+  esac
+}
+
+# One look: open, wait for the full screen turn and time it, let the painting
+# settle, photograph; `--at S NAME` more photographs S seconds after the open.
 shoot() {
   local name=$1; shift
+  local later=()
+  while [ "${1:-}" = "--at" ]; do later+=("$2" "$3"); shift 3; done
   pkill -x Chintan 2>/dev/null; sleep 1
   # Through LaunchServices, never the binary itself: run from the runner's
   # launchd context the binary came up with no window on the screen (the
   # 12:15 and 12:29 photos on 2026-09-27 showed HEY and Telegram, not the
   # wall); `open` hands it to the user's GUI session, where the window is.
+  local t0; t0=$(date +%s)
   open -n "$APP" --args --house "${CHINTAN_HOUSE:-}" --tab jharokha "$@" >"$OUT/$name.log" 2>&1
-  sleep "${WALL_WAIT:-12}"
-  local pid; pid=$(pgrep -x Chintan | head -1)
-  if [ -z "$pid" ]; then
+  local s=none waited=0
+  while [ "$waited" -lt "${WALL_LIMIT:-60}" ]; do
+    s=$(state)
+    [ "$s" = full ] && break
+    sleep 1; waited=$(( $(date +%s) - t0 ))
+  done
+  if [ "$s" = full ]; then
+    echo "$name: full screen $(( $(date +%s) - t0 )) s after open"
+  else
+    echo "$name: not full screen after ${WALL_LIMIT:-60} s (last seen: $s)"
+  fi
+  if [ -z "$(pgrep -x Chintan)" ]; then
     echo "$name: the app left early; its last words:"; tail -15 "$OUT/$name.log"
   fi
-  # The picture must hold the app's own window, or the eyes say so.
-  if ! osascript -e 'tell application "System Events" to get name of window 1 of process "Chintan"' >/dev/null 2>&1; then
-    echo "$name: NO WINDOW on the screen; the photograph would not be of the wall"
-  fi
-  screencapture -x "$OUT/$name.png" && echo "$OUT/$name.png"
+  # The picture comes down and fades in after the turn.
+  sleep "${WALL_SETTLE:-6}"
+  photo "$name"
+  local i=0
+  while [ "$i" -lt "${#later[@]}" ]; do
+    local at=${later[$i]} shot=${later[$((i + 1))]}
+    local now; now=$(date +%s)
+    [ $(( t0 + at - now )) -gt 0 ] && sleep $(( t0 + at - now ))
+    photo "$shot"
+    i=$((i + 2))
+  done
   pkill -x Chintan 2>/dev/null || true
 }
 shoot wall
 shoot wall-alone --open alone
+# The wall turning on its own: a turn 30 s after launch for the eyes,
+# photographed before, twice inside the crossfade, and after.
+shoot wall-turn-before --at 32 wall-turn-mid --at 33 wall-turn-mid2 --at 38 wall-turn-after \
+  --open alone --turn 30

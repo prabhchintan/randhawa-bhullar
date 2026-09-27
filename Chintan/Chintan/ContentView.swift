@@ -60,6 +60,8 @@ struct ContentView: View {
     // What the last hold on the painting alone came to, said for a moment.
     @State private var kept: Gallery.Kept?
     @State private var keeping = 0
+    // How often the Mac wall turns to the next painting, from its menu.
+    @AppStorage(WallPace.key) private var paceMinutes = WallPace.standard
 
     private struct Pinch: Equatable {
         var zoom: CGFloat = 1
@@ -104,6 +106,10 @@ struct ContentView: View {
         .opacity(alone ? 0 : 1)
         .allowsHitTesting(!alone)
         .overlay { if alone { looking } }
+        #if targetEnvironment(macCatalyst)
+        // On the wall the label stays with the painting alone, small in its corner.
+        .overlay { if alone { WallLabel() } }
+        #endif
         .overlay { keptLine }
         // Alone, the home indicator steps back with the clock.
         .persistentSystemOverlays(alone ? .hidden : .automatic)
@@ -126,6 +132,17 @@ struct ContentView: View {
         .environmentObject(store)
         .environmentObject(gallery)
         .task { await gallery.load() }
+        #if targetEnvironment(macCatalyst)
+        // The wall turns through the day's set on its own, at the pace set in
+        // its menu; a turn by hand starts the wait again.
+        .task(id: WallPace.Turn(minutes: paceMinutes, turned: turned)) {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(WallPace.seconds(paceMinutes)))
+                guard !Task.isCancelled else { return }
+                await gallery.next()
+            }
+        }
+        #endif
         .task {
             // For the house's eyes: `--open alone-back` leaves the painting
             // alone, then brings the wall back, as a tap would;
@@ -339,6 +356,77 @@ private enum Old: ClockHiding {
         #endif
     }
 }
+
+// How often the Mac wall turns: 5, 15, 30 or 60 minutes, 15 unless changed
+// in the wall's menu. `--turn SECONDS` is the house's eyes' own quick pace.
+enum WallPace {
+    static let key = "wall.minutes"
+    static let standard = 15
+    static let choices = [5, 15, 30, 60]
+
+    struct Turn: Equatable {
+        let minutes: Int
+        let turned: Int
+    }
+
+    static func seconds(_ minutes: Int) -> Double {
+        let args = ProcessInfo.processInfo.arguments
+        if let i = args.firstIndex(of: "--turn"), i + 1 < args.count, let s = Double(args[i + 1]), s > 0 { return s }
+        return Double(choices.contains(minutes) ? minutes : standard) * 60
+    }
+}
+
+#if targetEnvironment(macCatalyst)
+// The wall's label with the painting alone: the title, the artist, the year
+// and the credit, small in the bottom right corner over a short shade, the
+// way a museum letters a wall. It changes with the painting, as slowly.
+private struct WallLabel: View {
+    @EnvironmentObject private var gallery: Gallery
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
+                           center: .bottomTrailing, startRadius: 0, endRadius: 420)
+            if let p = gallery.painting, let title = p.title {
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text(title.plainDashes)
+                        .font(.system(.callout, design: .serif).italic())
+                        .foregroundStyle(Theme.bone)
+                    let artist = (p.artist ?? "").plainDashes
+                    if !artist.isEmpty {
+                        Text(artist)
+                            .font(.system(.footnote, design: .serif))
+                            .foregroundStyle(Theme.bone.opacity(0.88))
+                    }
+                    if let year = p.year, !year.isEmpty {
+                        Text(year.plainDashes)
+                            .font(Theme.label(.footnote))
+                            .tracking(0.8)
+                            .foregroundStyle(Theme.giltOnArt)
+                    }
+                    if let credit = p.credit, !credit.isEmpty {
+                        Text(credit.plainDashes)
+                            .font(.caption)
+                            .foregroundStyle(Theme.bone.opacity(0.66))
+                            .padding(.top, 2)
+                    }
+                }
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 340, alignment: .trailing)
+                .shadow(color: .black.opacity(0.5), radius: 6)
+                .padding(.trailing, 40)
+                .padding(.bottom, 32)
+                .id(p.key)
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 2.6), value: gallery.painting?.key)
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+#endif
 
 // A page's clip at its left and right edges only; its shade still runs up
 // under the clock and down under the bar.

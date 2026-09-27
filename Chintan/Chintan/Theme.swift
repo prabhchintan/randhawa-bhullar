@@ -63,6 +63,8 @@ final class Gallery: ObservableObject {
     @Published var image: UIImage?
     @Published var painting: HouseClient.Painting?
     @Published var shelf: [HouseClient.Painting] = []
+    // On the Mac, the picture a turn is fading from, kept under the new one.
+    @Published private(set) var under: UIImage?
     // The painting that stood the day before today's, kept on the phone.
     @Published private(set) var yesterday: HouseClient.Painting?
 
@@ -228,6 +230,15 @@ final class Gallery: ObservableObject {
             ui = await picture(p, from: HouseClient(baseAddress: address))
         }
         guard let ui, painting?.key == p.key else { return }
+        #if targetEnvironment(macCatalyst)
+        // The wall turns by a slow crossfade: the old picture stays whole
+        // under the new one while it comes up, so nothing dips and nothing slides.
+        if animated, image != nil {
+            under = image
+            withAnimation(.easeInOut(duration: 2.6)) { image = ui }
+            return
+        }
+        #endif
         if animated {
             withAnimation(.easeInOut(duration: 0.6)) { image = ui }
         } else {
@@ -282,6 +293,20 @@ struct Painting: View {
 
     var body: some View {
         Theme.lampBlack
+            #if targetEnvironment(macCatalyst)
+            .overlay {
+                ZStack {
+                    if let under = gallery.under { picture(under) }
+                    // Each picture its own view, so a turn is one fading in
+                    // over the last; the one it replaces goes only once covered.
+                    if let image = gallery.image {
+                        picture(image)
+                            .id(ObjectIdentifier(image))
+                            .transition(.asymmetric(insertion: .opacity, removal: .identity))
+                    }
+                }
+            }
+            #else
             .overlay {
                 if let image = gallery.image {
                     // The house composes each picture for the phone's frame, so
@@ -297,9 +322,18 @@ struct Painting: View {
                         .transition(.opacity)
                 }
             }
+            #endif
             .clipped()
             .ignoresSafeArea()
             .accessibilityHidden(true)
+    }
+
+    private func picture(_ image: UIImage) -> some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFill()
+            .scaleEffect(1.04)
+            .scaleEffect(zoom, anchor: anchor)
     }
 }
 
