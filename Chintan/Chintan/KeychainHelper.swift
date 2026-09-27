@@ -11,8 +11,23 @@ enum Keychain {
     // the simulator; wins over the Keychain and never persists.
     static var override: String?
 
+    // On the Mac an ad hoc build has no data protection keychain (no team, no
+    // entitlement), so the address lives in the app's defaults there; the
+    // house writes it once (`defaults write Prabhchintan.Chintan houseAddress`)
+    // and a --house launch remembers it (Prab, 2026-09-27 13:37: "it says no
+    // house address add in settings but i don't see a settings things").
+    private static let defaultsKey = "houseAddress"
+
     static func loadHouseAddress() -> String? {
-        if let override, !override.isEmpty { return override }
+        if let override, !override.isEmpty {
+            #if targetEnvironment(macCatalyst)
+            UserDefaults.standard.set(override, forKey: defaultsKey)
+            #endif
+            return override
+        }
+        #if targetEnvironment(macCatalyst)
+        if let kept = UserDefaults.standard.string(forKey: defaultsKey), !kept.isEmpty { return kept }
+        #endif
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -27,6 +42,9 @@ enum Keychain {
     }
 
     static func saveHouseAddress(_ address: String) {
+        #if targetEnvironment(macCatalyst)
+        UserDefaults.standard.set(address, forKey: defaultsKey)
+        #endif
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
