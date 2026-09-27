@@ -775,6 +775,22 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    a CONFIRMED look with the full screen time measured, and a frame inside
    the crossfade (sprint 44's ledger). Next: the columns
    (the board, then `GET /v1/mail`), the 60 s poll, the wall's own lettering size.
+   His word on the first build (2026-09-27 12:36, verbatim: "it is
+   fantastic chintan, any way on the mac app we can change art every 5
+   minutes, maybe we can add this as a setting where i can switch between
+   5, 15, 30, 60 minutes. absolutely love that i can have art that
+   transitions (classic but slow fade in and out is fine, make it slow
+   though) and one last thing is even in full screen no distractions we
+   should keep the title and info on the bottom right if that makes
+   sense"). So, ahead of the columns: (a) the wall turns through the day's
+   set on its own, a setting on the Mac of 5, 15, 30 or 60 minutes
+   (default 15), kept in the app's defaults; (b) every turn a slow
+   crossfade, classic, two to three seconds, the old work dimming out as
+   the new one comes up, nothing sliding; (c) the label (title, artist,
+   year, the museum's credit) stays at the bottom right of the wall even
+   with the painting alone, small, in the museum's lettering, over a
+   short shade so it reads on any work; the phone's alone view is
+   untouched. The Mac only; the phone keeps its tap.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
