@@ -95,6 +95,9 @@ struct ContentView: View {
         .opacity(alone ? 0 : 1)
         .allowsHitTesting(!alone)
         .overlay { if alone { looking } }
+        .overlay { keptLine }
+        // Alone, the home indicator steps back with the clock.
+        .persistentSystemOverlays(alone ? .hidden : .automatic)
         .background { Painting(zoom: pinch.zoom, anchor: pinch.anchor) }
         .onChange(of: alone) { _, now in if now { clockAway = true } }
         .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
@@ -190,7 +193,6 @@ struct ContentView: View {
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { back() }
             .accessibilityAction(named: "Keep this painting") { keep() }
-            .overlay(alignment: .bottom) { keptLine }
             .accessibilityAdjustableAction { direction in
                 switch direction {
                 case .increment: walk(1)
@@ -200,24 +202,41 @@ struct ContentView: View {
             }
     }
 
-    // The hold's answer at the painting's foot, a wall label's line on a
-    // smoked mount, gone after a few seconds: gilt when kept, saffron when not.
-    @ViewBuilder private var keptLine: some View {
-        if let kept {
-            let (words, gilt): (String, Bool) = switch kept {
-            case .kept: ("Kept, in the baithak", true)
-            case .already: ("Already in the baithak", true)
-            case .noDoor: ("The house cannot keep it yet", false)
-            case .unheard: ("The house is not answering", false)
-            }
-            Text(words)
-                .font(Theme.label(.footnote))
-                .tracking(1)
-                .foregroundStyle(gilt ? Theme.giltOnArt : Theme.saffron)
-                .mount()
-                .padding(.bottom, 64)
+    // The hold's answer below the work, in the screen's foot where the home
+    // indicator stood, over a short shade: gilt when kept, saffron when not,
+    // gone after a few seconds. Never on the painting itself.
+    private var keptLine: some View {
+        GeometryReader { g in
+            let foot = max(g.safeAreaInsets.bottom, 20)
+            if let kept {
+                let (words, gilt): (String, Bool) = switch kept {
+                case .kept: ("Kept, in the baithak", true)
+                case .already: ("Already in the baithak", true)
+                case .noDoor: ("The house cannot keep it yet", false)
+                case .unheard: ("The house is not answering", false)
+                }
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    Text(words)
+                        .font(Theme.label(.caption))
+                        .tracking(1)
+                        .foregroundStyle(gilt ? Theme.giltOnArt : Theme.saffron)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: foot)
+                        .background(alignment: .bottom) {
+                            LinearGradient(colors: [Theme.lampBlack.opacity(0.78), Theme.lampBlack.opacity(0)],
+                                           startPoint: .bottom, endPoint: .top)
+                                .frame(height: foot * 2.4)
+                        }
+                        .offset(y: g.safeAreaInsets.bottom)
+                }
                 .transition(.opacity)
                 .accessibilityHidden(true)
+                .allowsHitTesting(false)
+            }
         }
     }
 
