@@ -747,10 +747,42 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    The first slice: the destination compiling green on yantar with the
    senses guarded, Home full screen on the wall cut, the painting alone on
    tap; the columns and the poll the second slice; the mail column the
-   third.
+   third. First slice built (sprint 43): `see.sh --wall OUT` builds it ad
+   hoc signed and photographs it, only when yantar has sat untouched ten
+   minutes (the wall opens full screen over whatever is there, and the
+   picture is the whole screen). Left of it, for the second slice: the
+   lettering is phone-sized on a laptop (the date and the label small at
+   the corners; the wall wants a size of its own and wider margins, laid
+   out with the columns), the house address typed on the Mac (an ad hoc
+   build has no Keychain; the look passes `--house`; a development signed
+   build in /Applications is the Shipping item), and the first launch's
+   crash seen once (a segfault, no report, not seen again in three).
 
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 43 (2136afa): the Mac wall (O, its first slice).
+  chintan now builds for the Mac through Catalyst (Mac idiom, not Designed
+  for iPad) and builds green on yantar. Opened, it goes full screen by itself,
+  with no title bar, menu bar or Dock, and hangs the day's painting in the
+  house's landscape cut: today the court ladies whole at the screen's height,
+  with softened copies either side. The Mac asks for `.wall.jpg` and falls
+  back to the phone's cut on a 404. A click on the bare picture leaves the
+  painting alone in full colour, as on the phone (seen: `wall`,
+  `wall-alone`). The Mac shows Home only, with no bar. The phone's senses
+  (Where, the phone's word, Health, Motion, MetricKit, the wakes, the app
+  Shortcut's word) never start on the Mac, and Settings has no senses
+  there, so the Mac never posts to /v1/location, /v1/phone, /v1/health,
+  /v1/motion or /v1/metrics. The Mac has its own entitlements: a sandbox
+  with the network, no HealthKit. One change the phone shares: Home's date,
+  things and rings no longer wait for the whole shelf of pictures to come
+  down (the Mac's first open, a wall cut made per painting, showed the
+  date alone for seconds). The phone re-seen after the split, both modes:
+  Home, the Board, the Study, the painting alone and back, Settings with its
+  senses; all unchanged. A look on the Mac with the lettering a size up was
+  not taken: the maintainer was at yantar, and the wall is not opened over
+  him (the guard added then). The walk was not run; no touch on the phone
+  moved. No new door.
 
 - 2026-09-27 · sprint 42 (cbd4623, a1b637a): the keep line leaves the
   painting (the house's steer). After a hold on the painting alone, the
