@@ -42,9 +42,7 @@ struct ContentView: View {
     @State private var keyboard = false
     // The painting alone, asked for by a tap on Home's bare picture.
     @State private var alone = Tab.launch == .jharokha && ContentView.eyes?.hasPrefix("alone") == true
-    // The clock goes with the wall and comes back only once the wall has: the
-    // system letters it for what stands under it as it returns, and over the
-    // bare picture that is dark, black on the shade.
+    // The clock goes with the wall and comes back only once the wall has.
     @State private var clockAway = Tab.launch == .jharokha && ContentView.eyes?.hasPrefix("alone") == true
     // A pinch on the painting alone: how far in, and from where.
     @GestureState(resetTransaction: Transaction(animation: .smooth)) private var pinch = Pinch()
@@ -93,8 +91,8 @@ struct ContentView: View {
         .allowsHitTesting(!alone)
         .overlay { if alone { looking } }
         .background { Painting(zoom: pinch.zoom, anchor: pinch.anchor) }
-        .statusBarHidden(clockAway)
         .onChange(of: alone) { _, now in if now { clockAway = true } }
+        .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
         .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
@@ -196,6 +194,21 @@ struct ContentView: View {
         // The bar holds the system tab bar's size; past it, the large viewer.
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .padding(.top, 6)
+    }
+}
+
+// The clock is the app's, not a page's: always bone (Info.plist, light
+// content, not asked of each screen), so it never turns black when a page
+// comes back in light mode. Hidden the same way, for the painting alone:
+// the app's own switch, old but the only one when no screen is asked.
+private protocol ClockHiding { static func hide(_ away: Bool) }
+private enum Clock: ClockHiding {
+    static func hide(_ away: Bool) { (Old.self as ClockHiding.Type).hide(away) }
+}
+private enum Old: ClockHiding {
+    @available(iOS, deprecated: 9.0)
+    static func hide(_ away: Bool) {
+        UIApplication.shared.setStatusBarHidden(away, with: .fade)
     }
 }
 
