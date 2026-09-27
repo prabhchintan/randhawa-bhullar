@@ -10,6 +10,9 @@ on:
       wait:
         description: seconds to let the wall settle before the photograph
         default: "30"
+      idle:
+        description: seconds yantar must have been untouched (the house lowers it only when its desk sensor says Prab is at chintan)
+        default: "600"
 
 concurrency:
   group: chintan-yantar
@@ -27,6 +30,7 @@ jobs:
         env:
           CHINTAN_HOUSE: ${{ secrets.CHINTAN_HOUSE }}
           WALL_WAIT: ${{ inputs.wait }}
+          WALL_IDLE: ${{ inputs.idle }}
         run: bash Chintan/scripts/see.sh --wall "$RUNNER_TEMP/wall"
       - uses: actions/upload-artifact@v4
         with:
