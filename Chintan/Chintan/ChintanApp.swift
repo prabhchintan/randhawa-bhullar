@@ -19,6 +19,7 @@ struct ChintanApp: App {
         _ = PhoneWord.shared
         _ = Health.shared
         _ = Motion.shared
+        _ = Metrics.shared
         Wakes.register()
         Wakes.ask()
     }
@@ -34,6 +35,7 @@ struct ChintanApp: App {
                 Whereabouts.shared.freshen()
                 Health.shared.freshen()
                 Motion.shared.freshen()
+                Metrics.shared.freshen()
             }
             PhoneWord.shared.scene(now)
             if now == .background { Wakes.ask() }
