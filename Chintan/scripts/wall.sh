@@ -34,6 +34,11 @@ if [ -d /Applications ] && [ -w /Applications ]; then
   rm -rf /Applications/Chintan.app.new && cp -R "$APP" /Applications/Chintan.app.new \
     && rm -rf /Applications/Chintan.app && mv /Applications/Chintan.app.new /Applications/Chintan.app \
     && echo "INSTALLED: /Applications/Chintan.app"
+  # The dev copy shows as "chintan dev" in Spotlight and the Dock (Prab, 13:26:
+  # Applications is production, the other is the house's), display name only,
+  # so the process and bundle names the eyes look for stay the same.
+  plutil -replace CFBundleDisplayName -string "chintan dev" "$APP/Contents/Info.plist" \
+    && codesign -f -s - --deep "$APP" >/dev/null 2>&1 || true
 fi
 [ "$ONLY_BUILD" = yes ] && exit 0
 
