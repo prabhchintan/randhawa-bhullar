@@ -183,6 +183,7 @@ struct BoardView: View {
         // its actions, since a slide on a held plaque is a thumb's way.
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isHeader)
+        .accessibilityIdentifier("heading")
         .accessibilityAction(named: "A word for the house") {
             withAnimation(.snappy) { wording = true }
         }

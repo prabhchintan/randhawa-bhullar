@@ -128,6 +128,28 @@ final class ChintanWalk: XCTestCase {
             note("board: no leaf to open")
         }
 
+        // The heading held grows its plaque over a dimmed board; held again
+        // and slid down onto the plaque's last line, a word for the house
+        // opens, is typed and put away, never sent.
+        let heading = app.descendants(matching: .any).matching(identifier: "heading").firstMatch
+        if heading.exists {
+            mark("hold-heading")
+            heading.press(forDuration: 1.5)
+            pause(0.8)
+            mark("slide-word-board")
+            let from = heading.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.7))
+            let onto = heading.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 1)).withOffset(CGVector(dx: 0, dy: 87))
+            from.press(forDuration: 0.8, thenDragTo: onto)
+            pause(1)
+            if typeWord("board") {
+                mark("word-away-board")
+                app.buttons["Put away"].tap()
+                pause(1)
+            }
+        } else {
+            note("board: no heading to hold")
+        }
+
         mark("swipe-board-left")
         app.swipeLeft()
         pause(1.5)
@@ -165,6 +187,16 @@ final class ChintanWalk: XCTestCase {
             darbanName.press(forDuration: 1.5)
             pause(0.8)
             note("after holding darban, chintan is " + (app.buttons["chintan"].firstMatch.isSelected ? "still open" : "not open"))
+            // Held again and slid down the plaque onto its last line.
+            mark("slide-word-study")
+            let from = darbanName.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            from.press(forDuration: 0.8, thenDragTo: from.withOffset(CGVector(dx: 24, dy: 198)))
+            pause(1)
+            if typeWord("study") {
+                mark("word-away-study")
+                app.buttons["Put away"].tap()
+                pause(1)
+            }
         }
 
         // A word typed in a room, the keyboard up, and taken back unsent.
@@ -231,6 +263,20 @@ final class ChintanWalk: XCTestCase {
 
     private func pause(_ seconds: Double) {
         Thread.sleep(forTimeInterval: seconds)
+    }
+
+    // The composer a slide opened: photographed, a word typed, photographed.
+    private func typeWord(_ screen: String) -> Bool {
+        let word = app.descendants(matching: .any).matching(identifier: "word").firstMatch
+        guard word.waitForExistence(timeout: 2) else {
+            note(screen + ": the slide did not open a word for the house")
+            return false
+        }
+        shot(screen + "-word")
+        word.typeText("the walk")
+        pause(0.5)
+        shot(screen + "-word-typed")
+        return true
     }
 
     private func selectedTab() -> String {
