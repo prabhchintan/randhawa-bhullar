@@ -359,9 +359,15 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    now `.equatable()` in ContentView (Home and the Board always equal, the
    Study by `open`). Any new input on a page goes into its `==`. The Board's
    held plaque rebuilt: a leaf's width, opaque, on a dimmed board with the
-   shelves stepped back. Left: the walk to slide onto the word in the Study
-   and hold the Board's heading, the board scroll's test-hand number (20.7
-   against 13.6 at 0eaa531), then MetricKit.
+   shelves stepped back. The walk slides onto the word on the Board (the
+   heading, identifier "heading") and in the Study (darban's name), and the
+   MetricKit subscriber is built (sprint 37, Metrics.swift, `POST
+   /v1/metrics`). Left: seen on his phone (the simulator never gets a
+   payload; the first comes a day after install), the house filing them and
+   the review reading the trend; and the board scroll's test-hand number
+   (28.7, not the heading's hold: 26.2 without it), which wants a board
+   scroll window in the no-hand walk (HitchMeter.walk) before anything is
+   touched for it. G is whole on the app side otherwise.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -650,10 +656,36 @@ F. Settings and the edges. The health dot; settings one tap away; a
    steer is whole. The band under the head gone (sprint 33): the head is a
    dark ground held through Done and the title, then dissolving
    (PaintedGround's headHold). Left of F: the version line, then a widget,
-   notifications and Siri on his word. Next: G, MetricKit (the word for the
-   house is whole, sprint 35).
+   notifications and Siri on his word. MetricKit built (sprint 37). Next:
+   the version line, the smallest open thing here; the rest waits on his word.
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 37 (8a17f96, 6c882ec): the house hears how the app
+  runs on his phone, and the walk reaches the word for the house from every
+  screen (G's last parts). Metrics.swift subscribes to MetricKit; once a day
+  iOS hands the app a day of its own numbers (launch times, hang rate,
+  scroll hitches, memory, battery) and each goes to `POST /v1/metrics` as
+  {"kind": "metrics", "version": "1.x", "build": "N", "payload": MetricKit's
+  own jsonRepresentation}, told like the senses (any 2xx heard, a 4xx other
+  than 404/405 dropped, anything else kept in Application Support, at most
+  fourteen days, sent on the next opening). Diagnostic payloads (crash and
+  hang reports) are left out, so "no crash reporting" stays literally true.
+  The door (live 09-23 03:30) should accept that shape and file the payload
+  whole; if it wants another, the house says so and the envelope changes in
+  one place. Nothing shows on the phone; the resting tabs unchanged in both
+  modes. The walk now holds the Board's heading and slides down onto its
+  word, and slides from darban's name onto the Study's; both composers rise
+  by real touches, a word typed and put away unsent (shots board-word,
+  board-word-typed, study-word, study-word-typed; sheets slide-word-board,
+  slide-word-study). Hitches, test hand, median of three (ms/s): reveal
+  34.9, first visits 29.8, tabs 51.6, swipe 42.8, board scroll 28.7, study
+  scroll 4.6; no hand, tabs 5.2, neighbours 0.0, rest 0.0. The board scroll
+  with the heading's hold taken off read 26.2, so the hold is not its cost;
+  the Board carries eleven things today against ten, and the test hand reads
+  every leaf, so a no-hand scroll window comes before any fix. Seen, not
+  ours: today's folio (Two Court Ladies with Fireworks) shows its own orange mount and bone page inside
+  the mirror, the scan's border untrimmed (the house's composer). No new door.
 
 - 2026-09-26 · sprint 36 (309962c): turning a page is smooth again, the
   Board's held plaque stands alone, and the Study keeps the Board's margin
