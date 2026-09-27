@@ -343,7 +343,14 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    the label letters "Yesterday" in gilt. `see.sh OUT jharokha@alone-yesterday
    jharokha@alone-yesterday-back` stages a yesterday from the shelf's last
    picture. Left: seen on his phone the morning after the shelf first moves.
-   Next: the keep gesture, which needs a house door (sprint 40's line).
+   The keep gesture built on the app side (sprint 41): alone, a press and
+   hold posts `/v1/keep` (Gallery.keep) and a line on a mount at the
+   painting's foot answers for three and a half seconds; the phone keeps
+   only the ids the house took (UserDefaults gallery.kept). `see.sh OUT
+   jharokha@alone-kept` stages the yes, `jharokha@alone-keep` asks the
+   house for real. Left: the house's door (sprint 41's line), then seen
+   on his phone. E is whole on the app side otherwise; next buildable: F's
+   version line.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -680,6 +687,27 @@ F. Settings and the edges. The health dot; settings one tap away; a
    the version line, the smallest open thing here; the rest waits on his word.
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 41 (33f73e3): the keep gesture (E, its last slice,
+  app side). With the painting alone, a press and hold keeps the work: the
+  house is asked to file it in the vault's baithak, and a small line on a
+  smoked mount rises at the painting's foot, "Kept, in the baithak" in gilt
+  with the success tap, or in saffron with a warning tap "The house cannot
+  keep it yet" (no door) or "The house is not answering"; it fades after a
+  few seconds. A second hold on a kept work says "Already in the baithak"
+  and asks nothing. VoiceOver has "Keep this painting" among the painting's
+  actions and hears the answer. A tap still brings the wall back, a pinch
+  still looks closer. Seen in both modes: the staged yes
+  (`jharokha@alone-kept`), the real house's 404 said in saffron
+  (`jharokha@alone-keep`; look 2 cut the line from "The house has no door
+  for keeping yet", which ran nearly edge to edge), and Home and the bone
+  clock unchanged after coming back (`jharokha@alone-back`, `jharokha`).
+  The walk was not run; nothing on the pages moved. The door this needs
+  (chintan repo): `POST /v1/keep {"id", "title", "artist", "year"}` (id
+  always, the rest when the painting has them), filing the work, picture
+  and label, in the vault's baithak and answering 200 {"ok": true, "kept":
+  "baithak"}, idempotent on id; 404 or 405 until then, which the phone says
+  as "cannot keep it yet" and does not remember.
 
 - 2026-09-27 · sprint 40 (bd2dcd6): yesterday's painting one swipe back (E,
   its second slice). The phone now keeps the day before's work when the
