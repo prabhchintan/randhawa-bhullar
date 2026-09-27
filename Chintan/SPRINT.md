@@ -791,6 +791,25 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    with the painting alone, small, in the museum's lettering, over a
    short shade so it reads on any work; the phone's alone view is
    untouched. The Mac only; the phone keeps its tap.
+   And at 13:14 (verbatim: "i actually LOVE it it's freaking amazing, but
+   can we not have the info of art on the bottom right stay consistent, as
+   in literally stay the same when i click to view art full screen, and by
+   the way there is a debug version that seems like the more ahead version
+   that should be the one that opens when i open chintan which is in the
+   application folder but isn't for some reason ... given the macbook pro
+   aspect ratio we could widen the pool on chintan no? like it's all
+   portrait ratio"). So: (d) the label at the bottom right does not move,
+   resize, fade or reflow when the painting goes alone or comes back: the
+   same view in the same place, only the rest of the wall leaves; (e) every
+   green build now replaces /Applications/Chintan.app (wall.sh), so the app
+   he opens is the newest; (f) the house stocks a second shelf for wide
+   frames, landscape works chosen for a 16:9 wall (the same museums, the
+   same subcontinent third, cut with the mirrored ground above and below
+   when the work is squarer than the frame), served at
+   `GET /v1/paintings?frame=wall` with each picture at
+   `/v1/paintings/ID.wall.jpg`; the Mac asks for that shelf and falls back
+   to the phone's shelf when the house has no wide set yet. The phone's
+   shelf and its portrait pool are untouched.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push

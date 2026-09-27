@@ -26,6 +26,15 @@ fi
 grep -E "warning:" "$LOG" | grep -F "/Chintan/Chintan/" | sort -u | head -10 || true
 APP="$DD/Build/Products/Debug-maccatalyst/Chintan.app"
 echo "BUILD OK: $APP"
+# The build he opens is the newest one (Prab, 2026-09-27 13:14: the Debug
+# build in DerivedData was ahead of the copy in Applications): every green
+# build replaces /Applications/Chintan.app, so Spotlight and the Dock open
+# the latest wall.
+if [ -d /Applications ] && [ -w /Applications ]; then
+  rm -rf /Applications/Chintan.app.new && cp -R "$APP" /Applications/Chintan.app.new \
+    && rm -rf /Applications/Chintan.app && mv /Applications/Chintan.app.new /Applications/Chintan.app \
+    && echo "INSTALLED: /Applications/Chintan.app"
+fi
 [ "$ONLY_BUILD" = yes ] && exit 0
 
 # The wall opens full screen over whatever is on yantar and the picture is of
