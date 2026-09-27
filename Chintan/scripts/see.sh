@@ -24,6 +24,10 @@
 #                                                    then a swipe back to a staged
 #                                                    yesterday; ...-back: then the
 #                                                    wall back over it;
+#                                                    jharokha@alone-kept: alone,
+#                                                    held, the house's yes staged;
+#                                                    jharokha@alone-keep: so, the
+#                                                    house asked for real;
 #                                                    study@held: darban's name held;
 #                                                    study@onword: held, the thumb
 #                                                    on its word for the house;

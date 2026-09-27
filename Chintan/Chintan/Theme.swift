@@ -152,6 +152,34 @@ final class Gallery: ObservableObject {
         return true
     }
 
+    // What a hold on the painting alone came to, said at its foot.
+    enum Kept { case kept, already, noDoor, unheard }
+
+    // The painting on the wall filed in the vault's baithak by the house.
+    // The phone remembers only the ids the house took, so a second hold
+    // says so and asks nothing. `staged` answers as the house would, unasked,
+    // for the house's own eyes.
+    func keep(staged: Bool = false) async -> Kept {
+        guard let p = painting, let id = p.id else { return .unheard }
+        var kept = Set(UserDefaults.standard.stringArray(forKey: Self.keptKey) ?? [])
+        if kept.contains(id) { return .already }
+        if !staged {
+            guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return .unheard }
+            do {
+                try await HouseClient(baseAddress: address).keep(p)
+            } catch HouseError.noDoor {
+                return .noDoor
+            } catch {
+                return .unheard
+            }
+            kept.insert(id)
+            UserDefaults.standard.set(Array(kept), forKey: Self.keptKey)
+        }
+        return .kept
+    }
+
+    private static let keptKey = "gallery.kept"
+
     // Whether the painting on the wall is yesterday's, kept by the phone.
     var showingYesterday: Bool { painting != nil && painting?.key == yesterday?.key }
 

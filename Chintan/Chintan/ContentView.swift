@@ -48,6 +48,9 @@ struct ContentView: View {
     @GestureState(resetTransaction: Transaction(animation: .smooth)) private var pinch = Pinch()
     // A turn along the paintings while the painting stands alone.
     @State private var turned = 0
+    // What the last hold on the painting alone came to, said for a moment.
+    @State private var kept: Gallery.Kept?
+    @State private var keeping = 0
 
     private struct Pinch: Equatable {
         var zoom: CGFloat = 1
@@ -97,6 +100,14 @@ struct ContentView: View {
         .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
         .sensoryFeedback(.impact(weight: .light), trigger: turned)
+        // Success when the house takes the painting, a warning when it cannot.
+        .sensoryFeedback(trigger: keeping) { _, _ in
+            switch kept {
+            case .kept, .already: return .success
+            case .noDoor, .unheard: return .warning
+            case nil: return nil
+            }
+        }
         .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
         .tint(Theme.giltOnArt)
@@ -110,6 +121,14 @@ struct ContentView: View {
             // `alone-yesterday-back` then brings the wall back over it.
             guard let eyes = ContentView.eyes, eyes.hasPrefix("alone-") else { return }
             try? await Task.sleep(for: .seconds(2))
+            // `alone-kept` holds the painting as if the house had taken it,
+            // asking nothing of the house; `alone-keep` asks it for real.
+            // Held at four seconds, so the answer stands when the eyes look at six.
+            if eyes == "alone-keep" || eyes == "alone-kept" {
+                try? await Task.sleep(for: .seconds(2))
+                keep(staged: eyes == "alone-kept")
+                return
+            }
             if eyes.hasPrefix("alone-yesterday") {
                 walk(-1)
                 try? await Task.sleep(for: .seconds(1.5))
@@ -141,12 +160,13 @@ struct ContentView: View {
 
     // The painting alone: a pinch looks closer and springs back when let go;
     // a swipe walks the paintings the phone holds, to the right back to
-    // yesterday's, to the left on to the days ahead; a tap anywhere brings
-    // the wall back.
+    // yesterday's, to the left on to the days ahead; a press and hold keeps
+    // it in the vault's baithak; a tap anywhere brings the wall back.
     private var looking: some View {
         Color.clear
             .contentShape(Rectangle())
             .ignoresSafeArea()
+            .onLongPressGesture(minimumDuration: 0.6, maximumDistance: 12) { keep() }
             .onTapGesture { back() }
             .gesture(
                 MagnifyGesture()
@@ -169,6 +189,8 @@ struct ContentView: View {
             .accessibilityHint("Double tap to bring the day back. Swipe up or down to turn.")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { back() }
+            .accessibilityAction(named: "Keep this painting") { keep() }
+            .overlay(alignment: .bottom) { keptLine }
             .accessibilityAdjustableAction { direction in
                 switch direction {
                 case .increment: walk(1)
@@ -176,6 +198,45 @@ struct ContentView: View {
                 @unknown default: break
                 }
             }
+    }
+
+    // The hold's answer at the painting's foot, a wall label's line on a
+    // smoked mount, gone after a few seconds: gilt when kept, saffron when not.
+    @ViewBuilder private var keptLine: some View {
+        if let kept {
+            let (words, gilt): (String, Bool) = switch kept {
+            case .kept: ("Kept, in the baithak", true)
+            case .already: ("Already in the baithak", true)
+            case .noDoor: ("The house cannot keep it yet", false)
+            case .unheard: ("The house is not answering", false)
+            }
+            Text(words)
+                .font(Theme.label(.footnote))
+                .tracking(1)
+                .foregroundStyle(gilt ? Theme.giltOnArt : Theme.saffron)
+                .mount()
+                .padding(.bottom, 64)
+                .transition(.opacity)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func keep(staged: Bool = false) {
+        Task {
+            let answer = await gallery.keep(staged: staged)
+            withAnimation(.smooth) { kept = answer }
+            keeping += 1
+            let said = switch answer {
+            case .kept: "Kept, in the baithak"
+            case .already: "Already in the baithak"
+            case .noDoor: "Not kept. The house cannot keep paintings yet"
+            case .unheard: "Not kept. The house is not answering"
+            }
+            UIAccessibility.post(notification: .announcement, argument: said)
+            let shown = keeping
+            try? await Task.sleep(for: .seconds(3.5))
+            if keeping == shown { withAnimation(.smooth) { kept = nil } }
+        }
     }
 
     private func walk(_ by: Int) {

@@ -221,6 +221,25 @@ struct HouseClient {
         guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
     }
 
+    // A painting kept: the house files the work in the vault's baithak,
+    // {"id", "title", "artist", "year"}. A house without this door answers 404.
+    func keep(_ painting: Painting) async throws {
+        guard let keepURL = url("/v1/keep"), let id = painting.id else { throw HouseError.noAddress }
+        var request = URLRequest(url: keepURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 20
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var body = ["id": id]
+        body["title"] = painting.title
+        body["artist"] = painting.artist
+        body["year"] = painting.year
+        request.httpBody = try JSONEncoder().encode(body)
+        let (_, response) = try await Self.session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
+        guard (200..<300).contains(http.statusCode) else { throw HouseError.unreachable }
+    }
+
     // Where the phone is, told to the house and forgotten: {"lat", "lon",
     // "acc", "at"}, nil keys left out. The house answers with the place it knows it by (home,
     // work, out) or none yet. A house without this door answers 404.
