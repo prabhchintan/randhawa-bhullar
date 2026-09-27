@@ -17,6 +17,9 @@
 #                                                    jharokha@onword: held, the thumb
 #                                                    on its word for the house;
 #                                                    jharokha@word: that word open;
+#                                                    jharokha@alone: the painting alone;
+#                                                    jharokha@alone-back: so, then
+#                                                    the wall back after 2 s;
 #                                                    study@held: darban's name held;
 #                                                    study@onword: held, the thumb
 #                                                    on its word for the house;

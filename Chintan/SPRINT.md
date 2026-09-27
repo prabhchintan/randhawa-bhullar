@@ -324,6 +324,20 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    side: Cleveland as a second source and the Indian and Sikh themes live
    09-22 evening; architecture next); a keep gesture that files today's
    painting in the vault's baithak; yesterday's painting one swipe away.
+   The painting alone built (sprint 38): a tap on Home's bare picture puts
+   every page, its shade, the bar and the clock away (ContentView's `alone`,
+   asked for through `\.paintingAlone`); a pinch looks closer from where the
+   fingers began, to four times, and springs back when let go; a tap
+   anywhere brings the wall back. `see.sh OUT jharokha@alone
+   jharokha@alone-back` (the second opens alone and comes back after two
+   seconds). Left, a defect first: after coming back the clock is lettered
+   black, not bone, on Home's dark head and on every page after, until the
+   app is opened again. Tried and not it: the dark scheme on the painting
+   and the overlay; showing the clock only once the wall's fade has ended.
+   Launched plainly the clock is bone, so the system chose it from the pages
+   at launch; the next try is to never hide it (see whether it stays bone
+   with the pages at opacity 0) or to keep the pages at a trace of opacity.
+   Then: the keep gesture, yesterday's painting one swipe back.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -660,6 +674,27 @@ F. Settings and the edges. The health dot; settings one tap away; a
    the version line, the smallest open thing here; the rest waits on his word.
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 38 (71b48e1, c296cc0): the painting alone (E, its
+  first slice). A tap on Home's bare picture, above the day's lines, lets
+  the date, the things, the rings, the label, Visitors, the shade, the bar
+  and the clock fade away with a soft tap, and the day's work stands whole
+  on the screen as the house composed it: seen today, the two court ladies
+  with their fireworks in full colour, the grass at their feet, where the
+  shade had kept them a brown ghost. A pinch looks closer and springs back
+  when let go; a tap anywhere brings the wall back; the pages do not turn
+  while the painting stands alone. VoiceOver hears the painting by its title
+  with "Double tap to bring the day back." Seen in both modes
+  (`jharokha@alone`, `jharokha@alone-back`, new; Home and the Board
+  unchanged) and in the walk by real touches: the tap, a pinch to 2.5 times
+  (sheet pinch: the faces grow and settle back), the tap back (sheets
+  alone, pinch, alone-back; shots home-alone, home-back). A defect this
+  sprint did not close: back from the painting alone, the clock is black
+  instead of bone until the next opening, legible on the shade but wrong;
+  two fixes tried, the next named under E. Hitches, test hand, one run
+  (ms/s): reveal 27.9, first visits 40.1, tabs 53.9, swipe 48.5, board
+  scroll 32.3, study scroll 7.6; no hand, tabs 5.7, neighbours 0.0, rest
+  0.0. Audit 20 findings, the same set as sprint 37. No new door.
 
 - 2026-09-27 · sprint 37 (8a17f96, 6c882ec): the house hears how the app
   runs on his phone, and the walk reaches the word for the house from every
