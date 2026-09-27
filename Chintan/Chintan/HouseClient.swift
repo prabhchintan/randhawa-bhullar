@@ -73,8 +73,10 @@ struct HouseClient {
     }
 
     // The shelf, today's first. A house without this door answers 404.
-    func paintings() async throws -> [Painting] {
-        guard let url = url("/v1/paintings") else { throw HouseError.noAddress }
+    // `frame: "wall"` asks for the Mac's wide shelf (since 2026-09-27):
+    // landscape works cut for 16:9, each picture at /v1/paintings/ID.wall.jpg.
+    func paintings(frame: String? = nil) async throws -> [Painting] {
+        guard let url = url("/v1/paintings" + (frame.map { "?frame=" + $0 } ?? "")) else { throw HouseError.noAddress }
         let (data, response) = try await Self.session.data(from: url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
         struct Shelf: Decodable { let paintings: [Painting] }

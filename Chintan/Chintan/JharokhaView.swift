@@ -332,6 +332,23 @@ struct JharokhaView: View {
     // Small and exact, never shouting: the title, the artist, the year, one
     // to a line. The artist's nationality and dates wait with the credit, on tap.
     @ViewBuilder private var museumLabel: some View {
+        #if targetEnvironment(macCatalyst)
+        // The wall's label is its own, over the wall and the painting alone
+        // alike (ContentView's WallLabel); the foot only keeps its room, and
+        // the wall turns itself, so no next.
+        if let painting = gallery.painting, painting.title != nil {
+            WallLettering(painting: painting)
+                .hidden()
+                .padding(.trailing, WallLettering.trailing - 22)
+                .padding(.bottom, WallLettering.bottom - 2)
+                .accessibilityHidden(true)
+        }
+        #else
+        phoneLabel
+        #endif
+    }
+
+    @ViewBuilder private var phoneLabel: some View {
         if let painting = gallery.painting, let title = painting.title {
             let artist = (painting.artist ?? "").plainDashes
             let (name, about) = Self.split(artist)

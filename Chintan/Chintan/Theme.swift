@@ -106,7 +106,14 @@ final class Gallery: ObservableObject {
         fetching = true
         defer { fetching = false }
         let house = HouseClient(baseAddress: address)
-        var fresh = (try? await house.paintings()) ?? []
+        var fresh: [HouseClient.Painting] = []
+        #if targetEnvironment(macCatalyst)
+        // The Mac hangs the wide shelf, landscape works chosen for its frame;
+        // a house with none yet answers empty or 404, and the phone's shelf
+        // is hung instead, each in its landscape cut.
+        fresh = (try? await house.paintings(frame: "wall")) ?? []
+        #endif
+        if fresh.isEmpty { fresh = (try? await house.paintings()) ?? [] }
         if fresh.isEmpty, let one = try? await house.painting() { fresh = [one] }   // an older house
         guard !fresh.isEmpty else { return }
         keepYesterday(before: fresh)

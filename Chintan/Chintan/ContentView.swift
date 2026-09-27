@@ -107,8 +107,8 @@ struct ContentView: View {
         .allowsHitTesting(!alone)
         .overlay { if alone { looking } }
         #if targetEnvironment(macCatalyst)
-        // On the wall the label stays with the painting alone, small in its corner.
-        .overlay { if alone { WallLabel() } }
+        // On the wall the label never leaves: only the rest of the wall does.
+        .overlay { WallLabel() }
         #endif
         .overlay { keptLine }
         // Alone, the home indicator steps back with the clock.
@@ -377,9 +377,12 @@ enum WallPace {
 }
 
 #if targetEnvironment(macCatalyst)
-// The wall's label with the painting alone: the title, the artist, the year
-// and the credit, small in the bottom right corner over a short shade, the
-// way a museum letters a wall. It changes with the painting, as slowly.
+// The wall's label: the title, the artist, the year and the credit, small in
+// the bottom right corner over a short shade, the way a museum letters a
+// wall. One view over the wall and the painting alone alike, so a click that
+// puts the wall away leaves it exactly where it stood (Prab, 2026-09-27
+// 13:14: the same view, same place, same size). It changes with the
+// painting, as slowly as the painting does.
 private struct WallLabel: View {
     @EnvironmentObject private var gallery: Gallery
 
@@ -387,43 +390,56 @@ private struct WallLabel: View {
         ZStack(alignment: .bottomTrailing) {
             RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
                            center: .bottomTrailing, startRadius: 0, endRadius: 420)
-            if let p = gallery.painting, let title = p.title {
-                VStack(alignment: .trailing, spacing: 3) {
-                    Text(title.plainDashes)
-                        .font(.system(.callout, design: .serif).italic())
-                        .foregroundStyle(Theme.bone)
-                    let artist = (p.artist ?? "").plainDashes
-                    if !artist.isEmpty {
-                        Text(artist)
-                            .font(.system(.footnote, design: .serif))
-                            .foregroundStyle(Theme.bone.opacity(0.88))
-                    }
-                    if let year = p.year, !year.isEmpty {
-                        Text(year.plainDashes)
-                            .font(Theme.label(.footnote))
-                            .tracking(0.8)
-                            .foregroundStyle(Theme.giltOnArt)
-                    }
-                    if let credit = p.credit, !credit.isEmpty {
-                        Text(credit.plainDashes)
-                            .font(.caption)
-                            .foregroundStyle(Theme.bone.opacity(0.66))
-                            .padding(.top, 2)
-                    }
-                }
-                .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 340, alignment: .trailing)
-                .shadow(color: .black.opacity(0.5), radius: 6)
-                .padding(.trailing, 40)
-                .padding(.bottom, 32)
-                .id(p.key)
-                .transition(.opacity)
+            if let p = gallery.painting, p.title != nil {
+                WallLettering(painting: p)
+                    .shadow(color: .black.opacity(0.5), radius: 6)
+                    .padding(.trailing, WallLettering.trailing)
+                    .padding(.bottom, WallLettering.bottom)
+                    .id(p.key)
+                    .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 2.6), value: gallery.painting?.key)
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+}
+
+// The label's lettering. Home lays it unseen in its foot as well, so the
+// wall keeps the label's room and its hairline stands above it, never through.
+struct WallLettering: View {
+    let painting: HouseClient.Painting
+    // From the screen's bottom right corner.
+    static let trailing: CGFloat = 40
+    static let bottom: CGFloat = 32
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 3) {
+            Text((painting.title ?? "").plainDashes)
+                .font(.system(.callout, design: .serif).italic())
+                .foregroundStyle(Theme.bone)
+            let artist = (painting.artist ?? "").plainDashes
+            if !artist.isEmpty {
+                Text(artist)
+                    .font(.system(.footnote, design: .serif))
+                    .foregroundStyle(Theme.bone.opacity(0.88))
+            }
+            if let year = painting.year, !year.isEmpty {
+                Text(year.plainDashes)
+                    .font(Theme.label(.footnote))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.giltOnArt)
+            }
+            if let credit = painting.credit, !credit.isEmpty {
+                Text(credit.plainDashes)
+                    .font(.caption)
+                    .foregroundStyle(Theme.bone.opacity(0.66))
+                    .padding(.top, 2)
+            }
+        }
+        .multilineTextAlignment(.trailing)
+        .frame(maxWidth: 340, alignment: .trailing)
     }
 }
 #endif
