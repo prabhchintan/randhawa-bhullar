@@ -348,9 +348,14 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    painting's foot answers for three and a half seconds; the phone keeps
    only the ids the house took (UserDefaults gallery.kept). `see.sh OUT
    jharokha@alone-kept` stages the yes, `jharokha@alone-keep` asks the
-   house for real. Left: the house's door (sprint 41's line), then seen
-   on his phone. E is whole on the app side otherwise; next buildable: F's
-   version line.
+   house for real. The line moved off the work into the foot's safe area,
+   above the home indicator, which steps away while alone (sprint 42); the
+   walk films the turn on, the turn back and the hold (`--keep-staged`, so
+   the walk's hold never files a work; sheets alone-turn-on,
+   alone-turn-back, alone-hold). Left: the house's door (sprint 41's line),
+   then seen on his phone. E is whole on the app side; no further
+   collection slice before the next open run goes to the Board's bodies or
+   the audit (the house's steer, 09-27), then F's version line.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -687,6 +692,26 @@ F. Settings and the edges. The health dot; settings one tap away; a
    the version line, the smallest open thing here; the rest waits on his word.
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 42 (cbd4623, a1b637a): the keep line leaves the
+  painting (the house's steer). After a hold on the painting alone, the
+  answer ("Kept, in the baithak" in gilt, the house's refusals in saffron)
+  is lettered in the screen's foot below the work, over a short shade, in
+  the strip the home indicator lives in; before, it stood on a mount over
+  the court ladies' feet. The indicator steps away while the painting
+  stands alone; a touch brings it back, so the line sits in the top of the
+  foot, clear of it (look 2, from the walk's shot). Seen in both modes
+  (`jharokha@alone-kept`, `jharokha@alone-keep`, `jharokha@alone-back`;
+  Home, the Board and the Study unchanged). The walk now films the alone
+  view by real touches: a swipe left crossfades to tomorrow's Rubens in
+  about 250 ms, a swipe right back to today's, and the hold's line rises
+  a second after the press (sheets alone-turn-on, alone-turn-back,
+  alone-hold; shots home-alone-on, -returned, -kept). The walk's hold is
+  staged (`--keep-staged`), so the walk still sends the house nothing.
+  Hitches, test hand, one run (ms/s): reveal 28.2, first visits 34.6, tabs
+  50.2, swipe 33.4, board scroll 28.3, study scroll 10.1; no hand, tabs
+  7.8, neighbours 0.0, rest 0.0. Audit 20 findings, the same set as sprint
+  37. No new door; sprint 41's `POST /v1/keep` still wanted.
 
 - 2026-09-27 · sprint 41 (33f73e3): the keep gesture (E, its last slice,
   app side). With the painting alone, a press and hold keeps the work: the
