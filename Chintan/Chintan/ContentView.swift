@@ -169,7 +169,10 @@ struct ContentView: View {
         Color.clear
             .contentShape(Rectangle())
             .ignoresSafeArea()
-            .onLongPressGesture(minimumDuration: 0.6, maximumDistance: 12) { keep() }
+            // The walk holds with `--keep-staged`, so its hold never files a work.
+            .onLongPressGesture(minimumDuration: 0.6, maximumDistance: 12) {
+                keep(staged: ProcessInfo.processInfo.arguments.contains("--keep-staged"))
+            }
             .onTapGesture { back() }
             .gesture(
                 MagnifyGesture()
@@ -224,8 +227,10 @@ struct ContentView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+                        // The top of the foot, clear of the indicator a touch brings back.
+                        .padding(.top, 2)
                         .frame(maxWidth: .infinity)
-                        .frame(height: foot)
+                        .frame(height: foot, alignment: .top)
                         .background(alignment: .bottom) {
                             LinearGradient(colors: [Theme.lampBlack.opacity(0.78), Theme.lampBlack.opacity(0)],
                                            startPoint: .bottom, endPoint: .top)

@@ -24,7 +24,7 @@ final class ChintanWalk: XCTestCase {
         FileManager.default.createFile(atPath: logURL.path, contents: nil)
         log = try FileHandle(forWritingTo: logURL)
         app = XCUIApplication()
-        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha"]
+        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha", "--keep-staged"]
     }
 
     override func tearDown() {
@@ -99,6 +99,23 @@ final class ChintanWalk: XCTestCase {
         mark("pinch")
         app.pinch(withScale: 2.5, velocity: 1)
         pause(1)
+        // Alone, a swipe to the left walks on to tomorrow's painting and one
+        // to the right walks back; the film sees each turn cross.
+        mark("alone-turn-on")
+        app.swipeLeft()
+        pause(1.5)
+        shot("home-alone-on")
+        mark("alone-turn-back")
+        app.swipeRight()
+        pause(1.5)
+        shot("home-alone-returned")
+        // Held, the painting is kept; the answer rises in the foot below the
+        // work. Staged by `--keep-staged`, so nothing is filed.
+        mark("alone-hold")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4)).press(forDuration: 1.0)
+        pause(0.6)
+        shot("home-alone-kept")
+        pause(3.5)
         mark("alone-back")
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         pause(1)
