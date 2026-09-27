@@ -758,6 +758,53 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    build in /Applications is the Shipping item), and the first launch's
    crash seen once (a segfault, no report, not seen again in three).
 
+P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
+   decouple the skeleton from the UI (including the background), we can push
+   changes much faster or is that just a fantasy?"; and, the same message,
+   the weight: "I noticed haptic feedback and that was amazing this morning,
+   really coming together", "I love our iphone app"). Not a fantasy, but a
+   line to draw carefully. The app today is already half decoupled: the
+   painting, the day's line, the board's text, the mail, the visitors and
+   the voices all come from the house at run time, so most of what he sees
+   changes without a build. What still needs a build is how it is drawn:
+   the layout of a screen, the type, the gestures, the haptics, the
+   animation. The three roads:
+   - A web view in a shell: the fastest to push and the wrong one. The
+     things he named as the app's joy (the painting alone on tap, the
+     haptics, the swipe through the set, the offline shelf, the senses)
+     are native; a web view would trade them for speed and the app would
+     feel like a site. Never this.
+   - Server-driven layout: the app ships a vocabulary of native pieces
+     (a label in small capitals, a serif title, a leaf of lines with a
+     gilt date, a column, a plaque, a painting layer, a ring, a mail
+     line) and the house serves each screen as a tree of those pieces
+     with their data (`GET /v1/screens/home`, `/board`, `/wall`), plus
+     the look as tokens (`GET /v1/look`: the palette, the type scale, the
+     spacing, the scrim strengths, which tabs exist and in what order).
+     A change in what shows, where, how big, in what order, on which
+     screen, ships the moment the house's JSON changes; the phone and the
+     Mac wall read the same trees, so one edit dresses both. A new kind
+     of piece, a new gesture, a new animation still needs a build, and
+     those are the rarer changes. This is the road: Airbnb's and Lyft's
+     apps work this way; Apple allows it, since it is content and layout,
+     never code.
+   - The build cycle itself made cheaper: the sprint already builds and
+     ships to TestFlight in about an hour, most of it Apple's processing
+     and the install; the Mac wall on yantar needs no TestFlight at all,
+     so a Mac change is minutes.
+   The shape, in slices after the Mac wall: (1) `/v1/look` on the house,
+   the app's Theme reading it at launch and on every refresh with the
+   shipped values as the fallback, so a colour, a type size or a scrim can
+   change from the house; (2) the Home screen as a tree from
+   `/v1/screens/home` rendered by a native vocabulary, the shipped Home
+   kept as the fallback when the house is away; (3) the Board and the
+   wall's columns the same way; (4) the vocabulary grown as the house
+   asks for pieces that do not exist yet, each one a build, the last build
+   of its kind. Everything that gives the app its feel stays in Swift:
+   the painting layer and its alone view, the gestures, the haptics, the
+   senses. The rule: the house decides what and where, the app decides
+   how it feels.
+
 
 ## The ledger (newest first)
 
