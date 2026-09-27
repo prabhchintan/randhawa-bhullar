@@ -41,15 +41,22 @@ fi
 shoot() {
   local name=$1; shift
   pkill -x Chintan 2>/dev/null; sleep 1
-  "$APP/Contents/MacOS/Chintan" --house "${CHINTAN_HOUSE:-}" --tab jharokha "$@" >"$OUT/$name.log" 2>&1 &
-  local pid=$!
+  # Through LaunchServices, never the binary itself: run from the runner's
+  # launchd context the binary came up with no window on the screen (the
+  # 12:15 and 12:29 photos on 2026-09-27 showed HEY and Telegram, not the
+  # wall); `open` hands it to the user's GUI session, where the window is.
+  open -n "$APP" --args --house "${CHINTAN_HOUSE:-}" --tab jharokha "$@" >"$OUT/$name.log" 2>&1
   sleep "${WALL_WAIT:-12}"
-  if ! kill -0 "$pid" 2>/dev/null; then
-    wait "$pid"; echo "$name: the app left early (exit $?); its last words:"
-    tail -15 "$OUT/$name.log"
+  local pid; pid=$(pgrep -x Chintan | head -1)
+  if [ -z "$pid" ]; then
+    echo "$name: the app left early; its last words:"; tail -15 "$OUT/$name.log"
+  fi
+  # The picture must hold the app's own window, or the eyes say so.
+  if ! osascript -e 'tell application "System Events" to get name of window 1 of process "Chintan"' >/dev/null 2>&1; then
+    echo "$name: NO WINDOW on the screen; the photograph would not be of the wall"
   fi
   screencapture -x "$OUT/$name.png" && echo "$OUT/$name.png"
-  kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null || true
+  pkill -x Chintan 2>/dev/null || true
 }
 shoot wall
 shoot wall-alone --open alone
