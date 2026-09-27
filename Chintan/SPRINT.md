@@ -336,7 +336,14 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    clock's style is the app's (Info.plist, light content, no screen asked),
    hidden alone through UIApplication's own switch (ContentView's Clock);
    a screen's `.statusBarHidden` or style is now ignored, so never add one.
-   Next: the keep gesture, yesterday's painting one swipe back.
+   Yesterday's painting one swipe back built (sprint 40): the Gallery keeps
+   the work that stood before today's when the house's shelf moves on a day
+   (Caches/paintings/yesterday.json and its picture); alone, a swipe right
+   walks back, left walks on, stopping at either end (`Gallery.turn`), and
+   the label letters "Yesterday" in gilt. `see.sh OUT jharokha@alone-yesterday
+   jharokha@alone-yesterday-back` stages a yesterday from the shelf's last
+   picture. Left: seen on his phone the morning after the shelf first moves.
+   Next: the keep gesture, which needs a house door (sprint 40's line).
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -673,6 +680,21 @@ F. Settings and the edges. The health dot; settings one tap away; a
    the version line, the smallest open thing here; the rest waits on his word.
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 40 (bd2dcd6): yesterday's painting one swipe back (E,
+  its second slice). The phone now keeps the day before's work when the
+  house's shelf moves on; with the painting alone, a swipe to the right
+  brings it back whole, a swipe to the left walks on through the days ahead,
+  a light tap on each turn and none at either end; VoiceOver turns by
+  swiping up or down on the painting. Back on the wall the label reads
+  "Yesterday" in small gilt capitals over the title, so he always knows
+  whose day he is looking at. Seen in both modes (`jharokha@alone-yesterday`,
+  `-back`, new, a yesterday staged by see.sh): the Daumier stands alone,
+  then under the wall with its label marked; Home at rest unchanged. The
+  walk was not run; the pages' scroll is untouched. The door this wants
+  next, for the keep gesture: `POST /v1/keep {"id": painting id}` answering
+  200 {"ok": true, "kept": "baithak"} to file the work in the vault; a 404
+  means no door yet, and the app would say nothing.
 
 - 2026-09-27 · sprint 39 (5a25c60): the clock mended (the house's steer).
   Back from the painting alone in light mode, the clock came back black on
