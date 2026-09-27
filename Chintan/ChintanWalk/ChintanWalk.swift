@@ -89,6 +89,22 @@ final class ChintanWalk: XCTestCase {
             note("home: no museum label")
         }
 
+        // A tap on the bare picture leaves the painting alone; a pinch looks
+        // closer and springs back; a tap brings the wall back.
+        mark("alone")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)).tap()
+        pause(1)
+        shot("home-alone")
+        if app.buttons["Home"].isHittable { note("home: the tap did not leave the painting alone") }
+        mark("pinch")
+        app.pinch(withScale: 2.5, velocity: 1)
+        pause(1)
+        mark("alone-back")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        pause(1)
+        shot("home-back")
+        if !app.buttons["Home"].isHittable { note("home: a tap did not bring the wall back") }
+
         // The swipe between tabs, as a thumb does it.
         mark("swipe-home-left")
         app.swipeLeft()

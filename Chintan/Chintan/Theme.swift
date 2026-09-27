@@ -197,6 +197,10 @@ final class Gallery: ObservableObject {
 // sliding over it. While the picture is missing, the gallery wall after hours.
 struct Painting: View {
     @EnvironmentObject private var gallery: Gallery
+    // A closer look while the painting stands alone: the pinch's scale, from
+    // the point the fingers began at.
+    var zoom: CGFloat = 1
+    var anchor: UnitPoint = .center
 
     var body: some View {
         Theme.lampBlack
@@ -211,12 +215,26 @@ struct Painting: View {
                         .resizable()
                         .scaledToFill()
                         .scaleEffect(1.04)
+                        .scaleEffect(zoom, anchor: anchor)
                         .transition(.opacity)
                 }
             }
             .clipped()
             .ignoresSafeArea()
             .accessibilityHidden(true)
+    }
+}
+
+// The painting alone: Home asks for it with a tap on the bare picture, and
+// the app puts every page, the bar and the clock away until the next tap.
+private struct PaintingAloneKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
+extension EnvironmentValues {
+    var paintingAlone: Binding<Bool> {
+        get { self[PaintingAloneKey.self] }
+        set { self[PaintingAloneKey.self] = newValue }
     }
 }
 

@@ -40,6 +40,15 @@ struct ContentView: View {
     @StateObject private var gallery = Gallery()
     @State private var page: Tab? = Tab.launch
     @State private var keyboard = false
+    // The painting alone, asked for by a tap on Home's bare picture.
+    @State private var alone = Tab.launch == .jharokha && ContentView.eyes == "alone"
+    // A pinch on the painting alone: how far in, and from where.
+    @GestureState(resetTransaction: Transaction(animation: .smooth)) private var pinch = Pinch()
+
+    private struct Pinch: Equatable {
+        var zoom: CGFloat = 1
+        var anchor: UnitPoint = .center
+    }
 
     private var tab: Tab { page ?? .jharokha }
 
@@ -67,13 +76,22 @@ struct ContentView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: $page)
+        // Alone, the painting holds still; no swipe turns a page under it.
+        .scrollDisabled(alone)
         .scrollIndicators(.hidden)
         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         // The keyboard covers the bar, as the system's own tab bar lets it.
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if !keyboard { bar }
         }
-        .background { Painting() }
+        // Alone, every page, its shade and the bar step away; the picture stays.
+        .opacity(alone ? 0 : 1)
+        .allowsHitTesting(!alone)
+        .overlay { if alone { looking } }
+        .background { Painting(zoom: pinch.zoom, anchor: pinch.anchor) }
+        .statusBarHidden(alone)
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
+        .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
         .tint(Theme.giltOnArt)
         .environmentObject(store)
@@ -100,6 +118,34 @@ struct ContentView: View {
         case .board: BoardView().equatable()
         case .study: StudyView(open: tab == .study).equatable()
         }
+    }
+
+    // The painting alone: a pinch looks closer and springs back when let go;
+    // a tap anywhere brings the wall back.
+    private var looking: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .ignoresSafeArea()
+            .onTapGesture { withAnimation(.smooth) { alone = false } }
+            .gesture(
+                MagnifyGesture()
+                    .updating($pinch) { value, state, _ in
+                        if state.zoom == 1 { state.anchor = value.startAnchor }
+                        state.zoom = min(max(value.magnification, 1), 4)
+                    }
+            )
+            .accessibilityElement()
+            .accessibilityLabel(gallery.painting?.title ?? "The painting")
+            .accessibilityHint("Double tap to bring the day back.")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { withAnimation(.smooth) { alone = false } }
+    }
+
+    // For the house's eyes: `--open alone` on Home opens on the painting alone.
+    private static var eyes: String? {
+        let args = ProcessInfo.processInfo.arguments
+        guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return nil }
+        return args[i + 1]
     }
 
     // The tab bar lettered on the art: bone icons, the one open in gilt,

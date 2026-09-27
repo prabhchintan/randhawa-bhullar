@@ -10,6 +10,7 @@ import UIKit
 struct JharokhaView: View {
     @EnvironmentObject private var gallery: Gallery
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.paintingAlone) private var alone
     @State private var day = CockpitDay()
     @State private var dated: [BoardItem] = []
     // The house's own short titles, by the line, when it serves them.
@@ -79,6 +80,13 @@ struct JharokhaView: View {
                             // The last line clears the fade whole, above the foot.
                             .padding(.bottom, 40)
                             .frame(minHeight: wall.size.height, alignment: .bottomLeading)
+                            // A tap on the bare picture, nothing lettered under
+                            // it, puts the wall away and leaves the painting alone.
+                            .background {
+                                Color.clear
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { withAnimation(.smooth) { alone.wrappedValue = true } }
+                            }
                     }
                     .scrollBounceBehavior(.basedOnSize)
                     .fadedEdges(top: 0, bottom: 36)
