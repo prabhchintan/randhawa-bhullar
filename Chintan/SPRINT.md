@@ -815,6 +815,16 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    `?frame=wall` first. Left: a CONFIRMED look (the wall now says its
    window state on stdout, `open --stdout`, not yet seen working), a frame
    inside the crossfade, then the columns.
+   The house's steer, 17:41 and 18:05 (his word: "run the full collection
+   on the Mac as well, why not"; three letterings, "one without, one with
+   smaller titles and basic info, one with detailed info"). Built (sprint
+   46): every turn asks `GET /v1/wall/next` and hangs that work; the last
+   six stay (Caches/paintings/hung.json) for a swipe back and the next
+   open; the wide shelf only when the house is silent; the label follows
+   the record's `label` word (off, basic, detailed; `--letters WORD` for
+   the eyes). Left: the first look at it (never opened: at 18:12 every open
+   failed at spawn, launchd 162, and after that yantar was in use), then
+   what sprint 45 left.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -865,6 +875,33 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
 
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 46 (7b8146e, and the commit carrying this line): the
+  Mac wall runs the whole collection, lettered as the house says (the
+  house's 17:41 and 18:05 steer). Each turn of the wall now asks the house
+  for one fresh work (`GET /v1/wall/next`) and hangs it with the same 2.6 s
+  crossfade. That goes for the Turn Every timer and for a swipe forward
+  past the newest work. The last six works stay on the Mac, so a swipe back
+  finds them and the wall reopens on the last one, even with the house away.
+  The wide shelf is only the fallback when the house does not answer. The
+  label follows the record's `label` word, and a change shows at the next
+  turn with no restart. With `off` there is no label and no shade. With
+  `basic` there is the title in italic, then the artist and the year in
+  gilt on one small line. With `detailed` there is the title, the artist,
+  the year in gilt, the medium, the credit and the museum (when the credit
+  does not already name it), bone over a larger shade and wrapped under 42
+  percent of the wall. Home's foot keeps the same room, unseen. A work from
+  the shelf takes the word of the last one hung, basic before any. The
+  phone is untouched: all six stills match (/tmp/see/3). NOT SEEN on the
+  Mac. At 18:12 all three opens failed at spawn ("Launchd job spawn
+  failed", POSIX 162) and the photographs showed HEY. The dev copy's
+  re-sign verifies clean, so the eyes now open /Applications/Chintan.app,
+  the copy he opens, and print any re-sign or signature failure. Two
+  later tries found yantar in use (touched 221 s and 4 s before). The new
+  build is in /Applications. The first look (each lettering through
+  `--letters`, one turn through the house's loop) is the next job. No walk
+  and no hitch numbers, since nothing on the phone moved. No new door:
+  `/v1/wall/next` is live.
 
 - 2026-09-27 · sprint 45 (cbfe4bd, and the commit carrying this line): the
   Mac wall's label holds still, and the wall hangs wide works (the house's
