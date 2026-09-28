@@ -160,7 +160,8 @@ each and their state; hawa since 09-25, the air, its spool in RAM and wiped
 when the conversation ends, and the app keeps it nowhere either), `POST /v1/done {"text": ...}` when the board asks for
 it, `/v1/titles` (since 09-25 08:50: the house's own short name for every open
 thing, {"titles": [{"line", "title", "hour"}]}, a model names each line once,
-one to four words, the hour a clock time or a word like "evening"). Anything shown as a number, ring or bar comes from one of these or is
+one to four words, the hour a clock time or a word like "evening"), `/v1/wall/next?frame=large|medium|small` (since
+09-28, the widget's: one fresh work off the walls' loop, `image` its cut for that frame). Anything shown as a number, ring or bar comes from one of these or is
 not shown.
 
 ## The rules of a sprint
@@ -690,6 +691,7 @@ F. Settings and the edges. The health dot; settings one tap away; a
    (PaintedGround's headHold). Left of F: the version line, then a widget,
    notifications and Siri on his word. MetricKit built (sprint 37). Next:
    the version line, the smallest open thing here; the rest waits on his word.
+   The widget came on his word and is its own chunk, Q.
 O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    the app, by the way can we do a mac OS version so i can have the app as a
    full screen thing that always displays art, to dos and emails (for this we
@@ -879,9 +881,61 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    the painting layer and its alone view, the gestures, the haptics, the
    senses. The rule: the house decides what and where, the app decides
    how it feels.
+Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
+   i want it as a widget on the iphone. you would need to figure out how to
+   display it in different aspect ratios because i know widgets have certain
+   ratios. i think i will put it as the biggest sized widget on my home
+   screen and i have an iphone 15 ... pro"). The house composes: `GET
+   /v1/wall/next?frame=large|medium|small` gives one fresh work off the
+   walls' own loop, its picture at `/v1/paintings/ID.FRAME.jpg`, cut at the
+   15 Pro's 3x sizes, the rest whole in the mirrored ground. Built (sprint
+   48): the ChintanWidget extension (ChintanWidget/, embedded on the phone
+   only, never on the Mac), large, medium and small from one view; the
+   picture edge to edge as the container's background; the label bottom
+   right over a short shade as the house's word says (off, basic, detailed;
+   the small square the title alone); a refresh asked every 15 minutes and
+   on every opening of the app; the last work of each frame kept in the App
+   Group (group.Prabhchintan.Chintan, both targets), so off the tailnet the
+   widget keeps its picture; the house address handed over through the
+   group's defaults. A tap opens chintan://painting/ID: Home, the painting
+   alone, that work if the phone holds it, else Home's own. The eyes:
+   `see.sh --widget OUT` (widget.sh, ChintanWidgetEyes) opens the home
+   screen's gallery and photographs each size, then places the large one.
+   Left: (a) the large widget seen standing on the home screen: the test
+   places it, but it lands on a second page and the photograph shows page
+   one, so the test should swipe to the page that holds it (or clear the
+   first page) and then take it off; (b) the small frame's title alone seen
+   (the gallery showed a snapshot kept from the build before); (c) seen on
+   his phone after the next TestFlight build, whose archive now signs a
+   second bundle, Prabhchintan.Chintan.Widget, and the App Group: cloud
+   signing with the key should register both, and if the archive refuses,
+   that is his hands in the developer portal once (the App Group on both
+   identifiers).
 
 
 ## The ledger (newest first)
+
+- 2026-09-28 · sprint 48 (3a2efbd, d7380d7, and the commit carrying this
+  line): the wall on the home screen, chunk Q. Step one of the steer was
+  already done and CONFIRMED in sprint 47, so this sprint builds the widget.
+  chintan now has a widget, "The wall", in large, medium and small. It hangs
+  one fresh work from the house's own loop for its frame (`GET
+  /v1/wall/next?frame=`, already served by the house, no new door) edge to
+  edge, lettered bottom right as the house's word says. It turns about
+  every twenty minutes and each time the app opens, and keeps the last
+  picture when the house is out of reach. A tap opens chintan on the
+  painting alone. Seen in the simulator's widget gallery (/tmp/see/3, dark),
+  real works from the house: large, A View of Mount Vernon in its mirrored
+  ground, lettered basic; medium, Bloemaert's Head of an Old Man whole
+  between its reflections; small, Catlin's Indians and Horses in the
+  Forest. The small showed the artist line in its first look; it now
+  letters the title alone, built but not yet seen (the gallery showed a
+  snapshot kept from before). NOT SEEN standing on the home screen: the
+  eyes place it, but it lands off the first page. The phone's screens are
+  untouched (/tmp/see/1 matches /tmp/see/0). The Mac wall still builds and
+  carries no widget, its entitlements unchanged. No walk, since nothing in
+  the app moved. For the next TestFlight: a second bundle id and an App
+  Group to sign (chunk Q, Left (c)).
 
 - 2026-09-27 · sprint 47 (f4a00cd, 34c9d47, and the commit carrying this
   line): the Mac wall stays open again, and a click steps it round (his
