@@ -450,9 +450,9 @@ private struct WallLabel: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             if letters != .off {
-                RadialGradient(colors: [Theme.lampBlack.opacity(0.56), Theme.lampBlack.opacity(0)],
+                RadialGradient(colors: [Theme.lampBlack.opacity(0.64), Theme.lampBlack.opacity(0)],
                                center: .bottomTrailing, startRadius: 0,
-                               endRadius: WallLettering.unit * (letters == .detailed ? 380 : 290))
+                               endRadius: WallLettering.unit * (letters == .detailed ? 460 : 320))
                     .transition(.opacity)
             }
             if letters != .off, let p = gallery.painting, p.title != nil {

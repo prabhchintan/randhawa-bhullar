@@ -182,11 +182,11 @@ shoot() {
 shoot wall --step wall
 # The click round (Prab, 18:18): from the wall, a click every 10 s, each
 # step photographed 6 s after its click: bare, basic, detailed, the wall.
-shoot click-wall --step wall --clicks 10 \
-  --at 17 click-bare --at 27 click-basic --at 37 click-detailed --at 47 click-back
+shoot click-wall --at 17 click-bare --at 27 click-basic --at 37 click-detailed --at 47 click-back \
+  --step wall --clicks 10
 # The open as he will see it: the step the house's word names, then one turn
 # of the house's loop 30 s in, photographed after its crossfade.
-shoot open --turn 30 --at 38 open-turned
+shoot open --at 38 open-turned --turn 30
 
 # The copy he opens is replaced only after a look with every photograph
 # confirmed and the app standing throughout; then the new copy in
