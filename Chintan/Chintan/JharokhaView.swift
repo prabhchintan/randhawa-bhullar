@@ -337,7 +337,7 @@ struct JharokhaView: View {
         // alike (ContentView's WallLabel); the foot only keeps its room, and
         // the wall turns itself, so no next.
         if let painting = gallery.painting, painting.title != nil {
-            WallLettering(painting: painting)
+            WallLettering(painting: painting, letters: WallLetters.of(gallery))
                 .hidden()
                 .padding(.trailing, WallLettering.trailing - 22)
                 .padding(.bottom, WallLettering.bottom - 2)

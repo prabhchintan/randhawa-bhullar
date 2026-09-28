@@ -133,13 +133,13 @@ struct ContentView: View {
         .environmentObject(gallery)
         .task { await gallery.load() }
         #if targetEnvironment(macCatalyst)
-        // The wall turns through the day's set on its own, at the pace set in
-        // its menu; a turn by hand starts the wait again.
+        // The wall turns on its own, at the pace set in its menu, each turn a
+        // fresh work from the house; a turn by hand starts the wait again.
         .task(id: WallPace.Turn(minutes: paceMinutes, turned: turned)) {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(WallPace.seconds(paceMinutes)))
                 guard !Task.isCancelled else { return }
-                await gallery.next()
+                await gallery.turnWall()
             }
         }
         #endif
@@ -290,7 +290,16 @@ struct ContentView: View {
     }
 
     private func walk(_ by: Int) {
-        Task { if await gallery.turn(by) { turned += 1 } }
+        Task {
+            if await gallery.turn(by) {
+                turned += 1
+                return
+            }
+            #if targetEnvironment(macCatalyst)
+            // Past the newest work the wall has hung, the house's next.
+            if by > 0, await gallery.turnWall() { turned += 1 }
+            #endif
+        }
     }
 
     private func back() {
@@ -382,16 +391,21 @@ enum WallPace {
 // wall. One view over the wall and the painting alone alike, so a click that
 // puts the wall away leaves it exactly where it stood (Prab, 2026-09-27
 // 13:14: the same view, same place, same size). It changes with the
-// painting, as slowly as the painting does.
+// painting, as slowly as the painting does, and letters it as the house says.
 private struct WallLabel: View {
     @EnvironmentObject private var gallery: Gallery
 
     var body: some View {
+        let letters = WallLetters.of(gallery)
         ZStack(alignment: .bottomTrailing) {
-            RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
-                           center: .bottomTrailing, startRadius: 0, endRadius: 420)
-            if let p = gallery.painting, p.title != nil {
-                WallLettering(painting: p)
+            if letters != .off {
+                RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
+                               center: .bottomTrailing, startRadius: 0,
+                               endRadius: letters == .detailed ? 560 : 420)
+                    .transition(.opacity)
+            }
+            if letters != .off, let p = gallery.painting, p.title != nil {
+                WallLettering(painting: p, letters: letters)
                     .shadow(color: .black.opacity(0.5), radius: 6)
                     .padding(.trailing, WallLettering.trailing)
                     .padding(.bottom, WallLettering.bottom)
@@ -406,40 +420,113 @@ private struct WallLabel: View {
     }
 }
 
+// How the wall letters its work, the house's setting, not the Mac's (Prab,
+// 2026-09-27 18:05): none at all; basic, the title and the artist and year,
+// small; detailed, the medium, the credit and the museum as well. Carried on
+// each work the house hangs, so a change shows at the next turn; a work from
+// the shelf takes the word of the last one hung, basic before any.
+enum WallLetters {
+    case off, basic, detailed
+
+    init(_ word: String?) {
+        switch word?.lowercased() {
+        case "off": self = .off
+        case "detailed": self = .detailed
+        default: self = .basic
+        }
+    }
+
+    // `--letters WORD` is the house's eyes' own, to see each lettering.
+    @MainActor static func of(_ gallery: Gallery) -> WallLetters {
+        let args = ProcessInfo.processInfo.arguments
+        if let i = args.firstIndex(of: "--letters"), i + 1 < args.count { return WallLetters(args[i + 1]) }
+        return WallLetters(gallery.painting?.label ?? gallery.hung.last?.label)
+    }
+}
+
 // The label's lettering. Home lays it unseen in its foot as well, so the
 // wall keeps the label's room and its hairline stands above it, never through.
 struct WallLettering: View {
     let painting: HouseClient.Painting
+    var letters: WallLetters = .basic
     // From the screen's bottom right corner.
     static let trailing: CGFloat = 40
     static let bottom: CGFloat = 32
 
     var body: some View {
+        switch letters {
+        case .off: EmptyView()
+        case .basic: basic
+        case .detailed: detailed
+        }
+    }
+
+    private var title: String { (painting.title ?? "").plainDashes }
+    private var artist: String { (painting.artist ?? "").plainDashes }
+    private var year: String { (painting.year ?? "").plainDashes }
+
+    // The title in italic, the artist and the year under it, small.
+    private var basic: some View {
         VStack(alignment: .trailing, spacing: 3) {
-            Text((painting.title ?? "").plainDashes)
+            Text(title)
                 .font(.system(.callout, design: .serif).italic())
                 .foregroundStyle(Theme.bone)
-            let artist = (painting.artist ?? "").plainDashes
+            if !artist.isEmpty || !year.isEmpty {
+                (Text(artist).foregroundStyle(Theme.bone.opacity(0.88))
+                 + Text(!artist.isEmpty && !year.isEmpty ? ", " : "").foregroundStyle(Theme.bone.opacity(0.88))
+                 + Text(year).foregroundStyle(Theme.giltOnArt))
+                    .font(.system(.footnote, design: .serif))
+            }
+        }
+        .multilineTextAlignment(.trailing)
+        .frame(maxWidth: 340, alignment: .trailing)
+    }
+
+    // The museum's full card: title, artist, the year in gilt, the medium,
+    // the credit and the museum, wrapped under 42 percent of the wall.
+    private var detailed: some View {
+        VStack(alignment: .trailing, spacing: 4) {
+            Text(title)
+                .font(.system(.title3, design: .serif).italic())
+                .foregroundStyle(Theme.bone)
             if !artist.isEmpty {
                 Text(artist)
-                    .font(.system(.footnote, design: .serif))
-                    .foregroundStyle(Theme.bone.opacity(0.88))
+                    .font(.system(.callout, design: .serif))
+                    .foregroundStyle(Theme.bone.opacity(0.9))
             }
-            if let year = painting.year, !year.isEmpty {
-                Text(year.plainDashes)
+            if !year.isEmpty {
+                Text(year)
                     .font(Theme.label(.footnote))
                     .tracking(0.8)
                     .foregroundStyle(Theme.giltOnArt)
+            }
+            if let medium = painting.medium, !medium.isEmpty {
+                Text(medium.plainDashes)
+                    .font(.system(.footnote, design: .serif))
+                    .foregroundStyle(Theme.bone.opacity(0.78))
+                    .padding(.top, 4)
             }
             if let credit = painting.credit, !credit.isEmpty {
                 Text(credit.plainDashes)
                     .font(.caption)
                     .foregroundStyle(Theme.bone.opacity(0.66))
-                    .padding(.top, 2)
+            }
+            if let museum {
+                Text(museum)
+                    .font(Theme.label(.caption2))
+                    .tracking(1)
+                    .foregroundStyle(Theme.bone.opacity(0.66))
             }
         }
         .multilineTextAlignment(.trailing)
-        .frame(maxWidth: 340, alignment: .trailing)
+        .frame(maxWidth: UIScreen.main.bounds.width * 0.42, alignment: .trailing)
+    }
+
+    // The museum by its name, only when the credit does not already say it.
+    private var museum: String? {
+        guard let source = painting.source?.trimmingCharacters(in: .whitespaces),
+              source.contains(" "), !(painting.credit ?? "").localizedCaseInsensitiveContains(source) else { return nil }
+        return source.plainDashes
     }
 }
 #endif

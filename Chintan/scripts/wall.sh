@@ -38,7 +38,13 @@ if [ -d /Applications ] && [ -w /Applications ]; then
   # Applications is production, the other is the house's), display name only,
   # so the process and bundle names the eyes look for stay the same.
   plutil -replace CFBundleDisplayName -string "chintan dev" "$APP/Contents/Info.plist" \
-    && codesign -f -s - --deep "$APP" >/dev/null 2>&1 || true
+    && codesign -f -s - --deep --preserve-metadata=entitlements "$APP" >"$OUT/resign.log" 2>&1 \
+    || { echo "DEV COPY NOT RESIGNED:"; tail -3 "$OUT/resign.log"; }
+  codesign --verify --deep --strict "$APP" >>"$OUT/resign.log" 2>&1 \
+    || { echo "DEV COPY SIGNATURE BROKEN:"; tail -3 "$OUT/resign.log"; }
+  # The eyes open the copy he opens (2026-09-27 18:12: the re-signed dev copy
+  # failed at spawn, "Launchd job spawn failed", 162, three times running).
+  [ -d /Applications/Chintan.app ] && APP=/Applications/Chintan.app
 fi
 [ "$ONLY_BUILD" = yes ] && exit 0
 

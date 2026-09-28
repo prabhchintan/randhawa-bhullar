@@ -93,6 +93,25 @@ final class Gallery: ObservableObject {
     }
 
     func load() async {
+        #if targetEnvironment(macCatalyst)
+        // The wall opens on the last work it hung, house or no house, and
+        // then turns by asking; the shelf waits as the fallback.
+        if hung.isEmpty, let data = try? Data(contentsOf: Self.hungFile),
+           let saved = try? JSONDecoder().decode([HouseClient.Painting].self, from: data),
+           let last = saved.last(where: { FileManager.default.fileExists(atPath: Self.file($0).path) }) {
+            hung = saved.filter { FileManager.default.fileExists(atPath: Self.file($0).path) }
+            await show(last, animated: image == nil)
+        }
+        if !hung.isEmpty || asking { return }
+        if await hang() { return }
+        #endif
+        await stock()
+    }
+
+    // The shelf: what the phone already holds, then the house's, every
+    // picture brought down. `show` false on the Mac's fallback, which turns
+    // to the shelf itself.
+    private func stock(show showing: Bool = true) async {
         // What the phone already holds is shown at once, house or no house.
         if shelf.isEmpty, let data = try? Data(contentsOf: Self.shelfFile),
            let saved = try? JSONDecoder().decode([HouseClient.Painting].self, from: data), !saved.isEmpty {
@@ -100,7 +119,7 @@ final class Gallery: ObservableObject {
                 yesterday = try? JSONDecoder().decode(HouseClient.Painting.self, from: kept)
             }
             shelf = saved
-            await show(chosen(in: saved), animated: image == nil)
+            if showing { await show(chosen(in: saved), animated: image == nil) }
         }
         guard !fetching, let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
         fetching = true
@@ -125,13 +144,13 @@ final class Gallery: ObservableObject {
             try? FileManager.default.removeItem(at: Self.file(p))
             pictures[p.key] = nil
         }
-        await show(chosen(in: fresh), animated: true)
+        if showing { await show(chosen(in: fresh), animated: true) }
         // The rest of the shelf comes down quietly, so next and an evening
         // without the house both have pictures; what left the shelf leaves the phone.
         for p in fresh where !FileManager.default.fileExists(atPath: Self.file(p).path) {
             _ = await picture(p, from: house)
         }
-        let keep = Set((fresh + [yesterday].compactMap { $0 }).map { $0.key + ".jpg" } + ["shelf.json", "yesterday.json"])
+        let keep = Set((fresh + hung + [yesterday].compactMap { $0 }).map { $0.key + ".jpg" } + ["shelf.json", "yesterday.json", "hung.json"])
         for name in (try? FileManager.default.contentsOfDirectory(atPath: Self.folder.path)) ?? [] where !keep.contains(name) {
             try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(name))
         }
@@ -149,7 +168,11 @@ final class Gallery: ObservableObject {
     // next goes round. False when there is nowhere to turn.
     @discardableResult
     func turn(_ by: Int, wrap: Bool = false) async -> Bool {
-        let ready = walk.filter { pictures[$0.key] != nil || FileManager.default.fileExists(atPath: Self.file($0).path) }
+        await step(walk, by, wrap: wrap)
+    }
+
+    private func step(_ list: [HouseClient.Painting], _ by: Int, wrap: Bool) async -> Bool {
+        let ready = list.filter { pictures[$0.key] != nil || FileManager.default.fileExists(atPath: Self.file($0).path) }
         guard ready.count > 1 else { return false }
         let at = ready.firstIndex { $0.key == painting?.key } ?? (by > 0 ? -1 : ready.count)
         var to = at + by
@@ -192,7 +215,61 @@ final class Gallery: ObservableObject {
     // Whether the painting on the wall is yesterday's, kept by the phone.
     var showingYesterday: Bool { painting != nil && painting?.key == yesterday?.key }
 
-    private var walk: [HouseClient.Painting] {
+    #if targetEnvironment(macCatalyst)
+    // The Mac wall's own loop (Prab, 2026-09-27 17:41: "run the full
+    // collection on the Mac as well"): each turn asks the house for one fresh
+    // work off its whole wide pool, and the last few stay, so a swipe back
+    // still finds them; kept on disk, so the wall reopens on the last one.
+    @Published private(set) var hung: [HouseClient.Painting] = []
+    private var asking = false
+    private static let hungFile = folder.appendingPathComponent("hung.json")
+    private static let hungKept = 6
+
+    // The house's next work, brought down and hung with the slow crossfade.
+    // False when the house does not answer or is asked already.
+    @discardableResult
+    func hang() async -> Bool {
+        guard !asking, let address = Keychain.loadHouseAddress(), !address.isEmpty else { return false }
+        asking = true
+        defer { asking = false }
+        let house = HouseClient(baseAddress: address)
+        guard let p = try? await house.wallNext() else { return false }
+        if pictures[p.key] == nil, !FileManager.default.fileExists(atPath: Self.file(p).path) {
+            guard await picture(p, from: house) != nil else { return false }
+        }
+        hung.removeAll { $0.key == p.key }
+        hung.append(p)
+        // What falls off the end leaves the Mac, unless the shelf holds it.
+        while hung.count > Self.hungKept {
+            let old = hung.removeFirst()
+            guard !shelf.contains(where: { $0.key == old.key }) else { continue }
+            pictures[old.key] = nil
+            try? FileManager.default.removeItem(at: Self.file(old))
+        }
+        try? JSONEncoder().encode(hung).write(to: Self.hungFile, options: .atomic)
+        await show(p, animated: true)
+        return true
+    }
+
+    // A turn of the wall: the house's next work, or with the house silent,
+    // the next on the wide shelf, fetched once when the wall has none.
+    @discardableResult
+    func turnWall() async -> Bool {
+        guard !asking else { return false }
+        if await hang() { return true }
+        if shelf.isEmpty { await stock(show: false) }
+        return await step(shelfWalk, 1, wrap: true)
+    }
+
+    // Back and forth through what the wall has hung; the shelf when it has
+    // hung nothing yet.
+    private var walk: [HouseClient.Painting] { hung.isEmpty ? shelfWalk : hung }
+    #else
+    private var walk: [HouseClient.Painting] { shelfWalk }
+    private var hung: [HouseClient.Painting] { [] }
+    #endif
+
+    private var shelfWalk: [HouseClient.Painting] {
         guard let yesterday, !shelf.contains(where: { $0.key == yesterday.key }) else { return shelf }
         return [yesterday] + shelf
     }

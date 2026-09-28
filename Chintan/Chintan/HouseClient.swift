@@ -61,6 +61,13 @@ struct HouseClient {
         let date: String?
         let image: String?
         let fit: String?
+        // The wall's record (GET /v1/wall/next, since 2026-09-27) carries
+        // more: the medium, the museum it came from, its page there, and the
+        // house's lettering for the wall ("off", "basic" or "detailed").
+        var medium: String?
+        var source: String?
+        var url: String?
+        var label: String?
 
         var key: String { (id ?? "today") + (fit.map { "-" + $0 } ?? "") }
         var imagePath: String { image ?? "/v1/painting.jpg" }
@@ -81,6 +88,20 @@ struct HouseClient {
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
         struct Shelf: Decodable { let paintings: [Painting] }
         return try JSONDecoder().decode(Shelf.self, from: data).paintings
+    }
+
+    // One fresh work for the Mac wall, off the house's whole wide pool; each
+    // ask is a new one, nothing hung twice in a day. A house without this
+    // door answers 404 and the wall turns through the wide shelf instead.
+    func wallNext() async throws -> Painting {
+        guard let url = url("/v1/wall/next") else { throw HouseError.noAddress }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 30
+        let (data, response) = try await Self.session.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
+        let work = try JSONDecoder().decode(Painting.self, from: data)
+        guard work.id != nil else { throw HouseError.noDoor }
+        return work
     }
 
     func paintingImage(_ painting: Painting? = nil) async throws -> Data {
