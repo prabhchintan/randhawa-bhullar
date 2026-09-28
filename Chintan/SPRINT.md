@@ -825,6 +825,13 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    the eyes). Left: the first look at it (never opened: at 18:12 every open
    failed at spawn, launchd 162, and after that yantar was in use), then
    what sprint 45 left.
+   The crash and the click round (Prab, 18:18). Done (sprint 47): the
+   crash was the eyes' own re-sign (the ledger), mended and seen; a click
+   on the art steps wall, bare, basic, detailed, wall, the house's word the
+   opening step; the lettering at the Linux wall's scale. All seen
+   CONFIRMED, so the open loop, the three letterings and a turn inside
+   the house's loop are seen too. Left: a frame inside the crossfade,
+   then the columns (the board, then `GET /v1/mail`) and the 60 s poll.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -875,6 +882,36 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
 
 
 ## The ledger (newest first)
+
+- 2026-09-27 · sprint 47 (f4a00cd, 34c9d47, and the commit carrying this
+  line): the Mac wall stays open again, and a click steps it round (his
+  18:18 word). The crash was not in the Swift. The reports at 18:11, 18:12
+  and 18:13 all say SIGKILL, Code Signature Invalid, Launch Constraint
+  Violation, at dyld_start, on the DerivedData copy, and the system log
+  shows each refused spawn carrying a LaunchServices SpawnConstraint. Xcode
+  registers a build with LaunchServices, and then wall.sh renamed it
+  "chintan dev" and re-signed it in place, so its code hash no longer
+  matched the registration. That copy shares the bundle id with the one
+  in Applications, so a click on chintan could land on it and be killed.
+  Mended: nothing is edited or re-signed after the build, each copy is
+  registered again after it changes, the dev copy is unregistered once
+  his is installed, and /Applications/Chintan.app is replaced only after a
+  look with every photograph CONFIRMED. Then the installed copy is opened
+  and must itself be seen standing, or the old copy is put back.
+  `see.sh --wall --sign` prints both signatures, the crash reports, the
+  registrations and the system's launch lines. A click on the painting
+  alone now steps: bare, basic label, detailed label, the wall again (the
+  app back), each with the smooth fade. The house's `label` word picks the
+  opening step, and clicks rule until the next open. The label letters at
+  the Linux wall's scale (title 14, the rest 10 per 1080 of height, a 3.5
+  percent margin), over a slightly deeper shade. Seen CONFIRMED on yantar
+  (/tmp/see/3, full screen in 1 to 2 s every time): the wall with Catlin's
+  Athapasca Chief; the click round in order (wall-step off, basic,
+  detailed, wall); the open on the house's word (detailed); a turn of the
+  house's loop to the Mewar night hunt, lettered in detail; then the
+  installed copy opened from Applications, standing. INSTALLED. The phone
+  is untouched (/tmp/see/4 matches /tmp/see/0). No walk and no hitch
+  numbers, since nothing on the phone moved. No new door.
 
 - 2026-09-27 · sprint 46 (7b8146e, and the commit carrying this line): the
   Mac wall runs the whole collection, lettered as the house says (the
