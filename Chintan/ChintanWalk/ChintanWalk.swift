@@ -565,6 +565,17 @@ final class ChintanWidgetEyes: XCTestCase {
         XCUIDevice.shared.press(.home)
         sleep(2)
         tree("home")
+        // The first page has no room for the large one, and the simulator's
+        // home screen faults when a widget spills onto a new page (its ripple,
+        // SBHRippleSimulation); so place it on the page chintan's icon stands on.
+        let icon = board.icons["chintan"]
+        var turns = 0
+        while turns < 3 && !(icon.exists && icon.frame.width > 0 && board.frame.contains(icon.frame)) {
+            board.swipeLeft()
+            sleep(2)
+            turns += 1
+        }
+        shot("home-before")
         // Into the home screen's edit mode, from an empty spot above the dock.
         board.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.72)).press(forDuration: 1.6)
         sleep(1)
@@ -602,16 +613,28 @@ final class ChintanWidgetEyes: XCTestCase {
         // The system letters it " Add Widget", its plus sign a space.
         let place = board.buttons.matching(NSPredicate(format: "label CONTAINS 'Add Widget'")).firstMatch
         guard place.waitForExistence(timeout: 3) else { return }
-        place.tap()
-        sleep(2)
+        // Add Widget faults the simulator's home screen in its drop ripple
+        // (SBHRippleSimulation), so the preview is carried out by hand.
+        let preview = board.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+        preview.press(forDuration: 1.2, thenDragTo: board.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4)))
+        sleep(3)
+        shot("placed-edit")
+        tree("placed-edit")
         XCUIDevice.shared.press(.home)
         sleep(10)
+        // The home screen names a widget as an icon whose value begins "Widget".
+        let held = board.icons.matching(NSPredicate(format: "identifier == 'chintan' AND value BEGINSWITH 'Widget'")).firstMatch
+        // It may land on a later page: walk on until it stands in view.
+        var page = 1
+        while page < 4 && !(held.exists && held.isHittable) {
+            board.swipeLeft()
+            sleep(3)
+            page += 1
+        }
         shot("home-large")
         tree("placed")
         // Off again, so the next look begins on the same home screen.
-        let held = board.descendants(matching: .any)
-            .matching(NSPredicate(format: "label BEGINSWITH 'chintan' AND elementType != %d", XCUIElement.ElementType.icon.rawValue)).firstMatch
-        if held.exists {
+        if held.exists && held.isHittable {
             held.press(forDuration: 1.6)
             let remove = board.buttons["Remove Widget"]
             if remove.waitForExistence(timeout: 3) {
