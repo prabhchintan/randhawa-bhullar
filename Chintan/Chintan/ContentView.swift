@@ -62,6 +62,13 @@ struct ContentView: View {
     @State private var keeping = 0
     // How often the Mac wall turns to the next painting, from its menu.
     @AppStorage(WallPace.key) private var paceMinutes = WallPace.standard
+    #if targetEnvironment(macCatalyst)
+    // The lettering the clicks on the painting alone have chosen, over the
+    // house's word until the next open; nil on the wall.
+    @State private var handLetters: WallLetters?
+    // Whether the opening step, the house's word, has been taken.
+    @State private var opened = false
+    #endif
 
     private struct Pinch: Equatable {
         var zoom: CGFloat = 1
@@ -108,7 +115,19 @@ struct ContentView: View {
         .overlay { if alone { looking } }
         #if targetEnvironment(macCatalyst)
         // On the wall the label never leaves: only the rest of the wall does.
-        .overlay { WallLabel() }
+        .overlay { WallLabel(letters: alone ? handLetters ?? WallLetters.of(gallery) : WallLetters.of(gallery)) }
+        // The wall opens on the step the house's word names: off, the
+        // painting alone and bare; basic or detailed, alone and so lettered.
+        // A house that has said nothing opens on the wall.
+        .onChange(of: gallery.painting?.key, initial: true) { _, key in
+            guard !opened, key != nil else { return }
+            opened = true
+            guard !WallLetters.onWall, let word = WallLetters.word(gallery) else { return }
+            handLetters = WallLetters(word)
+            alone = true
+        }
+        // Onto the painting alone from the wall, bare first.
+        .onChange(of: alone) { _, now in if now && handLetters == nil { handLetters = .off } }
         #endif
         .overlay { keptLine }
         // Alone, the home indicator steps back with the clock.
@@ -140,6 +159,19 @@ struct ContentView: View {
                 try? await Task.sleep(for: .seconds(WallPace.seconds(paceMinutes)))
                 guard !Task.isCancelled else { return }
                 await gallery.turnWall()
+            }
+        }
+        .task {
+            // For the house's eyes: `--clicks S` clicks the art every S
+            // seconds, the way his hand would, round the four steps.
+            let args = ProcessInfo.processInfo.arguments
+            guard let i = args.firstIndex(of: "--clicks"), i + 1 < args.count,
+                  let every = Double(args[i + 1]), every > 0 else { return }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(every))
+                if alone { click() } else { withAnimation(.smooth) { alone = true } }
+                print("wall-step", alone ? "\(handLetters ?? .off)" : "wall")
+                fflush(stdout)
             }
         }
         #endif
@@ -199,7 +231,7 @@ struct ContentView: View {
             .onLongPressGesture(minimumDuration: 0.6, maximumDistance: 12) {
                 keep(staged: ProcessInfo.processInfo.arguments.contains("--keep-staged"))
             }
-            .onTapGesture { back() }
+            .onTapGesture { click() }
             .gesture(
                 MagnifyGesture()
                     .updating($pinch) { value, state, _ in
@@ -302,8 +334,27 @@ struct ContentView: View {
         }
     }
 
+    // A tap on the painting alone brings the wall back. On the Mac a click
+    // steps instead (Prab, 2026-09-27 18:18): bare, then the basic label,
+    // then the detailed one, then the wall again.
+    private func click() {
+        #if targetEnvironment(macCatalyst)
+        switch handLetters ?? WallLetters.of(gallery) {
+        case .off: withAnimation(.smooth) { handLetters = .basic }; return
+        case .basic: withAnimation(.smooth) { handLetters = .detailed }; return
+        case .detailed: break
+        }
+        #endif
+        back()
+    }
+
     private func back() {
-        withAnimation(.smooth) { alone = false } completion: { clockAway = false }
+        withAnimation(.smooth) {
+            alone = false
+            #if targetEnvironment(macCatalyst)
+            handLetters = nil
+            #endif
+        } completion: { clockAway = false }
     }
 
     // For the house's eyes: `--open alone` on Home opens on the painting alone.
@@ -394,22 +445,22 @@ enum WallPace {
 // painting, as slowly as the painting does, and letters it as the house says.
 private struct WallLabel: View {
     @EnvironmentObject private var gallery: Gallery
+    let letters: WallLetters
 
     var body: some View {
-        let letters = WallLetters.of(gallery)
         ZStack(alignment: .bottomTrailing) {
             if letters != .off {
-                RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
+                RadialGradient(colors: [Theme.lampBlack.opacity(0.56), Theme.lampBlack.opacity(0)],
                                center: .bottomTrailing, startRadius: 0,
-                               endRadius: letters == .detailed ? 560 : 420)
+                               endRadius: WallLettering.unit * (letters == .detailed ? 380 : 290))
                     .transition(.opacity)
             }
             if letters != .off, let p = gallery.painting, p.title != nil {
                 WallLettering(painting: p, letters: letters)
-                    .shadow(color: .black.opacity(0.5), radius: 6)
+                    .shadow(color: .black.opacity(0.5), radius: 4)
                     .padding(.trailing, WallLettering.trailing)
                     .padding(.bottom, WallLettering.bottom)
-                    .id(p.key)
+                    .id(p.key + "\(letters)")
                     .transition(.opacity)
             }
         }
@@ -436,22 +487,38 @@ enum WallLetters {
         }
     }
 
-    // `--letters WORD` is the house's eyes' own, to see each lettering.
-    @MainActor static func of(_ gallery: Gallery) -> WallLetters {
+    @MainActor static func of(_ gallery: Gallery) -> WallLetters { WallLetters(word(gallery)) }
+
+    // The house's word, nil when it has said none. `--letters WORD` is the
+    // house's eyes' own, to see each lettering.
+    @MainActor static func word(_ gallery: Gallery) -> String? {
         let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "--letters"), i + 1 < args.count { return WallLetters(args[i + 1]) }
-        return WallLetters(gallery.painting?.label ?? gallery.hung.last?.label)
+        if let i = args.firstIndex(of: "--letters"), i + 1 < args.count { return args[i + 1] }
+        return gallery.painting?.label ?? gallery.hung.last?.label
+    }
+
+    // `--step wall`: the eyes open on the wall whatever the house's word.
+    static var onWall: Bool {
+        let args = ProcessInfo.processInfo.arguments
+        guard let i = args.firstIndex(of: "--step"), i + 1 < args.count else { return false }
+        return args[i + 1] == "wall"
     }
 }
 
-// The label's lettering. Home lays it unseen in its foot as well, so the
+// The label's lettering, at the Linux wall's scale (the house, 2026-09-27:
+// the title 14 and the rest 10 at 1080 high, a 3.5 percent margin), so the
+// two walls letter alike. Home lays it unseen in its foot as well, so the
 // wall keeps the label's room and its hairline stands above it, never through.
 struct WallLettering: View {
     let painting: HouseClient.Painting
     var letters: WallLetters = .basic
+    // One point of a 1080 high wall, on this screen.
+    static var unit: CGFloat { UIScreen.main.bounds.height / 1080 }
     // From the screen's bottom right corner.
-    static let trailing: CGFloat = 40
-    static let bottom: CGFloat = 32
+    static var trailing: CGFloat { UIScreen.main.bounds.height * 0.035 }
+    static var bottom: CGFloat { UIScreen.main.bounds.height * 0.035 }
+    private var titleSize: CGFloat { 14 * Self.unit }
+    private var restSize: CGFloat { 10 * Self.unit }
 
     var body: some View {
         switch letters {
@@ -467,59 +534,59 @@ struct WallLettering: View {
 
     // The title in italic, the artist and the year under it, small.
     private var basic: some View {
-        VStack(alignment: .trailing, spacing: 3) {
+        VStack(alignment: .trailing, spacing: 2 * Self.unit) {
             Text(title)
-                .font(.system(.callout, design: .serif).italic())
+                .font(.system(size: titleSize, design: .serif).italic())
                 .foregroundStyle(Theme.bone)
             if !artist.isEmpty || !year.isEmpty {
                 (Text(artist).foregroundStyle(Theme.bone.opacity(0.88))
                  + Text(!artist.isEmpty && !year.isEmpty ? ", " : "").foregroundStyle(Theme.bone.opacity(0.88))
                  + Text(year).foregroundStyle(Theme.giltOnArt))
-                    .font(.system(.footnote, design: .serif))
+                    .font(.system(size: restSize, design: .serif))
             }
         }
         .multilineTextAlignment(.trailing)
-        .frame(maxWidth: 340, alignment: .trailing)
+        .frame(maxWidth: UIScreen.main.bounds.width * 0.22, alignment: .trailing)
     }
 
     // The museum's full card: title, artist, the year in gilt, the medium,
-    // the credit and the museum, wrapped under 42 percent of the wall.
+    // the credit and the museum, wrapped under 28 percent of the wall.
     private var detailed: some View {
-        VStack(alignment: .trailing, spacing: 4) {
+        VStack(alignment: .trailing, spacing: 2 * Self.unit) {
             Text(title)
-                .font(.system(.title3, design: .serif).italic())
+                .font(.system(size: titleSize, design: .serif).italic())
                 .foregroundStyle(Theme.bone)
             if !artist.isEmpty {
                 Text(artist)
-                    .font(.system(.callout, design: .serif))
+                    .font(.system(size: restSize, design: .serif))
                     .foregroundStyle(Theme.bone.opacity(0.9))
             }
             if !year.isEmpty {
                 Text(year)
-                    .font(Theme.label(.footnote))
-                    .tracking(0.8)
+                    .font(.system(size: restSize, design: .serif).smallCaps())
+                    .tracking(0.6)
                     .foregroundStyle(Theme.giltOnArt)
             }
             if let medium = painting.medium, !medium.isEmpty {
                 Text(medium.plainDashes)
-                    .font(.system(.footnote, design: .serif))
+                    .font(.system(size: restSize, design: .serif))
                     .foregroundStyle(Theme.bone.opacity(0.78))
-                    .padding(.top, 4)
+                    .padding(.top, 3 * Self.unit)
             }
             if let credit = painting.credit, !credit.isEmpty {
                 Text(credit.plainDashes)
-                    .font(.caption)
+                    .font(.system(size: restSize, design: .serif))
                     .foregroundStyle(Theme.bone.opacity(0.66))
             }
             if let museum {
                 Text(museum)
-                    .font(Theme.label(.caption2))
-                    .tracking(1)
+                    .font(.system(size: restSize, design: .serif).smallCaps())
+                    .tracking(0.8)
                     .foregroundStyle(Theme.bone.opacity(0.66))
             }
         }
         .multilineTextAlignment(.trailing)
-        .frame(maxWidth: UIScreen.main.bounds.width * 0.42, alignment: .trailing)
+        .frame(maxWidth: UIScreen.main.bounds.width * 0.28, alignment: .trailing)
     }
 
     // The museum by its name, only when the credit does not already say it.

@@ -7,12 +7,50 @@
 #
 #   bash Chintan/scripts/wall.sh OUTDIR            build, open, photograph
 #   bash Chintan/scripts/wall.sh --build OUTDIR    build only
+#   bash Chintan/scripts/wall.sh --sign                the signature of every copy
+#                                                     and the last crash reports
 set -uo pipefail
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+DD=${WALL_DERIVED:-$HOME/Library/Developer/Xcode/DerivedData/chintan-mac}
+
+# What the Mac thinks of a copy: its signature, whether it verifies, what
+# Gatekeeper says, its entitlements. A launch the system refuses leaves no
+# Swift frame, only these (2026-09-27 18:11 to 18:13: Launch Constraint
+# Violation, SIGKILL at dyld_start, three times).
+sign() {
+  local app=$1
+  [ -d "$app" ] || { echo "SIGN $app: not there"; return; }
+  echo "SIGN $app"
+  codesign -dv --verbose=4 "$app" 2>&1 | grep -E "^(Identifier|Format|CodeDirectory|Signature|TeamIdentifier|Runtime|Authority|CDHash)=" | sed 's/^/  /'
+  codesign --verify --deep --strict "$app" >/dev/null 2>&1 && echo "  verifies" || echo "  DOES NOT VERIFY: $(codesign --verify --deep --strict "$app" 2>&1 | tail -1)"
+  echo "  gatekeeper: $(spctl -a -vv "$app" 2>&1 | head -1)"
+  echo "  entitlements: $(codesign -d --entitlements - --xml "$app" 2>/dev/null | plutil -convert json -o - - 2>/dev/null)"
+  echo "  display name: $(plutil -extract CFBundleDisplayName raw "$app/Contents/Info.plist" 2>/dev/null)"
+}
+crashes() {
+  local f
+  for f in $(ls -t "$HOME"/Library/Logs/DiagnosticReports/Chintan*.ips 2>/dev/null | head -${1:-4}); do
+    echo "CRASH $(basename "$f"): $(grep -m1 '"procPath"' "$f" | sed 's/.*: "//; s/",*$//; s#\\/#/#g') $(grep -m1 '"indicator"' "$f" | sed 's/.*"indicator":"\([^"]*\)".*/\1/')"
+  done
+}
+if [ "${1:-}" = "--sign" ]; then
+  sign /Applications/Chintan.app
+  sign "$DD/Build/Products/Debug-maccatalyst/Chintan.app"
+  crashes 6
+  # Which copy the Dock and LaunchServices hand him when he clicks chintan.
+  echo "DOCK: $(defaults read com.apple.dock persistent-apps 2>/dev/null | grep -i '_CFURLString" = ".*chintan' | sed 's/.*= //' | tr '\n' ' ')"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump 2>/dev/null \
+    | grep -E '^path:.*Chintan\.app' | sort -u | sed 's/^/REGISTERED /'
+  # What the system said at the last launches, refused or not.
+  log show --last "${WALL_LOG:-3h}" --style compact \
+    --predicate 'eventMessage CONTAINS[c] "Prabhchintan.Chintan" OR process == "Chintan"' 2>/dev/null \
+    | grep -iE "constraint|spawn fail|killed|signature|amfi|terminat|exited|crash|fatal" | tail -${WALL_LOG_LINES:-40}
+  exit 0
+fi
+
 ONLY_BUILD=no
 if [ "${1:-}" = "--build" ]; then ONLY_BUILD=yes; shift; fi
 OUT=${1:?usage: wall.sh [--build] OUTDIR}
-ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-DD=${WALL_DERIVED:-$HOME/Library/Developer/Xcode/DerivedData/chintan-mac}
 mkdir -p "$OUT"
 LOG="$OUT/build.log"
 if ! xcodebuild -project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -configuration Debug \
@@ -26,27 +64,17 @@ fi
 grep -E "warning:" "$LOG" | grep -F "/Chintan/Chintan/" | sort -u | head -10 || true
 APP="$DD/Build/Products/Debug-maccatalyst/Chintan.app"
 echo "BUILD OK: $APP"
-# The build he opens is the newest one (Prab, 2026-09-27 13:14: the Debug
-# build in DerivedData was ahead of the copy in Applications): every green
-# build replaces /Applications/Chintan.app, so Spotlight and the Dock open
-# the latest wall.
-if [ -d /Applications ] && [ -w /Applications ]; then
-  rm -rf /Applications/Chintan.app.new && cp -R "$APP" /Applications/Chintan.app.new \
-    && rm -rf /Applications/Chintan.app && mv /Applications/Chintan.app.new /Applications/Chintan.app \
-    && echo "INSTALLED: /Applications/Chintan.app"
-  # The dev copy shows as "chintan dev" in Spotlight and the Dock (Prab, 13:26:
-  # Applications is production, the other is the house's), display name only,
-  # so the process and bundle names the eyes look for stay the same.
-  plutil -replace CFBundleDisplayName -string "chintan dev" "$APP/Contents/Info.plist" \
-    && codesign -f -s - --deep --preserve-metadata=entitlements "$APP" >"$OUT/resign.log" 2>&1 \
-    || { echo "DEV COPY NOT RESIGNED:"; tail -3 "$OUT/resign.log"; }
-  codesign --verify --deep --strict "$APP" >>"$OUT/resign.log" 2>&1 \
-    || { echo "DEV COPY SIGNATURE BROKEN:"; tail -3 "$OUT/resign.log"; }
-  # The eyes open the copy he opens (2026-09-27 18:12: the re-signed dev copy
-  # failed at spawn, "Launchd job spawn failed", 162, three times running).
-  [ -d /Applications/Chintan.app ] && APP=/Applications/Chintan.app
-fi
-[ "$ONLY_BUILD" = yes ] && exit 0
+# The crash of 2026-09-27 18:11 (Prab, 18:18: "On the Mac it's crashing"):
+# the eyes renamed the dev copy and re-signed it in place after Xcode had
+# registered it with LaunchServices, so its code hash no longer matched the
+# registration and the system killed it at spawn (Launch Constraint
+# Violation, POSIX 162), the dev copy answering to the same bundle id as the
+# copy he opens. So a copy is never re-signed or edited after the build, and
+# every copy is registered again after it changes.
+LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+"$LSREG" -f "$APP" 2>/dev/null
+sign "$APP"
+[ "$ONLY_BUILD" = yes ] && { echo "NOT INSTALLED: built only"; exit 0; }
 
 # The wall opens full screen over whatever is on yantar and the picture is of
 # the whole screen: never while someone is at the desk. Touched in the last
@@ -85,15 +113,17 @@ state() {
 }
 
 # One photograph, called confirmed only when the window stood full screen
-# in front as it was taken; otherwise the eyes say what was there instead.
+# in front as it was taken; otherwise the eyes say what was there instead,
+# and the build is not installed.
+UNSEEN=0
 photo() {
   local name=$1 s
   s=$(state)
-  screencapture -x "$OUT/$name.png" || return
+  screencapture -x "$OUT/$name.png" || { UNSEEN=$((UNSEEN + 1)); return; }
   case "$s" in
     full) echo "$OUT/$name.png CONFIRMED" ;;
-    window) echo "$OUT/$name.png NOT CONFIRMED: the window is there but not full screen in front" ;;
-    *) echo "$OUT/$name.png NOT CONFIRMED: NO WINDOW, the photograph is not of the wall" ;;
+    window) echo "$OUT/$name.png NOT CONFIRMED: the window is there but not full screen in front"; UNSEEN=$((UNSEEN + 1)) ;;
+    *) echo "$OUT/$name.png NOT CONFIRMED: NO WINDOW, the photograph is not of the wall"; UNSEEN=$((UNSEEN + 1)) ;;
   esac
 }
 
@@ -116,15 +146,19 @@ shoot() {
   while [ "$waited" -lt "${WALL_LIMIT:-60}" ]; do
     s=$(state)
     [ "$s" = full ] && break
+    [ "$waited" -gt 5 ] && [ -z "$(pgrep -x Chintan)" ] && break
     sleep 1; waited=$(( $(date +%s) - t0 ))
   done
   if [ "$s" = full ]; then
     echo "$name: full screen $(( $(date +%s) - t0 )) s after open"
   else
-    echo "$name: not full screen after ${WALL_LIMIT:-60} s (last seen: $s)"
+    echo "$name: not full screen after $waited s (last seen: $s)"
   fi
   if [ -z "$(pgrep -x Chintan)" ]; then
-    echo "$name: the app left early; its last words:"; tail -15 "$OUT/$name.log"
+    echo "$name: THE APP LEFT EARLY; its last words:"; tail -15 "$OUT/$name.log"
+    crashes 1
+    UNSEEN=$((UNSEEN + 1))
+    return
   fi
   # The picture comes down and fades in after the turn.
   sleep "${WALL_SETTLE:-6}"
@@ -137,11 +171,50 @@ shoot() {
     photo "$shot"
     i=$((i + 2))
   done
+  grep '^wall-step ' "$STATE_OUT" | sed "s/^/$name: /"
+  if [ -z "$(pgrep -x Chintan)" ]; then
+    echo "$name: THE APP LEFT during the look"; crashes 1; UNSEEN=$((UNSEEN + 1))
+  fi
   pkill -x Chintan 2>/dev/null || true
 }
-shoot wall
-shoot wall-alone --open alone
-# The wall turning on its own: a turn 30 s after launch for the eyes,
-# photographed before, twice inside the crossfade, and after.
-shoot wall-turn-before --at 32 wall-turn-mid --at 33 wall-turn-mid2 --at 38 wall-turn-after \
-  --open alone --turn 30
+
+# The wall itself, whatever the house says.
+shoot wall --step wall
+# The click round (Prab, 18:18): from the wall, a click every 10 s, each
+# step photographed 6 s after its click: bare, basic, detailed, the wall.
+shoot click-wall --step wall --clicks 10 \
+  --at 17 click-bare --at 27 click-basic --at 37 click-detailed --at 47 click-back
+# The open as he will see it: the step the house's word names, then one turn
+# of the house's loop 30 s in, photographed after its crossfade.
+shoot open --turn 30 --at 38 open-turned
+
+# The copy he opens is replaced only after a look with every photograph
+# confirmed and the app standing throughout; then the new copy in
+# Applications is opened and must be seen standing too, or the old comes back.
+if [ "$UNSEEN" -gt 0 ]; then
+  echo "NOT INSTALLED: $UNSEEN photographs not confirmed; /Applications/Chintan.app left as it was"
+  exit 0
+fi
+if [ -d /Applications ] && [ -w /Applications ]; then
+  rm -rf /Applications/Chintan.app.new /Applications/Chintan.app.old
+  cp -R "$APP" /Applications/Chintan.app.new || { echo "NOT INSTALLED: the copy failed"; exit 0; }
+  [ -d /Applications/Chintan.app ] && mv /Applications/Chintan.app /Applications/Chintan.app.old
+  mv /Applications/Chintan.app.new /Applications/Chintan.app
+  "$LSREG" -f /Applications/Chintan.app 2>/dev/null
+  # The dev copy leaves LaunchServices, so a click on chintan finds only his.
+  DEV=$APP; APP=/Applications/Chintan.app
+  "$LSREG" -u "$DEV" 2>/dev/null
+  sign "$APP"
+  shoot installed --step wall
+  if [ "$UNSEEN" -gt 0 ]; then
+    rm -rf /Applications/Chintan.app
+    if [ -d /Applications/Chintan.app.old ]; then
+      mv /Applications/Chintan.app.old /Applications/Chintan.app
+      "$LSREG" -f /Applications/Chintan.app 2>/dev/null
+    fi
+    echo "NOT INSTALLED: the copy in Applications was not seen standing; the old one is back"
+  else
+    rm -rf /Applications/Chintan.app.old
+    echo "INSTALLED: /Applications/Chintan.app, seen standing"
+  fi
+fi
