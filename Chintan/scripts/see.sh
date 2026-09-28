@@ -51,6 +51,8 @@
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
 #   bash Chintan/scripts/see.sh --wall [--build] OUTDIR
 #                                                    the Mac wall instead (wall.sh)
+#   bash Chintan/scripts/see.sh --widget OUTDIR      the widget in the home screen's
+#                                                    gallery and placed (widget.sh)
 #   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
 #                                                    text size, then back to normal
 set -euo pipefail
@@ -61,6 +63,10 @@ fi
 if [ "${1:-}" = "--wall" ]; then
   shift
   exec bash "$(dirname "$0")/wall.sh" "$@"
+fi
+if [ "${1:-}" = "--widget" ]; then
+  shift
+  exec bash "$(dirname "$0")/widget.sh" "$@"
 fi
 TEXT=large
 if [ "${1:-}" = "--large" ]; then

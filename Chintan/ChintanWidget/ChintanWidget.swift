@@ -182,14 +182,14 @@ struct WallFace: View {
         return family == .systemSmall && word == "detailed" ? "basic" : word
     }
 
-    private var margin: CGFloat { family == .systemSmall ? 11 : 14 }
+    private var margin: CGFloat { family == .systemSmall ? 10 : 14 }
     private var shade: CGFloat {
         switch family {
-        case .systemSmall: return 150
+        case .systemSmall: return 120
         default: return letters == "detailed" ? 260 : 200
         }
     }
-    private var titleSize: CGFloat { family == .systemSmall ? 11 : 13 }
+    private var titleSize: CGFloat { family == .systemSmall ? 10.5 : 13 }
     private var restSize: CGFloat { family == .systemSmall ? 9 : 10 }
     private var width: CGFloat { family == .systemSmall ? 130 : family == .systemMedium ? 170 : 210 }
 
@@ -214,7 +214,8 @@ struct WallFace: View {
                 if !plain(r.credit).isEmpty {
                     Text(plain(r.credit)).font(.system(size: restSize, design: .serif)).foregroundStyle(Self.bone.opacity(0.66))
                 }
-            } else if !artist.isEmpty || !year.isEmpty {
+            } else if family != .systemSmall, !artist.isEmpty || !year.isEmpty {
+                // The small square letters the title alone; the rest crowds the work.
                 (Text(artist).foregroundStyle(Self.bone.opacity(0.88))
                  + Text(!artist.isEmpty && !year.isEmpty ? ", " : "").foregroundStyle(Self.bone.opacity(0.88))
                  + Text(year).foregroundStyle(Self.gilt))

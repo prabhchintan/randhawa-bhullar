@@ -543,3 +543,92 @@ final class ChintanHitches: XCTestCase {
         log?.write(Data(String(format: "%.3f\t%.3f\t%@\n", start, end, name).utf8))
     }
 }
+
+// The widget's eyes (widget.sh): the app opened once, so the house's address
+// reaches the App Group, then the simulator's own home screen: the widget
+// gallery searched for chintan, each size photographed as the gallery shows
+// it, the large one added and photographed standing on the home screen, and
+// taken off again so the next look starts from the same screen.
+final class ChintanWidgetEyes: XCTestCase {
+    private var out: URL!
+    private let board = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+
+    func testGallery() throws {
+        continueAfterFailure = true
+        let env = ProcessInfo.processInfo.environment
+        out = URL(fileURLWithPath: env["WALK_OUT"] ?? NSTemporaryDirectory() + "widget")
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let app = XCUIApplication()
+        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha"]
+        app.launch()
+        sleep(6)
+        XCUIDevice.shared.press(.home)
+        sleep(2)
+        tree("home")
+        // Into the home screen's edit mode, from an empty spot above the dock.
+        board.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.72)).press(forDuration: 1.6)
+        sleep(1)
+        let editMenu = board.buttons["Edit Home Screen"]
+        if editMenu.exists { editMenu.tap(); sleep(1) }
+        let edit = board.buttons["Edit"]
+        if edit.waitForExistence(timeout: 4) {
+            edit.tap()
+            sleep(1)
+            let add = board.buttons["Add Widget"]
+            if add.waitForExistence(timeout: 3) { add.tap() }
+        } else if board.buttons["Add Widget"].exists {
+            board.buttons["Add Widget"].tap()
+        }
+        sleep(2)
+        tree("gallery")
+        let search = board.searchFields["Search Widgets"]
+        guard search.waitForExistence(timeout: 5) else { shot("no-gallery"); return }
+        search.tap()
+        search.typeText("chintan")
+        sleep(2)
+        tree("search")
+        let found = board.cells.containing(.staticText, identifier: "chintan").firstMatch
+        let named = board.staticTexts["chintan"].firstMatch
+        if found.exists { found.tap() } else if named.exists { named.tap() } else { shot("not-found"); return }
+        // The gallery asks the widget for its snapshot, from the house; let it hang.
+        sleep(12)
+        tree("sizes")
+        shot("gallery-small")
+        for size in ["medium", "large"] {
+            board.swipeLeft()
+            sleep(6)
+            shot("gallery-" + size)
+        }
+        // The system letters it " Add Widget", its plus sign a space.
+        let place = board.buttons.matching(NSPredicate(format: "label CONTAINS 'Add Widget'")).firstMatch
+        guard place.waitForExistence(timeout: 3) else { return }
+        place.tap()
+        sleep(2)
+        XCUIDevice.shared.press(.home)
+        sleep(10)
+        shot("home-large")
+        tree("placed")
+        // Off again, so the next look begins on the same home screen.
+        let held = board.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH 'chintan' AND elementType != %d", XCUIElement.ElementType.icon.rawValue)).firstMatch
+        if held.exists {
+            held.press(forDuration: 1.6)
+            let remove = board.buttons["Remove Widget"]
+            if remove.waitForExistence(timeout: 3) {
+                remove.tap()
+                let sure = board.alerts.buttons["Remove"]
+                if sure.waitForExistence(timeout: 3) { sure.tap() }
+            }
+        }
+        XCUIDevice.shared.press(.home)
+    }
+
+    private func shot(_ name: String) {
+        try? XCUIScreen.main.screenshot().pngRepresentation.write(to: out.appendingPathComponent(name + ".png"))
+    }
+
+    // What the home screen holds at each step, for when a step misses.
+    private func tree(_ name: String) {
+        try? Data(board.debugDescription.utf8).write(to: out.appendingPathComponent("tree-" + name + ".txt"))
+    }
+}
