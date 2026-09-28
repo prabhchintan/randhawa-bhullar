@@ -901,11 +901,17 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    alone, that work if the phone holds it, else Home's own. The eyes:
    `see.sh --widget OUT` (widget.sh, ChintanWidgetEyes) opens the home
    screen's gallery and photographs each size, then places the large one.
-   Left: (a) the large widget seen standing on the home screen: the test
-   places it, but it lands on a second page and the photograph shows page
-   one, so the test should swipe to the page that holds it (or clear the
-   first page) and then take it off; (b) the small frame's title alone seen
-   (the gallery showed a snapshot kept from the build before); (c) seen on
+   Sprint 49: (b) seen, the small square letters the title alone. (a) is
+   a wall in the simulator, not a page: every "Add Widget" tap since sprint
+   48 faulted SpringBoard (EXC_BAD_ACCESS in -[SBHRippleSimulation clear],
+   its drop ripple; SpringBoard-*.ips in ~/Library/Logs/DiagnosticReports),
+   with room on the page and with Reduce Motion on alike, so nothing was
+   ever placed. The eyes now carry the preview out by a press and drag
+   instead (no fault, but the drag closed the gallery with nothing placed;
+   try a longer hold before moving, or a slower drag, once), photograph
+   `placed-edit`, walk the pages to the widget, and find it as the home
+   screen names it (an icon, identifier chintan, value "Widget"). Left:
+   (a) placed by the drag, or else seen only on his phone; (c) seen on
    his phone after the next TestFlight build, whose archive now signs a
    second bundle, Prabhchintan.Chintan.Widget, and the App Group: cloud
    signing with the key should register both, and if the archive refuses,
@@ -914,6 +920,21 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-09-28 · sprint 49 (71c8351, and the commit carrying this line): the
+  widget's look, chunk Q's open slice. Seen in the gallery (/tmp/see/w1 and
+  /tmp/see/w6, dark, real works from the house): the small square lettered with the
+  title alone ("A Celebration"), the large edge to edge (Hartley's
+  Provincetown, the title in italic, the artist and a gilt year bottom
+  right). Nothing wrong seen in either, so the widget is fit for the next
+  TestFlight build. NOT SEEN standing on the home screen, and now we know
+  why: the simulator's SpringBoard faults in its own drop ripple on every
+  "Add Widget" tap (four reports this morning and one from sprint 48), so
+  sprint 48's widget never landed on any page. The fault is Apple's
+  simulator, not the widget; the eyes now drag the preview out instead,
+  which no longer faults but has not placed it yet. The app is untouched:
+  the six stills (/tmp/see/0) match sprint 48's. No walk and no hitch
+  numbers, since nothing moved. No new door.
 
 - 2026-09-28 · sprint 48 (3a2efbd, d7380d7, and the commit carrying this
   line): the wall on the home screen, chunk Q. Step one of the steer was
