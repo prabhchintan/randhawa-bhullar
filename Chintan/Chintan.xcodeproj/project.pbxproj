@@ -28,6 +28,8 @@
 		CA00000000000000000000A4 /* AppOpened.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A4 /* AppOpened.swift */; };
 		CA00000000000000000000A5 /* HouseWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A5 /* HouseWord.swift */; };
 		CA00000000000000000000A6 /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A6 /* Metrics.swift */; };
+		CA00000000000000000000B1 /* ChintanWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000B1 /* ChintanWidget.swift */; };
+		CA00000000000000000000B2 /* ChintanWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000B2 /* ChintanWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +40,28 @@
 			remoteGlobalIDString = CA3000000000000000000001;
 			remoteInfo = Chintan;
 		};
+		CA8000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA4000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA3000000000000000000003;
+			remoteInfo = ChintanWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CA500000000000000000000A /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CA00000000000000000000B2 /* ChintanWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		CA1000000000000000000001 /* ChintanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChintanApp.swift; sourceTree = "<group>"; };
@@ -66,6 +89,10 @@
 		CA10000000000000000000A5 /* HouseWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseWord.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A6 /* Metrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metrics.swift; sourceTree = "<group>"; };
 		CA1000000000000000000013 /* Chintan.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Chintan.entitlements; sourceTree = "<group>"; };
+		CA10000000000000000000B1 /* ChintanWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChintanWidget.swift; sourceTree = "<group>"; };
+		CA10000000000000000000B2 /* ChintanWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ChintanWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA10000000000000000000B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CA10000000000000000000B4 /* ChintanWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChintanWidget.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +110,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA5000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -91,6 +125,7 @@
 			children = (
 				CA2000000000000000000002 /* Chintan */,
 				CA2000000000000000000004 /* ChintanWalk */,
+				CA2000000000000000000005 /* ChintanWidget */,
 				CA2000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -129,6 +164,7 @@
 			children = (
 				CA100000000000000000000B /* Chintan.app */,
 				CA100000000000000000000F /* ChintanWalk.xctest */,
+				CA10000000000000000000B2 /* ChintanWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -141,6 +177,16 @@
 			path = ChintanWalk;
 			sourceTree = "<group>";
 		};
+		CA2000000000000000000005 /* ChintanWidget */ = {
+			isa = PBXGroup;
+			children = (
+				CA10000000000000000000B1 /* ChintanWidget.swift */,
+				CA10000000000000000000B3 /* Info.plist */,
+				CA10000000000000000000B4 /* ChintanWidget.entitlements */,
+			);
+			path = ChintanWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -151,10 +197,12 @@
 				CA5000000000000000000003 /* Sources */,
 				CA5000000000000000000001 /* Frameworks */,
 				CA5000000000000000000002 /* Resources */,
+				CA500000000000000000000A /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CA9000000000000000000002 /* PBXTargetDependency */,
 			);
 			name = Chintan;
 			productName = Chintan;
@@ -179,6 +227,23 @@
 			productReference = CA100000000000000000000F /* ChintanWalk.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		CA3000000000000000000003 /* ChintanWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA7000000000000000000004 /* Build configuration list for PBXNativeTarget "ChintanWidget" */;
+			buildPhases = (
+				CA5000000000000000000007 /* Sources */,
+				CA5000000000000000000008 /* Frameworks */,
+				CA5000000000000000000009 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ChintanWidget;
+			productName = ChintanWidget;
+			productReference = CA10000000000000000000B2 /* ChintanWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -195,6 +260,9 @@
 					CA3000000000000000000002 = {
 						CreatedOnToolsVersion = 16.0;
 						TestTargetID = CA3000000000000000000001;
+					};
+					CA3000000000000000000003 = {
+						CreatedOnToolsVersion = 16.0;
 					};
 				};
 			};
@@ -213,6 +281,7 @@
 			targets = (
 				CA3000000000000000000001 /* Chintan */,
 				CA3000000000000000000002 /* ChintanWalk */,
+				CA3000000000000000000003 /* ChintanWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -227,6 +296,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CA5000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA5000000000000000000009 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -270,6 +346,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CA5000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA00000000000000000000B1 /* ChintanWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -277,6 +361,12 @@
 			isa = PBXTargetDependency;
 			target = CA3000000000000000000001 /* Chintan */;
 			targetProxy = CA8000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		CA9000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = CA3000000000000000000003 /* ChintanWidget */;
+			targetProxy = CA8000000000000000000002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -492,6 +582,62 @@
 			};
 			name = Release;
 		};
+		CA6000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ChintanWidget/ChintanWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7FWNAT83XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChintanWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = chintan;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Chintan.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		CA6000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ChintanWidget/ChintanWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7FWNAT83XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChintanWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = chintan;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.Chintan.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -518,6 +664,15 @@
 			buildConfigurations = (
 				CA6000000000000000000005 /* Debug */,
 				CA6000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CA7000000000000000000004 /* Build configuration list for PBXNativeTarget "ChintanWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA6000000000000000000007 /* Debug */,
+				CA6000000000000000000008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

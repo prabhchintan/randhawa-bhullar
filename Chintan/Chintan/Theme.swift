@@ -184,6 +184,14 @@ final class Gallery: ObservableObject {
         return true
     }
 
+    // A tap on the widget: the work it hung, when the phone holds it too,
+    // chosen for the day; otherwise the painting on the wall stays.
+    func choose(id: String) async {
+        guard let p = walk.first(where: { $0.id == id }), p.key != painting?.key else { return }
+        UserDefaults.standard.set(p.key + "|" + Self.today, forKey: Self.chosenKey)
+        await show(p, animated: true)
+    }
+
     // What a hold on the painting alone came to, said at its foot.
     enum Kept { case kept, already, noDoor, unheard }
 

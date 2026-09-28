@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 @main
 struct ChintanApp: App {
@@ -43,6 +44,9 @@ struct ChintanApp: App {
                 Health.shared.freshen()
                 Motion.shared.freshen()
                 Metrics.shared.freshen()
+                // The widget hangs a fresh work each time the app is opened.
+                _ = Keychain.loadHouseAddress()
+                WidgetCenter.shared.reloadAllTimelines()
             }
             PhoneWord.shared.scene(now)
             if now == .background { Wakes.ask() }

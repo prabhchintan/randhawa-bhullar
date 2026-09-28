@@ -151,6 +151,17 @@ struct ContentView: View {
         .environmentObject(store)
         .environmentObject(gallery)
         .task { await gallery.load() }
+        // A tap on the widget (chintan://painting/ID) opens on the painting
+        // alone: its work when the phone holds it, else Home's own.
+        .onOpenURL { url in
+            guard url.scheme == "chintan", url.host == "painting" else { return }
+            let id = url.lastPathComponent
+            withAnimation(.snappy) { page = .jharokha }
+            Task {
+                if !id.isEmpty, id != "/" { await gallery.choose(id: id) }
+                withAnimation(.smooth) { alone = true }
+            }
+        }
         #if targetEnvironment(macCatalyst)
         // The wall turns on its own, at the pace set in its menu, each turn a
         // fresh work from the house; a turn by hand starts the wait again.
