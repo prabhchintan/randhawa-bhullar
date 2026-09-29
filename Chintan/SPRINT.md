@@ -894,10 +894,14 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    picture edge to edge as the container's background; the label bottom
    right over a short shade as the house's word says (off, basic, detailed;
    the small square the title alone); a refresh asked every 15 minutes and
-   on every opening of the app; the last work of each frame kept in the App
-   Group (group.Prabhchintan.Chintan, both targets), so off the tailnet the
-   widget keeps its picture; the house address handed over through the
-   group's defaults. A tap opens chintan://painting/ID: Home, the painting
+   on every opening of the app; the last work of each frame kept in the
+   widget's own Application Support, so off the tailnet the widget keeps its
+   picture. No App Group (sprint 50: the profiles carry none and the key may
+   not register one, so run 36385134219's archive failed): the house address
+   is one constant, House.swift in both targets, read from the Info.plist
+   key ChintanHouse that ship.sh, see.sh and widget.sh fill from
+   CHINTAN_HOUSE at build time, so it never enters the repository; the app
+   uses it too when nothing is typed in settings. A tap opens chintan://painting/ID: Home, the painting
    alone, that work if the phone holds it, else Home's own. The eyes:
    `see.sh --widget OUT` (widget.sh, ChintanWidgetEyes) opens the home
    screen's gallery and photographs each size, then places the large one.
@@ -912,14 +916,28 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    `placed-edit`, walk the pages to the widget, and find it as the home
    screen names it (an icon, identifier chintan, value "Widget"). Left:
    (a) placed by the drag, or else seen only on his phone; (c) seen on
-   his phone after the next TestFlight build, whose archive now signs a
-   second bundle, Prabhchintan.Chintan.Widget, and the App Group: cloud
-   signing with the key should register both, and if the archive refuses,
-   that is his hands in the developer portal once (the App Group on both
-   identifiers).
+   his phone after the next TestFlight build, whose archive signs a second
+   bundle, Prabhchintan.Chintan.Widget, with no capabilities, which cloud
+   signing registers by itself. Never register App Groups by API.
 
 
 ## The ledger (newest first)
+
+- 2026-09-29 · sprint 50 (015376b, and the commit carrying this line): ship
+  is mended, on the house's steer. Run 36385134219's archive failed because
+  the widget brought App Groups into both targets and the profiles carry
+  none. Both targets now carry no App Group: the app's entitlements lose
+  it, the widget's entitlements file is gone, and the widget asks the house
+  itself by the address the build carries (House.swift, ChintanHouse in both
+  Info.plists, filled from CHINTAN_HOUSE by ship.sh), keeping its last
+  picture in its own container. The app reads that same address when none
+  is typed, so a fresh install finds the house with no settings at all. The
+  simulator build is green and the six stills (/tmp/see/1) match sprint 49's:
+  the phone's screens are untouched. NOT PROVEN here: the signed archive
+  and widget.sh both need approval this run cannot give, so the proof is
+  the job's ship step (the nightly chintan.yml turns green with it), and
+  the widget standing on a page is still the simulator's SpringBoard fault
+  of sprint 49. No walk, nothing moved. No new door.
 
 - 2026-09-28 · sprint 49 (71c8351, and the commit carrying this line): the
   widget's look, chunk Q's open slice. Seen in the gallery (/tmp/see/w1 and

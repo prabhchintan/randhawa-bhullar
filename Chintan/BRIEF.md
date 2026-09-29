@@ -25,7 +25,9 @@ its own rules below.
 
 The house serves a small JSON door on the maintainer's tailnet. The
 address is typed once into the app's settings screen and kept in the
-Keychain; it is not in this repository and the default is empty. Every
+Keychain; it is not in this repository, and the default is the address the
+build was given (CHINTAN_HOUSE, since sprint 50, so the widget can ask the
+house without a shared container). Every
 request is over plain HTTP on the tailnet (WireGuard is the wire), so the
 app's Info.plist allows arbitrary loads and the brief is the reason: a
 private app whose only host is the maintainer's own machine. There is no
