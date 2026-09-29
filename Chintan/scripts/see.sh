@@ -82,7 +82,7 @@ mkdir -p "$OUT"
 LOG="$OUT/build.log"
 if ! xcodebuild -project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -configuration Debug \
      -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-     -derivedDataPath "$DD" CODE_SIGNING_ALLOWED=NO build > "$LOG" 2>&1; then
+     -derivedDataPath "$DD" CODE_SIGNING_ALLOWED=NO CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" build > "$LOG" 2>&1; then
   grep -E -B2 -A6 "error:" "$LOG" | tail -80
   echo "BUILD FAILED"
   exit 1

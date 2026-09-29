@@ -24,7 +24,7 @@ xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
 xcrun simctl ui "$UDID" appearance "${WIDGET_LOOK:-dark}"
 XCB=(-project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -configuration Debug
-     -destination "id=$UDID" -derivedDataPath "$DD")
+     -destination "id=$UDID" -derivedDataPath "$DD" CHINTAN_HOUSE="${CHINTAN_HOUSE:-}")
 if ! xcodebuild "${XCB[@]}" -only-testing:ChintanWalk build-for-testing > "$OUT/build.log" 2>&1; then
   grep -E -B2 -A6 "error:" "$OUT/build.log" | tail -80
   echo "BUILD FAILED"
@@ -33,9 +33,9 @@ fi
 TEST_RUNNER_WALK_OUT="$OUT" TEST_RUNNER_CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" \
   xcodebuild "${XCB[@]}" -only-testing:ChintanWalk/ChintanWidgetEyes test-without-building > "$OUT/test.log" 2>&1 \
   || echo "the test said no; read $OUT/test.log"
-# What the widget kept in the App Group: the record the house gave each frame.
-GROUP=$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan group.Prabhchintan.Chintan 2>/dev/null || true)
-for f in "$GROUP"/wall/*.json; do
+# What the widget kept in its own container: the record the house gave each frame.
+PLUGINS="$HOME/Library/Developer/CoreSimulator/Devices/$UDID/data/Containers/Data/PluginKitPlugin"
+for f in "$PLUGINS"/*/Library/Application\ Support/wall/*.json; do
   [ -f "$f" ] && echo "KEPT $(basename "$f"): $(head -c 300 "$f")"
 done
 echo "pictures:"

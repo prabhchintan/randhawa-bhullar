@@ -49,9 +49,12 @@ if [ -n "${CHINTAN_HOUSE:-}" ]; then
     echo "the house gave no icon; the checked-in one stands"
   fi
 fi
+# The build carries the house's address (House.swift), so the widget can ask
+# the house without a shared container; it never enters the repository.
 archive() {
   xcodebuild -project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -destination 'generic/platform=iOS' \
-    -archivePath "$TMP/Chintan.xcarchive" CURRENT_PROJECT_VERSION="$BUILD" "${KEY[@]}" archive > "$TMP/archive.log" 2>&1
+    -archivePath "$TMP/Chintan.xcarchive" CURRENT_PROJECT_VERSION="$BUILD" CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" \
+    "${KEY[@]}" archive > "$TMP/archive.log" 2>&1
 }
 if ! archive; then
   if grep -q "Revoke certificate" "$TMP/archive.log"; then

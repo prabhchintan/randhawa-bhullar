@@ -544,8 +544,8 @@ final class ChintanHitches: XCTestCase {
     }
 }
 
-// The widget's eyes (widget.sh): the app opened once, so the house's address
-// reaches the App Group, then the simulator's own home screen: the widget
+// The widget's eyes (widget.sh): the app opened once, then the simulator's
+// own home screen (the widget finds the house by the build's address): the widget
 // gallery searched for chintan, each size photographed as the gallery shows
 // it, the large one added and photographed standing on the home screen, and
 // taken off again so the next look starts from the same screen.

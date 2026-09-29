@@ -29,6 +29,8 @@
 		CA00000000000000000000A5 /* HouseWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A5 /* HouseWord.swift */; };
 		CA00000000000000000000A6 /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A6 /* Metrics.swift */; };
 		CA00000000000000000000B1 /* ChintanWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000B1 /* ChintanWidget.swift */; };
+		CA00000000000000000000C1 /* House.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000C1 /* House.swift */; };
+		CA00000000000000000000C2 /* House.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000C1 /* House.swift */; };
 		CA00000000000000000000B2 /* ChintanWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000B2 /* ChintanWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -92,7 +94,7 @@
 		CA10000000000000000000B1 /* ChintanWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChintanWidget.swift; sourceTree = "<group>"; };
 		CA10000000000000000000B2 /* ChintanWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ChintanWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA10000000000000000000B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CA10000000000000000000B4 /* ChintanWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChintanWidget.entitlements; sourceTree = "<group>"; };
+		CA10000000000000000000C1 /* House.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = House.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,6 +151,7 @@
 				CA10000000000000000000A4 /* AppOpened.swift */,
 				CA10000000000000000000A5 /* HouseWord.swift */,
 				CA10000000000000000000A6 /* Metrics.swift */,
+				CA10000000000000000000C1 /* House.swift */,
 				CA1000000000000000000003 /* HouseClient.swift */,
 				CA1000000000000000000004 /* ConversationStore.swift */,
 				CA1000000000000000000008 /* KeychainHelper.swift */,
@@ -182,7 +185,6 @@
 			children = (
 				CA10000000000000000000B1 /* ChintanWidget.swift */,
 				CA10000000000000000000B3 /* Info.plist */,
-				CA10000000000000000000B4 /* ChintanWidget.entitlements */,
 			);
 			path = ChintanWidget;
 			sourceTree = "<group>";
@@ -332,6 +334,7 @@
 				CA00000000000000000000A6 /* Metrics.swift in Sources */,
 				CA000000000000000000000B /* Theme.swift in Sources */,
 				CA0000000000000000000007 /* SettingsView.swift in Sources */,
+				CA00000000000000000000C1 /* House.swift in Sources */,
 				CA0000000000000000000003 /* HouseClient.swift in Sources */,
 				CA0000000000000000000004 /* ConversationStore.swift in Sources */,
 				CA0000000000000000000008 /* KeychainHelper.swift in Sources */,
@@ -351,6 +354,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA00000000000000000000B1 /* ChintanWidget.swift in Sources */,
+				CA00000000000000000000C2 /* House.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -585,7 +589,6 @@
 		CA6000000000000000000007 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = ChintanWidget/ChintanWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
@@ -613,7 +616,6 @@
 		CA6000000000000000000008 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = ChintanWidget/ChintanWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;

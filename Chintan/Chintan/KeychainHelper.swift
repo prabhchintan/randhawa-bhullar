@@ -23,12 +23,16 @@ enum Keychain {
             #if targetEnvironment(macCatalyst)
             UserDefaults.standard.set(override, forKey: defaultsKey)
             #endif
-            share(override)
             return override
         }
         #if targetEnvironment(macCatalyst)
         if let kept = UserDefaults.standard.string(forKey: defaultsKey), !kept.isEmpty { return kept }
         #endif
+        return typed() ?? House.address
+    }
+
+    // The address typed in settings, which wins over the build's own.
+    private static func typed() -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -38,27 +42,15 @@ enum Keychain {
         ]
         var item: CFTypeRef?
         guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
-              let data = item as? Data, let address = String(data: data, encoding: .utf8) else { return nil }
-        share(address)
+              let data = item as? Data, let address = String(data: data, encoding: .utf8),
+              !address.isEmpty else { return nil }
         return address
-    }
-
-    // The widget on the home screen asks the same house, and an extension
-    // cannot read the app's Keychain; the address is handed to it through the
-    // App Group's defaults, on this phone only, as the Mac keeps it in its own.
-    private static func share(_ address: String) {
-        #if !targetEnvironment(macCatalyst)
-        guard let shared = UserDefaults(suiteName: "group.Prabhchintan.Chintan"),
-              shared.string(forKey: defaultsKey) != address else { return }
-        shared.set(address, forKey: defaultsKey)
-        #endif
     }
 
     static func saveHouseAddress(_ address: String) {
         #if targetEnvironment(macCatalyst)
         UserDefaults.standard.set(address, forKey: defaultsKey)
         #endif
-        share(address)
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,

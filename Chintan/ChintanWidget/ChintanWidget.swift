@@ -42,19 +42,12 @@ struct Record: Codable {
     let image: String?
 }
 
-// What the app shares with the widget through the App Group: the house
-// address, and the last work hung in each frame, kept so an evening off the
-// tailnet still has its picture.
+// The last work hung in each frame, kept in the widget's own container so an
+// evening off the tailnet still has its picture. The widget shares nothing
+// with the app: it asks the house the build names (House.address) itself.
 enum Shared {
-    static let group = "group.Prabhchintan.Chintan"
-
-    static var house: String? {
-        UserDefaults(suiteName: group)?.string(forKey: "houseAddress")
-    }
-
     private static var folder: URL {
-        let root = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)
-            ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let url = root.appendingPathComponent("wall", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
@@ -107,7 +100,7 @@ struct Hanger: TimelineProvider {
     // The house's next work for this frame, brought down, kept and hung;
     // nil when the house is out of reach.
     static func fresh(_ frame: String) async -> Hung? {
-        guard var address = Shared.house?.trimmingCharacters(in: .whitespacesAndNewlines), !address.isEmpty else { return nil }
+        guard var address = House.address?.trimmingCharacters(in: .whitespacesAndNewlines), !address.isEmpty else { return nil }
         if !address.contains("://") { address = "http://" + address }
         while address.hasSuffix("/") { address.removeLast() }
         let config = URLSessionConfiguration.ephemeral
