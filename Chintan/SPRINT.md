@@ -356,7 +356,8 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    alone-turn-back, alone-hold). Left: the house's door (sprint 41's line),
    then seen on his phone. E is whole on the app side; no further
    collection slice before the next open run goes to the Board's bodies or
-   the audit (the house's steer, 09-27), then F's version line.
+   the audit (the house's steer, 09-27), then F's version line. The Board's
+   bodies mended (sprint 51); next, the audit, then the version line.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -922,6 +923,19 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-09-29 · sprint 51 (7da5b66, and the commit carrying this line): the
+  Board's bodies read clean (the house's 09-27 steer). The first look
+  (/tmp/see/0) showed the reasons under three of today's things with a stray
+  mark where the house's bracket had closed before a comma or a stop:
+  "1261976;, the site", "Cypress and Tomball;. Each", "from 09-24;. Why".
+  The bracket now simply drops when punctuation already follows it, and
+  becomes a semicolon only when a word does. The iCloud leaf lettered the
+  vault's backticks around its command. A leaf's reasons now carry no
+  backticks or bold marks. Seen in both modes (/tmp/see/1 and /tmp/see/2,
+  `board` and `board@4`, the iCloud leaf opened): every reason reads as a
+  sentence. Home and the Study are untouched. No walk and no hitch numbers,
+  since nothing moved. No new door.
 
 - 2026-09-29 · sprint 50 (015376b, and the commit carrying this line): ship
   is mended, on the house's steer. Run 36385134219's archive failed because
