@@ -434,14 +434,20 @@ private struct DueMark: View {
 extension BoardItem {
     // The reasons after the gist, as the house wrote them.
     var why: String {
+        // The vault's code and bold marks are for the vault, not the leaf.
         var rest = String(text.dropFirst(gist.count))
+            .replacingOccurrences(of: "`", with: "")
+            .replacingOccurrences(of: "**", with: "")
         while let first = rest.first, " ,;:".contains(first) { rest.removeFirst() }
         if rest.hasPrefix("(") {
             rest.removeFirst()
             if rest.hasSuffix(")") {
                 rest.removeLast()
             } else if let close = rest.firstIndex(of: ")") {
-                rest.replaceSubrange(close...close, with: ";")
+                // A stop already after the paren keeps it; else a semicolon.
+                let next = rest.index(after: close)
+                let stopped = next < rest.endIndex && ",;:.".contains(rest[next])
+                rest.replaceSubrange(close...close, with: stopped ? "" : ";")
             }
         }
         return rest.prefix(1).uppercased() + rest.dropFirst()
