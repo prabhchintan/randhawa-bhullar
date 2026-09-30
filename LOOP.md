@@ -58,6 +58,11 @@ themselves:
 - Bump versions, regenerate screenshots, archive, upload, submit for review
   with automatic release, tag, push, and write the report, subject to the
   shipping gate below.
+- A cut in FUNNEL.md that chintan has filed by inbox note: an idea proven
+  in the private app and rewritten there for a person with no server. It
+  is built as the cut says, inside this scope, and the row is moved along
+  (the maintainer, 2026-09-30). A cut that would need anything from "What
+  waits for the maintainer" carries his dated word in the file, or it waits.
 - Skip the release, and skip the report. A quiet day ships nothing and says
   nothing; the transcript is enough.
 

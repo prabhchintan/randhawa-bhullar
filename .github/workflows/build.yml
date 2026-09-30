@@ -10,6 +10,10 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: The quiet check (FUNNEL.md)
+        run: python3 scripts/quiet.py
       - name: Build Randhawa (app + widget)
         run: |
           xcodebuild -project Randhawa.xcodeproj -target Randhawa \

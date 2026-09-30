@@ -80,7 +80,11 @@ inside scope (write a report anyway and say what stopped you).
    the loop does) are done and deployed in this run; app requests
    are built in this run and go out with the next release that is earned
    (see step 5), which may be today or weeks away. Then pick zero to three
-   improvements inside LOOP.md scope: first whatever the inbox asks for, then the next open item of the loop's
+   improvements inside LOOP.md scope: first whatever the inbox asks for (a
+   note from chintan that names a numbered cut in FUNNEL.md is one of
+   those: read the cut there, build it as written for a person with no
+   server, and move its row to On main with the commit when it builds, or
+   write one line under the row saying why not), then the next open item of the loop's
    backlog in ROADMAP.md, informed by the feeds and the standing questions in
    LOOP.md. Zero is a fine answer on a quiet day. When you finish a backlog
    item, mark it done in ROADMAP.md with the date, in one line. Nobody
@@ -88,7 +92,9 @@ inside scope (write a report anyway and say what stopped you).
    step named and not taken; take it, or write it into ROADMAP.md. Prefer the smallest change that answers a real
    question over the largest change that would look impressive.
 
-4. Build. Implement, then build both apps for the simulator. Keep the
+4. Build. Implement, then build both apps for the simulator, and run
+   `python3 scripts/quiet.py --diff` before every commit: a hit is fixed,
+   never committed around. Keep the
    no-dashes rule (no em or en dashes anywhere), keep every privacy claim
    literally true, match the comment voice. If screenshot copy changed, rerun
    the screenshot scripts and look at the PNGs. If a build fails and you

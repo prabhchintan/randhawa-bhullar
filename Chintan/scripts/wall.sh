@@ -136,7 +136,7 @@ shoot() {
   pkill -x Chintan 2>/dev/null; sleep 1
   # Through LaunchServices, never the binary itself: run from the runner's
   # launchd context the binary came up with no window on the screen (the
-  # 12:15 and 12:29 photos on 2026-09-27 showed HEY and Telegram, not the
+  # 12:15 and 12:29 photos on 2026-09-27 showed other windows, not the
   # wall); `open` hands it to the user's GUI session, where the window is.
   local t0; t0=$(date +%s)
   rm -f $STATE_GLOB

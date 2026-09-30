@@ -149,7 +149,7 @@ word = str(uuid.uuid4()).upper()
 room = [
     {"id": str(uuid.uuid4()).upper(), "text": "Is the round done?", "fromHouse": False, "date": now - 7300},
     {"id": str(uuid.uuid4()).upper(), "text": "Done at nine, nothing raised.", "fromHouse": True, "date": now - 7280},
-    {"id": word, "text": "Anything from the clinic?", "fromHouse": False, "date": now - 200},
+    {"id": word, "text": "Anything from the library?", "fromHouse": False, "date": now - 200},
 ]
 json.dump(room, open(os.path.join(d, "conversation-darban.json"), "w"))
 json.dump({"darban": {"id": "eyes-" + str(uuid.uuid4()), "word": word, "since": now - 200}},

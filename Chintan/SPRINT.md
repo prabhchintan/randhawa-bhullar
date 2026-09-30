@@ -242,7 +242,7 @@ eyes for motion, feel and the lived experience, in this order:
    long press on the museum label anywhere opens "a word for the house", a
    one-line composer; what he types goes to `POST /v1/word {"screen": ...,
    "text": ...}` and becomes the next sprint's steer, logged, so the lived
-   experience is the signal and he never has to open Telegram to say "this
+   experience is the signal and he never has to leave the app to say "this
    swipe is janky".
 5. **The rubric widens**: the fresh-eyes review reads the film's frames,
    the hitch ratios, the audit list and his words alongside the stills,
@@ -439,13 +439,13 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
    day's line from the house (its first sentence now says where he is when
    the phone has said: at home, at work, out); today's things only, each
    title cut to the fewest words that carry the most (the consequence and
-   the hour in the title itself when they matter, "Caremark, call, before
-   5" not "Call Caremark about the Zepbound prior authorization"); the
+   the hour in the title itself when they matter, "Dentist, call, before
+   5" not "Call the dentist about moving the cleaning to next week"); the
    meters as small rings placed neatly below, together, never floating on
    the art; the week and everything later leaves Home for the Board. The
    sprint measures Home by how much painting is visible with nothing
    pressed, and by the label reading in one breath. Built (sprint 17):
-   today and past only, each thing in the phone's own cut ("Caremark,
+   today and past only, each thing in the phone's own cut ("Dentist,
    call") with its hour apart in gilt, the rings and the label under a
    gilt hairline. Since 2026-09-24 (his word at 03:56) the rings, the
    hairline and the label stand on the bar itself, a foot below the scroll,
@@ -534,11 +534,11 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
    system is felt, not displayed (D).
 
    What Apple allows, plainly, so no slice chases a wall:
-   - HealthKit: everything he has. Steps, distance, flights, active and
+   - HealthKit: every type Apple lets an app read. Steps, distance, flights, active and
      resting energy, heart rate, resting heart rate, HRV, walking heart rate
      average, VO2 max, respiratory rate, blood oxygen, wrist temperature, sleep
      analysis with stages, stand hours, exercise minutes, workouts, body mass
-     and body fat (a check against `ghar weight`, never the writer), headphone
+     and body fat, headphone
      and environmental audio exposure, time in daylight, mindful minutes,
      walking steadiness and the gait set, blood glucose or pressure if a
      device ever writes them. HKObserverQuery plus enableBackgroundDelivery
@@ -573,7 +573,7 @@ N. The senses (Prab, 2026-09-24 18:50, at the door, verbatim: "it's worth
      So "on the phone" is inferred, never seen: the app in the foreground, a
      wake that finds the phone unlocked and moving, or a Shortcuts personal
      automation ("App opened", run immediately) that posts
-     {"event": "app", "app": "Telegram", "source": "shortcut"} to /v1/phone.
+     {"event": "app", "app": "Safari", "source": "shortcut"} to /v1/phone.
      He found a Shortcut fiddly once (PHONE.md, 09-01), so the automation is
      offered once in the Settings room's words and never chased.
    - Cleaning on the phone, so the house never hoards junk: heart rate to
@@ -983,7 +983,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   Board's bodies read clean (the house's 09-27 steer). The first look
   (/tmp/see/0) showed the reasons under three of today's things with a stray
   mark where the house's bracket had closed before a comma or a stop:
-  "1261976;, the site", "Cypress and Tomball;. Each", "from 09-24;. Why".
+  "A-2231;, the site", "Main and Elm;. Each", "from 09-24;. Why".
   The bracket now simply drops when punctuation already follows it, and
   becomes a semicolon only when a word does. The iCloud leaf lettered the
   vault's backticks around its command. A leaf's reasons now carry no
@@ -1493,7 +1493,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   "Settings" breadcrumb shows the same process, not a relaunch) the room
   empty again, chintan's history whole; Application Support holds only
   conversation.json. Not seen: an answer in hawa's room. The house door
-  refused every connection through the run (port 8082, connection refused,
+  refused every connection through the run (the door, connection refused,
   six tries), so the word showed "The house is not answering." with Try
   again, honestly; the first answered word is his. No hitch numbers
   (nothing that moves was changed). No new door needed.
@@ -1623,8 +1623,8 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   four words, the deed after it only when the noun alone says nothing, the
   day and the hour never inside the name; a word hour ("evening") stands
   apart like a clock time. Seen with the house's titles set aside
-  (`see.sh ... jharokha@cut`): Caremark call · evening, Testosterone draw
-  8:30 AM (the house says Blood draw), Calcium scan 1:30 PM, DMV plates
+  (`see.sh ... jharokha@cut`): Dentist call · evening, Piano lesson 3 of 3
+  8:30 AM (the house says Piano lesson), Oil change 1:30 PM, Parking permit
   10:10 AM. An empty day (`jharokha@empty`) is the date alone above the
   foot. At the largest text the painting's label ran most of the screen
   and pushed the things out of the wall; it now stops growing where the
@@ -1642,8 +1642,8 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   under the date when there is nothing today. The things a size down (body,
   was title3; "the action font could be smaller a bit"). The titles are the
   house's now: `/v1/titles` is live and the phone already preferred it, so the
-  wall reads Caremark call, Blood draw 8:30 AM, Calcium scan 1:30 PM, DMV
-  plates 10:10 AM ("much better"). Left for the next sprint: the phone's own
+  wall reads Dentist call, Piano lesson 8:30 AM, Oil change 1:30 PM, Parking
+  permit 10:10 AM ("much better"). Left for the next sprint: the phone's own
   fallback cut tightened the same way for a house that is away.
 
 - 2026-09-25 · sprint 25 (d1748c1): the phone names its wifi, so the house
@@ -1891,7 +1891,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   beyond Sunday and the undated, combined and soonest first. Where the
   shelf's name is the day, the leaf no longer letters the date at its
   right ("Thu Sep 24" under Today, "Fri Sep 25" under Tomorrow), so the
-  title and its reasons take the whole width: the calcium scan's "1:30
+  title and its reasons take the whole width: the oil change's "1:30
   PM" now sits beside its title on one line where it wrapped under it.
   Later keeps a gilt date on each leaf, and a thing whose day has passed
   keeps its saffron one under Today. Seen in both modes at rest, with a
@@ -1906,11 +1906,11 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   material with lamp black, square cornered like a wall label, its edge
   on the leaves' edge), and the three rooms share one mount, its edge on
   the bubbles'; the picture still shows through. The Board names each
-  thing by Home's cut ("Caremark, call" where it read "Call Caremark"),
+  thing by Home's cut ("Dentist, call" where it read "Call the dentist"),
   the house's `/v1/titles` first when it answers, the hour in gilt small
-  capitals after the last word ("Testosterone draw 3 of 3 8 AM"); first
-  look had a long title split around its hour ("Coronary artery 1:30 PM /
-  calcium scan"), then cut to "1:30..."; now the hour wraps whole under
+  capitals after the last word ("Piano lesson 3 of 3 8 AM"); first
+  look had a long title split around its hour ("Front porch 1:30 PM /
+  light bulb"), then cut to "1:30..."; now the hour wraps whole under
   it. Home's held plaque names the thing by the same cut. Seen in both
   modes at rest, a leaf opened, a thing held on Home, and in the walk's
   film (the mounts ride with the shelves through the scroll; the rule
@@ -1928,8 +1928,8 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 - 2026-09-24 · sprint 17 (3359a41, ac61086): Home is today. The week's
   calendar leaves are gone from Home; it holds only what is due today or
   already past, each in its fewest words in the serif, the thing before
-  the deed and no articles ("Caremark, call" where it read "Call
-  Caremark" on a leaf), the first hour the house wrote set apart in gilt
+  the deed and no articles ("Dentist, call" where it read "Call
+  the dentist" on a leaf), the first hour the house wrote set apart in gilt
   small capitals ("8 AM", "before 5 PM"), and "since Tue" in saffron for a
   thing whose day has passed. Under the thing a gilt hairline, and under it
   the rings together beside the label, top-aligned, the foot of the wall.
@@ -1947,7 +1947,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   not 1179 by 2556 (every picture on today's shelf already is). No hitch
   numbers (nothing that moves was touched). Doors needed from the house:
   (1) `GET /v1/titles` returning {"titles": [{"line": LINE, "title":
-  "Caremark, call", "hour": "before 5 PM" or null}]}, LINE the task line
+  "Dentist, call", "hour": "before 5 PM" or null}]}, LINE the task line
   after its checkbox exactly as `/v1/board` prints it; the app prefers
   these to its own cut and cuts its own on a 404 (today it is 404). (2)
   `ghar painting refit` trims the scan's border (uniform rows and columns
@@ -1957,7 +1957,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   the house to check its ratio gate, and for the small grey Met scans.
 
 - 2026-09-23 · sprint 16 (862de91): a thing on Home, held. Home's things
-  were only their gist ("Call Ogden Clinic"); the why lived a swipe away
+  were only their gist ("Call the dentist"); the why lived a swipe away
   on the Board. Now a thing pressed and held grows a plaque just above the
   leaves, the whole width of the wall, over the day's line and the
   painting (`.snappy`, scale up from its foot and fade): the day in gilt
@@ -2012,7 +2012,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   largest text size (`see.sh --large OUT`, which sets it, looks, and sets
   it back), and there the app came apart: Home's rings and museum label
   sat side by side wider than the phone, so the whole page widened, its
-  things ran off the right edge ("Call Huntzinge") and its lines lettered
+  things ran off the right edge ("Renew the parking permi") and its lines lettered
   over the Board next door, with the Study's "CHIN" showing at the Board's
   right edge; the study's rooms ran off screen; the bar's names grew
   until they crowded. Now each page is clipped at its sides only (the
@@ -2180,7 +2180,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   long plaque is gone; each shelf (Today, This week, Later) is named in
   gilt small capitals on the painting itself, and under it one leaf per
   day, the date lettered once at the leaf's head: Wednesday's call alone,
-  Friday's four together, Monday's bill and Wednesday's hiring pool on
+  Friday's four together, Monday's and Wednesday's single things on
   leaves of their own, the picture showing between them. A thing opened
   keeps its Done inside its leaf. Seen in both modes against the real
   house, at rest and scrolled to the end. No new door; `POST /v1/done` is
@@ -2188,12 +2188,12 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 - 2026-09-22 · sprint 7 (c7241a3): the board ends cleanly. At rest the
   last thing on the plaque no longer stops mid-word on the tab bar
-  ("Ogden DMV" half lettered); the foot of the list eases into the
+  ("Parking permit" half lettered); the foot of the list eases into the
   painting over 96 points and is clear for its last stretch, so the last
   leaf dissolves, and the end of the list carries an inset of the same
   height so it scrolls up whole, the plaque's foot closing above the
   tabs. This week now ends on Sunday (a Monday week), so Monday's
-  Union Walk bill sits alone under a Later shelf, seen opened with its
+  water bill sits alone under a Later shelf, seen opened with its
   Done at the foot of the board (see.sh's `board@N` now scrolls to the
   thing it opens). The Study's foot takes the same eased fade, seen
   unharmed. Seen in both modes against the real house over three looks.
@@ -2263,8 +2263,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   chintan, we can take away the email to do workflow now as in remove it
   entirely." The board tab is now the only place his to-dos show; the day
   card by mail and its HEY week board are retired on the house side (BUTLER
-  37), the job desk's ready postings arrive as dated lines with the Apply
-  link, and the night roll at 20:58 still clears the list to tomorrow.
+  37), and the night roll at 20:58 still clears the list to tomorrow.
 
 - 2026-09-22 · sprint 2 (040297d): the icon. The old blue dot on black is
   gone; the app is now a paper jharokha on the deep saffron: an arched

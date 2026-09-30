@@ -39,7 +39,19 @@ you need, tolerant of the door not existing yet.
 Before you finish: update Chintan/SPRINT.md (the backlog item done or
 narrowed, one ledger line newest first naming the commits and what a person
 would notice, and any door you need from the house), commit it, and leave
-the last pictures in /tmp/see/last (`cp -r` the final look there).
+the last pictures in /tmp/see/last (`cp -r` the final look there). End the
+ledger line with `Funnel:` and one sentence naming what in this sprint a
+stranger carrying Randhawa or Bhullar would want, in those apps' own terms
+and with no house words, or `Funnel: nothing`; the house reads it into
+FUNNEL.md.
+
+This repository is public. The ledger says what the app does and how it
+looks, never what the maintainer's life contains: no medication, clinic,
+doctor, employer, application, bill, vehicle, family name, street or
+store, and no board line quoted as it stands; when an example is needed,
+invent a neutral one of the same shape. Run `python3 scripts/quiet.py
+--diff` before each commit and fix every hit; a commit that fails it is
+not made.
 
 Rules: Swift and SwiftUI only, iOS 17 target, no packages, no third-party
 code, no analytics, never Randhawa or Bhullar, never the store, no secrets

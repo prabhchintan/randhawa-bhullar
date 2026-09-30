@@ -802,8 +802,8 @@ extension BoardItem {
         let hour: String?
     }
 
-    // A deed as the word that follows the thing ("Caremark call"); an empty
-    // one goes, the thing alone says it ("Rent" for "Pay rent").
+    // A deed as the word that follows the thing ("Dentist call"); an empty
+    // one goes, the thing alone says it ("Haircut" for "Book a haircut").
     private static let deeds: [String: String] = [
         "call": "call", "email": "email", "text": "text", "check": "check", "order": "order",
         "return": "return", "renew": "renewal", "pay": "payment", "book": "", "schedule": "",
@@ -823,8 +823,8 @@ extension BoardItem {
 
     // The house's line cut on the phone when the house is away, the way the
     // house cuts it: the noun of the thing in one to four words, the deed
-    // after it only when the noun alone says nothing ("Caremark call", "DMV
-    // plates", "Calcium scan"), and the hour apart, a clock time the house
+    // after it only when the noun alone says nothing ("Dentist call", "UPS
+    // pickup", "Water bill payment"), and the hour apart, a clock time the house
     // wrote ("8:30 AM", "before 5 PM") or a word ("evening").
     var short: Short {
         let hour: String? = {
@@ -854,18 +854,18 @@ extension BoardItem {
             deed = noun
             words.removeFirst()
         }
-        // "Plates at Ogden DMV": the place's own short name leads the thing.
+        // "Pickup at the UPS store": the place's own short name leads the thing.
         var place: [String] = []
         if let at = words.firstIndex(where: { $0.lowercased() == "at" }) {
             place = Array(words[(at + 1)...])
             words = Array(words[..<at])
         }
-        // "Draw 3 of 3" is the count, for the plaque.
+        // "Lesson 3 of 3" is the count, for the plaque.
         if words.count > 3, Int(words[words.count - 3]) != nil, words[words.count - 2] == "of",
            Int(words[words.count - 1]) != nil {
             words.removeLast(3)
         }
-        // "Tacoma to Utah plates": the thing is after its last small word.
+        // "Photos into the shared album": the thing is after its last small word.
         if let small = words.lastIndex(where: { ["to", "of", "on", "in", "into"].contains($0.lowercased()) }),
            small < words.count - 1 {
             words = Array(words[(small + 1)...])
@@ -874,7 +874,7 @@ extension BoardItem {
            !words.contains(initials), let noun = words.last {
             words = [initials, noun]
         } else if words.count > 3 {
-            // "Coronary artery calcium scan": the last two carry it.
+            // "Front porch light bulb": the last two carry it.
             words = Array(words.suffix(2))
         }
         if !deed.isEmpty { words.append(deed) }
