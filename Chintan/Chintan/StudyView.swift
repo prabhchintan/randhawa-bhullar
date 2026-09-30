@@ -34,6 +34,8 @@ struct StudyView: View {
     // A word for the house being written, on its plaque above the keyboard.
     @State private var wording = StudyView.launchArgument == "word"
     @Namespace private var rule
+    // The send mark grows with the text, its circle held under the field's height.
+    @ScaledMetric(relativeTo: .body) private var sendSide: CGFloat = 42
 
     private static var launchArgument: String? {
         let args = ProcessInfo.processInfo.arguments
@@ -346,7 +348,9 @@ struct StudyView: View {
 
     private var composer: some View {
         HStack(alignment: .bottom, spacing: 10) {
-            TextField("", text: $draft, prompt: Text("A word for " + voice.rawValue).foregroundStyle(Theme.bone.opacity(0.55)), axis: .vertical)
+            // A prompt never wraps, so at the accessibility sizes it says
+            // the least that still names the room, and reads whole.
+            TextField("", text: $draft, prompt: Text((typeSize.isAccessibilitySize ? "To " : "A word for ") + voice.rawValue).foregroundStyle(Theme.bone.opacity(0.55)), axis: .vertical)
                 .lineLimit(1...5)
                 .foregroundStyle(Theme.bone)
                 .tint(Theme.giltOnArt)
@@ -358,9 +362,10 @@ struct StudyView: View {
                 .accessibilityIdentifier("composer")
             Button(action: send) {
                 Image(systemName: "arrow.up")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.body.weight(.semibold))
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                     .foregroundStyle(canSend ? Theme.lampBlack : Theme.bone.opacity(0.5))
-                    .frame(width: 42, height: 42)
+                    .frame(width: min(sendSide, 72), height: min(sendSide, 72))
                     .background {
                         if canSend {
                             Circle().fill(Theme.giltOnArt)
