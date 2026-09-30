@@ -357,7 +357,9 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    then seen on his phone. E is whole on the app side; no further
    collection slice before the next open run goes to the Board's bodies or
    the audit (the house's steer, 09-27), then F's version line. The Board's
-   bodies mended (sprint 51); next, the audit, then the version line.
+   bodies mended (sprint 51); the audit's unnamed full-screen element found
+   and gone (sprint 52, 20 findings to 10). Next, the audit's last ten (the
+   Study's and the date's, sprint 52's line), then the version line.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -923,6 +925,37 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-09-30 · sprint 52 (b492667, 0759544, and the commit carrying this
+  line): the audit, its oldest finding closed (chunk 0, the house's 09-27
+  steer). The unnamed full-screen element on every screen since sprint 12
+  was each page's own shade, and the cause was the pager, not the shade:
+  `.accessibilityHidden(t != tab)` said false of the page in view, and on a
+  page that is not a container, false reaches every element inside it and
+  undoes their own `hidden(true)`. So VoiceOver on the page in view met the
+  shade, the foot's hairline and every other hidden decoration as blank
+  elements. Each page is now `.accessibilityElement(children: .contain)`
+  first, then hidden when out of view. Rule: never put an accessibility
+  modifier with a false value on a bare page. The audit now writes the tree
+  it read (tree-SCREEN-LOOK.txt), which is how the shade was named. Two
+  dead ends, undone: redrawing the shade as a Canvas, and padding it past
+  the safe area instead of ignoring it (XCUI's tree lists every view,
+  hidden or not; only the audit's count tells). At the largest text (look
+  2, `--large`), next sat on "18th century". It now stands under the label
+  in the label's column, capped where the label is. The date may take a
+  second line, and did, whole. Seen in both modes (/tmp/see/1, /tmp/see/4)
+  and at the largest text (/tmp/see/3/large): Home, the Board and the Study
+  are unchanged at the normal size, and next is a few points higher. Audit
+  20 to 10 findings, none unnamed. Left, the ten: the date still reads
+  "text clipped" though the largest look shows it whole, so it should be
+  waived by name if a second look agrees. The Study's first stamp and first
+  word read "partially unsupported"; they are the top of a bottom-anchored
+  conversation, pushed off the top as the text grows.
+  And one unnamed "unsupported" plus one "clipped" in the Study, likely the
+  composer's prompt, cut to "A word for..." at the largest text. No walk
+  film and no hitch numbers: nothing moved, though the pages' accessibility
+  shape changed, so the next walk should read its no-hand tabs line against
+  sprint 42's 7.8. No new door.
 
 - 2026-09-29 · sprint 51 (7da5b66, and the commit carrying this line): the
   Board's bodies read clean (the house's 09-27 steer). The first look
