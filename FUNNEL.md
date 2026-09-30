@@ -149,11 +149,14 @@ Touches: views only. Needs his word: no.
 
 ## Filed
 
-- 1. Eyes for the pair, filed 2026-09-30, for the next scheduled run
+(empty)
 
 ## On main
 
-(empty)
+- 1. Eyes for the pair, on main 2026-09-30 (ee73f55): `scripts/see.sh`,
+  `Walk/`, the RandhawaWalk and BhullarWalk schemes. Narrowed in one
+  place: Bhullar has no menu, and its envelope leaves for Mail, so its walk
+  photographs the list of memories instead.
 
 ## Shipped
 
