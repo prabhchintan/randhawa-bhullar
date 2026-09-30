@@ -182,6 +182,8 @@ struct JharokhaView: View {
                 .font(.system(.title2, design: .serif).weight(.medium).smallCaps())
                 .tracking(0.4)
                 .foregroundStyle(Theme.bone)
+                // At the largest sizes the date takes a second line, never cut.
+                .fixedSize(horizontal: false, vertical: true)
                 // A thing held names its own day; the date steps aside.
                 .opacity(heldThing == nil ? 1 : 0)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -352,90 +354,96 @@ struct JharokhaView: View {
         if let painting = gallery.painting, let title = painting.title {
             let artist = (painting.artist ?? "").plainDashes
             let (name, about) = Self.split(artist)
-            VStack(alignment: .trailing, spacing: 2) {
-                // Yesterday's painting, walked back to, says so over its title.
-                if gallery.showingYesterday {
-                    Text("Yesterday")
-                        .font(Theme.label(.caption2))
-                        .tracking(1)
-                        .foregroundStyle(Theme.giltOnArt)
-                }
-                Text(title.plainDashes)
-                    .font(.system(.caption, design: .serif).italic())
-                if !name.isEmpty {
-                    Text(name)
-                        .font(.system(.caption, design: .serif))
-                }
-                if let year = painting.year, !year.isEmpty {
-                    Text(year.plainDashes)
-                        .font(.system(.caption, design: .serif))
-                        .foregroundStyle(.white.opacity(0.75))
-                }
-                if showCredit {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        if let about { Text(about) }
-                        if let credit = painting.credit { Text(credit.plainDashes) }
+            // Next stands under the label in the same column, so at the
+            // largest text it steps down with the label, never onto the year.
+            VStack(alignment: .trailing, spacing: -1) {
+                VStack(alignment: .trailing, spacing: 2) {
+                    // Yesterday's painting, walked back to, says so over its title.
+                    if gallery.showingYesterday {
+                        Text("Yesterday")
+                            .font(Theme.label(.caption2))
+                            .tracking(1)
+                            .foregroundStyle(Theme.giltOnArt)
                     }
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.75))
-                    .padding(.top, 4)
-                    .transition(.opacity)
+                    Text(title.plainDashes)
+                        .font(.system(.caption, design: .serif).italic())
+                    if !name.isEmpty {
+                        Text(name)
+                            .font(.system(.caption, design: .serif))
+                    }
+                    if let year = painting.year, !year.isEmpty {
+                        Text(year.plainDashes)
+                            .font(.system(.caption, design: .serif))
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
+                    if showCredit {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            if let about { Text(about) }
+                            if let credit = painting.credit { Text(credit.plainDashes) }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.75))
+                        .padding(.top, 4)
+                        .transition(.opacity)
+                    }
+                }
+                .multilineTextAlignment(.trailing)
+                .foregroundStyle(.white.opacity(0.88))
+                // The label stops growing where the rings do, so at the largest
+                // text the day's things keep the wall.
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: 200, alignment: .trailing)
+                .contentShape(Rectangle())
+                // To VoiceOver the label is one card: read whole, a double tap
+                // for the credit, and the word for the house among its actions,
+                // since a slide on a held plaque is a thumb's way, not VoiceOver's.
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityHint(showCredit ? "Puts the credit away" : "Shows the credit")
+                .accessibilityAction(named: "A word for the house") {
+                    withAnimation(.snappy) { wording = true }
+                }
+                .accessibilityIdentifier("label")
+                // The label behind a held plaque steps back, so the two never read at once.
+                .opacity(heldLabel ? 0.25 : 1)
+                .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
+                // Pressed and held, the label grows a plaque with the whole of
+                // it, the way the wall card reads close up; let go, it folds back.
+                .gesture(labelHold)
+                if gallery.shelf.count > 1 {
+                    nextMark
+                        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                } else {
+                    Color.clear.frame(height: 22)
                 }
             }
-            .multilineTextAlignment(.trailing)
-            .foregroundStyle(.white.opacity(0.88))
-            // The label stops growing where the rings do, so at the largest
-            // text the day's things keep the wall.
-            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: 200, alignment: .trailing)
-            .contentShape(Rectangle())
-            // To VoiceOver the label is one card: read whole, a double tap
-            // for the credit, and the word for the house among its actions,
-            // since a slide on a held plaque is a thumb's way, not VoiceOver's.
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isButton)
-            .accessibilityHint(showCredit ? "Puts the credit away" : "Shows the credit")
-            .accessibilityAction(named: "A word for the house") {
-                withAnimation(.snappy) { wording = true }
-            }
-            .accessibilityIdentifier("label")
-            // The label behind a held plaque steps back, so the two never read at once.
-            .opacity(heldLabel ? 0.25 : 1)
-            .onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { showCredit.toggle() } }
-            // Pressed and held, the label grows a plaque with the whole of
-            // it, the way the wall card reads close up; let go, it folds back.
-            .gesture(labelHold)
-            .overlay(alignment: .bottomTrailing) { nextMark.offset(y: 24) }
-            .padding(.bottom, 22)
         }
     }
 
     // Under the label, the gallery's turn: the next painting on the shelf,
     // the phone's own copy, with a soft tick when it comes.
-    @ViewBuilder private var nextMark: some View {
-        if gallery.shelf.count > 1 {
-            Button {
-                Task {
-                    if await gallery.next() { turned += 1 }
-                }
-            } label: {
-                HStack(spacing: 4) {
-                    Text("next")
-                        .font(Theme.label(.caption))
-                        .tracking(1)
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 9, weight: .semibold))
-                }
-                .foregroundStyle(Theme.giltOnArt)
-                .padding(.vertical, 6)
-                .padding(.leading, 12)
-                .contentShape(Rectangle())
+    private var nextMark: some View {
+        Button {
+            Task {
+                if await gallery.next() { turned += 1 }
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("next")
-            .accessibilityLabel("Next painting")
+        } label: {
+            HStack(spacing: 4) {
+                Text("next")
+                    .font(Theme.label(.caption))
+                    .tracking(1)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 9, weight: .semibold))
+            }
+            .foregroundStyle(Theme.giltOnArt)
+            .padding(.vertical, 6)
+            .padding(.leading, 12)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("next")
+        .accessibilityLabel("Next painting")
     }
 
     // "Edgar Degas (French, 1834-1917)" is the name on the label and the

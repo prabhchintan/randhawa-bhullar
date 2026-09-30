@@ -89,6 +89,11 @@ struct ContentView: View {
                             // never lettering over its neighbour.
                             .clipShape(Sides())
                             // Only the page in view is read out, by VoiceOver or anything else.
+                            // Each page a container first: said of a bare page,
+                            // `hidden(false)` reached every element inside it and
+                            // undid their own `hidden(true)`, so the page in view
+                            // read its shades and hairlines as blank elements.
+                            .accessibilityElement(children: .contain)
                             .accessibilityHidden(t != tab)
                             .id(t)
                     }
