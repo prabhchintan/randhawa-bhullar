@@ -7,21 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2E28D8FDAC32A09DC14CD167 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAFC5177A94B58006CAA9153 /* Foundation.framework */; };
+		5CB6DED0A0A66B20CF4B1C3E /* Eyes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A3C4D2074F7C730A72C986 /* Eyes.swift */; };
+		A6EE2143595D031BEDD89C55 /* RandhawaWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B067B8AB8A6DD2BFED3CACD /* RandhawaWalk.swift */; };
 		B00000000000000000000001 /* MomentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* MomentStore.swift */; };
 		B00000000000000000000002 /* ConstellationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* ConstellationView.swift */; };
 		B00000000000000000000003 /* RandhawaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000003 /* RandhawaApp.swift */; };
 		B00000000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000004 /* ContentView.swift */; };
-		B00000000000000000000006 /* SpaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000009 /* SpaceModel.swift */; };
 		B00000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000005 /* Assets.xcassets */; };
+		B00000000000000000000006 /* SpaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000009 /* SpaceModel.swift */; };
 		B00000000000000000000011 /* MomentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* MomentStore.swift */; };
+		B00000000000000000000012 /* ConstellationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* ConstellationView.swift */; };
+		B00000000000000000000016 /* RandhawaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000006 /* RandhawaWidget.swift */; };
+		B00000000000000000000017 /* RandhawaWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000007 /* RandhawaWidgetBundle.swift */; };
 		B00000000000000000000021 /* MemoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000C /* MemoryModel.swift */; };
 		B00000000000000000000022 /* MemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000D /* MemoryStore.swift */; };
 		B00000000000000000000023 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000E /* CloudSync.swift */; };
 		B00000000000000000000024 /* MemoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000F /* MemoryViews.swift */; };
 		B00000000000000000000025 /* MemoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000C /* MemoryModel.swift */; };
-		B00000000000000000000012 /* ConstellationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* ConstellationView.swift */; };
-		B00000000000000000000016 /* RandhawaWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000006 /* RandhawaWidget.swift */; };
-		B00000000000000000000017 /* RandhawaWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000007 /* RandhawaWidgetBundle.swift */; };
 		B00000000000000000000031 /* Ink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000010 /* Ink.swift */; };
 		B00000000000000000000032 /* InkMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000011 /* InkMapView.swift */; };
 		B00000000000000000000033 /* PlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000012 /* PlaceNames.swift */; };
@@ -32,6 +35,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		54C6D94248CD3DDC65D58F08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A000000000000000000000FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A00000000000000000000001;
+			remoteInfo = Randhawa;
+		};
 		F00000000000000000000002 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A000000000000000000000FF /* Project object */;
@@ -56,15 +66,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0B067B8AB8A6DD2BFED3CACD /* RandhawaWalk.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RandhawaWalk.swift; sourceTree = "<group>"; };
+		37543AC09A2D28856BF08FFD /* RandhawaWalk.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RandhawaWalk.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3A3C4D2074F7C730A72C986 /* Eyes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Eyes.swift; sourceTree = "<group>"; };
+		CAFC5177A94B58006CAA9153 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D00000000000000000000001 /* MomentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomentStore.swift; sourceTree = "<group>"; };
 		D00000000000000000000002 /* ConstellationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstellationView.swift; sourceTree = "<group>"; };
 		D00000000000000000000003 /* RandhawaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RandhawaApp.swift; sourceTree = "<group>"; };
 		D00000000000000000000004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		D00000000000000000000009 /* SpaceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceModel.swift; sourceTree = "<group>"; };
 		D00000000000000000000005 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D00000000000000000000006 /* RandhawaWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RandhawaWidget.swift; sourceTree = "<group>"; };
 		D00000000000000000000007 /* RandhawaWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RandhawaWidgetBundle.swift; sourceTree = "<group>"; };
 		D00000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D00000000000000000000009 /* SpaceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceModel.swift; sourceTree = "<group>"; };
 		D0000000000000000000000A /* Randhawa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Randhawa.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0000000000000000000000B /* RandhawaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RandhawaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0000000000000000000000C /* MemoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryModel.swift; sourceTree = "<group>"; };
@@ -79,6 +93,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		592A71D70A584E95287CE914 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2E28D8FDAC32A09DC14CD167 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E00000000000000000000002 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -96,6 +118,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		08C2480BCD110E4745ED52BE /* RandhawaWalk */ = {
+			isa = PBXGroup;
+			children = (
+				A3A3C4D2074F7C730A72C986 /* Eyes.swift */,
+				0B067B8AB8A6DD2BFED3CACD /* RandhawaWalk.swift */,
+			);
+			name = RandhawaWalk;
+			path = Walk;
+			sourceTree = "<group>";
+		};
+		2691BDF802C503FAF0A66BCE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				32A025D9B2432DBB5F507424 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		32A025D9B2432DBB5F507424 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC5177A94B58006CAA9153 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		C00000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +152,8 @@
 				C00000000000000000000003 /* Randhawa */,
 				C00000000000000000000004 /* RandhawaWidget */,
 				C00000000000000000000005 /* Products */,
+				2691BDF802C503FAF0A66BCE /* Frameworks */,
+				08C2480BCD110E4745ED52BE /* RandhawaWalk */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,21 +164,6 @@
 				D00000000000000000000010 /* Ink.swift */,
 			);
 			path = Shared;
-			sourceTree = "<group>";
-		};
-		C00000000000000000000006 /* MemoryKit */ = {
-			isa = PBXGroup;
-			children = (
-				D00000000000000000000001 /* MomentStore.swift */,
-				D0000000000000000000000C /* MemoryModel.swift */,
-				D0000000000000000000000D /* MemoryStore.swift */,
-				D0000000000000000000000E /* CloudSync.swift */,
-				D0000000000000000000000F /* MemoryViews.swift */,
-				D00000000000000000000012 /* PlaceNames.swift */,
-				D00000000000000000000013 /* Export.swift */,
-				D00000000000000000000014 /* MailComposer.swift */,
-			);
-			path = MemoryKit;
 			sourceTree = "<group>";
 		};
 		C00000000000000000000003 /* Randhawa */ = {
@@ -158,8 +193,24 @@
 			children = (
 				D0000000000000000000000A /* Randhawa.app */,
 				D0000000000000000000000B /* RandhawaWidgetExtension.appex */,
+				37543AC09A2D28856BF08FFD /* RandhawaWalk.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C00000000000000000000006 /* MemoryKit */ = {
+			isa = PBXGroup;
+			children = (
+				D00000000000000000000001 /* MomentStore.swift */,
+				D0000000000000000000000C /* MemoryModel.swift */,
+				D0000000000000000000000D /* MemoryStore.swift */,
+				D0000000000000000000000E /* CloudSync.swift */,
+				D0000000000000000000000F /* MemoryViews.swift */,
+				D00000000000000000000012 /* PlaceNames.swift */,
+				D00000000000000000000013 /* Export.swift */,
+				D00000000000000000000014 /* MailComposer.swift */,
+			);
+			path = MemoryKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -200,6 +251,24 @@
 			productReference = D0000000000000000000000B /* RandhawaWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		AAF2F960822945AB5CA2BD5F /* RandhawaWalk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A57B83877EFCA745AE65565F /* Build configuration list for PBXNativeTarget "RandhawaWalk" */;
+			buildPhases = (
+				A809DA0DB1E8430A7DC0377F /* Sources */,
+				592A71D70A584E95287CE914 /* Frameworks */,
+				D738E2F112C58456A3EE6AFF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2E0224CC8167362BDA100F32 /* PBXTargetDependency */,
+			);
+			name = RandhawaWalk;
+			productName = RandhawaWalk;
+			productReference = 37543AC09A2D28856BF08FFD /* RandhawaWalk.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -233,11 +302,19 @@
 			targets = (
 				A00000000000000000000001 /* Randhawa */,
 				A00000000000000000000002 /* RandhawaWidgetExtension */,
+				AAF2F960822945AB5CA2BD5F /* RandhawaWalk */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D738E2F112C58456A3EE6AFF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E00000000000000000000003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -249,6 +326,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A809DA0DB1E8430A7DC0377F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CB6DED0A0A66B20CF4B1C3E /* Eyes.swift in Sources */,
+				A6EE2143595D031BEDD89C55 /* RandhawaWalk.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E00000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -286,6 +372,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2E0224CC8167362BDA100F32 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Randhawa;
+			target = A00000000000000000000001 /* Randhawa */;
+			targetProxy = 54C6D94248CD3DDC65D58F08 /* PBXContainerItemProxy */;
+		};
 		F00000000000000000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A00000000000000000000002 /* RandhawaWidgetExtension */;
@@ -426,8 +518,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Randhawa marks a dot each time your phone notices you have gone somewhere, and draws the line between, so your map draws itself. It uses only low-power signals, never continuous location. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Only when you choose to take a photo for a memory. The photo stays with the memory, on this device and in your private iCloud if sync is on.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Randhawa marks a dot each time your phone notices you have gone somewhere, and draws the line between, so your map draws itself. It uses only low-power signals, never continuous location. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -460,8 +552,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Randhawa marks a dot each time your phone notices you have gone somewhere, and draws the line between, so your map draws itself. It uses only low-power signals, never continuous location. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Only when you choose to take a photo for a memory. The photo stays with the memory, on this device and in your private iCloud if sync is on.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Randhawa marks a dot each time your phone notices you have gone somewhere, and draws the line between, so your map draws itself. It uses only low-power signals, never continuous location. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Randhawa marks a dot where you are each time you open it, so your map draws itself. Your places stay on this device, plus your private iCloud if you turn on sync.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -484,11 +576,11 @@
 		800000000000000000000005 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
-				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RandhawaWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Randhawa;
@@ -511,11 +603,11 @@
 		800000000000000000000006 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 7FWNAT83XU;
 				ENABLE_PREVIEWS = YES;
-				CODE_SIGN_ENTITLEMENTS = RandhawaWidget/RandhawaWidget.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RandhawaWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Randhawa;
@@ -532,6 +624,43 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AEAFF2EF38F2D02D18926E16 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7FWNAT83XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.RandhawaWalk;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Randhawa;
+			};
+			name = Debug;
+		};
+		D7AC4F5DB5F80BF2B0B466BE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7FWNAT83XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.RandhawaWalk;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Randhawa;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -561,6 +690,15 @@
 			buildConfigurations = (
 				800000000000000000000005 /* Debug */,
 				800000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A57B83877EFCA745AE65565F /* Build configuration list for PBXNativeTarget "RandhawaWalk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7AC4F5DB5F80BF2B0B466BE /* Release */,
+				AEAFF2EF38F2D02D18926E16 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

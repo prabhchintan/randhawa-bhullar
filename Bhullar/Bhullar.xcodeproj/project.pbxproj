@@ -7,20 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01DE2C4DCCC8602D996C3686 /* Eyes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B46FED537C78E5CD8C3129 /* Eyes.swift */; };
+		54E4052805F8FAAC3E1EA4A7 /* BhullarWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D28D96D11EB75F1C54AE5 /* BhullarWalk.swift */; };
+		55021E20910F38825004CA5A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD0E95F5731A180B49457735 /* Foundation.framework */; };
 		B00000000000000000000001 /* TimeScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* TimeScale.swift */; };
 		B00000000000000000000002 /* DotGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* DotGrid.swift */; };
 		B00000000000000000000003 /* BhullarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000003 /* BhullarApp.swift */; };
 		B00000000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000004 /* ContentView.swift */; };
 		B00000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000005 /* Assets.xcassets */; };
 		B00000000000000000000011 /* TimeScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000001 /* TimeScale.swift */; };
+		B00000000000000000000012 /* DotGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* DotGrid.swift */; };
+		B00000000000000000000016 /* BhullarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000006 /* BhullarWidget.swift */; };
+		B00000000000000000000017 /* BhullarWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000007 /* BhullarWidgetBundle.swift */; };
 		B00000000000000000000021 /* MomentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000C /* MomentStore.swift */; };
 		B00000000000000000000022 /* MemoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000D /* MemoryModel.swift */; };
 		B00000000000000000000023 /* MemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000E /* MemoryStore.swift */; };
 		B00000000000000000000024 /* CloudSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000F /* CloudSync.swift */; };
 		B00000000000000000000025 /* MemoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000010 /* MemoryViews.swift */; };
-		B00000000000000000000012 /* DotGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000002 /* DotGrid.swift */; };
-		B00000000000000000000016 /* BhullarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000006 /* BhullarWidget.swift */; };
-		B00000000000000000000017 /* BhullarWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000007 /* BhullarWidgetBundle.swift */; };
 		B00000000000000000000026 /* PlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000011 /* PlaceNames.swift */; };
 		B00000000000000000000027 /* MomentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000C /* MomentStore.swift */; };
 		B00000000000000000000028 /* MemoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0000000000000000000000D /* MemoryModel.swift */; };
@@ -29,6 +32,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		794624D50C572DD3ED401206 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A000000000000000000000FF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A00000000000000000000001;
+			remoteInfo = Bhullar;
+		};
 		F00000000000000000000002 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A000000000000000000000FF /* Project object */;
@@ -53,6 +63,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1A7D28D96D11EB75F1C54AE5 /* BhullarWalk.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BhullarWalk.swift; sourceTree = "<group>"; };
+		BD0E95F5731A180B49457735 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		CF3E6D126DBA999C2536CB0F /* BhullarWalk.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BhullarWalk.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D00000000000000000000001 /* TimeScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeScale.swift; sourceTree = "<group>"; };
 		D00000000000000000000002 /* DotGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DotGrid.swift; sourceTree = "<group>"; };
 		D00000000000000000000003 /* BhullarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BhullarApp.swift; sourceTree = "<group>"; };
@@ -70,9 +83,18 @@
 		D00000000000000000000010 /* MemoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryViews.swift; sourceTree = "<group>"; };
 		D00000000000000000000011 /* PlaceNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceNames.swift; sourceTree = "<group>"; };
 		D00000000000000000000012 /* MailComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailComposer.swift; sourceTree = "<group>"; };
+		E8B46FED537C78E5CD8C3129 /* Eyes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Eyes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		34F648D10FD8489C98D2C540 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55021E20910F38825004CA5A /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E00000000000000000000002 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -90,6 +112,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		11C34293B56FCD6CBD5176D7 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				BD0E95F5731A180B49457735 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		6E1101A81FF3313DC11889D7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				11C34293B56FCD6CBD5176D7 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C00000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -98,22 +136,9 @@
 				C00000000000000000000003 /* Bhullar */,
 				C00000000000000000000004 /* BhullarWidget */,
 				C00000000000000000000005 /* Products */,
+				6E1101A81FF3313DC11889D7 /* Frameworks */,
+				E55416EC8B650FE5013C1123 /* BhullarWalk */,
 			);
-			sourceTree = "<group>";
-		};
-		C00000000000000000000006 /* MemoryKit */ = {
-			isa = PBXGroup;
-			children = (
-				D0000000000000000000000C /* MomentStore.swift */,
-				D0000000000000000000000D /* MemoryModel.swift */,
-				D0000000000000000000000E /* MemoryStore.swift */,
-				D0000000000000000000000F /* CloudSync.swift */,
-				D00000000000000000000010 /* MemoryViews.swift */,
-				D00000000000000000000011 /* PlaceNames.swift */,
-				D00000000000000000000012 /* MailComposer.swift */,
-			);
-			name = MemoryKit;
-			path = ../MemoryKit;
 			sourceTree = "<group>";
 		};
 		C00000000000000000000002 /* Shared */ = {
@@ -150,13 +175,57 @@
 			children = (
 				D0000000000000000000000A /* Bhullar.app */,
 				D0000000000000000000000B /* BhullarWidgetExtension.appex */,
+				CF3E6D126DBA999C2536CB0F /* BhullarWalk.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C00000000000000000000006 /* MemoryKit */ = {
+			isa = PBXGroup;
+			children = (
+				D0000000000000000000000C /* MomentStore.swift */,
+				D0000000000000000000000D /* MemoryModel.swift */,
+				D0000000000000000000000E /* MemoryStore.swift */,
+				D0000000000000000000000F /* CloudSync.swift */,
+				D00000000000000000000010 /* MemoryViews.swift */,
+				D00000000000000000000011 /* PlaceNames.swift */,
+				D00000000000000000000012 /* MailComposer.swift */,
+			);
+			name = MemoryKit;
+			path = ../MemoryKit;
+			sourceTree = "<group>";
+		};
+		E55416EC8B650FE5013C1123 /* BhullarWalk */ = {
+			isa = PBXGroup;
+			children = (
+				E8B46FED537C78E5CD8C3129 /* Eyes.swift */,
+				1A7D28D96D11EB75F1C54AE5 /* BhullarWalk.swift */,
+			);
+			name = BhullarWalk;
+			path = ../Walk;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		59A81597212D691EBEB8E6A8 /* BhullarWalk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9E738D5A2606FA908D35642 /* Build configuration list for PBXNativeTarget "BhullarWalk" */;
+			buildPhases = (
+				5BA343C00C4EFB232E76DCC5 /* Sources */,
+				34F648D10FD8489C98D2C540 /* Frameworks */,
+				6D32C66BA69B9697EED09B51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7F85D5296DAEC12352DC6C45 /* PBXTargetDependency */,
+			);
+			name = BhullarWalk;
+			productName = BhullarWalk;
+			productReference = CF3E6D126DBA999C2536CB0F /* BhullarWalk.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		A00000000000000000000001 /* Bhullar */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 900000000000000000000002 /* Build configuration list for PBXNativeTarget "Bhullar" */;
@@ -225,11 +294,19 @@
 			targets = (
 				A00000000000000000000001 /* Bhullar */,
 				A00000000000000000000002 /* BhullarWidgetExtension */,
+				59A81597212D691EBEB8E6A8 /* BhullarWalk */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6D32C66BA69B9697EED09B51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E00000000000000000000003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -241,6 +318,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5BA343C00C4EFB232E76DCC5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01DE2C4DCCC8602D996C3686 /* Eyes.swift in Sources */,
+				54E4052805F8FAAC3E1EA4A7 /* BhullarWalk.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E00000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -275,6 +361,12 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		7F85D5296DAEC12352DC6C45 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Bhullar;
+			target = A00000000000000000000001 /* Bhullar */;
+			targetProxy = 794624D50C572DD3ED401206 /* PBXContainerItemProxy */;
+		};
 		F00000000000000000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A00000000000000000000002 /* BhullarWidgetExtension */;
@@ -283,6 +375,25 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		42327497D78EF1050FF3FBF2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7FWNAT83XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.BhullarWalk;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Bhullar;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		800000000000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -520,6 +631,24 @@
 			};
 			name = Release;
 		};
+		AA3A3B92C67DB0903FBCDFE2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7FWNAT83XU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Prabhchintan.BhullarWalk;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Bhullar;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -546,6 +675,15 @@
 			buildConfigurations = (
 				800000000000000000000005 /* Debug */,
 				800000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E9E738D5A2606FA908D35642 /* Build configuration list for PBXNativeTarget "BhullarWalk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42327497D78EF1050FF3FBF2 /* Release */,
+				AA3A3B92C67DB0903FBCDFE2 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

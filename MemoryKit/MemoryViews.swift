@@ -64,6 +64,7 @@ struct MemoryComposerView: View {
                 TextField(prompt, text: $text, axis: .vertical)
                     .lineLimit(4...12)
                     .focused($focused)
+                    .accessibilityIdentifier("words")
 
                 if let photoData, let image = UIImage(data: photoData) {
                     Image(uiImage: image)

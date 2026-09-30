@@ -68,6 +68,7 @@ struct ContentView: View {
                     },
                     unitName: scale.unitName
                 )
+                .accessibilityIdentifier("grid")
                 .id("\(scaleRaw)-\(yearOffset)")
                 .transition(.opacity)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -110,6 +111,7 @@ struct ContentView: View {
                                 .foregroundStyle(onThisDayCount > 0 ? AnyShapeStyle(.orange) : AnyShapeStyle(.tertiary))
                         }
                         .buttonStyle(.plain)
+                        .accessibilityIdentifier("memories")
                     }
                     Text("swipe to change scale · tap a dot to open it")
                         .font(.caption2)
@@ -150,6 +152,7 @@ struct ContentView: View {
                     .frame(width: 38, height: 38)
                     .background(.thinMaterial, in: Circle())
             }
+            .accessibilityIdentifier("remember")
             .padding(20)
         }
         .overlay(alignment: .topTrailing) {
@@ -162,6 +165,7 @@ struct ContentView: View {
                     .frame(width: 38, height: 38)
                     .background(.thinMaterial, in: Circle())
             }
+            .accessibilityIdentifier("write")
             .padding(20)
         }
         .sheet(isPresented: $composing) {

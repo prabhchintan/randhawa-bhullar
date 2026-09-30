@@ -123,6 +123,7 @@ struct ContentView: View {
                     } label: {
                         ControlIcon(systemName: "ellipsis")
                     }
+                    .accessibilityIdentifier("menu")
                     Spacer()
                     VeilControl(veil: $veil)
                 }
@@ -172,6 +173,7 @@ struct ContentView: View {
             } label: {
                 ControlIcon(systemName: "plus")
             }
+            .accessibilityIdentifier("remember")
             .padding(20)
             .environment(\.colorScheme, veil > 0.5 ? .dark : colorScheme)
         }
