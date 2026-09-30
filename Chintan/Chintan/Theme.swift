@@ -416,8 +416,8 @@ struct Painting: View {
             }
             #endif
             .clipped()
-            .ignoresSafeArea()
             .accessibilityHidden(true)
+            .ignoresSafeArea()
     }
 
     private func picture(_ image: UIImage) -> some View {
@@ -454,25 +454,43 @@ struct PaintedGround: View {
     var foot: CGFloat = 200
     var footShade: Double = 0.7
 
+    // The safe area it reaches past, to the screen's edges.
+    @State private var past = EdgeInsets()
+
+    // Reached past the safe area by padding, never by ignoring it: a view
+    // ignoring it stood in the accessibility tree as an unnamed element the
+    // size of the screen, hidden or not.
     var body: some View {
         Color.clear
-            .overlay(alignment: .top) {
-                if head > 0 {
-                    LinearGradient(stops: [.init(color: .black.opacity(headShade), location: 0),
-                                           .init(color: .black.opacity(headShade), location: headHold),
-                                           .init(color: .black.opacity(headShade / 2), location: (headHold + 1) / 2),
-                                           .init(color: .clear, location: 1)],
-                                   startPoint: .top, endPoint: .bottom)
-                        .frame(height: head)
-                }
+            .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { past = $0 }
+            .overlay {
+                shade
+                    .padding(.top, -past.top)
+                    .padding(.bottom, -past.bottom)
+                    .padding(.leading, -past.leading)
+                    .padding(.trailing, -past.trailing)
             }
-            .overlay(alignment: .bottom) {
-                LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black.opacity(footShade), location: 0.6)],
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: foot)
-            }
-            .ignoresSafeArea()
+            .allowsHitTesting(false)
             .accessibilityHidden(true)
+    }
+
+    private var shade: some View {
+        Canvas { context, size in
+            if head > 0 {
+                let band = CGRect(x: 0, y: 0, width: size.width, height: head)
+                context.fill(Path(band), with: .linearGradient(
+                    Gradient(stops: [.init(color: .black.opacity(headShade), location: 0),
+                                     .init(color: .black.opacity(headShade), location: headHold),
+                                     .init(color: .black.opacity(headShade / 2), location: (headHold + 1) / 2),
+                                     .init(color: .clear, location: 1)]),
+                    startPoint: .zero, endPoint: CGPoint(x: 0, y: head)))
+            }
+            let top = size.height - foot
+            let band = CGRect(x: 0, y: top, width: size.width, height: foot)
+            context.fill(Path(band), with: .linearGradient(
+                Gradient(stops: [.init(color: .clear, location: 0), .init(color: .black.opacity(footShade), location: 0.6)]),
+                startPoint: CGPoint(x: 0, y: top), endPoint: CGPoint(x: 0, y: size.height)))
+        }
     }
 }
 

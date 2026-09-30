@@ -331,12 +331,13 @@ final class ChintanAudit: XCTestCase {
     private var log: FileHandle?
     private var waived: FileHandle?
     private var look = "light"
+    private var out = URL(fileURLWithPath: NSTemporaryDirectory())
 
     override func setUpWithError() throws {
         continueAfterFailure = true
         let env = ProcessInfo.processInfo.environment
         look = env["AUDIT_LOOK"] ?? "light"
-        let out = URL(fileURLWithPath: env["WALK_OUT"] ?? NSTemporaryDirectory() + "walk")
+        out = URL(fileURLWithPath: env["WALK_OUT"] ?? NSTemporaryDirectory() + "walk")
         try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
         log = try Self.append(out.appendingPathComponent("audit.tsv"))
         waived = try Self.append(out.appendingPathComponent("audit-waived.tsv"))
@@ -418,6 +419,9 @@ final class ChintanAudit: XCTestCase {
     }
 
     private func audit(_ screen: String) {
+        // The tree the audit read, so an unnamed finding can be found in it.
+        let tree = out.appendingPathComponent("tree-\(screen.replacingOccurrences(of: ", ", with: "-").replacingOccurrences(of: " ", with: "-"))-\(look).txt")
+        try? Data(app.debugDescription.utf8).write(to: tree)
         do {
             try app.performAccessibilityAudit { issue in
                 let who = issue.element.map { el -> String in
