@@ -358,8 +358,11 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    collection slice before the next open run goes to the Board's bodies or
    the audit (the house's steer, 09-27), then F's version line. The Board's
    bodies mended (sprint 51); the audit's unnamed full-screen element found
-   and gone (sprint 52, 20 findings to 10). Next, the audit's last ten (the
-   Study's and the date's, sprint 52's line), then the version line.
+   and gone (sprint 52, 20 findings to 10). The Study at the largest text
+   mended (sprint 53: the send mark grows, the prompt reads whole); the ten
+   stand, each named in sprint 53's line as the audit's own reading, not a
+   defect in the pictures. Next, the version line (F); waive the ten by
+   name in ChintanAudit only when a sprint has room, not before it.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
    a meter, a label, a room name grows a plaque with the detail on a press
@@ -925,6 +928,25 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-09-30 · sprint 53 (dd817bc, and the commit carrying this line): the
+  audit's last ten, read against the largest text (chunk 0). The look at
+  the largest size (/tmp/see/large0) showed two things a person would hit
+  in the Study: the send mark stayed a small fixed 17 point arrow beside a
+  field three times its height, and the empty composer's prompt was cut to
+  "A word for...". Now the arrow is the body style (capped at accessibility
+  2) in a circle that scales from 42 to at most 72, and at the accessibility
+  sizes the prompt says "To chintan" (the room's name), which reads whole
+  (/tmp/see/1). At the normal size nothing moved (/tmp/see/2, the same as
+  /tmp/see/0). The audit still counts ten, so they are the audit's own
+  readings: the unnamed "unsupported" and "clipped" pair in the Study are
+  not the field (an explicit body style on it changed nothing, undone) and
+  most likely UIKit's own placeholder label; the stamp and first word's
+  "partially unsupported" are the top of a bottom-anchored conversation,
+  and the largest look shows the conversation's words at full size; the
+  date's "clipped" is whole in sprint 52's largest look. Each of the ten is
+  a candidate to waive by name, with these reasons. No walk film and no
+  hitch numbers: nothing moves differently. No new door.
 
 - 2026-09-30 · sprint 52 (b492667, 0759544, and the commit carrying this
   line): the audit, its oldest finding closed (chunk 0, the house's 09-27
