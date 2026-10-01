@@ -13,6 +13,9 @@
 #                                                    jharokha@tN: Home's Nth thing held;
 #                                                    jharokha@cut: the phone's own cut;
 #                                                    jharokha@empty: a day with nothing;
+#                                                    jharokha@day: an invented day of
+#                                                    three things (tN holds one of
+#                                                    them when the real day is empty);
 #                                                    jharokha@label: the label held;
 #                                                    jharokha@onword: held, the thumb
 #                                                    on its word for the house;

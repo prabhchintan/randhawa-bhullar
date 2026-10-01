@@ -111,6 +111,18 @@ struct JharokhaView: View {
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
             .overlay(alignment: .topLeading) { guestBook }
+            .overlay(alignment: .top) {
+                // At the accessibility sizes a thing held is taller than the
+                // room over it, so its plaque hangs from under Visitors and
+                // grows down, never off the top of the phone.
+                if typeSize.isAccessibilitySize, let item = dated.first(where: { $0.id == heldThing }) {
+                    ThingPlaque(item: item, short: titles[item.line] ?? item.short)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 22)
+                        .padding(.top, 80)
+                        .transition(.scale(scale: 0.6, anchor: .top).combined(with: .opacity))
+                }
+            }
             .coordinateSpace(name: "home")
         }
         .environment(\.colorScheme, .dark)
@@ -196,7 +208,7 @@ struct JharokhaView: View {
                 .opacity(heldThing == nil ? 1 : 0)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottom) {
-                if let item = dated.first(where: { $0.id == heldThing }) {
+                if !typeSize.isAccessibilitySize, let item = dated.first(where: { $0.id == heldThing }) {
                     // It stands just above the leaves, over the day's line and
                     // the painting, the whole width of the wall, and grows up.
                     ThingPlaque(item: item, short: titles[item.line] ?? item.short)
@@ -212,7 +224,12 @@ struct JharokhaView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(dated) { item in
                         let short = titles[item.line] ?? item.short
-                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        // At the accessibility sizes the hour stands under its
+                        // title, so the title keeps the line and never breaks a word.
+                        let layout = typeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 0))
+                            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 10))
+                        layout {
                             // A size down from title3 (his word 08:52: "the action
                             // font could be smaller a bit").
                             Text(short.title.plainDashes)
@@ -502,6 +519,11 @@ struct JharokhaView: View {
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
         if let s, Self.eyes != "cut" { titles = s }
         if let b, Self.eyes != "empty" { dated = BoardItem.today(BoardParser.parse(b)) }
+        // For the house's eyes: `--open day` letters an invented day of three
+        // things, and a thing held (`tN`) on a day with none holds one of them.
+        if Self.eyes == "day" || (Self.eyes?.hasPrefix("t") == true && dated.isEmpty) {
+            dated = BoardItem.stagedDay
+        }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
     }
 }
@@ -899,6 +921,20 @@ extension BoardItem {
         var title = words.isEmpty ? gist : words.joined(separator: " ")
         title = title.prefix(1).uppercased() + title.dropFirst()
         return Short(title: title, hour: hour)
+    }
+
+    // An invented day for the eyes, its things the shape of real ones.
+    static var stagedDay: [BoardItem] {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        let today = f.string(from: .now)
+        let past = f.string(from: Calendar.current.date(byAdding: .day, value: -2, to: .now) ?? .now)
+        return [
+            BoardItem(text: "Pay the water bill (due two days ago; a late fee after Friday)", date: past, done: false),
+            BoardItem(text: "Call the dentist before 5 PM about moving the cleaning", date: today, done: false),
+            BoardItem(text: "Return the library books this evening (three, the branch closes at 8)", date: today, done: false),
+        ]
     }
 
     // A thing whose day has passed says when it fell.
