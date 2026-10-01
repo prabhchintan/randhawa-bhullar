@@ -20,6 +20,9 @@ struct JharokhaView: View {
     @State private var showCredit = false
     @State private var openMeter: String?
     @State private var showVisitors = false
+    // How many have come to the site since he last opened the book.
+    @State private var newcomers = 0
+    @State private var guests: [HouseClient.Visitor] = []
     @State private var turned = 0
     // The ring under a press and hold, its plaque grown over the wall.
     @State private var held: String?
@@ -120,15 +123,16 @@ struct JharokhaView: View {
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldLabel) { _, now in now }
         // A tick as the thumb comes onto the word for the house.
         .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
-        .sheet(isPresented: $showVisitors) {
-            VisitorsView()
+        .sheet(isPresented: $showVisitors, onDismiss: { newcomers = GuestBook.newcomers(guests) }) {
+            VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked)
                 .presentationBackground(.ultraThinMaterial)
                 .presentationDragIndicator(.visible)
         }
     }
 
     // The guest book, lettered small at the head of the wall: who came to
-    // the site. Opens the visitors over the painting.
+    // the site. Opens the visitors over the painting. Someone come since he
+    // last looked puts a gilt point after the word.
     private var guestBook: some View {
         Button {
             showVisitors = true
@@ -139,6 +143,10 @@ struct JharokhaView: View {
                 Text("Visitors")
                     .font(Theme.label(.caption))
                     .tracking(1)
+                if newcomers > 0 {
+                    NewPoint()
+                        .transition(.opacity)
+                }
             }
             .foregroundStyle(Theme.bone.opacity(0.85))
             .shadow(color: .black.opacity(0.7), radius: 5)
@@ -148,7 +156,7 @@ struct JharokhaView: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("visitors")
-        .accessibilityLabel("Visitors to the site")
+        .accessibilityLabel(newcomers > 0 ? "Visitors to the site, someone new" : "Visitors to the site")
     }
 
     private var overlay: some View {
@@ -479,7 +487,17 @@ struct JharokhaView: View {
         async let board = try? house.board()
         async let beat = try? house.pulse()
         async let short = try? house.titles()
-        let (c, b, p, s) = await (cockpit, board, beat, short)
+        async let book = try? house.visitors()
+        let (c, b, p, s, v) = await (cockpit, board, beat, short, book)
+        if let v {
+            guests = v
+            // The first time the book is read, its time is set and nothing is new.
+            if GuestBook.looked == 0 { GuestBook.looked = Int(Date.now.timeIntervalSince1970) }
+            let since = Self.eyes == "newcomers" ? GuestBook.monthAgo : GuestBook.looked
+            // `--open book` opens the book on launch, read the same way.
+            if Self.eyes == "book", !showVisitors { showVisitors = true }
+            withAnimation(.smooth) { newcomers = GuestBook.newcomers(v, since: since) }
+        }
         if let c { day = CockpitDay(c) }
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
         if let s, Self.eyes != "cut" { titles = s }

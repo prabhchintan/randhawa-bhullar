@@ -7,8 +7,30 @@ import SwiftUI
 // glass, plaques for the text, the same wall as the board.
 // (Prab, 2026-09-23 07:15: "a running list of actual humans who visited,
 // where from, and if I want I can click on it and it shows me details".)
+// When he last opened the book, so Home can mark someone come since. Never
+// opened, nothing is new: the first look only sets the time.
+enum GuestBook {
+    private static let key = "visitors.looked"
+
+    static var looked: Int {
+        get { UserDefaults.standard.integer(forKey: key) }
+        set { UserDefaults.standard.set(newValue, forKey: key) }
+    }
+
+    // Everyone here since the last look, or none before the first.
+    static func newcomers(_ people: [HouseClient.Visitor], since: Int = looked) -> Int {
+        since == 0 ? 0 : people.filter { $0.last > since }.count
+    }
+
+    // For the house's eyes: `--open newcomers` on Home reads the book as if
+    // last opened a month ago, and keeps nothing.
+    static var monthAgo: Int { Int(Date.now.timeIntervalSince1970) - 31 * 86400 }
+}
+
 struct VisitorsView: View {
     @State private var people: [HouseClient.Visitor] = []
+    // The last look before this one: who came since wears a gilt point.
+    var since = GuestBook.looked
     @State private var errorText: String?
     @State private var loaded = false
 
@@ -52,7 +74,7 @@ struct VisitorsView: View {
                             .padding(.top, 12)
                         ForEach(shelf.rows) { person in
                             NavigationLink(value: person.id) {
-                                VisitorLeaf(person: person)
+                                VisitorLeaf(person: person, new: since > 0 && person.last > since)
                             }
                             .buttonStyle(.plain)
                         }
@@ -112,6 +134,7 @@ struct VisitorsView: View {
         do {
             people = try await HouseClient(baseAddress: address).visitors()
             errorText = nil
+            GuestBook.looked = Int(Date.now.timeIntervalSince1970)
         } catch HouseError.noDoor {
             errorText = "The house does not keep the book yet."
         } catch {
@@ -125,6 +148,8 @@ struct VisitorsView: View {
 // read, and when they were last here.
 private struct VisitorLeaf: View {
     let person: HouseClient.Visitor
+    // Come since the last look.
+    var new = false
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -133,6 +158,13 @@ private struct VisitorLeaf: View {
                     Text(person.place)
                         .font(.body)
                         .foregroundStyle(Theme.ink)
+                        // The point hangs in the margin, so the lines stay flush.
+                        .overlay(alignment: .leading) {
+                            if new {
+                                NewPoint(color: Theme.gilt)
+                                    .offset(x: -12)
+                            }
+                        }
                     if person.returning {
                         Text("returning")
                             .font(Theme.label(.caption2))
@@ -393,5 +425,17 @@ private enum Told {
             let m = (seconds % 3600) / 60
             return (h == 1 ? "an hour" : "\(h) hours") + (m > 0 ? " \(m) min" : "")
         }
+    }
+}
+
+// Someone come since the last look: a single gilt point, never a count.
+struct NewPoint: View {
+    var color: Color = Theme.giltOnArt
+
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 6, height: 6)
+            .accessibilityLabel("New")
     }
 }
