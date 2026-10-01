@@ -361,7 +361,7 @@ E. The collection. The painting alone on tap (label away, pinch to look);
    and gone (sprint 52, 20 findings to 10). The Study at the largest text
    mended (sprint 53: the send mark grows, the prompt reads whole); the ten
    stand, each named in sprint 53's line as the audit's own reading, not a
-   defect in the pictures. Next, the version line (F); waive the ten by
+   defect in the pictures. The version line built (sprint 54); waive the ten by
    name in ChintanAudit only when a sprint has room, not before it.
 G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    system kinds only); touch to reveal everywhere a thing is short: a leaf,
@@ -697,6 +697,9 @@ F. Settings and the edges. The health dot; settings one tap away; a
    (PaintedGround's headHold). Left of F: the version line, then a widget,
    notifications and Siri on his word. MetricKit built (sprint 37). Next:
    the version line, the smallest open thing here; the rest waits on his word.
+   The version line built (sprint 54): Settings closes on a colophon, the
+   build number and the day it was made (`see.sh OUT settings@foot`). Left
+   of F: notifications and Siri, on his word only.
    The widget came on his word and is its own chunk, Q.
 O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    the app, by the way can we do a mac OS version so i can have the app as a
@@ -928,6 +931,20 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-01 · sprint 54 (4083c23, and the commit carrying this line): the
+  version line (chunk F). Settings now closes the way a catalogue does: a
+  short gilt hairline, then "chintan, build N" in gilt small capitals and
+  "made" with the day under it in bone, centred on the painting below the
+  last room, so the TestFlight build in his hand can be told apart at a
+  glance. The build is CFBundleVersion (ship.sh stamps it; the simulator
+  reads 1), the day the executable's own date. The first look (/tmp/see/1)
+  put the day under the scroll's faded foot by the home indicator; the
+  colophon now keeps 36 points of its own below it and reads whole in both
+  modes (/tmp/see/2). The eyes gain `settings@foot`. No walk film and no
+  hitch numbers: nothing moves. No new door. Funnel: a line at the foot of
+  settings naming the version and the day it was built, so someone writing
+  in about a problem can say which one they have.
 
 - 2026-09-30 · sprint 53 (dd817bc, and the commit carrying this line): the
   audit's last ten, read against the largest text (chunk 0). The look at
