@@ -70,6 +70,10 @@ struct SettingsView: View {
                     MotionSection()
                         .id("motion")
                     #endif
+                    Colophon()
+                        .padding(.top, 12)
+                        .padding(.bottom, 36)
+                        .id("colophon")
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
@@ -78,8 +82,8 @@ struct SettingsView: View {
             .scrollIndicators(.hidden)
             .fadedEdges(top: 16, bottom: 24)
             // For the house's eyes: `--open senses` opens on the senses,
-            // `--open motion` at the foot, on How you move; `--open apps` on Which app
-            // you open.
+            // `--open motion` on How you move; `--open apps` on Which app you open;
+            // `--open foot` on the colophon.
             .onAppear {
                 let args = ProcessInfo.processInfo.arguments
                 guard let i = args.firstIndex(of: "--open"), i + 1 < args.count else { return }
@@ -87,6 +91,7 @@ struct SettingsView: View {
                 case "senses": reader.scrollTo("senses", anchor: .top)
                 case "motion": reader.scrollTo("motion", anchor: .bottom)
                 case "apps": reader.scrollTo("apps", anchor: .top)
+                case "foot": reader.scrollTo("colophon", anchor: .bottom)
                 default: break
                 }
             }
@@ -134,6 +139,46 @@ struct SettingsView: View {
         } catch {
             status = "The house is not answering. Are you on the tailnet?"
         }
+    }
+}
+
+// The foot of the wall, the way a catalogue closes: which build is in his
+// hand and the day it was made, so a TestFlight install can be told apart.
+struct Colophon: View {
+    private static let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+    private static let made: Date? = Bundle.main.executableURL.flatMap {
+        try? FileManager.default.attributesOfItem(atPath: $0.path)[.modificationDate] as? Date
+    }
+
+    private var day: String? {
+        guard let made = Self.made else { return nil }
+        let style = Calendar.current.isDate(made, equalTo: .now, toGranularity: .year)
+            ? Date.FormatStyle().day().month(.wide)
+            : Date.FormatStyle().day().month(.wide).year()
+        return made.formatted(style)
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Rectangle()
+                .fill(Theme.giltOnArt.opacity(0.7))
+                .frame(width: 28, height: 0.5)
+                .accessibilityHidden(true)
+            Text("chintan, build \(Self.build)")
+                .font(Theme.label())
+                .tracking(1)
+                .foregroundStyle(Theme.giltOnArt)
+            if let day {
+                Text("made \(day)")
+                    .font(Theme.label(.caption))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.bone.opacity(0.78))
+            }
+        }
+        .multilineTextAlignment(.center)
+        .shadow(color: .black.opacity(0.8), radius: 8)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 

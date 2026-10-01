@@ -42,6 +42,8 @@
 #                                                    settings@still: there, off;
 #                                                    settings@apps: every sense on,
 #                                                    opened on Which app you open;
+#                                                    settings@foot: opened at the
+#                                                    foot, on the build's colophon;
 #                                                    study@waiting: a word left
 #                                                    waiting, taken up again;
 #                                                    study@hawa: hawa's room
@@ -117,6 +119,8 @@ for mode in light dark; do
     case "$tab" in settings@move|settings@still) EXTRA=(--settings --open motion) ;; esac
     # settings@apps: as settings@on, opened on Which app you open.
     case "$tab" in settings@apps) EXTRA=(--settings --open apps) ;; esac
+    # settings@foot: opened at the very foot, on the build's colophon.
+    case "$tab" in settings@foot) EXTRA=(--settings --open foot) ;; esac
     # settings@on: location granted always, telling, a place heard, and the
     # phone's word, Health and motion heard. The app
     # the eyes launch never monitors and never posts, so the house hears nothing.
