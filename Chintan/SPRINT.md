@@ -423,7 +423,13 @@ H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    only a quarter carry the deep client signals, so the person's line
    leans on city, network kind, pages and time, which are always there.
    Next slices: a mark on Home when someone new has come since he last
-   looked; the site's own page names instead of paths.
+   looked; the site's own page names instead of paths. The mark built
+   (sprint 55): a gilt point after Visitors on Home when anyone's `last` is
+   past the last opening of the book (UserDefaults visitors.looked, set when
+   the book loads, never set means nothing is new), and the same point hung
+   in the margin of each of those leaves in the book; `see.sh OUT
+   jharokha@newcomers jharokha@book` read the book as if opened a month ago.
+   Next: the page names.
 E2. The shelf (Prab, 2026-09-23 07:15: "toggle to the next art ... some
    dozen or so artworks that remain downloaded for offline use, easily one
    of my favorite features"). Built by the house 09-23 morning: the house
@@ -931,6 +937,23 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-01 · sprint 55 (d2e8726, and the commit carrying this line): the
+  guest book says someone came (chunk H). Home now asks the house for the
+  book with the day, and when anyone has visited the site since he last
+  opened it, a single gilt point stands after "Visitors" at the head of the
+  wall; VoiceOver says "someone new". Opened, the book hangs the same point
+  in the margin of each of those people's leaves, the place names still
+  flush with the lines under them; closed, the point on Home goes. Never a
+  count, never a badge. The first look staged a week back and found nobody
+  (the newest visit was eight days old), so the eyes now stage a month
+  (`jharokha@newcomers`, `jharokha@book`); the first book look put the point
+  inline and pushed each place off the column, so it moved into the margin
+  (/tmp/see/3, both modes). Home without the mark, the Board and the Study
+  are as before. No walk film and no hitch numbers: nothing moves but a
+  fade. No new door (`/v1/visitors` as it stands). Funnel: a quiet mark on
+  the opening screen when something new has arrived since you last looked,
+  so a returning person sees at a glance that there is something to open.
 
 - 2026-10-01 · sprint 54 (4083c23, and the commit carrying this line): the
   version line (chunk F). Settings now closes the way a catalogue does: a
