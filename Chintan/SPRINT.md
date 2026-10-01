@@ -459,9 +459,10 @@ I. Home is today (Prab, 2026-09-23 20:05; next after the open slice). One
    screen. `GET /v1/titles` live 09-25 08:50; the day's line gone on his
    word the same morning, the date alone leads. The phone's own cut
    matches the house's and the date and things read as one label (sprint
-   26). Left: at the accessibility sizes the hour should stand under its
-   title (it takes half the line and splits "Care- mark"), and the held
-   plaque there rises under Visitors; seen in /tmp/see/last/large.
+   26). The accessibility sizes mended (sprint 55): the hour stands under
+   its title, and a thing held hangs its plaque from under Visitors and
+   grows down (`see.sh --large OUT jharokha@day jharokha@t2`; `day` stages
+   an invented day of three things). I is whole on the app side.
 J. The Board by day. This week broken by day, one gilt date per leaf as
    now, Later for the rest combined (one shelf, undated things and the
    weeks beyond, sorted by date); the title rule of I applies everywhere.
@@ -954,6 +955,20 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   fade. No new door (`/v1/visitors` as it stands). Funnel: a quiet mark on
   the opening screen when something new has arrived since you last looked,
   so a returning person sees at a glance that there is something to open.
+- 2026-10-01 · sprint 55 (4455ad6, and the commit carrying this line):
+  Home at the largest text (chunk I's last open slice). The live day had
+  nothing due, so the eyes gain `jharokha@day`, an invented day of three
+  things (a bill past due, a call before 5 PM, a return this evening), and
+  `tN` holds one of them when the real day is empty. The first look at the
+  largest size (/tmp/see/1) showed the hour already under its title once
+  the row turns into a column there ("Water bill payment", then "since
+  Tue" under it, no word broken), and the held plaque running up under
+  Visitors and off the top of the phone, its date cut in half. The plaque
+  now hangs from just under Visitors at those sizes and grows down, whole,
+  over the day (/tmp/see/2). At the normal size nothing moved: the hour sits
+  beside its title and the plaque rises from the day as before (/tmp/see/3,
+  both modes). No walk film and no hitch numbers: the motion is the same
+  plaque's scale from a new anchor. No new door. Funnel: nothing.
 
 - 2026-10-01 · sprint 54 (4083c23, and the commit carrying this line): the
   version line (chunk F). Settings now closes the way a catalogue does: a
