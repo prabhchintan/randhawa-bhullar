@@ -853,6 +853,15 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    CONFIRMED, so the open loop, the three letterings and a turn inside
    the house's loop are seen too. Left: a frame inside the crossfade,
    then the columns (the board, then `GET /v1/mail`) and the 60 s poll.
+   The board column and the poll built (sprint 57): WallBoard (ContentView)
+   letters Today and each day left in the week at the wall's top right,
+   nine things at most, the rest "and N more this week"; the day's things
+   leave the foot on the Mac; Home reads the board and titles every 60 s
+   while the scene is active (`--poll S` for the eyes, each read said as
+   `wall-poll same|changed|unheard`), taking only a changed board. wall.sh
+   gains `column` (`--open day`, an invented week). Left: the column SEEN
+   (yantar's display could not be photographed in sprint 57; nothing
+   installed), then done by a click (`POST /v1/done`), then the mail column.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -941,6 +950,31 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-02 · sprint 57 (9150e63, and the commit carrying this line): the
+  Mac wall's board column and its minute's read (chunk O, the house's steer).
+  The walk first, as asked: test hand (ms/s) reveal 46.5, first visits
+  33.7, tabs 26.3, swipe 3.9, board scroll 13.6, study scroll 3.1; no hand,
+  rest 0.0, tabs 114.6, neighbours 0.0. The tabs line is one frame: a 723 ms
+  stall on the first turn, 0.7 s into the window (the other two hitches
+  together 31 ms, so 4.7 without it, under sprint 42's 7.8). One run only:
+  whether the stall is the book Home now fetches on opening wants
+  `walk.sh --hitches` with three runs before anything is touched. The
+  build: on the Mac, today's things leave the foot under the date and stand
+  with the rest of the week in a narrow column at the wall's top right,
+  over a short shade from the corner. Each day's name is small in gilt, its
+  things in the serif with the hour apart, a thing past due in saffron,
+  nine at most and then "and N more this week". The wall reads the board
+  again every 60 seconds while it is in view and rests when hidden or
+  asleep. A read that finds nothing new moves nothing; a new thing fades in.
+  Seen: both Mac builds green; the wall's own words show the read working
+  (one read at 60 s in the first look, six reads ten seconds apart at the
+  eyes' pace, every one "same"). NOT seen: yantar's display could not be
+  photographed in either look ("could not create image from display", the
+  window never reported full screen), so no picture of the column, and
+  /Applications/Chintan.app was left as it was. The phone is unchanged
+  (/tmp/see/0, /tmp/see/2 `jharokha@day`: the day's things still under the
+  date). No new door. Funnel: nothing.
 
 - 2026-10-02 · sprint 56 (31bcac7, and the commit carrying this line): the
   guest book names the pages (chunk H's last slice, app side). A visit's
