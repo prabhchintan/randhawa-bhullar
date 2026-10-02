@@ -35,6 +35,13 @@ struct JharokhaView: View {
     @State private var wordLine = CGRect.zero
     // A word for the house being written, on its plaque above the keyboard.
     @State private var wording = JharokhaView.eyes == "word"
+    #if targetEnvironment(macCatalyst)
+    @Environment(\.scenePhase) private var phase
+    // The board as last read, so a minute's read that finds it unchanged
+    // moves nothing on the wall; and its days, the wall's column.
+    @State private var boardText: String?
+    @State private var week: [BoardSection] = []
+    #endif
 
     private struct LabelHold: Equatable {
         var held = false
@@ -111,6 +118,9 @@ struct JharokhaView: View {
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
             .overlay(alignment: .topLeading) { guestBook }
+            #if targetEnvironment(macCatalyst)
+            .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles) }
+            #endif
             .overlay(alignment: .top) {
                 // At the accessibility sizes a thing held is taller than the
                 // room over it, so its plaque hangs from under Visitors and
@@ -128,6 +138,18 @@ struct JharokhaView: View {
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
+        #if targetEnvironment(macCatalyst)
+        // The wall reads the board again every minute while it is in view,
+        // and rests while the window is hidden or the Mac sleeps.
+        .task(id: phase == .active) {
+            guard phase == .active, Self.eyes != "day" else { return }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(Self.pollSeconds))
+                guard !Task.isCancelled else { return }
+                await poll()
+            }
+        }
+        #endif
         .sensoryFeedback(.impact(weight: .light), trigger: turned)
         // A soft impact as a plaque grows, none as it folds.
         .sensoryFeedback(.impact(flexibility: .soft), trigger: held) { _, now in now != nil }
@@ -219,8 +241,9 @@ struct JharokhaView: View {
             }
 
             // Today's things only, each in its fewest words, the hour apart in
-            // gilt; a thing whose day has passed says so in saffron.
-            if !dated.isEmpty {
+            // gilt; a thing whose day has passed says so in saffron. On the
+            // Mac they stand in the wall's column with the week instead.
+            if Self.thingsUnderDate, !dated.isEmpty {
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(dated) { item in
                         let short = titles[item.line] ?? item.short
@@ -519,13 +542,62 @@ struct JharokhaView: View {
         if let c { day = CockpitDay(c) }
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
         if let s, Self.eyes != "cut" { titles = s }
-        if let b, Self.eyes != "empty" { dated = BoardItem.today(BoardParser.parse(b)) }
+        if let b, Self.eyes != "empty" { take(b) }
         // For the house's eyes: `--open day` letters an invented day of three
         // things, and a thing held (`tN`) on a day with none holds one of them.
         if Self.eyes == "day" || (Self.eyes?.hasPrefix("t") == true && dated.isEmpty) {
             dated = BoardItem.stagedDay
+            #if targetEnvironment(macCatalyst)
+            // The wall's column gets an invented week around that day.
+            week = BoardSection.week([BoardSection(title: "", items: BoardItem.stagedDay + BoardItem.stagedWeek)])
+            #endif
         }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
+    }
+
+    // The board as read; on the Mac only a changed board is taken, so the
+    // wall stays still through a minute's read that finds nothing new.
+    private func take(_ board: String) {
+        #if targetEnvironment(macCatalyst)
+        guard board != boardText else { return }
+        boardText = board
+        withAnimation(.easeInOut(duration: 1.2)) { week = BoardSection.week(BoardParser.parse(board)) }
+        #endif
+        dated = BoardItem.today(BoardParser.parse(board))
+    }
+
+    #if targetEnvironment(macCatalyst)
+    // A minute's read: the board and its titles only, both cheap and cached
+    // on the house. `--poll S` is the house's eyes' own pace, each read said
+    // on standard output so a look can count them.
+    private static var pollSeconds: Double {
+        let args = ProcessInfo.processInfo.arguments
+        if let i = args.firstIndex(of: "--poll"), i + 1 < args.count, let s = Double(args[i + 1]), s > 0 { return s }
+        return 60
+    }
+
+    private func poll() async {
+        guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        let house = HouseClient(baseAddress: address)
+        async let board = try? house.board()
+        async let short = try? house.titles()
+        let (b, s) = await (board, short)
+        let was = boardText
+        if let s, s != titles { withAnimation(.easeInOut(duration: 1.2)) { titles = s } }
+        if let b, Self.eyes != "empty" { take(b) }
+        print("wall-poll", b == nil ? "unheard" : was == boardText ? "same" : "changed")
+        fflush(stdout)
+    }
+    #endif
+
+    // The day's things stand under the date on the phone; the Mac letters
+    // them in the wall's column.
+    private static var thingsUnderDate: Bool {
+        #if targetEnvironment(macCatalyst)
+        false
+        #else
+        true
+        #endif
     }
 }
 
@@ -838,7 +910,7 @@ extension BoardItem {
     }
 
     // A thing in the fewest words that carry the most, and its hour apart.
-    struct Short: Decodable {
+    struct Short: Decodable, Equatable {
         let title: String
         let hour: String?
     }
@@ -935,6 +1007,22 @@ extension BoardItem {
             BoardItem(text: "Pay the water bill (due two days ago; a late fee after Friday)", date: past, done: false),
             BoardItem(text: "Call the dentist before 5 PM about moving the cleaning", date: today, done: false),
             BoardItem(text: "Return the library books this evening (three, the branch closes at 8)", date: today, done: false),
+        ]
+    }
+
+    // The rest of an invented week for the wall's column: the days after
+    // today, each the shape of a real thing.
+    static var stagedWeek: [BoardItem] {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        func on(_ days: Int) -> String {
+            f.string(from: Calendar.current.date(byAdding: .day, value: days, to: .now) ?? .now)
+        }
+        return [
+            BoardItem(text: "Order the printer ink (the last cartridge is low)", date: on(1), done: false),
+            BoardItem(text: "Renew the passport before the trip in November", date: on(2), done: false),
+            BoardItem(text: "Send the photos to the shared album", date: on(2), done: false),
         ]
     }
 

@@ -171,7 +171,7 @@ shoot() {
     photo "$shot"
     i=$((i + 2))
   done
-  grep '^wall-step ' "$STATE_OUT" | sed "s/^/$name: /"
+  grep -E '^wall-(step|poll) ' "$STATE_OUT" | sed "s/^/$name: /"
   if [ -z "$(pgrep -x Chintan)" ]; then
     echo "$name: THE APP LEFT during the look"; crashes 1; UNSEEN=$((UNSEEN + 1))
   fi
@@ -185,8 +185,11 @@ shoot wall --step wall
 shoot click-wall --at 17 click-bare --at 27 click-basic --at 37 click-detailed --at 47 click-back \
   --step wall --clicks 10
 # The open as he will see it: the step the house's word names, then one turn
-# of the house's loop 30 s in, photographed after its crossfade.
-shoot open --at 38 open-turned --turn 30
+# of the house's loop 30 s in, photographed after its crossfade; the board
+# read every 10 s through it, each read said (same, changed or unheard).
+shoot open --at 38 open-turned --turn 30 --poll 10
+# The board's column with an invented week, so its shape is seen on any day.
+shoot column --step wall --open day
 
 # The copy he opens is replaced only after a look with every photograph
 # confirmed and the app standing throughout; then the new copy in

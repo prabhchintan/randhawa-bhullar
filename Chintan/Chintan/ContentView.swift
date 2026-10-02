@@ -487,6 +487,101 @@ private struct WallLabel: View {
     }
 }
 
+// The board on the wall: a narrow column down the right side, its head at
+// the wall's top, the way a museum letters a room's list of works. Today and
+// each day left in the week, the day's name small in gilt, its things under
+// it in the serif, the hour apart; the week's later things stay the phone's.
+// Over a short shade from the corner, so it reads on any work. Home reads the
+// board every minute and hands it here only when it changed; a thing new to
+// the column fades in, one gone fades out, the rest stand still.
+struct WallBoard: View {
+    let shelves: [BoardSection]
+    let titles: [String: BoardItem.Short]
+    // So the column never runs down onto the label in the same corner.
+    private static let most = 9
+
+    private var u: CGFloat { WallLettering.unit }
+
+    var body: some View {
+        let shown = Self.cut(shelves)
+        ZStack(alignment: .topTrailing) {
+            if !shown.isEmpty {
+                RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
+                               center: .topTrailing, startRadius: 0, endRadius: u * 560)
+                    .transition(.opacity)
+                VStack(alignment: .leading, spacing: 16 * u) {
+                    ForEach(shown, id: \.title) { shelf in
+                        VStack(alignment: .leading, spacing: 5 * u) {
+                            Text(shelf.title)
+                                .font(.system(size: 10 * u, design: .serif).weight(.medium).smallCaps())
+                                .tracking(1.2)
+                                .foregroundStyle(Theme.giltOnArt)
+                            ForEach(shelf.items, id: \.key) { item in
+                                row(item)
+                                    .transition(.opacity)
+                            }
+                        }
+                        .transition(.opacity)
+                    }
+                    if left > 0 {
+                        Text(left == 1 ? "and one more this week" : "and \(left) more this week")
+                            .font(.system(size: 10 * u, design: .serif).italic())
+                            .foregroundStyle(Theme.bone.opacity(0.7))
+                    }
+                }
+                .frame(width: UIScreen.main.bounds.width * 0.2, alignment: .leading)
+                .shadow(color: .black.opacity(0.5), radius: 4)
+                .padding(.trailing, WallLettering.trailing)
+                .padding(.top, WallLettering.bottom)
+            }
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
+
+    // A thing in its fewest words with the hour apart in gilt, after the
+    // last word so a title that wraps never splits around it; a thing whose
+    // day has passed says when it fell, in saffron.
+    private func row(_ item: BoardItem) -> some View {
+        let short = titles[item.line] ?? item.short
+        let when = item.since ?? short.hour
+        return (Text(short.title.plainDashes)
+            .font(.system(size: 14 * u, design: .serif))
+            .foregroundStyle(Theme.bone)
+         + Text(when.map { "   " + $0 } ?? "")
+            .font(.system(size: 10 * u, design: .serif).smallCaps())
+            .tracking(0.6)
+            .foregroundStyle(item.since != nil ? Theme.saffron : Theme.giltOnArt))
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var left: Int { shelves.reduce(0) { $0 + $1.items.count } - Self.cut(shelves).reduce(0) { $0 + $1.items.count } }
+
+    // The first few things in order, whole days where they fit.
+    private static func cut(_ shelves: [BoardSection]) -> [BoardSection] {
+        var room = most
+        var kept: [BoardSection] = []
+        for shelf in shelves where room > 0 {
+            let items = Array(shelf.items.prefix(room))
+            room -= items.count
+            kept.append(BoardSection(title: shelf.title, items: items, named: shelf.named))
+        }
+        return kept
+    }
+}
+
+extension BoardSection {
+    // The wall's week: Today and each day left in it, Later left to the phone.
+    static func week(_ sections: [BoardSection]) -> [BoardSection] {
+        shelves(sections, without: []).filter { $0.named }
+    }
+}
+
+extension BoardItem {
+    // A thing's own key on the wall, the same across reads of the board.
+    var key: String { (date ?? "") + "|" + text }
+}
+
 // How the wall letters its work, the house's setting, not the Mac's (Prab,
 // 2026-09-27 18:05): none at all; basic, the title and the artist and year,
 // small; detailed, the medium, the credit and the museum as well. Carried on
