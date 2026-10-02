@@ -31,6 +31,9 @@ struct VisitorsView: View {
     @State private var people: [HouseClient.Visitor] = []
     // The last look before this one: who came since wears a gilt point.
     var since = GuestBook.looked
+    // For the house's eyes: opened on the person who read the most pages.
+    var openBusiest = false
+    @State private var path: [String] = []
     @State private var errorText: String?
     @State private var loaded = false
 
@@ -50,7 +53,7 @@ struct VisitorsView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
                     heading
@@ -134,6 +137,7 @@ struct VisitorsView: View {
         do {
             people = try await HouseClient(baseAddress: address).visitors()
             errorText = nil
+            if openBusiest, path.isEmpty, let busiest = people.max(by: { $0.pages < $1.pages }) { path = [busiest.id] }
             GuestBook.looked = Int(Date.now.timeIntervalSince1970)
         } catch HouseError.noDoor {
             errorText = "The house does not keep the book yet."
@@ -190,9 +194,7 @@ private struct VisitorLeaf: View {
 
     private var line: String {
         var bits: [String] = []
-        let net = person.network.isEmpty ? "" : person.network
-        if !net.isEmpty { bits.append(person.kind.isEmpty ? net : "\(net), \(person.kind)") }
-        else if !person.kind.isEmpty { bits.append(person.kind) }
+        if let line = person.lineSaid { bits.append(line) }
         bits.append(person.visits == 1 ? "one visit" : "\(person.visits) visits")
         bits.append(person.pages == 1 ? "one page" : "\(person.pages) pages")
         bits.append(Told.words(person.seconds))
@@ -241,7 +243,8 @@ private struct VisitorDetailView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 18)
+            // The way back stands clear above the plaque, never on its edge.
+            .padding(.top, 48)
             .padding(.bottom, 40)
         }
         .scrollIndicators(.hidden)
@@ -277,11 +280,8 @@ private struct VisitorDetailView: View {
             Text(p.place)
                 .font(.system(.title2, design: .serif).weight(.semibold))
                 .foregroundStyle(Theme.ink)
-                .padding(.top, 26)
             VStack(alignment: .leading, spacing: 3) {
-                if !p.network.isEmpty {
-                    Text(p.kind.isEmpty ? p.network : "\(p.network), \(p.kind)")
-                }
+                if let line = p.lineSaid { Text(line) }
                 if !p.device.isEmpty { Text(p.device) }
                 if let languages = p.languages, !languages.isEmpty { Text("Speaks \(languages)") }
                 if p.masked, let real = p.realRegion, !real.isEmpty {
@@ -344,7 +344,7 @@ private struct VisitLeaf: View {
                             Rectangle().fill(Theme.gilt.opacity(0.22)).frame(height: 0.5)
                         }
                         HStack(alignment: .firstTextBaseline) {
-                            Text(step.page == "/" ? "the front page" : step.page)
+                            Text(step.name)
                                 .font(.system(.callout, design: .serif))
                                 .foregroundStyle(Theme.ink)
                                 .lineLimit(1)
@@ -425,6 +425,15 @@ private enum Told {
             let m = (seconds % 3600) / 60
             return (h == 1 ? "an hour" : "\(h) hours") + (m > 0 ? " \(m) min" : "")
         }
+    }
+}
+
+extension HouseClient.Visitor {
+    // The network and the kind of line, leaving out what the house could
+    // not tell (it letters an unknown as "?").
+    var lineSaid: String? {
+        let said = [network, kind].filter { !$0.isEmpty && $0 != "?" }
+        return said.isEmpty ? nil : said.joined(separator: ", ")
     }
 }
 

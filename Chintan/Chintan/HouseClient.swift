@@ -128,6 +128,21 @@ struct HouseClient {
         struct Step: Decodable {
             let page: String
             let seconds: Int
+            // The site's own name for the page, when the house letters it.
+            let title: String?
+
+            // The page as a person would name it: the site's title, else the
+            // path said in words ("/field-notes/rain" is "Field notes, rain").
+            var name: String {
+                if let title, !title.isEmpty { return title }
+                var path = page.split(separator: "?").first.map(String.init) ?? page
+                if let dot = path.lastIndex(of: "."), path[dot...].count <= 5 { path = String(path[..<dot]) }
+                let parts = path.split(separator: "/")
+                    .filter { $0 != "index" }
+                    .map { $0.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ") }
+                guard let first = parts.first else { return "The front page" }
+                return ([first.prefix(1).uppercased() + first.dropFirst()] + parts.dropFirst()).joined(separator: ", ")
+            }
         }
         let id: String
         let at: Int

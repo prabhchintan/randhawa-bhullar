@@ -23,6 +23,8 @@
 #                                                    jharokha@newcomers: the book read
 #                                                    as if last opened a month ago;
 #                                                    jharokha@book: so, the book open;
+#                                                    jharokha@person: the book open on
+#                                                    whoever read the most pages;
 #                                                    jharokha@alone: the painting alone;
 #                                                    jharokha@alone-back: so, then
 #                                                    the wall back after 2 s;

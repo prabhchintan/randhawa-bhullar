@@ -136,7 +136,7 @@ struct JharokhaView: View {
         // A tick as the thumb comes onto the word for the house.
         .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
         .sheet(isPresented: $showVisitors, onDismiss: { newcomers = GuestBook.newcomers(guests) }) {
-            VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked)
+            VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked, openBusiest: Self.eyes == "person")
                 .presentationBackground(.ultraThinMaterial)
                 .presentationDragIndicator(.visible)
         }
@@ -511,8 +511,9 @@ struct JharokhaView: View {
             // The first time the book is read, its time is set and nothing is new.
             if GuestBook.looked == 0 { GuestBook.looked = Int(Date.now.timeIntervalSince1970) }
             let since = Self.eyes == "newcomers" ? GuestBook.monthAgo : GuestBook.looked
-            // `--open book` opens the book on launch, read the same way.
-            if Self.eyes == "book", !showVisitors { showVisitors = true }
+            // `--open book` opens the book on launch, read the same way;
+            // `--open person` opens it on the one who read the most.
+            if Self.eyes == "book" || Self.eyes == "person", !showVisitors { showVisitors = true }
             withAnimation(.smooth) { newcomers = GuestBook.newcomers(v, since: since) }
         }
         if let c { day = CockpitDay(c) }
