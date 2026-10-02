@@ -429,7 +429,10 @@ H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    the book loads, never set means nothing is new), and the same point hung
    in the margin of each of those leaves in the book; `see.sh OUT
    jharokha@newcomers jharokha@book` read the book as if opened a month ago.
-   Next: the page names.
+   The page names built on the app side (sprint 56): each step letters its
+   `title` when the house sends one, else the path in words; `see.sh OUT
+   jharokha@person` opens the book on whoever read the most. Left: the
+   house's `title` on each step (sprint 56's line), then H is whole.
 E2. The shelf (Prab, 2026-09-23 07:15: "toggle to the next art ... some
    dozen or so artworks that remain downloaded for offline use, easily one
    of my favorite features"). Built by the house 09-23 morning: the house
@@ -938,6 +941,23 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-02 · sprint 56 (31bcac7, and the commit carrying this line): the
+  guest book names the pages (chunk H's last slice, app side). A visit's
+  journey no longer reads as the site's paths with their slashes: each
+  page is lettered in words, the front page as before, a path like
+  "/field-notes/rain" as "Field notes, rain", and the site's own title
+  wherever the house gives one. Two things the first look showed, mended
+  the same run: the person's way back ("book") sat on the top edge of
+  their plaque, and now stands clear above it; and a person whose network
+  the house could not tell read "? · 3 visits", and now simply starts at
+  the visits. Seen in both modes (/tmp/see/1, /tmp/see/2, /tmp/see/3,
+  `jharokha@person`, `jharokha@book`); Home is unchanged. No walk film and
+  no hitch numbers: nothing moves. The door wanted: `GET /v1/visitors/VID`
+  gives each step an optional `"title"`, the page's own name as the site
+  letters it (its heading or its <title> without the site's name), absent
+  when the site has no such page; the app reads it when present and says
+  the path in words when not. Funnel: nothing.
 
 - 2026-10-01 · sprint 55 (d2e8726, and the commit carrying this line): the
   guest book says someone came (chunk H). Home now asks the house for the
