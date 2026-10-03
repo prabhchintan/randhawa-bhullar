@@ -116,8 +116,31 @@ state() {
 # in front as it was taken; otherwise the eyes say what was there instead,
 # and the build is not installed.
 UNSEEN=0
+# The wall's own drawing of its window (SIGUSR1, sprint 58): taken beside
+# every photograph, so a look still has a picture of the wall when the
+# display cannot be photographed. Said as SELF, never as CONFIRMED; it does
+# not count toward installing the copy.
+selfphoto() {
+  local name=$1 before n waited=0
+  [ -n "$STATE_OUT" ] && [ -n "$(pgrep -x Chintan)" ] || return
+  before=$(grep -c '^wall-photo ' "$STATE_OUT")
+  pkill -USR1 -x Chintan 2>/dev/null || return
+  while [ "$waited" -lt 10 ]; do
+    sleep 1; waited=$((waited + 1))
+    n=$(grep -c '^wall-photo ' "$STATE_OUT")
+    [ "$n" -gt "$before" ] && break
+  done
+  if [ "${n:-0}" -le "$before" ]; then echo "$OUT/$name-self.jpg NOT DRAWN: the wall did not answer"; return; fi
+  if grep '^wall-photo ' "$STATE_OUT" | tail -1 | cut -d' ' -f2 | base64 -D > "$OUT/$name-self.jpg" 2>/dev/null \
+     && [ -s "$OUT/$name-self.jpg" ] && [ "$(head -c 2 "$OUT/$name-self.jpg" | xxd -p)" = ffd8 ]; then
+    echo "$OUT/$name-self.jpg SELF: the wall's own drawing"
+  else
+    rm -f "$OUT/$name-self.jpg"; echo "$OUT/$name-self.jpg NOT DRAWN: the wall said none"
+  fi
+}
 photo() {
   local name=$1 s
+  selfphoto "$name"
   s=$(state)
   screencapture -x "$OUT/$name.png" || { UNSEEN=$((UNSEEN + 1)); return; }
   case "$s" in

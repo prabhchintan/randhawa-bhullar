@@ -506,8 +506,13 @@ struct WallBoard: View {
         let shown = Self.cut(shelves)
         ZStack(alignment: .topTrailing) {
             if !shown.isEmpty {
-                RadialGradient(colors: [Theme.lampBlack.opacity(0.62), Theme.lampBlack.opacity(0)],
-                               center: .topTrailing, startRadius: 0, endRadius: u * 560)
+                // Held dark across the column's width before it falls away:
+                // a pale work let the first words of each line go grey
+                // (the wall's own drawing, sprint 58).
+                RadialGradient(stops: [.init(color: Theme.lampBlack.opacity(0.78), location: 0),
+                                       .init(color: Theme.lampBlack.opacity(0.6), location: 0.5),
+                                       .init(color: Theme.lampBlack.opacity(0), location: 1)],
+                               center: .topTrailing, startRadius: 0, endRadius: u * 720)
                     .transition(.opacity)
                 VStack(alignment: .leading, spacing: 16 * u) {
                     ForEach(shown, id: \.title) { shelf in

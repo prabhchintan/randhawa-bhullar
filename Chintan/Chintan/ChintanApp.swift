@@ -100,7 +100,41 @@ enum Wall {
                 if mask & (1 << 14) == 0 { window.perform(NSSelectorFromString("toggleFullScreen:"), with: nil) }
             }
         }
-        if ProcessInfo.processInfo.arguments.contains("--say-window") { say() }
+        if ProcessInfo.processInfo.arguments.contains("--say-window") { say(); hearPhotos() }
+    }
+
+    // For the house's eyes (`--say-window`, wall.sh only): yantar's display
+    // could not be photographed when the sprint ran unattended (sprint 57,
+    // "could not create image from display"), so on SIGUSR1 the wall draws
+    // its own window and says it on standard output, one line, "wall-photo"
+    // and a base64 JPEG. It is the wall's drawing of itself, not the screen.
+    private static var photoSource: DispatchSourceSignal?
+
+    private static func hearPhotos() {
+        signal(SIGUSR1, SIG_IGN)
+        let source = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
+        source.setEventHandler { MainActor.assumeIsolated { photograph() } }
+        source.resume()
+        photoSource = source
+    }
+
+    private static func photograph() {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.windows.first { $0.isKeyWindow } ?? ($0 as? UIWindowScene)?.windows.first }
+            .first
+        guard let window, window.bounds.width > 0 else {
+            print("wall-photo none"); fflush(stdout); return
+        }
+        let image = UIGraphicsImageRenderer(bounds: window.bounds).image { context in
+            if !window.drawHierarchy(in: window.bounds, afterScreenUpdates: true) {
+                window.layer.render(in: context.cgContext)
+            }
+        }
+        guard let jpeg = image.jpegData(compressionQuality: 0.85) else {
+            print("wall-photo none"); fflush(stdout); return
+        }
+        print("wall-photo", jpeg.base64EncodedString())
+        fflush(stdout)
     }
 
     // For the house's eyes (`--say-window`, wall.sh only): twice a second the
