@@ -866,10 +866,11 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    draws its window and says it on stdout ("wall-photo", base64 JPEG);
    wall.sh takes one beside every photograph as NAME-self.jpg, said SELF,
    never CONFIRMED, never counted toward installing. Its shade deepened so
-   a pale work no longer greys the first words. Next: the label at the
-   bottom right on a pale work with the painting alone (detailed, over
-   paper, its second line lost: its shade wants the same deepening), then
-   done by a click, then the mail column.
+   a pale work no longer greys the first words. The label's shade deepened
+   the same way (sprint 59: held dark past its first words, wider for the
+   detailed card; wall.sh gains `label`, the detailed card with the
+   painting alone). Next: done by a click (`POST /v1/done`), then the mail
+   column.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -958,6 +959,22 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-03 · sprint 59 (f1e5853, and the commit carrying this line): the
+  Mac wall's label at the bottom right reads on a pale work (chunk O). Its
+  shade is now held dark across the label before it falls away, as the
+  column's was in sprint 58 (corner 0.78, half way 0.6), and reaches
+  further (720 units for the detailed card, 640 for the basic). Seen by the
+  wall's own drawing (/tmp/see/1 and /tmp/see/2, the display still could
+  not be photographed, nothing installed): the detailed card with the
+  painting alone on a pale prairie reads all six lines, the ground behind
+  its first words about a quarter darker than the bare work (105 against
+  136); the basic label on the same work, which first stood on almost no
+  shade (127 against 122), now does (107 against 136); on a darker work
+  the long credit line reads whole. wall.sh gains `label` (`--open alone
+  --letters detailed`). The phone is unchanged (/tmp/see/0). No walk film
+  and no hitch numbers: nothing moves differently. No new door. Funnel:
+  nothing.
 
 - 2026-10-03 · sprint 58 (a3ac706, and the commit carrying this line): the
   Mac wall's week column, seen at last (chunk O). yantar's display still
