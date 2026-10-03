@@ -862,6 +862,14 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    gains `column` (`--open day`, an invented week). Left: the column SEEN
    (yantar's display could not be photographed in sprint 57; nothing
    installed), then done by a click (`POST /v1/done`), then the mail column.
+   The column SEEN (sprint 58) by the wall's own drawing: on SIGUSR1 it
+   draws its window and says it on stdout ("wall-photo", base64 JPEG);
+   wall.sh takes one beside every photograph as NAME-self.jpg, said SELF,
+   never CONFIRMED, never counted toward installing. Its shade deepened so
+   a pale work no longer greys the first words. Next: the label at the
+   bottom right on a pale work with the painting alone (detailed, over
+   paper, its second line lost: its shade wants the same deepening), then
+   done by a click, then the mail column.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -950,6 +958,25 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-03 · sprint 58 (a3ac706, and the commit carrying this line): the
+  Mac wall's week column, seen at last (chunk O). yantar's display still
+  could not be photographed ("could not create image from display", the
+  window never reported full screen), so the wall now draws itself: wall.sh
+  signals it and keeps its own drawing of the window beside each photograph
+  (/tmp/see/wallN/NAME-self.jpg). The first drawing (/tmp/see/wall1) showed
+  the column whole at the top right, Today and Tomorrow in gilt, the
+  invented week's things in the serif with their hours apart, nothing
+  colliding with Visitors or the label; and on a pale work its shade fell
+  away before the column's left edge, so the first words of each line sat
+  on bare paper. The shade is now held dark across the column's width
+  before it falls (corner 0.78, half way 0.6): on a pale screen the ground
+  behind the first words measures about a quarter darker than the bare
+  work beside it and the lines read (/tmp/see/wall3, `column-self`). Seen
+  too, and left for the next run: the detailed label on a pale drawing with
+  the painting alone loses its second line. The phone is unchanged
+  (/tmp/see/0). No walk film and no hitch numbers: nothing moves
+  differently. No new door. Funnel: nothing.
 
 - 2026-10-02 · sprint 57 (9150e63, and the commit carrying this line): the
   Mac wall's board column and its minute's read (chunk O, the house's steer).
