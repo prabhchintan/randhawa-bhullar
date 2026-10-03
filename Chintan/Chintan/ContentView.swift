@@ -466,9 +466,14 @@ private struct WallLabel: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             if letters != .off {
-                RadialGradient(colors: [Theme.lampBlack.opacity(0.64), Theme.lampBlack.opacity(0)],
+                // Held dark out past the label's left edge before it falls
+                // away, as the column's is: on a pale work the detailed card
+                // lost its second line (the wall's own drawing, sprint 58).
+                RadialGradient(stops: [.init(color: Theme.lampBlack.opacity(0.78), location: 0),
+                                       .init(color: Theme.lampBlack.opacity(0.6), location: 0.5),
+                                       .init(color: Theme.lampBlack.opacity(0), location: 1)],
                                center: .bottomTrailing, startRadius: 0,
-                               endRadius: WallLettering.unit * (letters == .detailed ? 460 : 320))
+                               endRadius: WallLettering.unit * (letters == .detailed ? 720 : 640))
                     .transition(.opacity)
             }
             if letters != .off, let p = gallery.painting, p.title != nil {

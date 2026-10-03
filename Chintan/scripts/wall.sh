@@ -213,6 +213,8 @@ shoot click-wall --at 17 click-bare --at 27 click-basic --at 37 click-detailed -
 shoot open --at 38 open-turned --turn 30 --poll 10
 # The board's column with an invented week, so its shape is seen on any day.
 shoot column --step wall --open day
+# The detailed label with the painting alone, the corner it shades the most.
+shoot label --open alone --letters detailed
 
 # The copy he opens is replaced only after a look with every photograph
 # confirmed and the app standing throughout; then the new copy in
