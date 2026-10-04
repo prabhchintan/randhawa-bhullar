@@ -13,11 +13,16 @@
 #       the hitch numbers alone, RUNS times (default 3), each run and the
 #       median of each gesture; the Mac's frames are noisy, so a sprint that
 #       touches motion reads the median before against after.
+#   bash Chintan/scripts/walk.sh --profile [OUTDIR]
+#       the walk with no hand under `sample`, from launch to its end: where
+#       the main thread spent a stall (OUTDIR/sample.txt), beside its frames.
 set -euo pipefail
 ONLY_AUDIT=""
 ONLY_HITCHES=""
+ONLY_PROFILE=""
 if [ "${1:-}" = "--audit" ]; then ONLY_AUDIT=1; shift; fi
 if [ "${1:-}" = "--hitches" ]; then ONLY_HITCHES=1; shift; fi
+if [ "${1:-}" = "--profile" ]; then ONLY_PROFILE=1; shift; fi
 OUT=${1:-/tmp/see/walk}
 RUNS=${2:-3}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
@@ -86,6 +91,37 @@ for (start, end, name), late in windows:
           f" {len(ms)} hitches, worst {max(ms, default=0):.0f} ms")
 PY
 }
+
+if [ -n "$ONLY_PROFILE" ]; then
+  xcrun simctl ui "$UDID" appearance light
+  xcrun simctl install "$UDID" "$(ls -d "$DD"/Build/Products/Debug-iphonesimulator/Chintan.app)"
+  DATA=$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan data)
+  rm -f "$DATA/Library/Caches/self-done"
+  xcrun simctl launch --terminate-running-process "$UDID" Prabhchintan.Chintan \
+    --house "${CHINTAN_HOUSE:-}" --tab jharokha --hitches --self-walk > /dev/null
+  PID=""
+  for _ in $(seq 50); do
+    PID=$(pgrep -f "Chintan.app/Chintan" | head -1 || true)
+    [ -n "$PID" ] && break
+    sleep 0.1
+  done
+  echo "Sampling $(ps -o pid=,comm= -p "$PID")"
+  # Begun once the launch has settled, so its attach is not the launch's cost.
+  sleep 7
+  # By its full path: a `sample` earlier on the runner's PATH is not Apple's.
+  /usr/bin/sample "$PID" 14 1 -mayDie > "$OUT/sample.txt" 2> "$OUT/sample.log" || tail -5 "$OUT/sample.log"
+  for _ in $(seq 30); do
+    [ -f "$DATA/Library/Caches/self-done" ] && break
+    sleep 1
+  done
+  xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+  cp "$DATA/Library/Caches/self-steps.tsv" "$OUT/self-steps.tsv" 2>/dev/null || true
+  cp "$DATA/Library/Caches/hitches.tsv" "$OUT/self-frames.tsv" 2>/dev/null || true
+  echo "Windows:"; cat "$OUT/self-steps.tsv" 2>/dev/null || true
+  echo "Late frames:"; cat "$OUT/self-frames.tsv" 2>/dev/null || true
+  echo "Sample: $OUT/sample.txt"
+  exit 0
+fi
 
 if [ -n "$ONLY_HITCHES" ]; then
   xcrun simctl ui "$UDID" appearance light
