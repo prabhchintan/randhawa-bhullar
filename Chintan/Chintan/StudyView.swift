@@ -5,8 +5,9 @@ import SwiftUI
 // The voice's words on plaques at the left, his own on smoked glass at the
 // right, the composer resting on the foot of the picture, send on return.
 // Each room keeps its own conversation; a reply finds its room even when
-// he has walked into another. hawa's room keeps nothing: it empties when the
-// app is put away or the study is left.
+// he has walked into another. hawa's room is kept on the phone alone and
+// only until he clears it, from the clear mark beside its name (his word,
+// 2026-10-04: a room that emptied itself on its own lost his conversations).
 struct StudyView: View {
     // Whether the study is the page in view.
     var open = true
@@ -24,6 +25,8 @@ struct StudyView: View {
     @State private var asking: [Voice: Task<Void, Never>] = [:]
     // Opened on launch with --settings, for the house's screenshots.
     @State private var showingSettings = ProcessInfo.processInfo.arguments.contains("--settings")
+    // The clear mark pressed, asking once before the room goes.
+    @State private var clearing = false
     // The room whose name is pressed and held, its plaque grown under the
     // names, and whether the thumb has slid onto its word for the house;
     // `--open held` holds darban's for the house's eyes, `--open onword`
@@ -109,7 +112,7 @@ struct StudyView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .fadedEdges()
                 .accessibilityIdentifier("conversation")
-                .overlay(alignment: voice.kept ? .bottom : .top) {
+                .overlay(alignment: voice.clearable ? .top : .bottom) {
                     if messages.isEmpty && !isThinking {
                         quiet
                     }
@@ -147,10 +150,11 @@ struct StudyView: View {
         .onChange(of: voice) { kept = voice.rawValue }
         .onChange(of: phase) {
             if phase == .active { Voice.allCases.forEach(resume) }
-            if phase == .background { letGo() }
         }
-        .onChange(of: open) {
-            if !open { letGo() }
+        .confirmationDialog("Clear this room?", isPresented: $clearing, titleVisibility: .visible) {
+            Button("Clear", role: .destructive) { clear(voice) }
+        } message: {
+            Text("Said here, gone: from the phone, from the house, and from the Telegram chat.")
         }
         .task {
             Voice.allCases.forEach(resume)
@@ -167,7 +171,7 @@ struct StudyView: View {
     private var quiet: some View {
         VStack(spacing: 12) {
             Rectangle().fill(Theme.giltOnArt).frame(width: 36, height: 0.75)
-            Text(voice.kept ? lines[voice].map(Self.sentence) ?? "The room is quiet." : "Said here, gone. The house keeps nothing from this room.")
+            Text(voice.clearable ? "The house keeps nothing from this room. It stays on your phone until you clear it." : lines[voice].map(Self.sentence) ?? "The room is quiet.")
                 .font(.system(.title3, design: .serif).italic())
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.bone)
@@ -180,7 +184,7 @@ struct StudyView: View {
                 .padding(-70)
         }
         .padding(.horizontal, 40)
-        .padding(voice.kept ? .bottom : .top, 24)
+        .padding(voice.clearable ? .top : .bottom, 24)
     }
 
     private static func sentence(_ line: String) -> String {
@@ -221,6 +225,27 @@ struct StudyView: View {
             // Never wider than the page: names too wide for it once pushed
             // the whole study, bubbles and composer, past the Board's margin.
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            // The clear mark, in hawa's room only and only while it holds
+            // something: a word in gilt under a hairline, the way the names
+            // are set, pressed once to ask and once more to let the room go.
+            if voice.clearable && (!messages.isEmpty || isThinking) {
+                Button {
+                    clearing = true
+                } label: {
+                    Text("clear")
+                        .font(Theme.label(.footnote))
+                        .tracking(1.1)
+                        .foregroundStyle(Theme.giltOnArt)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.7), lineWidth: 0.75))
+                        .mount()
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear this room")
+                .accessibilityIdentifier("clear")
+            }
             Button {
                 showingSettings = true
             } label: {
@@ -329,10 +354,10 @@ struct StudyView: View {
                         .foregroundStyle(Theme.saffron)
                 }
             }
-            Text(v.kept ? lines[v].map(Self.sentence) ?? "A room of the house." : "Said here, gone.")
+            Text(v.clearable ? "Said here, gone when you clear it." : lines[v].map(Self.sentence) ?? "A room of the house.")
                 .font(.system(.title3, design: .serif))
                 .foregroundStyle(Theme.ink)
-            Text(!v.kept ? "The house keeps nothing from this room."
+            Text(v.clearable ? "The house keeps nothing from this room; your phone keeps it until you clear it."
                  : last.map { "Last spoke " + Self.spoke($0) } ?? "Nothing said here yet.")
                 .font(.system(.callout, design: .serif).italic())
                 .foregroundStyle(Theme.ink.opacity(0.8))
@@ -553,17 +578,20 @@ struct StudyView: View {
         store.wait(nil, in: room)
     }
 
-    // The rooms that keep nothing, let go: the wait cut, the words gone, and
-    // an unsent word in them with it.
-    private func letGo() {
-        for v in Voice.allCases where !v.kept {
-            asking[v]?.cancel()
-            asking[v] = nil
-            thinking.remove(v)
-            errors[v] = nil
-            store.forget(v)
+    // A room cleared on his word: the wait cut, the words gone from the
+    // phone, an unsent word with them, and the house told so its side of the
+    // conversation (the mind, and the Telegram chat) goes too.
+    private func clear(_ v: Voice) {
+        asking[v]?.cancel()
+        asking[v] = nil
+        thinking.remove(v)
+        errors[v] = nil
+        store.forget(v)
+        if voice == v { draft = "" }
+        guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        Task.detached {
+            _ = try? await HouseClient(baseAddress: address).say("/clear", to: v.rawValue, id: UUID().uuidString)
         }
-        if !voice.kept { draft = "" }
     }
 }
 

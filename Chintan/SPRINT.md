@@ -1118,6 +1118,17 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   beside its title and the plaque rises from the day as before (/tmp/see/3,
   both modes). No walk film and no hitch numbers: the motion is the same
   plaque's scale from a new anchor. No new door. Funnel: nothing.
+- 2026-10-04 · by hand (chintan, the study line): hawa's room keeps its
+  conversation on the phone until he clears it. His word at 17:42: the room
+  "clears too soon even if I exit the app ... it should keep the
+  conversations unless I clear them", with a clear button. The store now
+  files hawa like the other rooms (its file goes when cleared), the view no
+  longer empties on background or on leaving the study, and a gilt clear
+  mark sits beside the gear in hawa's room while it holds something; it
+  asks once, then empties the phone and tells the house (/clear on the say
+  door), which clears its own mind and the Telegram chat. The runner's side
+  (hawa.py: no idle cutoff, park and resume across restarts, the other
+  rooms' talk carried into every turn) shipped the same hour.
 
 - 2026-10-01 · sprint 54 (4083c23, and the commit carrying this line): the
   version line (chunk F). Settings now closes the way a catalogue does: a
