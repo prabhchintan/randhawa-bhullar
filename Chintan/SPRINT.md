@@ -406,14 +406,18 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    the review reading the trend; and the board scroll's test-hand number
    (28.7, not the heading's hold: 26.2 without it), which wants a board
    scroll window in the no-hand walk (HitchMeter.walk) before anything is
-   touched for it. Left too (sprint 60): the 723 ms stall on the first turn
-   of the no-hand walk (sprint 57), still unconfirmed. Not the guest book:
-   that window opens nine seconds after launch, long after the book has
-   come, and the hitch is stamped as the late frame ends, so it begins on
-   the turn to the Board itself; the first suspect is the first selection
-   haptic of the run. Run `walk.sh --hitches` (three runs) before touching
-   it; it needed an approval sprint 60 could not give. G is whole on the
-   app side otherwise.
+   touched for it. The stall on the first turn of the no-hand walk (sprint
+   57) measured and placed (sprint 61): 718 to 833 ms, one frame, on the
+   first turn to the Board, in seventeen of nineteen runs; never on a later
+   turn. Not the haptic (gone with no tick in one run, back in the next
+   two; a tick played and held at rest pays nothing), not the shelf names'
+   blur (three runs without it, unchanged), not the app's code: sampled
+   across it (`see.sh --walk --profile OUT`, OUT/sample.txt), the main
+   thread waits in its run loop through the late frame. The frame is held
+   outside the app, in the simulator's render server on yantar's Intel GPU,
+   so the walk cannot judge it; the phone's own word is MetricKit's hang
+   rate. Run `walk.sh` through `see.sh --walk` (the approved door). Nothing
+   more for it until MetricKit names a hang. G is whole on the app side.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -966,6 +970,23 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-04 · sprint 61 (94bc494, and the commit carrying this line): the
+  first turn's stall measured, and found not to be the app's (chunk G).
+  The walk with no hand, three runs: tabs 114.2 ms/s (121.0, 112.4, 114.2),
+  each one frame of 718 to 802 ms on the first turn to the Board; rest and
+  neighbours 0.0; with the test hand reveal 38.8, first visits 30.7, tabs
+  22.8, swipe 11.5, board scroll 5.4, study scroll 0.0. Tried and put back,
+  none of it changing the number: the tab's tick taken away (one clean run,
+  then 112.6 and 120.9), the haptics readied 0.8 s after launch, a held
+  UIKit tick in place of SwiftUI's, a tick played at rest before the walk,
+  the shelf names on a plain smoked mount with no blur (112.9 over three).
+  The new profile (`see.sh --walk --profile OUT`, Apple's `sample` by its
+  full path, since another on the runner's PATH answers with a template
+  line) caught an 833 ms frame with the main thread waiting in its run
+  loop throughout: the frame is held by the simulator's render server, not
+  by anything the app does, so nothing in the app was changed for it. The
+  pictures are as they were (/tmp/see/1). No new door. Funnel: nothing.
 
 - 2026-10-04 · sprint 60 (3329dc1, and the commit carrying this line): the
   phone again, the Mac wall put down. The Board's reasons now stop on a
