@@ -293,10 +293,7 @@ struct BoardView: View {
                     .font(.body)
                     .fixedSize(horizontal: false, vertical: true)
                 if !item.why.isEmpty {
-                    Text(item.why)
-                        .font(.footnote)
-                        .foregroundStyle(Theme.ink.opacity(0.72))
-                        .lineLimit(isOpen ? nil : 2)
+                    Reasons(text: item.why, whole: isOpen)
                 }
                 if isOpen && !item.line.isEmpty {
                     doneMark(item)
@@ -412,6 +409,59 @@ extension BoardView: Equatable {
     static func == (_: BoardView, _: BoardView) -> Bool { true }
 }
 
+// A thing's reasons in the smaller hand, two lines when closed, cut after
+// the last whole word that fits and never inside one; whole on tap.
+private struct Reasons: View {
+    let text: String
+    let whole: Bool
+    @State private var width: CGFloat = 0
+    @Environment(\.dynamicTypeSize) private var size
+
+    var body: some View {
+        Text(whole ? text : Self.cut(text, width: width, size: size))
+            .font(.footnote)
+            .foregroundStyle(Theme.ink.opacity(0.72))
+            .lineLimit(whole ? nil : 2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+    }
+
+    // The longest run of whole words, a stop after it, that two lines hold.
+    static func cut(_ text: String, width: CGFloat, size: DynamicTypeSize) -> String {
+        guard width > 0 else { return text }
+        let font = UIFont.preferredFont(forTextStyle: .footnote, compatibleWith:
+            UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(size)))
+        let room = font.lineHeight * 2 + font.lineHeight / 2
+        func fits(_ s: String) -> Bool {
+            let box = (s as NSString).boundingRect(
+                with: CGSize(width: width, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: [.font: font], context: nil)
+            return box.height <= room
+        }
+        if fits(text) { return text }
+        // Each place a word ends, with what comes before it.
+        var ends: [String.Index] = []
+        var i = text.startIndex
+        while let gap = text[i...].firstIndex(of: " ") {
+            ends.append(gap)
+            i = text.index(after: gap)
+        }
+        func shortened(_ end: String.Index) -> String {
+            var head = text[..<end]
+            while let last = head.last, !last.isLetter && !last.isNumber { head.removeLast() }
+            return head + "\u{2026}"
+        }
+        var (lo, hi, best) = (0, ends.count - 1, ends.first.map(shortened) ?? text)
+        while lo <= hi {
+            let mid = (lo + hi) / 2
+            let s = shortened(ends[mid])
+            if fits(s) { best = s; lo = mid + 1 } else { hi = mid - 1 }
+        }
+        return best
+    }
+}
+
 // When a thing is due, lettered small: the weekday over the day, saffron
 // once the day has come.
 private struct DueMark: View {
@@ -476,15 +526,17 @@ extension BoardSection {
     // The open things by when they fall, soonest first: Today (and anything
     // already past), then each day left in the week (through Sunday) on a
     // shelf of its own, Tomorrow and then the weekday by name, and Later for
-    // the rest combined. Things without a date close Later in the house's
-    // own order. Done means gone.
+    // the rest combined. Never fewer than the next three days named, so a
+    // Saturday still sees Monday and Tuesday coming. Things without a date
+    // close Later in the house's own order. Done means gone.
     static func shelves(_ sections: [BoardSection], without gone: Set<String>) -> [BoardSection] {
         var cal = Calendar.current
         cal.firstWeekday = 2
         let today = cal.startOfDay(for: .now)
-        // The week ends on Sunday: Monday's bill belongs to the next one.
-        let week = cal.dateInterval(of: .weekOfYear, for: today)?.end
+        // The week ends on Sunday, or three days on when that comes first.
+        let sunday = cal.dateInterval(of: .weekOfYear, for: today)?.end
             ?? cal.date(byAdding: .day, value: 7, to: today) ?? today
+        let week = max(sunday, cal.date(byAdding: .day, value: 4, to: today) ?? sunday)
         let open = sections.flatMap(\.items).filter { !$0.done && !gone.contains($0.line) }
         let dated = open.filter { $0.day != nil }.sorted { $0.day! < $1.day! }
         let undated = open.filter { $0.day == nil }
