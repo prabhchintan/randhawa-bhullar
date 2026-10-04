@@ -406,14 +406,20 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    the review reading the trend; and the board scroll's test-hand number
    (28.7, not the heading's hold: 26.2 without it), which wants a board
    scroll window in the no-hand walk (HitchMeter.walk) before anything is
-   touched for it. Left too (sprint 60): the 723 ms stall on the first turn
-   of the no-hand walk (sprint 57), still unconfirmed. Not the guest book:
-   that window opens nine seconds after launch, long after the book has
-   come, and the hitch is stamped as the late frame ends, so it begins on
-   the turn to the Board itself; the first suspect is the first selection
-   haptic of the run. Run `walk.sh --hitches` (three runs) before touching
-   it; it needed an approval sprint 60 could not give. G is whole on the
-   app side otherwise.
+   touched for it. Left too: the stall on the first turn of the no-hand
+   walk, confirmed and read from its stacks (sprint 61, `see.sh --hitches
+   --sample OUT 3`): 801, 130 and 820 ms. Not the haptic. The Board is the
+   first page drawn through RenderBox, and its first frame pays twice on the
+   main thread, both times waiting on the simulator's Metal server: RenderBox
+   making its device (about 100 ms), then the packed texture its offscreen
+   effects draw into (about 690 ms; the heading's shadow, the plaques'
+   shadows, the faded-edge mask). Three warm-ups a moment after launch were
+   measured and none moved the median (121 before; 110, 106, 110 after): a
+   shadowed drawn point takes the device off the turn but not the texture,
+   and a full-screen unseen copy of the effects made neither. All reverted.
+   Since both waits are `MTLSimDevice` round trips, the stall may be the
+   simulator's alone; read the phone's own hitch ratio from MetricKit before
+   building anything more for it. G is whole on the app side otherwise.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -966,6 +972,24 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-04 · sprint 61 (the commit carrying this line; no app change):
+  the first turn's stall measured, as chunk G asked (`see.sh --hitches
+  --sample`, three runs each). Tabs with no hand 121.2 ms/s median (121.2,
+  22.8, 122.1), one late frame of 801, 130 and 820 ms on the turn to the
+  Board. The sampled stacks name it: the Board is the first page drawn
+  through RenderBox, and its first frame waits on the simulator's Metal
+  server twice, for RenderBox's device and then for the texture its
+  shadows and faded edges draw into. Three warm-ups tried and measured, a
+  moment after launch while nothing moves: the device made off the main
+  thread with one flat drawn point (110.4: 110.4, 115.9, 107.0); a shadowed
+  point kept drawn (105.7: 3.1, 106.8, 105.7, the device off the turn, the
+  texture not); a full-screen unseen copy of the Board's effects (110.2:
+  113.0, 110.2, 110.0, neither). None moved the median, so all were
+  reverted and the app is as it was (/tmp/see/0, /tmp/see/last). Every
+  other window held: swipe 7.6, board scroll 6.0, study scroll 0.0,
+  neighbours 0.0. Next is the phone's own number from MetricKit, not more
+  warming. No new door. Funnel: nothing.
 
 - 2026-10-04 · sprint 60 (3329dc1, and the commit carrying this line): the
   phone again, the Mac wall put down. The Board's reasons now stop on a
