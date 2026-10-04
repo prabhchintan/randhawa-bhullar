@@ -406,7 +406,14 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    the review reading the trend; and the board scroll's test-hand number
    (28.7, not the heading's hold: 26.2 without it), which wants a board
    scroll window in the no-hand walk (HitchMeter.walk) before anything is
-   touched for it. G is whole on the app side otherwise.
+   touched for it. Left too (sprint 60): the 723 ms stall on the first turn
+   of the no-hand walk (sprint 57), still unconfirmed. Not the guest book:
+   that window opens nine seconds after launch, long after the book has
+   come, and the hitch is stamped as the late frame ends, so it begins on
+   the turn to the Board itself; the first suspect is the first selection
+   haptic of the run. Run `walk.sh --hitches` (three runs) before touching
+   it; it needed an approval sprint 60 could not give. G is whole on the
+   app side otherwise.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -959,6 +966,26 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-04 · sprint 60 (3329dc1, and the commit carrying this line): the
+  phone again, the Mac wall put down. The Board's reasons now stop on a
+  whole word: a closed thing's two lines are measured at the leaf's own
+  width and text size and cut after the last word that fits, its stray
+  comma or bracket dropped, an ellipsis after (an invented "...bring the
+  receipt..." where it once read "...bring the rec..."). And the next three days are
+  always named: the week still ends on Sunday, but never sooner than three
+  days on, so on a Saturday Monday and Tuesday stand on their own shelves
+  instead of under Later. Seen on a Sunday (/tmp/see/1, /tmp/see/2):
+  Tomorrow, Tuesday and Wednesday each on its own shelf, Later from Friday,
+  the held heading's tally "three today, one tomorrow, two Tuesday, one
+  Wednesday, two later", every closed reason ending on a word in both
+  modes, an opened one whole. The 723 ms stall was not measured: walk.sh
+  needed an approval this run could not give, so nothing was touched for
+  it; read from the meter's own code, the window opens nine seconds after
+  launch, so the guest book is not the cause (chunk G now names the next
+  suspect). No new door. Funnel: a reminder's note that ends on a whole
+  word, and the next few days named by their weekday even across a
+  weekend.
 
 - 2026-10-03 · sprint 59 (f1e5853, and the commit carrying this line): the
   Mac wall's label at the bottom right reads on a pale work (chunk O). Its
