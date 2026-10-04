@@ -59,6 +59,9 @@
 #                                                    put away and back, then
 #                                                    chintan's room)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
+#   bash Chintan/scripts/see.sh --hitches [--sample] OUTDIR [RUNS]
+#                                                    the hitch numbers alone, RUNS
+#                                                    times (walk.sh --hitches)
 #   bash Chintan/scripts/see.sh --wall [--build] OUTDIR
 #                                                    the Mac wall instead (wall.sh)
 #   bash Chintan/scripts/see.sh --widget OUTDIR      the widget in the home screen's
@@ -69,6 +72,10 @@ set -euo pipefail
 if [ "${1:-}" = "--walk" ]; then
   shift
   exec bash "$(dirname "$0")/walk.sh" "$@"
+fi
+if [ "${1:-}" = "--hitches" ]; then
+  shift
+  exec bash "$(dirname "$0")/walk.sh" --hitches "$@"
 fi
 if [ "${1:-}" = "--wall" ]; then
   shift

@@ -13,11 +13,18 @@
 #       the hitch numbers alone, RUNS times (default 3), each run and the
 #       median of each gesture; the Mac's frames are noisy, so a sprint that
 #       touches motion reads the median before against after.
+#   bash Chintan/scripts/walk.sh --hitches --sample [OUTDIR] [RUNS]
+#       the same, each run's no-hand walk sampled across its first turn
+#       (runN/first-turn.txt, the stacks of every thread).
+# The sprint job may run only see.sh, so it reaches all of these as
+# `see.sh --walk ...` (or `see.sh --hitches OUT RUNS`), never by approval.
 set -euo pipefail
 ONLY_AUDIT=""
 ONLY_HITCHES=""
 if [ "${1:-}" = "--audit" ]; then ONLY_AUDIT=1; shift; fi
 if [ "${1:-}" = "--hitches" ]; then ONLY_HITCHES=1; shift; fi
+SAMPLE=""
+if [ "${1:-}" = "--sample" ]; then SAMPLE=1; shift; fi
 OUT=${1:-/tmp/see/walk}
 RUNS=${2:-3}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
@@ -60,6 +67,17 @@ hitches() {
   rm -f "$DATA/Library/Caches/self-done"
   xcrun simctl launch --terminate-running-process "$UDID" Prabhchintan.Chintan \
     --house "${CHINTAN_HOUSE:-}" --tab jharokha --hitches --self-walk > /dev/null 2>&1 || true
+  # With --sample, the app and the simulator's render server (its
+  # backboardd) sampled across the first turn, about ten seconds in, so a
+  # stall is read from a stack, not guessed. Sampling slows both a little.
+  if [ -n "$SAMPLE" ]; then
+    SIM=$(pgrep -f "launchd_sim.*$UDID" | head -1 || true)
+    BBD=$( [ -n "$SIM" ] && pgrep -P "$SIM" -x backboardd | head -1 || true)
+    (sleep 9; /usr/bin/sample Chintan 2.5 5 -file "$1/first-turn.txt" > "$1/sample.log" 2>&1 || true) &
+    if [ -n "$BBD" ]; then
+      (sleep 9; /usr/bin/sample "$BBD" 2.5 5 -file "$1/first-turn-backboardd.txt" >> "$1/sample.log" 2>&1 || true) &
+    fi
+  fi
   for _ in $(seq 60); do
     [ -f "$DATA/Library/Caches/self-done" ] && break
     sleep 1
