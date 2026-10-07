@@ -16,6 +16,10 @@ struct ContentView: View {
     @State private var showingMailComposer = false
     @State private var opened: OpenedDot?
     @State private var justSaved: Memory?
+    @Environment(\.dynamicTypeSize) private var typeSize
+    /// The percentage grows with the words around it instead of staying put
+    /// while they swell past it.
+    @ScaledMetric(relativeTo: .largeTitle) private var percentSize: CGFloat = 48
 
     /// Randhawa's moments, read once when the app comes forward rather than
     /// again on every dot tapped. Bhullar never writes them, so a snapshot per
@@ -75,18 +79,32 @@ struct ContentView: View {
 
                 VStack(spacing: 6) {
                     Text("\(position.percent)%")
-                        .font(.system(size: 48, weight: .semibold, design: .rounded))
+                        .font(.system(size: percentSize, weight: .semibold, design: .rounded))
                         .monospacedDigit()
-                    Text("\(scale.unitName) \(position.index) of \(position.total) · \(position.remaining) left")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    // One line while it fits; at the accessibility sizes the
+                    // count and what is left stack instead of truncating.
+                    let dayLine = typeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(spacing: 2))
+                        : AnyLayout(HStackLayout(spacing: 0))
+                    dayLine {
+                        Text("\(scale.unitName) \(position.index) of \(position.total)")
+                        if !typeSize.isAccessibilitySize { Text(" · ") }
+                        Text("\(position.remaining) left")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .accessibilityElement(children: .combine)
                     if supportsYearPicker, let earliestPastYear {
                         HStack(spacing: 20) {
                             Button {
                                 withAnimation(.easeInOut(duration: 0.2)) { yearOffset -= 1 }
                             } label: {
                                 Image(systemName: "chevron.left")
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
                             }
+                            .accessibilityLabel("Previous year")
                             .disabled(currentYear + yearOffset <= earliestPastYear)
 
                             Text(String(currentYear + yearOffset))
@@ -96,11 +114,15 @@ struct ContentView: View {
                                 withAnimation(.easeInOut(duration: 0.2)) { yearOffset += 1 }
                             } label: {
                                 Image(systemName: "chevron.right")
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
                             }
+                            .accessibilityLabel("Next year")
                             .disabled(yearOffset >= 0)
                         }
                         .foregroundStyle(.secondary)
                         .buttonStyle(.plain)
+                        .padding(.vertical, -12)
                     }
                     if !memoryStore.memories.isEmpty {
                         Button {
@@ -109,13 +131,22 @@ struct ContentView: View {
                             Text(memoriesLabel(onThisDay: onThisDayCount))
                                 .font(.caption)
                                 .foregroundStyle(onThisDayCount > 0 ? AnyShapeStyle(.orange) : AnyShapeStyle(.tertiary))
+                                // A finger's worth of target, without
+                                // pushing the lines around it apart.
+                                .padding(.vertical, 12)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .padding(.vertical, -12)
                         .accessibilityIdentifier("memories")
                     }
                     Text("swipe to change scale · tap a dot to open it")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                        // Clear of the plus in the corner, however many
+                        // lines the hint wraps to.
+                        .padding(.horizontal, 30)
                 }
             }
         }
@@ -146,27 +177,23 @@ struct ContentView: View {
             Button {
                 composing = true
             } label: {
-                Image(systemName: "plus")
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.primary)
-                    .frame(width: 38, height: 38)
-                    .background(.thinMaterial, in: Circle())
+                CornerGlyph(systemName: "plus")
             }
+            .accessibilityLabel("Remember")
+            .accessibilityShowsLargeContentViewer()
             .accessibilityIdentifier("remember")
-            .padding(20)
+            .padding(17)
         }
         .overlay(alignment: .topTrailing) {
             Button {
                 writeToMakers()
             } label: {
-                Image(systemName: "envelope")
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.primary)
-                    .frame(width: 38, height: 38)
-                    .background(.thinMaterial, in: Circle())
+                CornerGlyph(systemName: "envelope")
             }
+            .accessibilityLabel("Write to the makers")
+            .accessibilityShowsLargeContentViewer()
             .accessibilityIdentifier("write")
-            .padding(20)
+            .padding(17)
         }
         .sheet(isPresented: $composing) {
             MemoryComposerView(
@@ -266,6 +293,24 @@ struct ContentView: View {
         } else if let url = URL(string: "mailto:\(LoopMail.address)") {
             openURL(url)
         }
+    }
+}
+
+/// A corner control: a 38 point circle inside a 44 point target. The glyph
+/// stops growing at the largest standard size so it never outgrows its
+/// circle; at the accessibility sizes a long press shows it large instead.
+private struct CornerGlyph: View {
+    let systemName: String
+
+    var body: some View {
+        Image(systemName: systemName)
+            .font(.body.weight(.medium))
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            .foregroundStyle(.primary)
+            .frame(width: 38, height: 38)
+            .background(.thinMaterial, in: Circle())
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
     }
 }
 

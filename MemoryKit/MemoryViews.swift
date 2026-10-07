@@ -49,6 +49,7 @@ struct MemoryComposerView: View {
     @State private var pickedItem: PhotosPickerItem?
     @State private var photoData: Data?
     @State private var showingCamera = false
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var canSave: Bool {
         !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || photoData != nil
@@ -83,20 +84,30 @@ struct MemoryComposerView: View {
                                     .foregroundStyle(.white, .black.opacity(0.5))
                                     .padding(8)
                             }
+                            .accessibilityLabel("Remove photo")
                         }
                 } else {
-                    HStack(spacing: 20) {
+                    // Side by side while they fit; stacked at the
+                    // accessibility sizes, where two labels in a row clip.
+                    let photoButtons = typeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                        : AnyLayout(HStackLayout(spacing: 20))
+                    photoButtons {
                         if hasCamera {
                             Button {
                                 showingCamera = true
                             } label: {
                                 Label("Take a photo", systemImage: "camera")
                                     .font(.subheadline)
+                                    .frame(minHeight: 44)
+                                    .contentShape(Rectangle())
                             }
                         }
                         PhotosPicker(selection: $pickedItem, matching: .images) {
                             Label("Choose a photo", systemImage: "photo")
                                 .font(.subheadline)
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
                         }
                     }
                 }
@@ -320,6 +331,9 @@ struct MemoryDetailView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             }
+            // The full width, from the leading edge. Sized to its words
+            // alone, a short memory floated as a narrow column mid screen.
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
         }
         .navigationTitle("Memory")
@@ -331,6 +345,7 @@ struct MemoryDetailView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
+                .accessibilityLabel("Share")
             }
         }
         .sheet(isPresented: $sharing) {

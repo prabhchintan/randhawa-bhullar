@@ -123,6 +123,8 @@ struct ContentView: View {
                     } label: {
                         ControlIcon(systemName: "ellipsis")
                     }
+                    .accessibilityLabel("Menu")
+                    .accessibilityShowsLargeContentViewer()
                     .accessibilityIdentifier("menu")
                     Spacer()
                     VeilControl(veil: $veil)
@@ -173,8 +175,10 @@ struct ContentView: View {
             } label: {
                 ControlIcon(systemName: "plus")
             }
+            .accessibilityLabel("Remember")
+            .accessibilityShowsLargeContentViewer()
             .accessibilityIdentifier("remember")
-            .padding(20)
+            .padding(17)
             .environment(\.colorScheme, veil > 0.5 ? .dark : colorScheme)
         }
         .sheet(item: $composing) { target in
@@ -639,16 +643,22 @@ private struct TrailSheet: View {
     }
 }
 
-/// Circular material button face shared by the overlay controls.
+/// Circular material button face shared by the overlay controls: a 38
+/// point circle inside a 44 point target. The glyph stops growing at the
+/// largest standard size so it never outgrows its circle; at the
+/// accessibility sizes a long press shows it large instead.
 private struct ControlIcon: View {
     let systemName: String
 
     var body: some View {
         Image(systemName: systemName)
             .font(.body.weight(.medium))
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .foregroundStyle(.primary)
             .frame(width: 38, height: 38)
             .background(.thinMaterial, in: Circle())
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
     }
 }
 
@@ -718,12 +728,13 @@ private struct TrailOfferCard: View {
 /// First launch: say what the app does and what it will never do, then ask.
 private struct IntroView: View {
     let begin: () -> Void
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 40
 
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
             Text("Randhawa")
-                .font(.system(size: 40, weight: .semibold, design: .rounded))
+                .font(.system(size: titleSize, weight: .semibold, design: .rounded))
             Text("Carry your phone and Randhawa draws the map of your life: a dot where you go, a line where you moved, darker where you return. A map only you can read.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
