@@ -56,6 +56,11 @@ inside scope (write a report anyway and say what stopped you).
    light, dark and the largest text, photographs every screen into
    /tmp/see/pair and prints Apple's accessibility audit by screen. Read the
    pictures and the audit before deciding. Nothing from it is committed.
+   Give the background walk an hour's timeout (the default ten minutes
+   stops it mid pass), and wait for it with a foreground loop that polls
+   /tmp/see/pair, never by ending your turn: an unattended session ends
+   with its turn, and on 2026-10-04 one did, mid work, with its edits
+   uncommitted and no report. Commit what builds before any long wait.
 
    $LOOP_PRIVATE/feedback/ holds mail from anyone who is not the
    maintainer: users writing through the apps' Write to the makers, or

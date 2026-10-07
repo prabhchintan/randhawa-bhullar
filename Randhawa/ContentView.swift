@@ -163,6 +163,8 @@ struct ContentView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(.thinMaterial, in: Capsule())
+                    // Clear of the plus in the corner when the words grow.
+                    .padding(.horizontal, 44)
             }
             .padding(20)
             // Once the veil is mostly drawn the map is black whatever the
@@ -671,6 +673,17 @@ private struct OfferCard: View {
     let notNow: () -> Void
 
     var body: some View {
+        // Whole while it fits; at the accessibility sizes it scrolls rather
+        // than cutting its own words off mid sentence.
+        ViewThatFits(in: .vertical) {
+            card
+            ScrollView { card }
+                .scrollBounceBehavior(.basedOnSize)
+        }
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var card: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.subheadline.weight(.semibold))
@@ -688,7 +701,6 @@ private struct OfferCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
