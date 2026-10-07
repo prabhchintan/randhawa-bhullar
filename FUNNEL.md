@@ -93,6 +93,11 @@ does and how it looks, never what the maintainer's life contains.
 
 Named by a sprint or by the house, not yet cut. One line each.
 
+- a reminder's note that ends on a whole word, and the next few days named by their weekday even across a weekend. (sprint 60, 2026-10-07)
+- a quiet mark on the opening screen when something new has arrived since you last looked, so a returning person sees at a glance that there is something to open. (sprint 55, 2026-10-07)
+
+- a line at the foot of settings naming the version and the day it was built, so someone writing in about a problem can say which one they have. (sprint 54, 2026-10-01)
+
 - Eyes for the pair: a `scripts/see.sh` for Randhawa and Bhullar like
   `Chintan/scripts/see.sh` (simulator, every screen, light and dark, the
   largest text, a VoiceOver audit), so the loop sees its work before and
