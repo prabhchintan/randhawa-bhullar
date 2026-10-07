@@ -59,69 +59,78 @@ struct MemoryComposerView: View {
         UIImagePickerController.isSourceTypeAvailable(.camera)
     }
 
-    var body: some View {
-        NavigationStack {
-            // Whole while it fits beside the keyboard; at the accessibility
-            // sizes it scrolls rather than cutting its labels off.
-            FitsOrScrolls {
-                VStack(alignment: .leading, spacing: 16) {
-                    TextField(prompt, text: $text, axis: .vertical)
-                        .lineLimit(4...12)
-                        .focused($focused)
-                        .accessibilityIdentifier("words")
+    private var fields: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            TextField(prompt, text: $text, axis: .vertical)
+                .lineLimit(4...12)
+                .focused($focused)
+                .accessibilityIdentifier("words")
 
-                    if let photoData, let image = UIImage(data: photoData) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 160)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(alignment: .topTrailing) {
-                                Button {
-                                    self.photoData = nil
-                                    pickedItem = nil
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.title3)
-                                        .foregroundStyle(.white, .black.opacity(0.5))
-                                        .padding(8)
-                                }
-                                .accessibilityLabel("Remove photo")
-                            }
-                    } else {
-                        // Side by side while they fit; stacked at the
-                        // accessibility sizes, where two labels in a row clip.
-                        let photoButtons = typeSize.isAccessibilitySize
-                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                            : AnyLayout(HStackLayout(spacing: 20))
-                        photoButtons {
-                            if hasCamera {
-                                Button {
-                                    showingCamera = true
-                                } label: {
-                                    Label("Take a photo", systemImage: "camera")
-                                        .font(.subheadline)
-                                        .frame(minHeight: 44)
-                                        .contentShape(Rectangle())
-                                }
-                            }
-                            PhotosPicker(selection: $pickedItem, matching: .images) {
-                                Label("Choose a photo", systemImage: "photo")
-                                    .font(.subheadline)
-                                    .frame(minHeight: 44)
-                                    .contentShape(Rectangle())
-                            }
+            if let photoData, let image = UIImage(data: photoData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 160)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(alignment: .topTrailing) {
+                        Button {
+                            self.photoData = nil
+                            pickedItem = nil
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.white, .black.opacity(0.5))
+                                .padding(8)
+                        }
+                        .accessibilityLabel("Remove photo")
+                    }
+            } else {
+                // Side by side while they fit; stacked at the
+                // accessibility sizes, where two labels in a row clip.
+                let photoButtons = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                    : AnyLayout(HStackLayout(spacing: 20))
+                photoButtons {
+                    if hasCamera {
+                        Button {
+                            showingCamera = true
+                        } label: {
+                            Label("Take a photo", systemImage: "camera")
+                                .font(.subheadline)
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
                         }
                     }
-
-                    Spacer()
-
-                    Text(contextLine)
-                        .font(.footnote)
-                        .foregroundStyle(.tertiary)
+                    PhotosPicker(selection: $pickedItem, matching: .images) {
+                        Label("Choose a photo", systemImage: "photo")
+                            .font(.subheadline)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
                 }
-                .padding(20)
+            }
+
+            Spacer()
+
+            Text(contextLine)
+                .font(.footnote)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(20)
+    }
+    var body: some View {
+        NavigationStack {
+            // At the accessibility sizes it scrolls rather than cutting its
+            // labels off beside the keyboard. One copy of the fields either
+            // way: two, as ViewThatFits makes, split the focus and the
+            // keyboard never came up.
+            Group {
+                if typeSize.isAccessibilitySize {
+                    ScrollView { fields }
+                } else {
+                    fields
+                }
             }
             .navigationTitle("New memory")
             .navigationBarTitleDisplayMode(.inline)
