@@ -162,6 +162,18 @@ Touches: views only. Needs his word: no.
   `Walk/`, the RandhawaWalk and BhullarWalk schemes. Narrowed in one
   place: Bhullar has no menu, and its envelope leaves for Mail, so its walk
   photographs the list of memories instead.
+- 2. The largest text and VoiceOver, filed 2026-10-01, first pass on main
+  2026-10-07 (8db4479, eb308d7, 8269081, cfb6bb1, b4eceb3, 54bb0e9).
+  Bhullar's day line stacks instead of truncating and its hint wraps clear
+  of the plus; the corner controls keep their glyph in the circle inside a
+  44 point target, with names and the large content viewer; the
+  percentage and the intro title scale; the offer cards and the intro
+  scroll rather than cut off; the composer's photo buttons stack; a
+  memory reads from the leading edge. The audit went from 209 findings to
+  186, hit regions from 16 to 2 (both Apple Maps' Legal). Narrowed: the
+  composer still truncates at the largest text, because inside a scroll
+  view its field would not take focus; contrast is left alone, since the
+  tertiary hints are the apps' quiet voice and the cut did not name it.
 
 ## Shipped
 
