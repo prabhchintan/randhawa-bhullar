@@ -280,8 +280,8 @@ struct BoardView: View {
         let isOpen = open.contains(item.id)
         return HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                // Named by Home's cut, the hour in gilt after its last word,
-                // so a title that wraps never splits around it.
+                // Named by Home's cut in Home's serif, the hour in gilt after
+                // its last word, so a title that wraps never splits around it.
                 let short = titles[item.line] ?? item.short
                 (Text(short.title.plainDashes)
                     .foregroundStyle(Theme.ink.opacity(item.done ? 0.45 : 1))
@@ -290,7 +290,7 @@ struct BoardView: View {
                     .font(Theme.label())
                     .tracking(0.6)
                     .foregroundStyle(Theme.gilt))
-                    .font(.body)
+                    .font(.system(.body, design: .serif))
                     .fixedSize(horizontal: false, vertical: true)
                 if !item.why.isEmpty {
                     Reasons(text: item.why, whole: isOpen)
