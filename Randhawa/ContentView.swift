@@ -739,30 +739,34 @@ private struct IntroView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 40
 
     var body: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            Text("Randhawa")
-                .font(.system(size: titleSize, weight: .semibold, design: .rounded))
-            Text("Carry your phone and Randhawa draws the map of your life: a dot where you go, a line where you moved, darker where you return. A map only you can read.")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-            Spacer()
-            VStack(spacing: 12) {
-                Button(action: begin) {
-                    Text("Begin")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.orange)
-                Text("iOS will ask about your location. Randhawa listens only for the moments your phone notices you have moved, using the low-power signals a sleeping app is allowed; it never runs continuously. Everything stays on this device unless you turn on iCloud sync, which keeps a copy in your private iCloud, invisible to us. No account. No tracking. Off in one tap.")
-                    .font(.footnote)
-                    .foregroundStyle(.tertiary)
+        // At the accessibility sizes the promise below the button is
+        // longer than the screen; it scrolls rather than being cut off.
+        FitsOrScrolls {
+            VStack(spacing: 20) {
+                Spacer()
+                Text("Randhawa")
+                    .font(.system(size: titleSize, weight: .semibold, design: .rounded))
+                Text("Carry your phone and Randhawa draws the map of your life: a dot where you go, a line where you moved, darker where you return. A map only you can read.")
                     .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                VStack(spacing: 12) {
+                    Button(action: begin) {
+                        Text("Begin")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+                    Text("iOS will ask about your location. Randhawa listens only for the moments your phone notices you have moved, using the low-power signals a sleeping app is allowed; it never runs continuously. Everything stays on this device unless you turn on iCloud sync, which keeps a copy in your private iCloud, invisible to us. No account. No tracking. Off in one tap.")
+                        .font(.footnote)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                }
             }
+            .padding(28)
         }
-        .padding(28)
         .background(Color(.systemBackground))
     }
 }
