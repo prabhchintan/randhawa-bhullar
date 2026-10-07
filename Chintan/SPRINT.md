@@ -973,6 +973,18 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 ## The ledger (newest first)
 
+- 2026-10-07 · sprint 62 (e68ff0d, and the commit carrying this line): a
+  thing has one face, as the house steered. The Board's leaf titles are now
+  lettered in the serif Home uses for the same thing (body size, so a title
+  that wraps still keeps its gilt hour after its last word); the reasons
+  under them stay in the text style, so the eye reads the name first and
+  the detail second. Seen in one cycle (/tmp/see/1, /tmp/see/last): in light
+  and dark every title on the Today and weekday shelves reads as Home's
+  line does, the hours in small capitals beside them, nothing reflowed or
+  clipped. The first turn's stall left alone until MetricKit from the phone
+  reports a hang or a hitch ratio. No walk film and no hitch numbers:
+  nothing moves differently. No new door. Funnel: nothing.
+
 - 2026-10-04 · sprint 61 (the commit carrying this line; no app change):
   the first turn's stall measured, as chunk G asked (`see.sh --hitches
   --sample`, three runs each). Tabs with no hand 121.2 ms/s median (121.2,
