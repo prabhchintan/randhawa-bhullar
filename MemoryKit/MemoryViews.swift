@@ -61,64 +61,68 @@ struct MemoryComposerView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                TextField(prompt, text: $text, axis: .vertical)
-                    .lineLimit(4...12)
-                    .focused($focused)
-                    .accessibilityIdentifier("words")
+            // Whole while it fits beside the keyboard; at the accessibility
+            // sizes it scrolls rather than cutting its labels off.
+            FitsOrScrolls {
+                VStack(alignment: .leading, spacing: 16) {
+                    TextField(prompt, text: $text, axis: .vertical)
+                        .lineLimit(4...12)
+                        .focused($focused)
+                        .accessibilityIdentifier("words")
 
-                if let photoData, let image = UIImage(data: photoData) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 160)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(alignment: .topTrailing) {
-                            Button {
-                                self.photoData = nil
-                                pickedItem = nil
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(.white, .black.opacity(0.5))
-                                    .padding(8)
+                    if let photoData, let image = UIImage(data: photoData) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 160)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(alignment: .topTrailing) {
+                                Button {
+                                    self.photoData = nil
+                                    pickedItem = nil
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.title3)
+                                        .foregroundStyle(.white, .black.opacity(0.5))
+                                        .padding(8)
+                                }
+                                .accessibilityLabel("Remove photo")
                             }
-                            .accessibilityLabel("Remove photo")
-                        }
-                } else {
-                    // Side by side while they fit; stacked at the
-                    // accessibility sizes, where two labels in a row clip.
-                    let photoButtons = typeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                        : AnyLayout(HStackLayout(spacing: 20))
-                    photoButtons {
-                        if hasCamera {
-                            Button {
-                                showingCamera = true
-                            } label: {
-                                Label("Take a photo", systemImage: "camera")
+                    } else {
+                        // Side by side while they fit; stacked at the
+                        // accessibility sizes, where two labels in a row clip.
+                        let photoButtons = typeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                            : AnyLayout(HStackLayout(spacing: 20))
+                        photoButtons {
+                            if hasCamera {
+                                Button {
+                                    showingCamera = true
+                                } label: {
+                                    Label("Take a photo", systemImage: "camera")
+                                        .font(.subheadline)
+                                        .frame(minHeight: 44)
+                                        .contentShape(Rectangle())
+                                }
+                            }
+                            PhotosPicker(selection: $pickedItem, matching: .images) {
+                                Label("Choose a photo", systemImage: "photo")
                                     .font(.subheadline)
                                     .frame(minHeight: 44)
                                     .contentShape(Rectangle())
                             }
                         }
-                        PhotosPicker(selection: $pickedItem, matching: .images) {
-                            Label("Choose a photo", systemImage: "photo")
-                                .font(.subheadline)
-                                .frame(minHeight: 44)
-                                .contentShape(Rectangle())
-                        }
                     }
+
+                    Spacer()
+
+                    Text(contextLine)
+                        .font(.footnote)
+                        .foregroundStyle(.tertiary)
                 }
-
-                Spacer()
-
-                Text(contextLine)
-                    .font(.footnote)
-                    .foregroundStyle(.tertiary)
+                .padding(20)
             }
-            .padding(20)
             .navigationTitle("New memory")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -150,6 +154,21 @@ struct MemoryComposerView: View {
                 }
                 .ignoresSafeArea()
             }
+        }
+    }
+}
+
+/// Its content as laid out while it fits the height it is offered, and in
+/// a scroll view when it does not, so large text scrolls instead of
+/// truncating.
+struct FitsOrScrolls<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            content()
+            ScrollView { content() }
+                .scrollBounceBehavior(.basedOnSize)
         }
     }
 }

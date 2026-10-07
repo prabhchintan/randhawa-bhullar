@@ -675,12 +675,8 @@ private struct OfferCard: View {
     var body: some View {
         // Whole while it fits; at the accessibility sizes it scrolls rather
         // than cutting its own words off mid sentence.
-        ViewThatFits(in: .vertical) {
-            card
-            ScrollView { card }
-                .scrollBounceBehavior(.basedOnSize)
-        }
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        FitsOrScrolls { card }
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var card: some View {

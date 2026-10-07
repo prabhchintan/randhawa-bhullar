@@ -83,13 +83,15 @@ struct ContentView: View {
                         .monospacedDigit()
                     // One line while it fits; at the accessibility sizes the
                     // count and what is left stack instead of truncating.
-                    let dayLine = typeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(spacing: 2))
-                        : AnyLayout(HStackLayout(spacing: 0))
-                    dayLine {
-                        Text("\(scale.unitName) \(position.index) of \(position.total)")
-                        if !typeSize.isAccessibilitySize { Text(" · ") }
-                        Text("\(position.remaining) left")
+                    Group {
+                        if typeSize.isAccessibilitySize {
+                            VStack(spacing: 2) {
+                                Text("\(scale.unitName) \(position.index) of \(position.total)")
+                                Text("\(position.remaining) left")
+                            }
+                        } else {
+                            Text("\(scale.unitName) \(position.index) of \(position.total) · \(position.remaining) left")
+                        }
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -144,6 +146,7 @@ struct ContentView: View {
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                         // Clear of the plus in the corner, however many
                         // lines the hint wraps to.
                         .padding(.horizontal, 30)
