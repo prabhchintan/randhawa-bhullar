@@ -201,7 +201,14 @@ the change compares the last two looks against this vision and world-class
 design principles and says improving, flat, worsening or enough; worsening
 stops the sprints until the maintainer's word, enough rests them until a
 named time, flat slows them. The nightly TestFlight build stays as the
-catch-all.
+catch-all. No empty runs (Prab, 2026-10-07 07:10): since that morning a
+clocked sprint runs only on a steer a person or the house has named, a
+thing to build with something to see; with no steer the gate stays closed
+whatever the gear says, and the reviewer's fix is kept for the house to
+read rather than becoming the next steer by itself. The house's check that
+morning: six of the last fourteen runs shipped, the verdicts ran improving,
+enough, flat, and the last four runs were polish on the Mac wall's label and
+a simulator stall that was not the phone's.
 
 ## The eyes, deeper (Prab, 2026-09-23 02:55, the study line)
 
