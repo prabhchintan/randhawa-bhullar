@@ -164,7 +164,9 @@ one to four words, the hour a clock time or a word like "evening"), `/v1/wall/ne
 09-28, the widget's: one fresh work off the walls' loop, `image` its cut for that frame),
 `/v1/feed` and `/v1/feed/kept` (since 10-11, the feed: rows with id, ts, source,
 kind, title, url, text, score, status, image; `POST /v1/feed/ID {"status"}` and
-`POST /v1/feed/ID/like`). Anything shown as a number, ring or bar comes from one of these or is
+`POST /v1/feed/ID/like`; `image` an https address, a page's own picture or a
+museum's for kind "art", the one thing the app fetches from elsewhere, since
+sprint 65). Anything shown as a number, ring or bar comes from one of these or is
 not shown.
 
 ## The rules of a sprint
@@ -987,23 +989,62 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    bundle, Prabhchintan.Chintan.Widget, with no capabilities, which cloud
    signing registers by itself. Never register App Groups by API.
 
-- **Bug, seen in sprint 63: hawa's name leaves the header.** Once hawa's
-  room holds words, its clear mark joins the header and the four names no
-  longer fit beside it at the default text size: the strip shows chintan,
-  darban, yaar and the clear mark, and hawa is cut off (see.sh study@hawa,
-  both looks). The fix keeps all four names and the mark in view, perhaps
-  the clear mark moved under the names or into the held plaque.
+- **Bugs, seen in sprint 65 at the largest text (see.sh --large).** (a) On
+  Home, the label held grows a plaque taller than the room above it: its
+  first lines run off the top of the phone and Visitors and The feed sit
+  over it (jharokha@label). The fix hides the two names while the label
+  is held and hangs the plaque from under them, as a held thing already
+  does at these sizes. (b) In the Study, a name held (study@held) grows a
+  plaque that runs down under the composer, and its word for the house
+  lands on the tab bar; the plaque should stop above the composer and
+  scroll. (c) The names' strip slides under the gear there, "dar" cut at
+  the gear's edge; a fade at the strip's end would say it scrolls. All
+  three were there before sprint 65; none shows at the default text.
 
-- **The feed, what is left after sprint 64.** Built: the pane, its cards,
-  the three marks, the fold, the Kept face, the cache and the queue. Left
-  for the eyes: a card with a picture (no row carried `image` on 10-11, so
-  FeedPicture is unseen; it asks the house alone and shows nothing for a
-  picture elsewhere); a real swipe filmed by the walk (the look folds a
-  card by hand and tells the house nothing); a mark made offline and sent
-  when the house answers; the audit run over the pane.
+- **The feed, what is left after sprint 65.** Built: the pane, its cards,
+  the three marks, the fold, the Kept face, the cache and the queue, and
+  (sprint 65) pictures on cards and the painting card. Left for the eyes:
+  a real swipe filmed by the walk (the look folds a card by hand and tells
+  the house nothing); the walk reaching the pane at all; a mark made
+  offline and sent when the house answers; the audit run over the pane.
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 65 (32690df, e1d8bdf, and the commit carrying this
+  line): the feed, round two, as the house steered. A card whose row
+  carries `image` opens on that picture, edge to edge across the top of
+  its plaque, held at 16:10 in smoked glass from the first paint so
+  nothing below it moves, faded in as it comes. Pictures are cut to the
+  phone's width once and kept in Caches/feed-pictures; what leaves the
+  feed and Kept leaves the phone. A row of kind "art" is the painting's
+  own card: the picture whole (never cropped) and full bleed over its own
+  colours drawn soft, the title in the serif italic and the medium and
+  credit on a smoked mount at its foot, as the label sits on Home; a tap
+  opens the museum's page. Kept shows the same cards; a slam dunk keeps
+  its gilt rule on either face. One widening, on this steer: the brief's
+  one host now has one exception, the feed's pictures, fetched over https
+  only from the address the house names, in an ephemeral session with no
+  cookies (a house path is still asked of the house). Seen in light and
+  dark (/tmp/see/1, /tmp/see/2, /tmp/see/last): the day's painting card,
+  a news card with its page's picture (the eyes' new `feed-picture`
+  scrolls to it), the painting on Kept. The bug hunt over every screen at
+  the default and the largest text, light and dark (/tmp/see/3,
+  /tmp/see/5, walks 4 and 5), found and fixed: a kind that only repeated
+  its source ("news news") is said once; cards slid hard under the
+  sheet's top edge and now dissolve into it; Visitors had no mount
+  beside The feed's and read weaker on a bright head, now both stand on
+  the same smoked glass; hawa's name dropped off the Study's strip once
+  its room held words (the backlog's bug from sprint 63), and the clear
+  mark now hangs under the gear. The first try at that hung the mark on
+  the strip over hawa and the gear, and walk 4 caught it ("the gear did
+  not open Settings", "a tap on chintan did not open it"); fixed, walk 5
+  has no tap notes. The walk now taps clear, checks all four names and
+  says Cancel. Found and not fixed, the cycles spent: three defects at the
+  largest text only, all older than this sprint (backlog). Hitches
+  (walk5): tabs 25.0 ms/s, reveal 28.2, swipe 0.0, board scroll 1.5,
+  study scroll 0.0. No new door: /v1/feed's `image` and kind "art" are
+  the house's of today. Funnel: nothing.
 
 - 2026-10-11 · sprint 64 (c35179d, 3f0cf04, and the commit carrying this
   line): the feed, as the house steered. A second name stands beside

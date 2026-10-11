@@ -69,7 +69,11 @@ background work, no Siri. Those are later rungs, on the maintainer's word.
 
 - Talks to one host, the one in its settings. No analytics, no crash
   reporting, no third-party code, no phone-home of any kind. Same house
-  style as the other apps: no em dashes or en dashes anywhere.
+  style as the other apps: no em dashes or en dashes anywhere. One
+  exception, on the house's steer of 2026-10-11: a feed card's picture is
+  fetched from the https address the house names for it (a page's own
+  picture, a museum's open-access file), with no cookies and nothing of
+  his sent.
 - TestFlight internal testing only. Never `--submit`. Never external
   testers. A build expires ninety days after upload (Apple's rule, read
   from Apple's TestFlight overview 2026-09-21); the loop re-uploads before
