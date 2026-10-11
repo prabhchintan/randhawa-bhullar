@@ -161,7 +161,10 @@ when the conversation ends, and the app keeps it nowhere either), `POST /v1/done
 it, `/v1/titles` (since 09-25 08:50: the house's own short name for every open
 thing, {"titles": [{"line", "title", "hour"}]}, a model names each line once,
 one to four words, the hour a clock time or a word like "evening"), `/v1/wall/next?frame=large|medium|small` (since
-09-28, the widget's: one fresh work off the walls' loop, `image` its cut for that frame). Anything shown as a number, ring or bar comes from one of these or is
+09-28, the widget's: one fresh work off the walls' loop, `image` its cut for that frame),
+`/v1/feed` and `/v1/feed/kept` (since 10-11, the feed: rows with id, ts, source,
+kind, title, url, text, score, status, image; `POST /v1/feed/ID {"status"}` and
+`POST /v1/feed/ID/like`). Anything shown as a number, ring or bar comes from one of these or is
 not shown.
 
 ## The rules of a sprint
@@ -991,8 +994,42 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   both looks). The fix keeps all four names and the mark in view, perhaps
   the clear mark moved under the names or into the held plaque.
 
+- **The feed, what is left after sprint 64.** Built: the pane, its cards,
+  the three marks, the fold, the Kept face, the cache and the queue. Left
+  for the eyes: a card with a picture (no row carried `image` on 10-11, so
+  FeedPicture is unseen; it asks the house alone and shows nothing for a
+  picture elsewhere); a real swipe filmed by the walk (the look folds a
+  card by hand and tells the house nothing); a mark made offline and sent
+  when the house answers; the audit run over the pane.
+
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 64 (c35179d, 3f0cf04, and the commit carrying this
+  line): the feed, as the house steered. A second name stands beside
+  Visitors at Home's head, "The feed" on its smoked mount, and opens a
+  pane over the painting: a timeline of the house's rows newest first, each
+  on a plaque with its source in gilt small capitals and its kind beside
+  it, the title in the serif, up to four lines of text and then a fade, the
+  time since at the right, a gilt rule down the left edge of a slam dunk.
+  Under each card a heart, a retweet mark and a star; a swipe left folds
+  the card away. A tap opens the link in Safari inside the app, or reads a
+  note with no link in full, and tells the house seen once (never over a
+  keep). Its second face, Kept, is his profile from /v1/feed/kept. Every
+  mark shows at once and posts behind it; a mark the house does not hear
+  waits in the phone's copy and goes on the next open; a refusal puts the
+  card back with one line. The copy lives in Application Support and opens
+  at once, read again when five minutes old or on a pull. VoiceOver reads
+  each card as one element, the marks and the fold as its actions; at the
+  largest text the head of a card takes two lines and Home's two names
+  stand one over the other. Seen with the real rows in light and dark
+  (/tmp/see/1 to /tmp/see/4, /tmp/see/last): a like filling the heart, a
+  keep showing on Kept and coming off again, a fold, a link opening, a
+  slam dunk's rule. Fixed on the way: the kept mark first stood on a beige
+  disc (now heavier and in full gilt), and at the largest text the new
+  name squeezed Visitors into three broken lines. No hitch numbers: the
+  walk does not reach the pane yet (backlog). No new door; the feed doors
+  are noted above. Funnel: nothing.
 
 - 2026-10-11 · sprint 63 (9d2f1bd, and the commit carrying this line): on
   the house's steer (the gear and the four names in the Study answered no
