@@ -63,7 +63,7 @@ struct MemoryComposerView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 TextField(prompt, text: $text, axis: .vertical)
-                    .lineLimit(4...12)
+                    .lineLimit(typeSize.isAccessibilitySize ? 1...6 : 4...12)
                     .focused($focused)
                     .accessibilityIdentifier("words")
 
@@ -87,36 +87,35 @@ struct MemoryComposerView: View {
                             .accessibilityLabel("Remove photo")
                         }
                 } else {
-                    // Side by side while they fit; stacked at the
-                    // accessibility sizes, where two labels in a row clip.
-                    let photoButtons = typeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                        : AnyLayout(HStackLayout(spacing: 20))
-                    photoButtons {
+                    // Words while they fit; at the accessibility sizes the
+                    // keyboard leaves room for one row, so icons, which keep
+                    // their names for VoiceOver and the large content viewer.
+                    HStack(spacing: 20) {
                         if hasCamera {
                             Button {
                                 showingCamera = true
                             } label: {
-                                Label("Take a photo", systemImage: "camera")
-                                    .font(.subheadline)
-                                    .frame(minHeight: 44)
-                                    .contentShape(Rectangle())
+                                photoLabel("Take a photo", systemImage: "camera")
                             }
+                            .accessibilityShowsLargeContentViewer()
                         }
                         PhotosPicker(selection: $pickedItem, matching: .images) {
-                            Label("Choose a photo", systemImage: "photo")
-                                .font(.subheadline)
-                                .frame(minHeight: 44)
-                                .contentShape(Rectangle())
+                            photoLabel("Choose a photo", systemImage: "photo")
                         }
+                        .accessibilityShowsLargeContentViewer()
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Spacer()
+                Spacer(minLength: 0)
 
+                // A footnote, so it stops growing at the first accessibility
+                // size and wraps whole rather than trailing off.
                 Text(contextLine)
                     .font(.footnote)
                     .foregroundStyle(.tertiary)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(20)
             .navigationTitle("New memory")
@@ -150,6 +149,27 @@ struct MemoryComposerView: View {
                 }
                 .ignoresSafeArea()
             }
+        }
+    }
+
+    private func photoLabel(_ title: String, systemImage: String) -> some View {
+        Label(title, systemImage: systemImage)
+            .labelStyle(PhotoLabelStyle(iconOnly: typeSize.isAccessibilitySize))
+            .font(.subheadline)
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
+    }
+}
+
+/// Title and icon, or the icon alone, chosen at run time.
+private struct PhotoLabelStyle: LabelStyle {
+    let iconOnly: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        if iconOnly {
+            Label(configuration).labelStyle(.iconOnly)
+        } else {
+            Label(configuration).labelStyle(.titleAndIcon)
         }
     }
 }
