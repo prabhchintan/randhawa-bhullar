@@ -63,7 +63,7 @@ struct MemoryComposerView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 TextField(prompt, text: $text, axis: .vertical)
-                    .lineLimit(typeSize.isAccessibilitySize ? 1...6 : 4...12)
+                    .lineLimit(typeSize.isAccessibilitySize ? 3...6 : 4...12)
                     .focused($focused)
                     .accessibilityIdentifier("words")
 
