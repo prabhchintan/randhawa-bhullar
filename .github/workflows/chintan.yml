@@ -22,25 +22,47 @@ on:
   schedule:
     - cron: "0 9 * * *"    # 03:00 Mountain in summer, 02:00 in winter
 
+permissions:
+  contents: write    # ship.sh moves the chintan-shipped tag after an upload
+
 concurrency:
   group: chintan-build
   cancel-in-progress: false
 
 jobs:
+  # The nightly ships only when there is something to ship (Prab, 2026-10-11:
+  # four identical builds had gone out with nothing but a new icon). It goes
+  # when Chintan/ changed since the chintan-shipped tag (its notes and
+  # ledger aside), or when that tag is older than 30 days (TestFlight builds
+  # expire at 90, and the icon still turns once a month), or when there is
+  # no tag yet. A hand run (workflow_dispatch) always ships.
   pick:
     runs-on: ubuntu-latest
     outputs:
       runner: ${{ steps.pick.outputs.runner }}
       go: ${{ steps.pick.outputs.go }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - id: pick
         run: |
           RUNNER="${{ github.event.inputs.runner || vars.CHINTAN_RUNNER || 'hosted' }}"
-          GO=1
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$RUNNER" != "yantar" ]; then GO=0; fi
+          GO=1; WHY="by hand"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "$RUNNER" != "yantar" ]; then GO=0; WHY="no yantar"
+            elif ! git fetch -q --depth=1 origin tag chintan-shipped 2>/dev/null; then WHY="never shipped with a mark"
+            elif ! git diff --quiet chintan-shipped HEAD -- Chintan ':(exclude)Chintan/*.md'; then
+              WHY="the app changed since $(git rev-parse --short chintan-shipped^{commit})"
+            else
+              SHIPPED=$(git for-each-ref --format='%(taggerdate:unix)' refs/tags/chintan-shipped)
+              AGE=$(( ( $(date +%s) - ${SHIPPED:-0} ) / 86400 ))
+              if [ "$AGE" -ge 30 ]; then WHY="the last build is $AGE days old"; else GO=0; WHY="nothing changed, last build $AGE days old"; fi
+            fi
+          fi
           echo "runner=$RUNNER" >> "$GITHUB_OUTPUT"
           echo "go=$GO" >> "$GITHUB_OUTPUT"
-          echo "runner: $RUNNER, go: $GO"
+          echo "runner: $RUNNER, go: $GO ($WHY)"
 
   build:
     needs: pick

@@ -86,6 +86,11 @@ if xcodebuild -exportArchive -archivePath "$TMP/Chintan.xcarchive" -exportOption
      -exportPath "$TMP/export" "${KEY[@]}" > "$TMP/export.log" 2>&1; then
   grep -E "Upload succeeded|EXPORT SUCCEEDED" "$TMP/export.log" | head -2
   echo "uploaded chintan 1.0 ($BUILD); Apple processes it in five to thirty minutes, TestFlight installs it on the phone"
+  # The mark of the last ship (Prab, 2026-10-11: a build only when the app
+  # changed, else once a month): an annotated tag on the commit just shipped,
+  # its tagger date the ship's day. chintan.yml's pick reads it. Never fails a ship.
+  ( cd "$ROOT" && git -c user.name=chintan -c user.email=prab@hey.com tag -f -a chintan-shipped -m "chintan 1.0 ($BUILD) shipped $(date -u +%F)" \
+    && git push -f origin refs/tags/chintan-shipped ) >/dev/null 2>&1 && echo "chintan-shipped tag moved to $(git -C "$ROOT" rev-parse --short HEAD)" || echo "the chintan-shipped tag could not be moved (the next nightly will ship again)"
 else
   grep -E -i -B3 -A8 "error|failed" "$TMP/export.log" | tail -40; echo "EXPORT FAILED"; exit 1
 fi
