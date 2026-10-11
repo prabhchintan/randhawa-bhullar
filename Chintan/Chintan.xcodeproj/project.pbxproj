@@ -20,6 +20,8 @@
 		CA0000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000009 /* Assets.xcassets */; };
 		CA000000000000000000000C /* ChintanWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA100000000000000000000E /* ChintanWalk.swift */; };
 		CA000000000000000000000D /* VisitorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000010 /* VisitorsView.swift */; };
+		CA00000000000000000000F1 /* Feed.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000F1 /* Feed.swift */; };
+		CA00000000000000000000F2 /* FeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000F2 /* FeedView.swift */; };
 		CA000000000000000000000E /* Whereabouts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000011 /* Whereabouts.swift */; };
 		CA000000000000000000000F /* PhoneWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1000000000000000000012 /* PhoneWord.swift */; };
 		CA00000000000000000000A1 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A1 /* Health.swift */; };
@@ -82,6 +84,8 @@
 		CA100000000000000000000E /* ChintanWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChintanWalk.swift; sourceTree = "<group>"; };
 		CA100000000000000000000F /* ChintanWalk.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChintanWalk.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA1000000000000000000010 /* VisitorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitorsView.swift; sourceTree = "<group>"; };
+		CA10000000000000000000F1 /* Feed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feed.swift; sourceTree = "<group>"; };
+		CA10000000000000000000F2 /* FeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedView.swift; sourceTree = "<group>"; };
 		CA1000000000000000000011 /* Whereabouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Whereabouts.swift; sourceTree = "<group>"; };
 		CA1000000000000000000012 /* PhoneWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWord.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A1 /* Health.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Health.swift; sourceTree = "<group>"; };
@@ -141,6 +145,8 @@
 				CA1000000000000000000006 /* JharokhaView.swift */,
 				CA100000000000000000000C /* BoardView.swift */,
 				CA1000000000000000000010 /* VisitorsView.swift */,
+				CA10000000000000000000F1 /* Feed.swift */,
+				CA10000000000000000000F2 /* FeedView.swift */,
 				CA100000000000000000000D /* Theme.swift */,
 				CA1000000000000000000007 /* SettingsView.swift */,
 				CA1000000000000000000011 /* Whereabouts.swift */,
@@ -324,6 +330,8 @@
 				CA0000000000000000000006 /* JharokhaView.swift in Sources */,
 				CA000000000000000000000A /* BoardView.swift in Sources */,
 				CA000000000000000000000D /* VisitorsView.swift in Sources */,
+				CA00000000000000000000F1 /* Feed.swift in Sources */,
+				CA00000000000000000000F2 /* FeedView.swift in Sources */,
 				CA000000000000000000000E /* Whereabouts.swift in Sources */,
 				CA000000000000000000000F /* PhoneWord.swift in Sources */,
 				CA00000000000000000000A1 /* Health.swift in Sources */,

@@ -73,6 +73,14 @@ struct HouseClient {
         var imagePath: String { image ?? "/v1/painting.jpg" }
     }
 
+    // A picture the house serves by path, the one host asked; a picture
+    // elsewhere is never fetched.
+    func houseURL(_ path: String) -> URL? {
+        if path.hasPrefix("/") { return url(path) }
+        guard let given = URL(string: path), let mine = url("/") else { return nil }
+        return given.host == mine.host ? given : nil
+    }
+
     func painting() async throws -> Painting {
         guard let url = url("/v1/painting") else { throw HouseError.noAddress }
         let (data, _) = try await Self.session.data(from: url)
@@ -195,6 +203,43 @@ struct HouseClient {
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
         struct One: Decodable { let visitor: Visitor }
         return try JSONDecoder().decode(One.self, from: data).visitor
+    }
+
+    // The feed: things to look at with nothing asked of him, already mixed
+    // by the house, newest first, dismissed rows left out. A house without
+    // this door answers 404.
+    func feed() async throws -> [FeedRow] {
+        try await feedRows("/v1/feed", key: "feed")
+    }
+
+    // His profile: what he kept and starred, newest first.
+    func feedKept() async throws -> [FeedRow] {
+        try await feedRows("/v1/feed/kept", key: "kept")
+    }
+
+    private func feedRows(_ path: String, key: String) async throws -> [FeedRow] {
+        guard let url = url(path) else { throw HouseError.noAddress }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 20
+        let (data, response) = try await Self.session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 { throw HouseError.noDoor }
+        guard http.statusCode == 200,
+              let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let rows = object[key] as? [[String: Any]] else { throw HouseError.unreachable }
+        return rows.compactMap(FeedRow.init)
+    }
+
+    // A mark on a row: {"status": "seen"|"dismissed"|"kept"|"starred"}, or
+    // a like, a weight on its source and kind. Told like the senses: what
+    // the house did not hear waits for the next.
+    func feedMark(_ id: String, status: String) async -> Told {
+        guard let body = try? JSONEncoder().encode(["status": status]) else { return .refused }
+        return await tell("/v1/feed/\(id)", body, within: 15)
+    }
+
+    func feedLike(_ id: String) async -> Told {
+        await tell("/v1/feed/\(id)/like", Data("{}".utf8), within: 15)
     }
 
     // The usage meters, each with its name, how much is spent, and when it

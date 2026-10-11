@@ -20,6 +20,9 @@ struct JharokhaView: View {
     @State private var showCredit = false
     @State private var openMeter: String?
     @State private var showVisitors = false
+    // The feed, opened from beside the guest book; `--open feed...` opens it
+    // on launch for the house's eyes, `--open kept` on its second face.
+    @State private var showFeed = JharokhaView.eyes.map { $0.hasPrefix("feed") || $0 == "kept" } ?? false
     // How many have come to the site since he last opened the book.
     @State private var newcomers = 0
     @State private var guests: [HouseClient.Visitor] = []
@@ -117,7 +120,12 @@ struct JharokhaView: View {
             }
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
-            .overlay(alignment: .topLeading) { guestBook }
+            .overlay(alignment: .topLeading) {
+                HStack(spacing: 0) {
+                    guestBook
+                    feedMount
+                }
+            }
             #if targetEnvironment(macCatalyst)
             .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles) }
             #endif
@@ -162,6 +170,36 @@ struct JharokhaView: View {
                 .presentationBackground(.ultraThinMaterial)
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showFeed) {
+            FeedView(face: Self.eyes == "kept" ? .kept : .feed, eyes: Self.eyes)
+                .presentationBackground(.ultraThinMaterial)
+                .presentationDragIndicator(.visible)
+        }
+    }
+
+    // The feed, lettered beside the guest book: things to look at, nothing
+    // asked of him.
+    private var feedMount: some View {
+        Button {
+            showFeed = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "scroll")
+                    .font(.caption)
+                Text("The feed")
+                    .font(Theme.label(.caption))
+                    .tracking(1)
+            }
+            .foregroundStyle(Theme.bone.opacity(0.9))
+            // On its mount, so the picture's own lettering never swallows it.
+            .mount()
+            .padding(.trailing, 22)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("feed")
+        .accessibilityLabel("The feed")
     }
 
     // The guest book, lettered small at the head of the wall: who came to

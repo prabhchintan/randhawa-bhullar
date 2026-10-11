@@ -1,0 +1,381 @@
+import SafariServices
+import SwiftUI
+
+// The feed: things to look at with nothing asked of him, a timeline in the
+// shape he knows from the bird, lettered for the museum. Each card names its
+// source in gilt, its title in the serif, a few lines of its text, how long
+// ago, and a picture when the house has one; under it three small marks, a
+// heart (more of this), a retweet (kept on his profile) and a star (kept and
+// sent to the house). A swipe left folds a card away. The second face, Kept,
+// is his profile. (Prab, 2026-10-11, the study line: "like my personal
+// twitter feed except made of things I need to look at doom scrolling which
+// don't have any immediate actions or needs from me".)
+struct FeedView: View {
+    enum Face { case feed, kept }
+
+    @StateObject private var store = FeedStore()
+    @State var face: Face = .feed
+    // For the house's eyes: what to do once the rows are in.
+    var eyes: String?
+    @State private var expanded: Set<String> = []
+    @State private var link: Link?
+    @State private var likes = 0
+    @State private var keeps = 0
+
+    struct Link: Identifiable {
+        let url: URL
+        var id: String { url.absoluteString }
+    }
+
+    private var shown: [FeedRow] { face == .feed ? store.rows : store.kept }
+
+    var body: some View {
+        List {
+            heading
+                .listRowInsets(EdgeInsets(top: 18, leading: 22, bottom: 6, trailing: 22))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            if let word = store.word {
+                Text(word)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.ink.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .plaque()
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+            if store.loaded && shown.isEmpty {
+                Text(face == .feed ? "Nothing new to look at." : "Nothing kept yet.")
+                    .font(.system(.body, design: .serif).italic())
+                    .foregroundStyle(Theme.ink.opacity(0.7))
+                    .padding(.horizontal, 6)
+                    .padding(.top, 8)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+            ForEach(shown) { row in
+                FeedCard(row: row, liked: store.liked.contains(row.id), expanded: expanded.contains(row.id),
+                         open: { open(row) }, like: { like(row) }, keep: { keep(row) }, star: { store.toggleStar(row) })
+                    .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            withAnimation(.snappy) { store.dismiss(row) }
+                        } label: {
+                            Label("Dismiss", systemImage: "xmark")
+                        }
+                        .tint(Theme.gilt)
+                    }
+                    .accessibilityAction(named: "Dismiss") { withAnimation(.snappy) { store.dismiss(row) } }
+            }
+            Color.clear
+                .frame(height: 24)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .scrollIndicators(.hidden)
+        .refreshable { await store.refresh() }
+        .task {
+            await store.open()
+            await look()
+        }
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: likes)
+        .sensoryFeedback(.selection, trigger: keeps)
+        .fullScreenCover(item: $link) { link in
+            SafariView(url: link.url) { self.link = nil }
+                .ignoresSafeArea()
+        }
+    }
+
+    // The pane's name, and its two faces: the feed and his profile.
+    private var heading: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("The feed")
+                .font(Theme.label())
+                .tracking(0.8)
+                .foregroundStyle(Theme.ink.opacity(0.7))
+            HStack(alignment: .firstTextBaseline, spacing: 22) {
+                faceButton("Feed", .feed)
+                faceButton("Kept", .kept)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func faceButton(_ name: String, _ which: Face) -> some View {
+        Button {
+            withAnimation(.snappy) { face = which }
+        } label: {
+            Text(name)
+                .font(Theme.title())
+                .foregroundStyle(Theme.ink.opacity(face == which ? 1 : 0.38))
+                .padding(.bottom, 6)
+                .overlay(alignment: .bottom) {
+                    if face == which {
+                        Rectangle().fill(Theme.gilt).frame(height: 1)
+                    }
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .accessibilityAddTraits(face == which ? .isSelected : [])
+        .accessibilityIdentifier("feed-face-\(name.lowercased())")
+    }
+
+    private func open(_ row: FeedRow) {
+        store.seen(row)
+        if let s = row.url, let url = URL(string: s) {
+            link = Link(url: url)
+        } else {
+            withAnimation(.snappy) {
+                if expanded.contains(row.id) { expanded.remove(row.id) } else { expanded.insert(row.id) }
+            }
+        }
+    }
+
+    private func like(_ row: FeedRow) {
+        guard !store.liked.contains(row.id) else { return }
+        withAnimation(.snappy) { store.like(row) }
+        likes += 1
+    }
+
+    private func keep(_ row: FeedRow) {
+        withAnimation(.snappy) { store.toggleKeep(row) }
+        keeps += 1
+    }
+
+    // For the house's eyes, on the first row: `feed-like` likes it,
+    // `feed-keep` keeps it and turns to Kept, `feed-unkeep` takes that one off
+    // again, `feed-fold` folds it away without telling the
+    // house, `feed-open` opens the first with a link, `feed-read` the first
+    // without one.
+    private func look() async {
+        guard let eyes else { return }
+        try? await Task.sleep(for: .seconds(1.2))
+        switch eyes {
+        case "feed-like":
+            if let row = store.rows.first(where: { !store.liked.contains($0.id) }) { like(row) }
+        case "feed-keep":
+            if let row = store.rows.first(where: { !$0.kept }) {
+                keep(row)
+                UserDefaults.standard.set(row.id, forKey: "feed.eyes.kept")
+                try? await Task.sleep(for: .seconds(1.2))
+                withAnimation(.snappy) { face = .kept }
+            }
+        case "feed-unkeep":
+            // Only what `feed-keep` kept, so his own keeps stay.
+            face = .kept
+            try? await Task.sleep(for: .seconds(1))
+            let id = UserDefaults.standard.string(forKey: "feed.eyes.kept")
+            if let row = store.kept.first(where: { $0.id == id }) { keep(row) }
+        case "feed-fold":
+            if let row = store.rows.first { withAnimation(.snappy) { store.dismiss(row, post: false) } }
+        case "feed-open":
+            if let row = store.rows.first(where: { $0.url != nil }) { open(row) }
+        case "feed-read":
+            if let row = store.rows.first(where: { $0.url == nil }) { open(row) }
+        default:
+            break
+        }
+    }
+}
+
+// One card on the timeline.
+private struct FeedCard: View {
+    let row: FeedRow
+    let liked: Bool
+    let expanded: Bool
+    let open: () -> Void
+    let like: () -> Void
+    let keep: () -> Void
+    let star: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            head
+            Text(row.title)
+                .font(.system(.body, design: .serif).weight(.semibold))
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            if !row.text.isEmpty {
+                FeedText(text: row.text, expanded: expanded)
+            }
+            if let path = row.image {
+                FeedPicture(path: path)
+            }
+            marks
+        }
+        .padding(.top, 14)
+        .padding(.horizontal, 18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: open)
+        // A slam dunk carries a thin gilt rule down its left edge.
+        .overlay(alignment: .leading) {
+            if row.slamDunk {
+                Rectangle()
+                    .fill(Theme.gilt)
+                    .frame(width: 2)
+                    .padding(.vertical, 14)
+            }
+        }
+        .plaque()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(said)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(row.url == nil ? "Reads the whole of it." : "Opens the link.")
+        .accessibilityAction(.default, open)
+        .accessibilityAction(named: liked ? "Liked" : "Like", like)
+        .accessibilityAction(named: row.kept ? "Take off Kept" : "Keep", keep)
+        .accessibilityAction(named: row.starred ? "Unstar" : "Star, for the house", star)
+        .accessibilityIdentifier("feed-card")
+    }
+
+    private var said: String {
+        var bits = [row.source, row.kind].filter { !$0.isEmpty }.joined(separator: ", ")
+        if row.slamDunk { bits += ", a slam dunk" }
+        return [bits, row.title, row.text, row.sinceSaid()].filter { !$0.isEmpty }.joined(separator: ". ")
+    }
+
+    // The source in gilt, the kind beside it, the time since at the right;
+    // at the largest sizes the time takes its own line.
+    private var head: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
+        return layout {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(row.source)
+                    .font(Theme.label(.caption))
+                    .tracking(1)
+                    .foregroundStyle(Theme.gilt)
+                if !row.kind.isEmpty {
+                    Text(row.kind)
+                        .font(Theme.label(.caption))
+                        .tracking(0.6)
+                        .foregroundStyle(Theme.ink.opacity(0.55))
+                }
+            }
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 8) }
+            Text(row.since())
+                .font(.caption)
+                .foregroundStyle(Theme.ink.opacity(0.55))
+        }
+    }
+
+    private var marks: some View {
+        HStack(spacing: 0) {
+            mark(liked ? "heart.fill" : "heart", on: liked, action: like)
+            mark("arrow.2.squarepath", on: row.kept, action: keep)
+            mark(row.starred ? "star.fill" : "star", on: row.starred, action: star)
+            Spacer(minLength: 0)
+            if row.url != nil {
+                Image(systemName: "arrow.up.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Theme.ink.opacity(0.35))
+            }
+        }
+        .padding(.leading, -12)
+    }
+
+    private func mark(_ symbol: String, on: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                // The retweet mark has no filled glyph, so a mark that is on
+                // is drawn heavier and in full gilt, one that is off is faint.
+                .font(.footnote.weight(on ? .bold : .regular))
+                .foregroundStyle(Theme.gilt.opacity(on ? 1 : 0.6))
+                .symbolEffect(.bounce, value: on)
+                .frame(minWidth: 52, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+    }
+}
+
+// The text, four lines and a fade, or the whole of it once read.
+private struct FeedText: View {
+    let text: String
+    let expanded: Bool
+    @State private var whole: CGFloat = 0
+    @State private var shown: CGFloat = 0
+
+    private var cut: Bool { !expanded && whole > shown + 1 }
+
+    var body: some View {
+        Text(text)
+            .font(.callout)
+            .foregroundStyle(Theme.ink.opacity(0.82))
+            .lineLimit(expanded ? nil : 4)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { shown = $0 }
+            .background(alignment: .topLeading) {
+                Text(text)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .hidden()
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
+            }
+            .mask {
+                VStack(spacing: 0) {
+                    Color.black
+                    LinearGradient(colors: [.black, .black.opacity(cut ? 0.1 : 1)], startPoint: .top, endPoint: .bottom)
+                        .frame(height: 22)
+                }
+            }
+    }
+}
+
+// A row's picture, asked of the house alone.
+private struct FeedPicture: View {
+    let path: String
+
+    var body: some View {
+        if let address = Keychain.loadHouseAddress(), let url = HouseClient(baseAddress: address).houseURL(path) {
+            AsyncImage(url: url) { phase in
+                if let image = phase.image {
+                    image.resizable().scaledToFill()
+                } else {
+                    Theme.ink.opacity(0.06)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 180)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Theme.gilt.opacity(0.3), lineWidth: 0.5))
+            .accessibilityHidden(true)
+        }
+    }
+}
+
+// A link read inside the app, the way the bird opens one.
+private struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+    let done: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(done: done) }
+
+    final class Coordinator: NSObject, SFSafariViewControllerDelegate {
+        let done: () -> Void
+        init(done: @escaping () -> Void) { self.done = done }
+        func safariViewControllerDidFinish(_ controller: SFSafariViewController) { done() }
+    }
+
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        let safari = SFSafariViewController(url: url)
+        safari.delegate = context.coordinator
+        safari.preferredControlTintColor = UIColor(Theme.gilt)
+        safari.dismissButtonStyle = .done
+        return safari
+    }
+
+    func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
+}
