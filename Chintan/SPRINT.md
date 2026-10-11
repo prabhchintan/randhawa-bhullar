@@ -544,6 +544,13 @@ M. The icon. Built by the house 2026-09-24 05:04 on his word ("as classy
    checked-in icon (a Velázquez) standing when the house is out of reach.
    Every build, nightly or a sprint's, carries a new work; the icon on his
    phone changes as often as TestFlight installs. makeicon.swift retired.
+   Since 2026-10-11 (his word, after the cycle audit: four identical builds
+   had gone out with nothing but a new icon) the nightly ships only when
+   Chintan/ changed since the annotated tag `chintan-shipped` (its .md
+   files aside) or that tag is 30 days old; ship.sh moves the tag after
+   every upload, a hand run always ships. The icon cannot turn without a
+   build: the private call that silenced the alternate-icon alert broke in
+   iOS 26.1. The widget is the living art; a new icon means a new app.
    Left: seen in the home screen grid on his phone beside Apple's own; the
    dark and tinted variants (iOS 18) if he wants them; a title on the
    TestFlight card is Apple's, not ours.
