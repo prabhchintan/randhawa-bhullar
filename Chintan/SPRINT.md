@@ -1001,15 +1001,50 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   the gear's edge; a fade at the strip's end would say it scrolls. All
   three were there before sprint 65; none shows at the default text.
 
-- **The feed, what is left after sprint 65.** Built: the pane, its cards,
-  the three marks, the fold, the Kept face, the cache and the queue, and
-  (sprint 65) pictures on cards and the painting card. Left for the eyes:
-  a real swipe filmed by the walk (the look folds a card by hand and tells
-  the house nothing); the walk reaching the pane at all; a mark made
-  offline and sent when the house answers; the audit run over the pane.
+- **The feed, what is left after sprint 66.** Built: the pane, its cards,
+  the three marks, the fold, the Kept face, the cache and the queue,
+  (sprint 65) pictures on cards and the painting card, and (sprint 66) the
+  walk, the hitch walk and the audit all reach the pane; the walk's swipe
+  is real and folds on the phone alone (`--feed-staged`). Left: the pane's
+  opening is still a jank on the Mac's frames (feed open 91 ms/s median,
+  feed scroll 33); next, the painting card's soft ground drawn from a
+  small cut instead of a live 30 point blur over the whole picture, then
+  read the numbers again. A mark made offline and sent when the house
+  answers is still unseen.
+
+- **hawa's room answered that a word had come to it six times over.** The
+  eyes' own `study@hawa` says a word on every launch it is given, light and
+  dark, so the repeats are most likely the looks of sprints 63 to 65, not
+  the app; confirm StudyView's `resume` only asks after a word and never
+  sends it again, and never pass `study@hawa` to see.sh twice in one sprint.
+  `study@in-hawa` (sprint 66) opens the room with nothing said.
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 66 (9d5f039, 3b761e0, and the commit carrying this
+  line): the reviewer's fix, as the house steered. hawa's clear mark no
+  longer hangs over the conversation: it closes the room under the last
+  word said, a short gilt hairline and the word in its gilt frame on a
+  mount, centred, and the room scrolls to it as words come, so it never
+  covers a word, a name or the gear (seen in light and dark, /tmp/see/1 and
+  /tmp/see/5; see.sh gains `study@in-hawa`, the room with nothing said).
+  The feed re-shot after sprint 65's last commit, unchanged and whole. The
+  walk now opens The feed from Home, scrolls it, swipes the first card away
+  for real (folded on the phone alone, `--feed-staged`, so the house is
+  told nothing), turns to Kept and lets the pane go from its grabber; its
+  first try dragged from the timeline's head, which is a pull to refresh,
+  and walked the rest of the app inside the pane (walk2). The audit reads
+  the pane on both faces: its one real finding, an unnamed space at the
+  timeline's foot, is gone; a card's clipped text is waived by name, as the
+  Board's reasons are. Audit (walk3): 10 findings, none on the pane, the
+  same Home and Study readings sprint 53 named. The pane's first hitch
+  numbers, and a fix: a kept picture was read and decoded on the main
+  thread as the pane rose; now off it, fading in as before. Hitches, median
+  of three (/tmp/see/hitches4): feed open 91.2 ms/s (139.1 in walk3
+  before), feed scroll 32.9, tabs 25.1, reveal 31.2, swipe 3.9, board
+  scroll 1.5, study scroll 13.1. Walk3 has no tap notes. Left: the pane's
+  opening and scroll still over 10 (backlog). No new door. Funnel: nothing.
 
 - 2026-10-11 · sprint 65 (32690df, e1d8bdf, and the commit carrying this
   line): the feed, round two, as the house steered. A card whose row
