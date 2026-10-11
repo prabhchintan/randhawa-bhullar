@@ -24,7 +24,7 @@ final class ChintanWalk: XCTestCase {
         FileManager.default.createFile(atPath: logURL.path, contents: nil)
         log = try FileHandle(forWritingTo: logURL)
         app = XCUIApplication()
-        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha", "--keep-staged"]
+        app.launchArguments = ["--house", env["CHINTAN_HOUSE"] ?? "", "--tab", "jharokha", "--keep-staged", "--feed-staged"]
     }
 
     override func tearDown() {
@@ -122,6 +122,60 @@ final class ChintanWalk: XCTestCase {
         shot("home-back")
         if !app.buttons["Home"].isHittable { note("home: a tap did not bring the wall back") }
 
+        // The feed: opened from Home's head, down the timeline and back, a
+        // card swiped away (on the phone alone, `--feed-staged`), Kept and
+        // back, and the pane let go with a drag down.
+        let feed = app.buttons["feed"].firstMatch
+        if feed.exists {
+            mark("feed-open")
+            feed.tap()
+            pause(2.5)
+            shot("feed")
+            let timeline = app.descendants(matching: .any).matching(identifier: "timeline").firstMatch
+            if timeline.waitForExistence(timeout: 3) {
+                mark("feed-scroll")
+                timeline.swipeUp()
+                pause(1.5)
+                shot("feed-scrolled")
+                mark("feed-scroll-back")
+                timeline.swipeDown()
+                pause(1.5)
+            } else {
+                note("feed: no timeline")
+            }
+            let cards = app.descendants(matching: .any).matching(identifier: "feed-card")
+            let card = cards.firstMatch
+            if card.waitForExistence(timeout: 3) {
+                let before = cards.count
+                mark("feed-fold")
+                card.swipeLeft(velocity: .fast)
+                pause(1.2)
+                shot("feed-folded")
+                if app.buttons["Dismiss"].exists {
+                    app.buttons["Dismiss"].tap()
+                    pause(1)
+                }
+                note("feed: a swipe left took " + String(before - cards.count) + " card off")
+            } else {
+                note("feed: no card")
+            }
+            let kept = app.buttons["feed-face-kept"].firstMatch
+            if kept.exists {
+                mark("feed-kept")
+                kept.tap()
+                pause(1.5)
+                shot("feed-kept")
+                app.buttons["feed-face-feed"].firstMatch.tap()
+                pause(1)
+            }
+            mark("feed-away")
+            letGo(app)
+            pause(1.5)
+            if !app.buttons["Home"].isHittable { note("feed: a drag down did not let the pane go") }
+        } else {
+            note("home: no feed")
+        }
+
         // The swipe between tabs, as a thumb does it.
         mark("swipe-home-left")
         app.swipeLeft()
@@ -213,11 +267,12 @@ final class ChintanWalk: XCTestCase {
             if !door.isSelected { note("study: a tap on " + room + " did not open it") }
         }
 
-        // In hawa's room with words in it, the clear mark hangs under the
-        // gear: all four names stay hittable, and a tap asks before it clears;
-        // the walk says Cancel, so the room stays.
+        // In hawa's room with words in it, the clear mark closes the room
+        // under its last word: all four names stay hittable, and a tap asks
+        // before it clears; the walk says Cancel, so the room stays.
         let clear = app.buttons["clear"].firstMatch
         if clear.exists {
+            if !clear.isHittable { note("study: the clear mark is not in view at the room's end") }
             for room in ["chintan", "darban", "yaar", "hawa"] where !app.buttons[room].firstMatch.isHittable {
                 note("study: with the clear mark up, " + room + " is off the strip")
             }
@@ -372,6 +427,12 @@ final class ChintanWalk: XCTestCase {
     }
 }
 
+// A sheet let go the way a thumb does it: a drag down from near its top.
+private func letGo(_ app: XCUIApplication) {
+    app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12))
+        .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95)))
+}
+
 // The audit: Apple's own accessibility audit (iOS 17) on every screen the
 // walk rests on: contrast, dynamic type, hit targets, element descriptions,
 // clipped text. Each finding is a line in audit.tsv (screen, appearance,
@@ -417,6 +478,21 @@ final class ChintanAudit: XCTestCase {
         XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 20))
         Thread.sleep(forTimeInterval: 5)
         audit("home")
+
+        let feed = app.buttons["feed"].firstMatch
+        if feed.exists {
+            feed.tap()
+            Thread.sleep(forTimeInterval: 3)
+            audit("feed")
+            let kept = app.buttons["feed-face-kept"].firstMatch
+            if kept.exists {
+                kept.tap()
+                Thread.sleep(forTimeInterval: 1.5)
+                audit("feed, kept")
+            }
+            letGo(app)
+            Thread.sleep(forTimeInterval: 1.5)
+        }
 
         app.buttons["Board"].tap()
         Thread.sleep(forTimeInterval: 3)
@@ -550,6 +626,18 @@ final class ChintanHitches: XCTestCase {
                     Thread.sleep(forTimeInterval: 0.5)
                 }
             }
+        }
+
+        // The feed: the pane rising, its timeline flung, the pane let go.
+        let feed = app.buttons["feed"].firstMatch
+        if feed.exists {
+            window("feed open") {
+                feed.tap()
+                Thread.sleep(forTimeInterval: 2.5)
+            }
+            window("feed scroll") { fling(app.descendants(matching: .any).matching(identifier: "timeline").firstMatch) }
+            letGo(app)
+            Thread.sleep(forTimeInterval: 1.5)
         }
 
         // The first visit to each tab, where a screen builds and fetches.

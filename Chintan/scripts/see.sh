@@ -57,7 +57,9 @@
 #                                                    study@hawa: hawa's room
 #                                                    empty, a word answered,
 #                                                    put away and back, then
-#                                                    chintan's room)
+#                                                    chintan's room;
+#                                                    study@in-hawa: hawa's room
+#                                                    as it stands, nothing said)
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
 #   bash Chintan/scripts/see.sh --hitches [--sample] OUTDIR [RUNS]
 #                                                    the hitch numbers alone, RUNS
@@ -136,6 +138,8 @@ for mode in light dark; do
     case "$tab" in settings@apps) EXTRA=(--settings --open apps) ;; esac
     # settings@foot: opened at the very foot, on the build's colophon.
     case "$tab" in settings@foot) EXTRA=(--settings --open foot) ;; esac
+    # study@in-hawa: hawa's room as the phone holds it, nothing said.
+    case "$tab" in study@in-hawa) EXTRA=(--open hawa) ;; esac
     # settings@on: location granted always, telling, a place heard, and the
     # phone's word, Health and motion heard. The app
     # the eyes launch never monitors and never posts, so the house hears nothing.

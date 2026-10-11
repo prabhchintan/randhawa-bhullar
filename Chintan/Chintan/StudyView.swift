@@ -6,7 +6,7 @@ import SwiftUI
 // right, the composer resting on the foot of the picture, send on return.
 // Each room keeps its own conversation; a reply finds its room even when
 // he has walked into another. hawa's room is kept on the phone alone and
-// only until he clears it, from the clear mark beside its name (his word,
+// only until he clears it, from the clear mark at the room's end (his word,
 // 2026-10-04: a room that emptied itself on its own lost his conversations).
 struct StudyView: View {
     // Whether the study is the page in view.
@@ -85,9 +85,7 @@ struct StudyView: View {
 
     private var walls: some View {
         VStack(spacing: 0) {
-            // Over the conversation, so the clear mark hanging under it takes its tap.
             header
-                .zIndex(1)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
@@ -102,6 +100,9 @@ struct StudyView: View {
                         }
                         if isThinking {
                             Breathing(name: voice.rawValue)
+                        }
+                        if clearable {
+                            clearMark.id(Self.roomEnd)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -130,7 +131,10 @@ struct StudyView: View {
                     }
                 }
                 .onChange(of: messages) {
-                    if let last = messages.last {
+                    // In hawa's room the clear mark is the last thing in view.
+                    if clearable {
+                        withAnimation { proxy.scrollTo(Self.roomEnd, anchor: .bottom) }
+                    } else if let last = messages.last {
                         withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                     }
                 }
@@ -244,36 +248,39 @@ struct StudyView: View {
         }
         .padding(.horizontal, 22)
         .padding(.top, 6)
-        // The clear mark, in hawa's room only and only while it holds
-        // something: a word in gilt under a hairline, the way the names
-        // are set, pressed once to ask and once more to let the room go.
-        // It hangs under the gear, so the four names keep the whole strip.
-        .overlay(alignment: .bottomTrailing) {
-            if voice.clearable && (!messages.isEmpty || isThinking) {
-                Button {
-                    clearing = true
-                } label: {
-                    Text("clear")
-                        .font(Theme.label(.footnote))
-                        .tracking(1.1)
-                        .foregroundStyle(Theme.giltOnArt)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.7), lineWidth: 0.75))
-                        .mount()
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Clear this room")
-                .accessibilityIdentifier("clear")
-                // Hung from a frame of no height at the header's foot, so it
-                // falls below the strip and never covers a name or the gear.
-                .fixedSize()
-                .frame(width: 0, height: 0, alignment: .topTrailing)
-                .padding(.trailing, 22)
-                .offset(y: 8)
+    }
+
+    private static let roomEnd = "room-end"
+
+    // hawa's room only, and only while it holds something.
+    private var clearable: Bool { voice.clearable && (!messages.isEmpty || isThinking) }
+
+    // The clear mark, at the room's end the way a plaque closes a gallery
+    // wall: a gilt hairline and the word in a gilt frame, under the last
+    // word said, so it never covers one. Pressed once to ask and once more
+    // to let the room go.
+    private var clearMark: some View {
+        VStack(spacing: 12) {
+            Rectangle().fill(Theme.giltOnArt).frame(width: 36, height: 0.75)
+            Button {
+                clearing = true
+            } label: {
+                Text("clear")
+                    .font(Theme.label(.footnote))
+                    .tracking(1.1)
+                    .foregroundStyle(Theme.giltOnArt)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.7), lineWidth: 0.75))
+                    .mount()
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Clear this room")
+            .accessibilityIdentifier("clear")
         }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 14)
     }
 
     // The four names share one mount, its edge on the bubbles' edge.

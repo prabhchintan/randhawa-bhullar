@@ -29,6 +29,10 @@ struct FeedView: View {
 
     private var shown: [FeedRow] { face == .feed ? store.rows : store.kept }
 
+    // The walk's swipe folds a card on the phone alone (`--feed-staged`),
+    // so the eyes never take a real row off his feed.
+    private static let staged = ProcessInfo.processInfo.arguments.contains("--feed-staged")
+
     var body: some View {
         ScrollViewReader { proxy in
         List {
@@ -67,7 +71,7 @@ struct FeedView: View {
                     .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
-                            withAnimation(.snappy) { store.dismiss(row) }
+                            withAnimation(.snappy) { store.dismiss(row, post: !Self.staged) }
                         } label: {
                             Label("Dismiss", systemImage: "xmark")
                         }
@@ -85,6 +89,7 @@ struct FeedView: View {
         .scrollContentBackground(.hidden)
         .scrollIndicators(.hidden)
         .fadedEdges(top: 18, bottom: 28)
+        .accessibilityIdentifier("timeline")
         .refreshable { await store.refresh() }
         .task {
             await store.open()
