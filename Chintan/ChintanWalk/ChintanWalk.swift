@@ -143,10 +143,10 @@ final class ChintanWalk: XCTestCase {
             } else {
                 note("feed: no timeline")
             }
-            let cards = app.descendants(matching: .any).matching(identifier: "feed-card")
-            let card = cards.firstMatch
+            let card = app.descendants(matching: .any).matching(identifier: "feed-card").firstMatch
             if card.waitForExistence(timeout: 3) {
-                let before = cards.count
+                // The list is lazy, so the card is found again by what it says.
+                let said = card.label
                 mark("feed-fold")
                 card.swipeLeft(velocity: .fast)
                 pause(1.2)
@@ -155,7 +155,8 @@ final class ChintanWalk: XCTestCase {
                     app.buttons["Dismiss"].tap()
                     pause(1)
                 }
-                note("feed: a swipe left took " + String(before - cards.count) + " card off")
+                let still = app.descendants(matching: .any).matching(NSPredicate(format: "identifier == 'feed-card' AND label == %@", said)).firstMatch
+                if still.exists { note("feed: a swipe left did not fold the card") }
             } else {
                 note("feed: no card")
             }
@@ -427,10 +428,15 @@ final class ChintanWalk: XCTestCase {
     }
 }
 
-// A sheet let go the way a thumb does it: a drag down from near its top.
+// A sheet let go the way a thumb does it: a quick drag down from its grabber.
+// From the timeline's head the same drag is a pull to refresh, not a let go.
 private func letGo(_ app: XCUIApplication) {
-    app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.12))
-        .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95)))
+    for y in [0.088, 0.078] where !app.buttons["Home"].isHittable {
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: y))
+            .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)),
+                   withVelocity: .fast, thenHoldForDuration: 0)
+        Thread.sleep(forTimeInterval: 1.2)
+    }
 }
 
 // The audit: Apple's own accessibility audit (iOS 17) on every screen the
@@ -526,7 +532,8 @@ final class ChintanAudit: XCTestCase {
     //   the study's words, Home's lines and label over their shade and the
     //   bar's names all read cleanly in both modes in every look since sprint 4.
     // - text clipped, the board: a thing's reasons stop at two lines by
-    //   design; the rest is on tap.
+    //   design; the rest is on tap. The feed's cards the same: four lines of
+    //   text, a painting's credit three, then a fade; the whole on tap.
     // - dynamic type, the bar's names and the rings' names: held at a size on
     //   purpose (the bar at the system tab bar's, with the large content viewer
     //   on a press and hold; the rings, a picture, at the first large size), so
@@ -542,6 +549,9 @@ final class ChintanAudit: XCTestCase {
         }
         if type == .textClipped, screen.hasPrefix("board") {
             return "a thing's reasons stop at two lines by design, the rest on tap"
+        }
+        if type == .textClipped, screen.hasPrefix("feed") {
+            return "a card's text stops at its lines and fades by design, the rest on tap"
         }
         return nil
     }

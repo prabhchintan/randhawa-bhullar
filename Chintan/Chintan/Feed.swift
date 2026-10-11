@@ -329,22 +329,27 @@ final class FeedPictures {
         SHA256.hash(data: Data(image.utf8)).prefix(12).map { String(format: "%02x", $0) }.joined() + ".jpg"
     }
 
-    // The picture if the phone holds it, without waiting.
+    // The picture if it is already drawn this session, without waiting. A
+    // kept file is never read here: read and decoded as the pane rose, it
+    // stalled the pane's first frames (the walk's "feed open", sprint 66).
     func held(_ image: String) -> UIImage? {
-        if let one = held[image] { return one }
-        guard let one = UIImage(contentsOfFile: Self.folder.appendingPathComponent(Self.name(image)).path) else { return nil }
-        held[image] = one
-        return one
+        held[image]
     }
 
     func picture(_ image: String) async -> UIImage? {
         if let one = held(image) { return one }
         if let task = asking[image] { return await task.value }
+        let file = Self.folder.appendingPathComponent(Self.name(image))
         let task = Task<UIImage?, Never> {
+            // Kept on the phone: read and decoded away from the screen.
+            if let one = await Task.detached(priority: .userInitiated, operation: {
+                UIImage(contentsOfFile: file.path)?.preparingForDisplay()
+            }).value {
+                return one
+            }
             guard let url = Self.source(image),
                   let (data, response) = try? await Self.session.data(from: url),
                   (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
-            let file = Self.folder.appendingPathComponent(Self.name(image))
             return await Task.detached(priority: .utility) { Self.cut(data, to: file) }.value
         }
         asking[image] = task

@@ -84,6 +84,8 @@ struct FeedView: View {
                 .frame(height: 24)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+                // Room at the foot, nothing to read.
+                .accessibilityHidden(true)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
