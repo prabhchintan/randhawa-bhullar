@@ -984,8 +984,32 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    bundle, Prabhchintan.Chintan.Widget, with no capabilities, which cloud
    signing registers by itself. Never register App Groups by API.
 
+- **Bug, seen in sprint 63: hawa's name leaves the header.** Once hawa's
+  room holds words, its clear mark joins the header and the four names no
+  longer fit beside it at the default text size: the strip shows chintan,
+  darban, yaar and the clear mark, and hawa is cut off (see.sh study@hawa,
+  both looks). The fix keeps all four names and the mark in view, perhaps
+  the clear mark moved under the names or into the held plaque.
+
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 63 (9d2f1bd, and the commit carrying this line): on
+  the house's steer (the gear and the four names in the Study answered no
+  tap on the phone), they answer again. The cause: hawa's empty room draws
+  its line at the top of the conversation over a pool of shade 70 points
+  wider than the line on every side, and that shade reached up over the
+  whole header and took every tap there; the line and its shade now let
+  touches through, and look exactly as before. Reproduced by the walk on
+  the simulator: from darban and yaar the taps landed, from hawa's empty
+  room a tap on chintan did nothing; after the fix, from hawa's room the
+  gear opens Settings, chintan opens with the gilt rule, a hold grows the
+  plaque and a slide onto its last line opens the word for the house
+  (/tmp/see/walk1, stills /tmp/see/1, /tmp/see/last). The walk now taps
+  the gear from hawa's room and notes any name that does not open. Hitches
+  (walk1): tabs 23.5 ms/s, reveal 31.5, swipe 0.0, study scroll 4.7.
+  Seen on the way, not mended: hawa's name is cut off the header when its
+  room holds words (backlog). No new door. Funnel: nothing.
 
 - 2026-10-07 · sprint 62 (e68ff0d, and the commit carrying this line): a
   thing has one face, as the house steered. The Board's leaf titles are now
