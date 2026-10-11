@@ -30,6 +30,7 @@ struct FeedView: View {
     private var shown: [FeedRow] { face == .feed ? store.rows : store.kept }
 
     var body: some View {
+        ScrollViewReader { proxy in
         List {
             heading
                 .listRowInsets(EdgeInsets(top: 18, leading: 22, bottom: 6, trailing: 22))
@@ -73,6 +74,7 @@ struct FeedView: View {
                         .tint(Theme.gilt)
                     }
                     .accessibilityAction(named: "Dismiss") { withAnimation(.snappy) { store.dismiss(row) } }
+                    .id(row.id)
             }
             Color.clear
                 .frame(height: 24)
@@ -82,10 +84,12 @@ struct FeedView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .scrollIndicators(.hidden)
+        .fadedEdges(top: 18, bottom: 28)
         .refreshable { await store.refresh() }
         .task {
             await store.open()
-            await look()
+            await look(proxy)
+        }
         }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: likes)
         .sensoryFeedback(.selection, trigger: keeps)
@@ -156,8 +160,9 @@ struct FeedView: View {
     // `feed-keep` keeps it and turns to Kept, `feed-unkeep` takes that one off
     // again, `feed-fold` folds it away without telling the
     // house, `feed-open` opens the first with a link, `feed-read` the first
-    // without one.
-    private func look() async {
+    // without one; `feed-picture` scrolls to the first card of words with a
+    // picture.
+    private func look(_ proxy: ScrollViewProxy) async {
         guard let eyes else { return }
         try? await Task.sleep(for: .seconds(1.2))
         switch eyes {
@@ -180,6 +185,10 @@ struct FeedView: View {
             if let row = store.rows.first { withAnimation(.snappy) { store.dismiss(row, post: false) } }
         case "feed-open":
             if let row = store.rows.first(where: { $0.url != nil }) { open(row) }
+        case "feed-picture":
+            if let row = store.rows.first(where: { $0.image != nil && !$0.art }) {
+                withAnimation(.snappy) { proxy.scrollTo(row.id, anchor: .top) }
+            }
         case "feed-read":
             if let row = store.rows.first(where: { $0.url == nil }) { open(row) }
         default:
@@ -200,44 +209,120 @@ private struct FeedCard: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            head
-            Text(row.title)
-                .font(.system(.body, design: .serif).weight(.semibold))
-                .foregroundStyle(Theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
-            if !row.text.isEmpty {
-                FeedText(text: row.text, expanded: expanded)
-            }
-            if let path = row.image {
-                FeedPicture(path: path)
-            }
-            marks
-        }
-        .padding(.top, 14)
-        .padding(.horizontal, 18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
-        .onTapGesture(perform: open)
-        // A slam dunk carries a thin gilt rule down its left edge.
-        .overlay(alignment: .leading) {
-            if row.slamDunk {
-                Rectangle()
-                    .fill(Theme.gilt)
-                    .frame(width: 2)
-                    .padding(.vertical, 14)
-            }
-        }
-        .plaque()
-        .accessibilityElement(children: .ignore)
+        face
+            .accessibilityElement(children: .ignore)
         .accessibilityLabel(said)
         .accessibilityAddTraits(.isButton)
-        .accessibilityHint(row.url == nil ? "Reads the whole of it." : "Opens the link.")
+        .accessibilityHint(row.url == nil ? "Reads the whole of it." : row.art ? "Opens the museum's page." : "Opens the link.")
         .accessibilityAction(.default, open)
         .accessibilityAction(named: liked ? "Liked" : "Like", like)
         .accessibilityAction(named: row.kept ? "Take off Kept" : "Keep", keep)
         .accessibilityAction(named: row.starred ? "Unstar" : "Star, for the house", star)
         .accessibilityIdentifier("feed-card")
+    }
+
+    @ViewBuilder private var face: some View {
+        if row.art, let image = row.image {
+            painting(image)
+        } else {
+            plain
+        }
+    }
+
+    // A card of words, its picture at its head when the house has one, edge
+    // to edge and held to 16:10 from the first paint.
+    private var plain: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let image = row.image {
+                FeedPicture(image: image)
+                    .aspectRatio(16 / 10, contentMode: .fit)
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(Theme.gilt.opacity(0.4)).frame(height: 0.5)
+                    }
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                head(source: Theme.gilt, quiet: Theme.ink.opacity(0.55))
+                Text(row.title)
+                    .font(.system(.body, design: .serif).weight(.semibold))
+                    .foregroundStyle(Theme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !row.text.isEmpty {
+                    FeedText(text: row.text, expanded: expanded)
+                }
+                marks(Theme.gilt, quiet: Theme.ink.opacity(0.35))
+            }
+            .padding(.top, 14)
+            .padding(.horizontal, 18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            // A slam dunk carries a thin gilt rule down its left edge.
+            .overlay(alignment: .leading) {
+                if row.slamDunk {
+                    Rectangle()
+                        .fill(Theme.gilt)
+                        .frame(width: 2)
+                        .padding(.vertical, 14)
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .contentShape(Rectangle())
+        .onTapGesture(perform: open)
+        .plaque()
+    }
+
+    // The day's painting: the picture to the card's edges, whole, over its
+    // own colours drawn soft, and the label on a smoked mount at its foot,
+    // the way the label sits under the painting on Home. A tap opens the
+    // museum's page.
+    private func painting(_ image: String) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            FeedPicture(image: image, whole: true)
+                .aspectRatio(4 / 5, contentMode: .fit)
+            VStack(alignment: .leading, spacing: 8) {
+                head(source: Theme.giltOnArt, quiet: Theme.bone.opacity(0.6))
+                Text(row.title)
+                    .font(.system(.body, design: .serif).italic())
+                    .foregroundStyle(Theme.bone)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !row.text.isEmpty {
+                    Text(row.text)
+                        .font(.footnote)
+                        .foregroundStyle(Theme.bone.opacity(0.72))
+                        .lineLimit(expanded ? nil : 3)
+                }
+                marks(Theme.giltOnArt, quiet: Theme.bone.opacity(0.4))
+            }
+            .padding(.top, 14)
+            .padding(.horizontal, 18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .overlay(Theme.lampBlack.opacity(0.68))
+                    .environment(\.colorScheme, .dark)
+            }
+            .overlay(alignment: .top) {
+                Rectangle().fill(Theme.giltOnArt.opacity(0.45)).frame(height: 0.5)
+            }
+            .overlay(alignment: .leading) {
+                if row.slamDunk {
+                    Rectangle()
+                        .fill(Theme.giltOnArt)
+                        .frame(width: 2)
+                        .padding(.vertical, 14)
+                }
+            }
+        }
+        .background { FeedPicture(image: image, ground: true) }
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.55), lineWidth: 0.5))
+        .background {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Theme.lampBlack)
+                .shadow(color: .black.opacity(0.25), radius: 12, y: 4)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: open)
     }
 
     private var said: String {
@@ -248,7 +333,7 @@ private struct FeedCard: View {
 
     // The source in gilt, the kind beside it, the time since at the right;
     // at the largest sizes the time takes its own line.
-    private var head: some View {
+    private func head(source: Color, quiet: Color) -> some View {
         let layout = typeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
             : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
@@ -257,43 +342,44 @@ private struct FeedCard: View {
                 Text(row.source)
                     .font(Theme.label(.caption))
                     .tracking(1)
-                    .foregroundStyle(Theme.gilt)
-                if !row.kind.isEmpty {
+                    .foregroundStyle(source)
+                // A kind that only repeats its source is said once.
+                if !row.kind.isEmpty, row.kind.lowercased() != row.source.lowercased() {
                     Text(row.kind)
                         .font(Theme.label(.caption))
                         .tracking(0.6)
-                        .foregroundStyle(Theme.ink.opacity(0.55))
+                        .foregroundStyle(quiet)
                 }
             }
             if !typeSize.isAccessibilitySize { Spacer(minLength: 8) }
             Text(row.since())
                 .font(.caption)
-                .foregroundStyle(Theme.ink.opacity(0.55))
+                .foregroundStyle(quiet)
         }
     }
 
-    private var marks: some View {
+    private func marks(_ tint: Color, quiet: Color) -> some View {
         HStack(spacing: 0) {
-            mark(liked ? "heart.fill" : "heart", on: liked, action: like)
-            mark("arrow.2.squarepath", on: row.kept, action: keep)
-            mark(row.starred ? "star.fill" : "star", on: row.starred, action: star)
+            mark(liked ? "heart.fill" : "heart", on: liked, tint: tint, action: like)
+            mark("arrow.2.squarepath", on: row.kept, tint: tint, action: keep)
+            mark(row.starred ? "star.fill" : "star", on: row.starred, tint: tint, action: star)
             Spacer(minLength: 0)
             if row.url != nil {
                 Image(systemName: "arrow.up.right")
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(Theme.ink.opacity(0.35))
+                    .foregroundStyle(quiet)
             }
         }
         .padding(.leading, -12)
     }
 
-    private func mark(_ symbol: String, on: Bool, action: @escaping () -> Void) -> some View {
+    private func mark(_ symbol: String, on: Bool, tint: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 // The retweet mark has no filled glyph, so a mark that is on
                 // is drawn heavier and in full gilt, one that is off is faint.
                 .font(.footnote.weight(on ? .bold : .regular))
-                .foregroundStyle(Theme.gilt.opacity(on ? 1 : 0.6))
+                .foregroundStyle(tint.opacity(on ? 1 : 0.6))
                 .symbolEffect(.bounce, value: on)
                 .frame(minWidth: 52, minHeight: 44)
                 .contentShape(Rectangle())
@@ -334,25 +420,57 @@ private struct FeedText: View {
     }
 }
 
-// A row's picture, asked of the house alone.
+// A row's picture from the phone's copy, or brought down and faded in. The
+// frame it fills is the card's from the first paint, smoked glass until the
+// picture comes, so nothing below it moves. `whole` shows a painting entire,
+// never cropped; `ground` is the same picture drawn soft behind it.
 private struct FeedPicture: View {
-    let path: String
+    let image: String
+    var whole = false
+    var ground = false
+    @State private var picture: UIImage?
+
+    init(image: String, whole: Bool = false, ground: Bool = false) {
+        self.image = image
+        self.whole = whole
+        self.ground = ground
+        _picture = State(initialValue: FeedPictures.shared.held(image))
+    }
 
     var body: some View {
-        if let address = Keychain.loadHouseAddress(), let url = HouseClient(baseAddress: address).houseURL(path) {
-            AsyncImage(url: url) { phase in
-                if let image = phase.image {
-                    image.resizable().scaledToFill()
-                } else {
-                    Theme.ink.opacity(0.06)
+        // A whole painting stands over its own ground, which carries the glass.
+        Rectangle()
+            .fill(whole ? AnyShapeStyle(Color.clear) : AnyShapeStyle(.ultraThinMaterial))
+            .overlay(whole ? .clear : Theme.lampBlack.opacity(ground ? 0.7 : 0.2))
+            .environment(\.colorScheme, .dark)
+            .overlay {
+                if let picture {
+                    if ground {
+                        Image(uiImage: picture)
+                            .resizable()
+                            .scaledToFill()
+                            .blur(radius: 30, opaque: true)
+                            .overlay(Theme.lampBlack.opacity(0.35))
+                            .transition(.opacity)
+                    } else if whole {
+                        Image(uiImage: picture)
+                            .resizable()
+                            .scaledToFit()
+                            .transition(.opacity)
+                    } else {
+                        Image(uiImage: picture)
+                            .resizable()
+                            .scaledToFill()
+                            .transition(.opacity)
+                    }
                 }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 180)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Theme.gilt.opacity(0.3), lineWidth: 0.5))
+            .clipped()
             .accessibilityHidden(true)
-        }
+            .task(id: image) {
+                guard picture == nil, let one = await FeedPictures.shared.picture(image) else { return }
+                withAnimation(.easeOut(duration: 0.45)) { picture = one }
+            }
     }
 }
 

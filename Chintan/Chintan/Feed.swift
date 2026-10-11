@@ -1,5 +1,8 @@
+import CryptoKit
 import Foundation
+import ImageIO
 import SwiftUI
+import UIKit
 
 // One row of the feed as the house serves it: where it came from, what kind
 // of thing it is, its title and text, a link and a picture when it has them,
@@ -43,6 +46,8 @@ struct FeedRow: Codable, Identifiable, Equatable {
     }
 
     var slamDunk: Bool { score >= 90 }
+    // The day's painting, a card of its own.
+    var art: Bool { kind.lowercased() == "art" }
     // On his profile: kept, and starred, which is kept and sent to the house.
     var kept: Bool { status == "kept" || status == "starred" }
     var starred: Bool { status == "starred" }
@@ -178,6 +183,7 @@ final class FeedStore: ObservableObject {
             }
             at = .now
             word = nil
+            FeedPictures.shared.keepOnly(rows + kept)
         case .failure(HouseError.noDoor):
             word = "The house does not keep a feed yet."
         case .failure:
@@ -289,6 +295,96 @@ final class FeedStore: ObservableObject {
     private func save() {
         let saved = Saved(rows: rows, kept: kept, liked: Array(liked), at: at, pending: pending)
         try? JSONEncoder().encode(saved).write(to: Self.file, options: .atomic)
+    }
+}
+
+// The feed's pictures, kept on the phone like the shelf's: brought down once,
+// cut to the card's size, so a card scrolled back to or opened offline shows
+// its picture at once. The house names each picture as a page's own image or
+// a museum's open-access file; a house path is asked of the house, a picture
+// elsewhere over https only, with no cookies and nothing of his sent. What
+// leaves the feed leaves the phone.
+@MainActor
+final class FeedPictures {
+    static let shared = FeedPictures()
+
+    private var held: [String: UIImage] = [:]
+    private var asking: [String: Task<UIImage?, Never>] = [:]
+
+    private static let folder: URL = {
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let url = caches.appendingPathComponent("feed-pictures", isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }()
+
+    private static let session: URLSession = {
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 20
+        config.httpShouldSetCookies = false
+        return URLSession(configuration: config)
+    }()
+
+    private static func name(_ image: String) -> String {
+        SHA256.hash(data: Data(image.utf8)).prefix(12).map { String(format: "%02x", $0) }.joined() + ".jpg"
+    }
+
+    // The picture if the phone holds it, without waiting.
+    func held(_ image: String) -> UIImage? {
+        if let one = held[image] { return one }
+        guard let one = UIImage(contentsOfFile: Self.folder.appendingPathComponent(Self.name(image)).path) else { return nil }
+        held[image] = one
+        return one
+    }
+
+    func picture(_ image: String) async -> UIImage? {
+        if let one = held(image) { return one }
+        if let task = asking[image] { return await task.value }
+        let task = Task<UIImage?, Never> {
+            guard let url = Self.source(image),
+                  let (data, response) = try? await Self.session.data(from: url),
+                  (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+            let file = Self.folder.appendingPathComponent(Self.name(image))
+            return await Task.detached(priority: .utility) { Self.cut(data, to: file) }.value
+        }
+        asking[image] = task
+        let one = await task.value
+        asking[image] = nil
+        if let one { held[image] = one }
+        return one
+    }
+
+    // Only the pictures the feed and Kept still show stay on the phone.
+    func keepOnly(_ rows: [FeedRow]) {
+        let keep = Set(rows.compactMap { $0.image.map(Self.name) })
+        for name in (try? FileManager.default.contentsOfDirectory(atPath: Self.folder.path)) ?? [] where !keep.contains(name) {
+            try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(name))
+        }
+        held = held.filter { keep.contains(Self.name($0.key)) }
+    }
+
+    private static func source(_ image: String) -> URL? {
+        if image.hasPrefix("/") {
+            guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return nil }
+            return HouseClient(baseAddress: address).houseURL(image)
+        }
+        guard let url = URL(string: image), url.scheme == "https" else { return nil }
+        return url
+    }
+
+    // A museum's print file runs to thousands of pixels; the card needs the
+    // phone's width at 3x, so it is cut down once and kept at that size.
+    nonisolated private static func cut(_ data: Data, to file: URL) -> UIImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: 1400,
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { return nil }
+        let one = UIImage(cgImage: cg)
+        if let jpeg = one.jpegData(compressionQuality: 0.85) { try? jpeg.write(to: file, options: .atomic) }
+        return one
     }
 }
 
