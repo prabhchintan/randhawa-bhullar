@@ -185,6 +185,9 @@ struct StudyView: View {
         }
         .padding(.horizontal, 40)
         .padding(voice.clearable ? .top : .bottom, 24)
+        // Nothing here is touched. In hawa's empty room the shade reaches up
+        // over the names and the gear, and once took every tap there.
+        .allowsHitTesting(false)
     }
 
     private static func sentence(_ line: String) -> String {

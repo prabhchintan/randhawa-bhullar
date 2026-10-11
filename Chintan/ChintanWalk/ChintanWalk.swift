@@ -203,13 +203,42 @@ final class ChintanWalk: XCTestCase {
         pause(1.5)
         shot("study-scrolled")
 
-        for room in ["darban", "yaar", "chintan"] {
+        for room in ["darban", "yaar", "hawa"] {
             let door = app.buttons[room].firstMatch
             guard door.exists else { note("study: no room " + room); continue }
             mark("room-" + room)
             door.tap()
             pause(1.2)
             shot("study-" + room)
+            if !door.isSelected { note("study: a tap on " + room + " did not open it") }
+        }
+
+        // The gear opens Settings, from hawa's room, whose empty line once
+        // shaded the names and the gear and took their taps; then chintan's
+        // name. A tap that lands nowhere is written down.
+        let gear = app.buttons["Settings"].firstMatch
+        if gear.exists {
+            mark("gear")
+            gear.tap()
+            pause(1.2)
+            shot("study-gear")
+            if app.buttons["Done"].exists {
+                app.buttons["Done"].tap()
+                pause(1)
+            } else {
+                note("study: the gear did not open Settings")
+            }
+        } else {
+            note("study: no gear")
+        }
+
+        let home = app.buttons["chintan"].firstMatch
+        if home.exists {
+            mark("room-chintan")
+            home.tap()
+            pause(1.2)
+            shot("study-chintan")
+            if !home.isSelected { note("study: a tap on chintan did not open it") }
         }
 
         // A room's name held grows its plaque under the names; the film sees
