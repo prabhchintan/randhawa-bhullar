@@ -226,10 +226,12 @@ struct JharokhaView: View {
                         .transition(.opacity)
                 }
             }
-            .foregroundStyle(Theme.bone.opacity(0.85))
-            .shadow(color: .black.opacity(0.7), radius: 5)
-            .padding(.horizontal, 22)
-            .padding(.vertical, 12)
+            .foregroundStyle(Theme.bone.opacity(0.9))
+            // On the same mount as the feed beside it, so the pair reads as one.
+            .mount()
+            .padding(.leading, 22)
+            .padding(.trailing, 10)
+            .padding(.vertical, 6)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

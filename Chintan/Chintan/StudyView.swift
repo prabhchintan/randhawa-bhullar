@@ -85,7 +85,9 @@ struct StudyView: View {
 
     private var walls: some View {
         VStack(spacing: 0) {
+            // Over the conversation, so the clear mark hanging under it takes its tap.
             header
+                .zIndex(1)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
@@ -228,9 +230,25 @@ struct StudyView: View {
             // Never wider than the page: names too wide for it once pushed
             // the whole study, bubbles and composer, past the Board's margin.
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-            // The clear mark, in hawa's room only and only while it holds
-            // something: a word in gilt under a hairline, the way the names
-            // are set, pressed once to ask and once more to let the room go.
+            Button {
+                showingSettings = true
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.body)
+                    .foregroundStyle(Theme.bone.opacity(0.85))
+                    .frame(width: 36, height: 36)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .environment(\.colorScheme, .dark)
+            }
+            .accessibilityLabel("Settings")
+        }
+        .padding(.horizontal, 22)
+        .padding(.top, 6)
+        // The clear mark, in hawa's room only and only while it holds
+        // something: a word in gilt under a hairline, the way the names
+        // are set, pressed once to ask and once more to let the room go.
+        // It hangs under the gear, so the four names keep the whole strip.
+        .overlay(alignment: .bottomTrailing) {
             if voice.clearable && (!messages.isEmpty || isThinking) {
                 Button {
                     clearing = true
@@ -248,21 +266,14 @@ struct StudyView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Clear this room")
                 .accessibilityIdentifier("clear")
+                // Hung from a frame of no height at the header's foot, so it
+                // falls below the strip and never covers a name or the gear.
+                .fixedSize()
+                .frame(width: 0, height: 0, alignment: .topTrailing)
+                .padding(.trailing, 22)
+                .offset(y: 8)
             }
-            Button {
-                showingSettings = true
-            } label: {
-                Image(systemName: "gearshape")
-                    .font(.body)
-                    .foregroundStyle(Theme.bone.opacity(0.85))
-                    .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .environment(\.colorScheme, .dark)
-            }
-            .accessibilityLabel("Settings")
         }
-        .padding(.horizontal, 22)
-        .padding(.top, 6)
     }
 
     // The four names share one mount, its edge on the bubbles' edge.

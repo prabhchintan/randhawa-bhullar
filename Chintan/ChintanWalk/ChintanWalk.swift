@@ -213,6 +213,29 @@ final class ChintanWalk: XCTestCase {
             if !door.isSelected { note("study: a tap on " + room + " did not open it") }
         }
 
+        // In hawa's room with words in it, the clear mark hangs under the
+        // gear: all four names stay hittable, and a tap asks before it clears;
+        // the walk says Cancel, so the room stays.
+        let clear = app.buttons["clear"].firstMatch
+        if clear.exists {
+            for room in ["chintan", "darban", "yaar", "hawa"] where !app.buttons[room].firstMatch.isHittable {
+                note("study: with the clear mark up, " + room + " is off the strip")
+            }
+            mark("clear")
+            clear.tap()
+            pause(1)
+            shot("study-clear-asked")
+            if app.buttons["Cancel"].exists {
+                app.buttons["Cancel"].tap()
+                // The dialog has to be gone before the gear can take a tap.
+                let gone = NSPredicate(format: "exists == false")
+                _ = XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: gone, object: app.buttons["Cancel"])], timeout: 3)
+                pause(0.5)
+            } else {
+                note("study: a tap on clear asked nothing")
+            }
+        }
+
         // The gear opens Settings, from hawa's room, whose empty line once
         // shaded the names and the gear and took their taps; then chintan's
         // name. A tap that lands nowhere is written down.
