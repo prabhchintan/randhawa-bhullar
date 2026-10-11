@@ -121,9 +121,15 @@ struct JharokhaView: View {
             // One shade from the day's line down through the tab bar, no seam.
             .background { PaintedGround(head: 110, foot: geo.size.height * 0.75, footShade: 0.82) }
             .overlay(alignment: .topLeading) {
-                HStack(spacing: 0) {
+                // At the accessibility sizes the two names stand one over the
+                // other, each whole.
+                let head = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 0))
+                    : AnyLayout(HStackLayout(spacing: 0))
+                head {
                     guestBook
                     feedMount
+                        .padding(.leading, typeSize.isAccessibilitySize ? 12 : 0)
                 }
             }
             #if targetEnvironment(macCatalyst)
