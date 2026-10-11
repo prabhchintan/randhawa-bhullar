@@ -174,6 +174,13 @@ Touches: views only. Needs his word: no.
   composer still truncates at the largest text, because inside a scroll
   view its field would not take focus; contrast is left alone, since the
   tertiary hints are the apps' quiet voice and the cut did not name it.
+  Second pass on main 2026-10-11 (272b269, 5851e76): the composer fits
+  above the keyboard at the largest text without a scroll view, its photo
+  buttons named icons in one row there and its footnote capped at the
+  first accessibility size; no page reads blank to the audit (its only
+  unnamed elements are the keyboard's suggestion bar). Audit 183 to 176,
+  clipped text 28 to 20, none of it in the composer. Contrast stays as
+  narrowed above.
 
 ## Shipped
 
