@@ -17,6 +17,9 @@
 #       the same, each run's no-hand walk sampled across its first turn
 #       (runN/first-turn.txt, the stacks of every thread); `--sample --at S`
 #       samples from the walk's second S instead.
+#   bash Chintan/scripts/walk.sh --hitches --release [OUTDIR] [RUNS]
+#       the same, built Release, so Debug's first-use costs leave the numbers
+#       (it may follow --sample and --at).
 # The sprint job may run only see.sh, so it reaches all of these as
 # `see.sh --walk ...` (or `see.sh --hitches OUT RUNS`), never by approval.
 set -euo pipefail
@@ -28,6 +31,8 @@ SAMPLE=""
 if [ "${1:-}" = "--sample" ]; then SAMPLE=1; shift; fi
 SAMPLE_AT=9
 if [ "${1:-}" = "--at" ]; then SAMPLE_AT=$2; shift 2; fi
+CONFIG=Debug
+if [ "${1:-}" = "--release" ]; then CONFIG=Release; shift; fi
 OUT=${1:-/tmp/see/walk}
 RUNS=${2:-3}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
@@ -46,7 +51,7 @@ xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
 
 # Build first, so the film holds the walk and not the compiler.
-XCB=(-project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -configuration Debug
+XCB=(-project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -configuration "$CONFIG"
      -destination "id=$UDID" -derivedDataPath "$DD")
 if ! xcodebuild "${XCB[@]}" -only-testing:ChintanWalk build-for-testing > "$OUT/build.log" 2>&1; then
   grep -E -B2 -A6 "error:" "$OUT/build.log" | tail -80

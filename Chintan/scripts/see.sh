@@ -134,7 +134,8 @@ for devs in json.load(sys.stdin)["devices"].values():
 sys.exit("no simulator called " + os.environ["DEVICE"])')
 xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
-APP=$(find "$DD/Build/Products" -name Chintan.app -path '*iphonesimulator*' | head -1)
+# The Debug app by name: the hitch walk's --release leaves a Release one beside it.
+APP="$DD/Build/Products/Debug-iphonesimulator/Chintan.app"
 xcrun simctl install "$UDID" "$APP"
 xcrun simctl ui "$UDID" content_size "$TEXT"
 for mode in light dark; do

@@ -115,21 +115,21 @@ struct FeedView: View {
     // The pane's two faces, the feed and his profile; the name he tapped on
     // Home is the pane's name, so it is not lettered again here.
     private var heading: some View {
-        // On the last baseline, so the away line's second line, if it has
-        // one, rises into the room above rather than lowering the names.
         HStack(alignment: .lastTextBaseline, spacing: 22) {
             faceButton("Feed", .feed)
             faceButton("Kept", .kept)
-            // Away from the house, one thin line on the heading's baseline
-            // says where the rows came from, so the first card keeps its room.
+            // Away from the house, one short line on the heading's baseline
+            // says where the rows came from; never two, so the first card
+            // keeps its room.
             if face == .feed, let away = store.away {
                 Spacer(minLength: 0)
                 Text(Self.said(away))
                     .font(.caption)
                     .foregroundStyle(Theme.ink.opacity(0.62))
-                    .multilineTextAlignment(.trailing)
-                    .lineLimit(2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .layoutPriority(-1)
+                    .accessibilityLabel(Self.told(away))
                     .accessibilityIdentifier("feed-away")
             }
         }
@@ -156,13 +156,22 @@ struct FeedView: View {
         .accessibilityIdentifier("feed-face-\(name.lowercased())")
     }
 
+    // The short line: the hour on the day itself, the date on any other.
     private static func said(_ away: FeedStore.Away) -> String {
         guard case .stale(let pushed) = away else { return "from the road" }
-        guard let pushed else { return "the house has not pushed lately" }
+        guard let pushed else { return "house quiet lately" }
         let when = Calendar.current.isDateInToday(pushed)
             ? pushed.formatted(date: .omitted, time: .shortened)
-            : pushed.formatted(.dateTime.month(.abbreviated).day().hour().minute())
-        return "the house has not pushed since " + when
+            : pushed.formatted(.dateTime.month(.abbreviated).day())
+        return "house quiet since " + when
+    }
+
+    // The whole sentence, for VoiceOver.
+    private static func told(_ away: FeedStore.Away) -> String {
+        guard case .stale(let pushed) = away else { return "From the road, the house is away" }
+        guard let pushed else { return "The house has not pushed lately" }
+        return "The house has not pushed since "
+            + pushed.formatted(.dateTime.month(.wide).day().hour().minute())
     }
 
     private func open(_ row: FeedRow) {
