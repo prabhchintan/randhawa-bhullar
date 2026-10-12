@@ -1035,15 +1035,37 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   queue and road as the like, which was seen heard. (c) A mark queued with
   both the house and the road out of reach, then sent, is unseen.
 
-- **hawa's room answered that a word had come to it six times over.** The
-  eyes' own `study@hawa` says a word on every launch it is given, light and
-  dark, so the repeats are most likely the looks of sprints 63 to 65, not
-  the app; confirm StudyView's `resume` only asks after a word and never
-  sends it again, and never pass `study@hawa` to see.sh twice in one sprint.
-  `study@in-hawa` (sprint 66) opens the room with nothing said.
+- **hawa's six-times replay: cleared (sprint 69).** One word said to hawa,
+  the app left and brought back three times, counted at a stand-in house:
+  one POST /v1/say, polls on its own id until the reply, and nothing after,
+  whatever the returns. `resume` only asks after a word (GET), and the pager
+  builds the Study once, so the launch word's `.task` never fires again.
+  The copies were the eyes' toast word, said to the real hawa on every
+  look; `study@hawa` now speaks only to `scripts/standin.py` on the Mac and
+  writes how many words reached it (NAME.count, 1 is right).
+
+- **Feed open, after the every-open read (sprint 69, median of three).**
+  97.1 ms/s (111.3, 97.1, 94.9; 75.9 in sprint 67), no hand 86.5 (61.5).
+  The every-open read costs about 20 ms/s as the pane rises; next, let the
+  pane's fresh read wait until it has risen and the first cells are drawn
+  (FeedView's `.task` calls `store.open()` at once), then read again.
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 69 (48f0882, 854b898, and the commit carrying this
+  line): the reviewer's fix, as the house steered. hawa's six-times replay
+  cleared: one word said in hawa's room, the app left and brought back three
+  times, and a stand-in house on the Mac heard one POST and its polls, nothing
+  more, in a hand run and in see.sh's light and dark (count 1 and 1,
+  /tmp/see/1). The copies hawa saw were the eyes' own word, said to the real
+  room on every look; the eyes now say it to `scripts/standin.py` only. Feed
+  open after the every-open read, median of three (/tmp/see/h0): 97.1 ms/s
+  (75.9 before the read), no hand 86.5, feed scroll 34.1, tabs 17.1, reveal
+  31.8, study scroll 4.6, board scroll 0.0, swipe 0.0. The feed's pane is
+  bone in light, no longer brown where the painting showed through its
+  glass; its cards stand on it like plaques on a wall, and dark is unchanged
+  (/tmp/see/2, /tmp/see/last). No new door. Funnel: nothing.
 
 - 2026-10-11 · sprint 68 (ea39901 and the commit carrying this line): the
   feed from anywhere, as the house steered. The feed is read again on every
