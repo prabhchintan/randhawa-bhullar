@@ -13,7 +13,7 @@ import SwiftUI
 struct FeedView: View {
     enum Face { case feed, kept }
 
-    @StateObject private var store = FeedStore()
+    @ObservedObject private var store = FeedStore.shared
     @State var face: Face = .feed
     // For the house's eyes: what to do once the rows are in.
     var eyes: String?
@@ -37,7 +37,7 @@ struct FeedView: View {
         ScrollViewReader { proxy in
         List {
             heading
-                .listRowInsets(EdgeInsets(top: 18, leading: 22, bottom: 6, trailing: 22))
+                .listRowInsets(EdgeInsets(top: 26, leading: 22, bottom: 14, trailing: 22))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             if let word = store.word {
@@ -90,7 +90,8 @@ struct FeedView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .scrollIndicators(.hidden)
-        .fadedEdges(top: 18, bottom: 28)
+        // A short fade at the foot, so the first card's marks read at rest.
+        .fadedEdges(top: 18, bottom: 12)
         .accessibilityIdentifier("timeline")
         .refreshable { await store.refresh() }
         .task {
@@ -106,17 +107,12 @@ struct FeedView: View {
         }
     }
 
-    // The pane's name, and its two faces: the feed and his profile.
+    // The pane's two faces, the feed and his profile; the name he tapped on
+    // Home is the pane's name, so it is not lettered again here.
     private var heading: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("The feed")
-                .font(Theme.label())
-                .tracking(0.8)
-                .foregroundStyle(Theme.ink.opacity(0.7))
-            HStack(alignment: .firstTextBaseline, spacing: 22) {
-                faceButton("Feed", .feed)
-                faceButton("Kept", .kept)
-            }
+        HStack(alignment: .firstTextBaseline, spacing: 22) {
+            faceButton("Feed", .feed)
+            faceButton("Kept", .kept)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -441,7 +437,7 @@ private struct FeedPicture: View {
         self.image = image
         self.whole = whole
         self.ground = ground
-        _picture = State(initialValue: FeedPictures.shared.held(image))
+        _picture = State(initialValue: ground ? FeedPictures.shared.heldSoft(image) : FeedPictures.shared.held(image))
     }
 
     var body: some View {
@@ -453,10 +449,11 @@ private struct FeedPicture: View {
             .overlay {
                 if let picture {
                     if ground {
+                        // A small cut, already soft, drawn large.
                         Image(uiImage: picture)
                             .resizable()
+                            .interpolation(.medium)
                             .scaledToFill()
-                            .blur(radius: 30, opaque: true)
                             .overlay(Theme.lampBlack.opacity(0.35))
                             .transition(.opacity)
                     } else if whole {
@@ -475,7 +472,9 @@ private struct FeedPicture: View {
             .clipped()
             .accessibilityHidden(true)
             .task(id: image) {
-                guard picture == nil, let one = await FeedPictures.shared.picture(image) else { return }
+                guard picture == nil else { return }
+                let pictures = FeedPictures.shared
+                guard let one = await (ground ? pictures.softPicture(image) : pictures.picture(image)) else { return }
                 withAnimation(.easeOut(duration: 0.45)) { picture = one }
             }
     }

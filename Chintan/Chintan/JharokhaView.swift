@@ -152,6 +152,10 @@ struct JharokhaView: View {
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
+        // The feed's copy and first pictures made ready before it is opened.
+        .task { await FeedStore.shared.warm() }
+        // The hitch meter's walk with no hand opens and lets go the feed.
+        .onReceive(NotificationCenter.default.publisher(for: HitchMeter.feed)) { showFeed = ($0.object as? Bool) ?? false }
         #if targetEnvironment(macCatalyst)
         // The wall reads the board again every minute while it is in view,
         // and rests while the window is hidden or the Mac sleeps.

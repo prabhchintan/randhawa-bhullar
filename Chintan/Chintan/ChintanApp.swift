@@ -182,6 +182,7 @@ enum Wall {
 // sums them over each gesture the walk logs, the hitch time ratio in ms per s.
 final class HitchMeter: NSObject {
     static let shared = HitchMeter()
+    static let feed = Notification.Name("chintan.selfwalk.feed")
     private var link: CADisplayLink?
     private var last: CFTimeInterval = 0
     private var file: FileHandle?
@@ -231,6 +232,13 @@ final class HitchMeter: NSObject {
                 }
             }
         }
+        // The feed's pane risen from Home and let go, by the meter's own hand.
+        await window("feed open, no hand") {
+            NotificationCenter.default.post(name: HitchMeter.feed, object: true)
+            try? await Task.sleep(for: .seconds(2.5))
+        }
+        NotificationCenter.default.post(name: HitchMeter.feed, object: false)
+        try? await Task.sleep(for: .seconds(1.5))
         try? log?.close()
         FileManager.default.createFile(atPath: caches.appendingPathComponent("self-done").path, contents: nil)
     }

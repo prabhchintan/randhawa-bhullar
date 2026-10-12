@@ -1,3 +1,4 @@
+import CoreImage
 import CryptoKit
 import Foundation
 import ImageIO
@@ -52,21 +53,39 @@ struct FeedRow: Codable, Identifiable, Equatable {
     var kept: Bool { status == "kept" || status == "starred" }
     var starred: Bool { status == "starred" }
 
+    // Read once per stamp and remembered: a card asks for its date on every
+    // drawing, and a formatter made each time stalled the pane's opening
+    // (sprint 67).
     var date: Date? {
         guard let ts else { return nil }
-        if let seconds = Double(ts) { return Date(timeIntervalSince1970: seconds > 1e11 ? seconds / 1000 : seconds) }
+        return Self.when.withLock { known in
+            if let d = known[ts] { return d }
+            let d = Self.read(ts)
+            known[ts] = .some(d)
+            return d
+        }
+    }
+
+    private static let when = Remembered<[String: Date?]>([:])
+    private static let isoFraction: ISO8601DateFormatter = {
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let d = iso.date(from: ts) { return d }
-        iso.formatOptions = [.withInternetDateTime]
-        if let d = iso.date(from: ts) { return d }
-        // A time with no zone is the house's own, read as the phone's.
-        let plain = DateFormatter()
-        plain.locale = Locale(identifier: "en_US_POSIX")
-        for format in ["yyyy-MM-dd'T'HH:mm:ss.SSSSSS", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss"] {
-            plain.dateFormat = format
-            if let d = plain.date(from: ts) { return d }
-        }
+        return iso
+    }()
+    private static let iso = ISO8601DateFormatter()
+    // A time with no zone is the house's own, read as the phone's.
+    private static let plain: [DateFormatter] = ["yyyy-MM-dd'T'HH:mm:ss.SSSSSS", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss"].map {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = $0
+        return f
+    }
+    private static let relative = RelativeDateTimeFormatter()
+
+    private static func read(_ ts: String) -> Date? {
+        if let seconds = Double(ts) { return Date(timeIntervalSince1970: seconds > 1e11 ? seconds / 1000 : seconds) }
+        if let d = isoFraction.date(from: ts) ?? iso.date(from: ts) { return d }
+        for f in plain { if let d = f.date(from: ts) { return d } }
         return nil
     }
 
@@ -86,7 +105,19 @@ struct FeedRow: Codable, Identifiable, Equatable {
     // The same, in words for VoiceOver.
     func sinceSaid(_ now: Date = .now) -> String {
         guard let date else { return "" }
-        return RelativeDateTimeFormatter().localizedString(for: date, relativeTo: now)
+        return Self.relative.localizedString(for: date, relativeTo: now)
+    }
+}
+
+// A value behind a lock, for what any thread may ask.
+final class Remembered<Value>: @unchecked Sendable {
+    private var value: Value
+    private let lock = NSLock()
+    init(_ value: Value) { self.value = value }
+    func withLock<T>(_ body: (inout Value) -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return body(&value)
     }
 }
 
@@ -126,26 +157,51 @@ final class FeedStore: ObservableObject {
         return support.appendingPathComponent("feed.json")
     }()
 
+    private static let writer = DispatchQueue(label: "feed.save", qos: .utility)
+
     private var house: HouseClient? {
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return nil }
         return HouseClient(baseAddress: address)
     }
 
-    // On opening: the phone's copy at once, the house's when it is stale.
-    func open() async {
-        if !loaded, let data = try? Data(contentsOf: Self.file),
-           let saved = try? JSONDecoder().decode(Saved.self, from: data) {
-            rows = saved.rows
-            kept = saved.kept
-            liked = Set(saved.liked)
-            at = saved.at
-            pending = saved.pending
-            loaded = true
+    // One copy for the app, so the pane rises on what Home has already read.
+    static let shared = FeedStore()
+
+    // While Home rests: the phone's copy read and decoded away from the
+    // screen, and the first cards' pictures made ready, so the pane rises on
+    // what is already in hand (the walk's "feed open", sprint 67).
+    func warm() async {
+        if !loaded {
+            let file = Self.file
+            let saved = await Task.detached(priority: .utility) { () -> Saved? in
+                guard let data = try? Data(contentsOf: file) else { return nil }
+                return try? JSONDecoder().decode(Saved.self, from: data)
+            }.value
+            if !loaded, let saved {
+                rows = saved.rows
+                kept = saved.kept
+                liked = Set(saved.liked)
+                at = saved.at
+                pending = saved.pending
+                loaded = true
+            }
         }
+        for row in rows.prefix(3) {
+            guard let image = row.image else { continue }
+            _ = await FeedPictures.shared.picture(image)
+            if row.art { _ = await FeedPictures.shared.softPicture(image) }
+        }
+    }
+
+    // On opening: the phone's copy at once, the house's when it is stale,
+    // asked once the pane has risen so its rows never land mid-rise.
+    func open() async {
+        await warm()
         if let at, Date.now.timeIntervalSince(at) < 5 * 60 {
             await flush()
             return
         }
+        try? await Task.sleep(for: .seconds(0.8))
         await refresh()
     }
 
@@ -169,7 +225,8 @@ final class FeedStore: ObservableObject {
                 if mark.what == "dismissed" { fresh.removeAll { $0.id == mark.id } }
                 if let i = fresh.firstIndex(where: { $0.id == mark.id }) { fresh[i].status = mark.what }
             }
-            rows = fresh
+            // Only a changed list is drawn again.
+            if rows != fresh { rows = fresh }
             if case .success(var profile) = p {
                 for mark in pending where mark.what != "like" {
                     if let i = profile.firstIndex(where: { $0.id == mark.id }) {
@@ -179,10 +236,10 @@ final class FeedStore: ObservableObject {
                         profile.insert(row, at: 0)
                     }
                 }
-                kept = profile
+                if kept != profile { kept = profile }
             }
             at = .now
-            word = nil
+            if word != nil { word = nil }
             FeedPictures.shared.keepOnly(rows + kept)
         case .failure(HouseError.noDoor):
             word = "The house does not keep a feed yet."
@@ -191,7 +248,7 @@ final class FeedStore: ObservableObject {
                 ? "The house is not answering. Are you on the tailnet?"
                 : "The house is not answering; this is the feed as it last was."
         }
-        loaded = true
+        if !loaded { loaded = true }
         save()
     }
 
@@ -294,7 +351,11 @@ final class FeedStore: ObservableObject {
 
     private func save() {
         let saved = Saved(rows: rows, kept: kept, liked: Array(liked), at: at, pending: pending)
-        try? JSONEncoder().encode(saved).write(to: Self.file, options: .atomic)
+        let file = Self.file
+        // Written in turn, away from the screen.
+        Self.writer.async {
+            try? JSONEncoder().encode(saved).write(to: file, options: .atomic)
+        }
     }
 }
 
@@ -309,6 +370,7 @@ final class FeedPictures {
     static let shared = FeedPictures()
 
     private var held: [String: UIImage] = [:]
+    private var soft: [String: UIImage] = [:]
     private var asking: [String: Task<UIImage?, Never>] = [:]
 
     private static let folder: URL = {
@@ -359,13 +421,52 @@ final class FeedPictures {
         return one
     }
 
+    // The painting card's soft ground: the picture cut to a few dozen pixels
+    // and blurred there once, away from the screen, then drawn large. A live
+    // blur over the whole picture cost the pane's opening (sprint 67).
+    func heldSoft(_ image: String) -> UIImage? {
+        soft[image]
+    }
+
+    func softPicture(_ image: String) async -> UIImage? {
+        if let one = soft[image] { return one }
+        guard let whole = await picture(image), let cg = whole.cgImage else { return nil }
+        let one = await Task.detached(priority: .userInitiated) { Self.soften(cg) }.value
+        if let one { soft[image] = one }
+        return one
+    }
+
+    nonisolated private static func soften(_ cg: CGImage) -> UIImage? {
+        let long: CGFloat = 40
+        let scale = long / CGFloat(max(cg.width, cg.height))
+        let width = max(1, Int((CGFloat(cg.width) * scale).rounded()))
+        let height = max(1, Int((CGFloat(cg.height) * scale).rounded()))
+        guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
+        context.interpolationQuality = .high
+        context.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let small = context.makeImage() else { return nil }
+        let input = CIImage(cgImage: small)
+        guard let blurred = input.clampedToExtent()
+            .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: 2.5])
+            .cropped(to: input.extent) as CIImage?,
+              let out = CIContext(options: [.useSoftwareRenderer: false]).createCGImage(blurred, from: input.extent)
+        else { return nil }
+        return UIImage(cgImage: out)
+    }
+
     // Only the pictures the feed and Kept still show stay on the phone.
     func keepOnly(_ rows: [FeedRow]) {
         let keep = Set(rows.compactMap { $0.image.map(Self.name) })
-        for name in (try? FileManager.default.contentsOfDirectory(atPath: Self.folder.path)) ?? [] where !keep.contains(name) {
-            try? FileManager.default.removeItem(at: Self.folder.appendingPathComponent(name))
+        let folder = Self.folder
+        DispatchQueue.global(qos: .utility).async {
+            for name in (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [] where !keep.contains(name) {
+                try? FileManager.default.removeItem(at: folder.appendingPathComponent(name))
+            }
         }
         held = held.filter { keep.contains(Self.name($0.key)) }
+        soft = soft.filter { keep.contains(Self.name($0.key)) }
     }
 
     private static func source(_ image: String) -> URL? {

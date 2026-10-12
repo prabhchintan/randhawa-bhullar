@@ -15,7 +15,8 @@
 #       touches motion reads the median before against after.
 #   bash Chintan/scripts/walk.sh --hitches --sample [OUTDIR] [RUNS]
 #       the same, each run's no-hand walk sampled across its first turn
-#       (runN/first-turn.txt, the stacks of every thread).
+#       (runN/first-turn.txt, the stacks of every thread); `--sample --at S`
+#       samples from the walk's second S instead.
 # The sprint job may run only see.sh, so it reaches all of these as
 # `see.sh --walk ...` (or `see.sh --hitches OUT RUNS`), never by approval.
 set -euo pipefail
@@ -25,6 +26,8 @@ if [ "${1:-}" = "--audit" ]; then ONLY_AUDIT=1; shift; fi
 if [ "${1:-}" = "--hitches" ]; then ONLY_HITCHES=1; shift; fi
 SAMPLE=""
 if [ "${1:-}" = "--sample" ]; then SAMPLE=1; shift; fi
+SAMPLE_AT=9
+if [ "${1:-}" = "--at" ]; then SAMPLE_AT=$2; shift 2; fi
 OUT=${1:-/tmp/see/walk}
 RUNS=${2:-3}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
@@ -73,9 +76,9 @@ hitches() {
   if [ -n "$SAMPLE" ]; then
     SIM=$(pgrep -f "launchd_sim.*$UDID" | head -1 || true)
     BBD=$( [ -n "$SIM" ] && pgrep -P "$SIM" -x backboardd | head -1 || true)
-    (sleep 9; /usr/bin/sample Chintan 2.5 5 -file "$1/first-turn.txt" > "$1/sample.log" 2>&1 || true) &
+    (sleep "$SAMPLE_AT"; /usr/bin/sample Chintan 2.5 5 -file "$1/first-turn.txt" > "$1/sample.log" 2>&1 || true) &
     if [ -n "$BBD" ]; then
-      (sleep 9; /usr/bin/sample "$BBD" 2.5 5 -file "$1/first-turn-backboardd.txt" >> "$1/sample.log" 2>&1 || true) &
+      (sleep "$SAMPLE_AT"; /usr/bin/sample "$BBD" 2.5 5 -file "$1/first-turn-backboardd.txt" >> "$1/sample.log" 2>&1 || true) &
     fi
   fi
   for _ in $(seq 60); do
