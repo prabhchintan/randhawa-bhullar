@@ -396,34 +396,31 @@ struct StudyView: View {
         HStack(alignment: .bottom, spacing: 10) {
             // A prompt never wraps, so at the accessibility sizes it says
             // the least that still names the room, and reads whole.
-            TextField("", text: $draft, prompt: Text((typeSize.isAccessibilitySize ? "To " : "A word for ") + voice.rawValue).foregroundStyle(Theme.bone.opacity(0.55)), axis: .vertical)
+            TextField("", text: $draft, prompt: Text((typeSize.isAccessibilitySize ? "To " : "A word for ") + voice.rawValue).foregroundStyle(Theme.ink.opacity(0.55)), axis: .vertical)
                 .lineLimit(1...5)
-                .foregroundStyle(Theme.bone)
-                .tint(Theme.giltOnArt)
+                .foregroundStyle(Theme.ink)
+                .tint(Theme.gilt)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.35), lineWidth: 0.5))
+                .ownGlass(radius: 12)
                 .onSubmit(send)
                 .accessibilityIdentifier("composer")
             Button(action: send) {
                 Image(systemName: "arrow.up")
                     .font(.body.weight(.semibold))
                     .dynamicTypeSize(...DynamicTypeSize.accessibility2)
-                    .foregroundStyle(canSend ? Theme.lampBlack : Theme.bone.opacity(0.5))
+                    .foregroundStyle(canSend ? Theme.lampBlack : Theme.ink.opacity(0.4))
                     .frame(width: min(sendSide, 72), height: min(sendSide, 72))
                     .background {
                         if canSend {
-                            Circle().fill(Theme.giltOnArt)
-                        } else {
-                            Circle().fill(.ultraThinMaterial)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.giltOnArt)
                         }
                     }
+                    .ownGlass(radius: 12, shown: !canSend)
             }
             .accessibilityLabel("Send")
             .disabled(!canSend)
         }
-        .environment(\.colorScheme, .dark)
         .padding(.horizontal, 16)
         .padding(.bottom, 10)
     }
@@ -447,12 +444,10 @@ struct StudyView: View {
             HStack {
                 Spacer(minLength: 56)
                 Text(message.text)
-                    .foregroundStyle(Theme.bone)
+                    .foregroundStyle(Theme.ink)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.4), lineWidth: 0.5))
-                    .environment(\.colorScheme, .dark)
+                    .ownGlass(radius: 16)
             }
         }
     }
@@ -649,4 +644,31 @@ private struct Breathing: View {
 // every turn rebuilt the whole study.
 extension StudyView: Equatable {
     static func == (a: StudyView, b: StudyView) -> Bool { a.open == b.open }
+}
+
+// His own words and the composer stand on glass in the mode's own ground:
+// bone in light, lamp black in dark, a gilt hairline at the edge. Lighter
+// than the house's plaque, so whose word is whose reads at a glance, and
+// never the picture's own colour smoked over, which read as brown.
+private struct OwnGlass: ViewModifier {
+    @Environment(\.colorScheme) private var scheme
+    var radius: CGFloat
+    var shown: Bool
+
+    func body(content: Content) -> some View {
+        content.background {
+            if shown {
+                let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+                shape.fill(.ultraThinMaterial)
+                    .overlay(shape.fill(scheme == .dark ? Theme.lampBlack.opacity(0.72) : Theme.bone.opacity(0.62)))
+                    .overlay(shape.strokeBorder(Theme.gilt.opacity(0.5), lineWidth: 0.5))
+            }
+        }
+    }
+}
+
+private extension View {
+    func ownGlass(radius: CGFloat, shown: Bool = true) -> some View {
+        modifier(OwnGlass(radius: radius, shown: shown))
+    }
 }

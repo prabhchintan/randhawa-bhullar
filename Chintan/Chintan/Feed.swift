@@ -34,8 +34,13 @@ struct FeedRow: Codable, Identifiable, Equatable {
         ts = string("ts")
         source = string("source") ?? "house"
         kind = string("kind") ?? ""
-        let title = string("title") ?? ""
-        let text = string("text") ?? ""
+        var title = string("title") ?? ""
+        var text = string("text") ?? ""
+        // A body that is only an address, or the title said again, says
+        // nothing the card does not; a title that is only an address gives
+        // way to the text.
+        if Self.bare(text) || Self.scaffold(text) || Self.same(text, title) { text = "" }
+        if Self.bare(title) && !text.isEmpty { title = "" }
         guard !title.isEmpty || !text.isEmpty else { return nil }
         // A row with no title leads with its text.
         self.title = title.isEmpty ? text : title
@@ -44,6 +49,55 @@ struct FeedRow: Codable, Identifiable, Equatable {
         score = (d["score"] as? NSNumber)?.doubleValue ?? Double(string("score") ?? "") ?? 0
         status = string("status")
         image = string("image")
+    }
+
+    // One word with no space that reads as a link: an address and nothing else.
+    static func bare(_ s: String) -> Bool {
+        let t = s.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !t.isEmpty, !t.contains(where: \.isWhitespace) else { return false }
+        return t.hasPrefix("http://") || t.hasPrefix("https://") || t.hasPrefix("www.") || t.hasPrefix("t.co/")
+    }
+
+    // A feed's own lettering around an address ("Link: https://... Points:
+    // 12"): fewer than six words of its own once the addresses, the labels
+    // and the numbers are taken out.
+    static func scaffold(_ s: String) -> Bool {
+        let words = s.split(whereSeparator: \.isWhitespace).map(String.init)
+        guard words.contains(where: bare) else { return false }
+        let own = words.filter { w in
+            !bare(w) && !w.hasSuffix(":") && w.contains(where: \.isLetter)
+        }
+        return own.count < 6
+    }
+
+    // The same words, whatever the case, the spacing and the stops; or a
+    // body that is the title with only an address after it.
+    static func same(_ a: String, _ b: String) -> Bool {
+        func letters(_ s: String) -> String {
+            s.lowercased().unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }.map(String.init).joined()
+        }
+        let x = letters(a), y = letters(b)
+        guard !x.isEmpty, !y.isEmpty else { return false }
+        if x == y { return true }
+        let words = a.split(whereSeparator: \.isWhitespace)
+        let kept = words.filter { !bare(String($0)) }.joined(separator: " ")
+        return kept.count < a.count && letters(kept) == y
+    }
+
+    // A row kept on the phone from before is read the same way as a fresh one.
+    private enum CodingKeys: String, CodingKey { case id, ts, source, kind, title, url, text, score, status, image }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        var d: [String: Any] = [:]
+        for key in [CodingKeys.id, .ts, .source, .kind, .title, .url, .text, .status, .image] {
+            d[key.rawValue] = try c.decodeIfPresent(String.self, forKey: key)
+        }
+        d["score"] = try c.decodeIfPresent(Double.self, forKey: .score)
+        guard let row = FeedRow(d) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: c.codingPath, debugDescription: "an empty row"))
+        }
+        self = row
     }
 
     var slamDunk: Bool { score >= 90 }
