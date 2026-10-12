@@ -1026,11 +1026,9 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 - **The feed from anywhere, what is left after sprint 68.** Built: read on
   every opening, foreground and pull; the road when the house is away; marks
-  by the way the feed last came. Left: (a) the stale line ("the house has
-  not pushed since ...") wraps to two lines on the heading and lowers the
-  first card by about 40 points (see.sh `jharokha@feed-stale-away`, light
-  and dark); shorten its time or give it a line of its own above the names.
-  (b) A dismiss made while away was not posted by the eyes (the walk's fold
+  by the way the feed last came. (a) The stale line wrapping and lowering
+  the first card: mended (sprint 71), one line, "house quiet since" and the
+  hour, or the date on another day. Left: (b) A dismiss made while away was not posted by the eyes (the walk's fold
   stays on the phone, so no real row leaves his feed); it takes the same
   queue and road as the like, which was seen heard. (c) A mark queued with
   both the house and the road out of reach, then sent, is unseen.
@@ -1050,12 +1048,39 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   moved nothing: 99.8 ms/s (97.1 in sprint 69), no hand 91.3 (86.5). So the
   read was never the cost. A sample across the no-hand opening shows the
   card bodies at a few percent and the rest UIKit's collection view laying
-  out the sheet's first cells. Next: a Release build's frames before any
-  more code, then the cells made lighter (FeedText's hidden twin and mask,
-  the painting card's material), as above.
+  out the sheet's first cells. Sprint 71 read a Release build (`see.sh
+  --hitches --release OUT 3`): feed open 101.4, no hand 89.7, the same as
+  Debug, so Debug's first-use costs were never it either. The phone's own
+  MetricKit cannot be read from yantar (it only posts to the house); the
+  door wanted is below. Release also shows "tabs, no hand" at 111.1 ms/s,
+  one stall of about 730 ms on the first turn, worth a sample before the
+  cells. Next: the phone's number from the door, then the cells made lighter
+  (FeedText's hidden twin and mask, the painting card's material).
+  The door wanted: `GET /v1/metrics/last` on the house, read-only, giving
+  {"build", "day", "scrollHitch": ms per s, "launch": ms, "hangs": s per
+  hour} from the newest MetricKit payload the phone posted, or 404 when
+  none has come.
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 71 (41647cc and the commit carrying this line): the
+  reviewer's fix, as the house steered. The feed's rise read in a Release
+  build first, median of three (/tmp/see/h-rel): feed open 101.4 ms/s, no
+  hand 89.7, feed scroll 38.6, tabs 13.5, reveal 28.5, study scroll 10.8,
+  board scroll 0.0, swipe 0.0, tabs with no hand 111.1 (one first-turn stall
+  near 730 ms); the same as Debug, so no cell code was touched. His phone's
+  MetricKit is not readable from yantar; the door wanted is in the backlog
+  (`GET /v1/metrics/last`). Then the feed's one visible defect: away from
+  the house with the house gone quiet, the heading's line read in two lines
+  and dropped the first card; it is now one short line, "house quiet since
+  9:50 PM" (the date on another day), the whole sentence kept for VoiceOver,
+  and the first card sits where it does on the road, about 35 points higher
+  (/tmp/see/0 before, /tmp/see/3 and /tmp/see/last after, light and dark).
+  The eyes: the hitch walk gains `--release`, and see.sh now installs its
+  Debug app by name, since the Release one beside it had been taken first
+  (/tmp/see/1 and /tmp/see/2 were that stale app). Door wanted: GET
+  /v1/metrics/last. Funnel: nothing.
 
 - 2026-10-11 · sprint 70 (the commit carrying this line): the reviewer's
   fix, as the house steered. The cards stand on the bone by their gilt
