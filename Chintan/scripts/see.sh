@@ -87,6 +87,10 @@ if [ "${1:-}" = "--widget" ]; then
   shift
   exec bash "$(dirname "$0")/widget.sh" "$@"
 fi
+if [ "${1:-}" = "--signed" ]; then
+  SEE_SIGN=1
+  shift
+fi
 TEXT=large
 if [ "${1:-}" = "--large" ]; then
   TEXT=accessibility-extra-extra-extra-large
@@ -99,9 +103,14 @@ DD=${SEE_DERIVED:-$HOME/Library/Developer/Xcode/DerivedData/chintan-see}
 DEVICE=${SEE_DEVICE:-iPhone 16 Pro}
 mkdir -p "$OUT"
 LOG="$OUT/build.log"
+# --signed (or SEE_SIGN=1): signed to run locally, so the app has a Keychain
+# of its own in the simulator (the feed's road lives there); unsigned, every
+# write fails.
+SIGN=(CODE_SIGNING_ALLOWED=NO)
+[ "${SEE_SIGN:-}" = 1 ] && SIGN=(CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER=)
 if ! xcodebuild -project "$ROOT/Chintan/Chintan.xcodeproj" -scheme Chintan -configuration Debug \
      -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-     -derivedDataPath "$DD" CODE_SIGNING_ALLOWED=NO CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" build > "$LOG" 2>&1; then
+     -derivedDataPath "$DD" "${SIGN[@]}" CHINTAN_HOUSE="${CHINTAN_HOUSE:-}" build > "$LOG" 2>&1; then
   grep -E -B2 -A6 "error:" "$LOG" | tail -80
   echo "BUILD FAILED"
   exit 1
@@ -140,6 +149,10 @@ for mode in light dark; do
     case "$tab" in settings@foot) EXTRA=(--settings --open foot) ;; esac
     # study@in-hawa: hawa's room as the phone holds it, nothing said.
     case "$tab" in study@in-hawa) EXTRA=(--open hawa) ;; esac
+    # A tab ending -away (jharokha@feed-away, jharokha@feed-like-away): the
+    # same look with a house address that refuses, so the feed takes the road.
+    HOUSE_ARG=${CHINTAN_HOUSE:-}
+    case "$tab" in *-away) HOUSE_ARG=127.0.0.1:9; T=${tab%-away}; EXTRA=(--open "${T#*@}") ;; esac
     # settings@on: location granted always, telling, a place heard, and the
     # phone's word, Health and motion heard. The app
     # the eyes launch never monitors and never posts, so the house hears nothing.
@@ -194,13 +207,20 @@ json.dump(kept, open(os.path.join(d, "yesterday.json"), "w"))
 PY
       ;;
     esac
-    xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab "$NAME" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
+    xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "$HOUSE_ARG" --tab "$NAME" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
     if [ "$tab" = study@waiting ]; then
       sleep 1.5
       xcrun simctl io "$UDID" screenshot "$OUT/$tab-opening-$mode.png" >/dev/null
     fi
     sleep 6
     xcrun simctl io "$UDID" screenshot "$OUT/$tab-$mode.png" >/dev/null
+    # After an -away look: how many marks the phone still holds unsent.
+    case "$tab" in *-away)
+      sleep 3
+      FEED="$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan data)/Library/Application Support/feed.json"
+      python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("pending", [])))' "$FEED" > "$OUT/$tab-$mode.pending" 2>/dev/null || true
+      ;;
+    esac
     case "$tab" in jharokha@alone-yesterday*)
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       rm -f "$DATA/Library/Caches/paintings/yesterday.json" "$DATA/Library/Caches/paintings/eyes-yesterday"*.jpg

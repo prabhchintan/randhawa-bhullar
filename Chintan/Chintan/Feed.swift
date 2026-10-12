@@ -122,10 +122,12 @@ final class Remembered<Value>: @unchecked Sendable {
 }
 
 // The feed on the phone: the house's rows and his kept ones, kept on the
-// phone like the shelf so the pane opens at once, read again from the house
-// when the copy is five minutes old or on a pull. Every mark shows at once
-// and goes to the house behind it; what the house does not hear waits and
-// goes when it answers; what it refuses goes back as it was, with a word.
+// phone like the shelf so the pane opens at once, and read again on every
+// opening, every return to the app and every pull, so there is always
+// something new (Prab, 2026-10-11 19:11). When the house is out of reach the
+// feed takes the road, the worker the house pushes its mix to. Every mark
+// shows at once and goes behind it the way the feed last came; what is not
+// heard waits and goes when it is; what is refused goes back, with a word.
 @MainActor
 final class FeedStore: ObservableObject {
     @Published private(set) var rows: [FeedRow] = []
@@ -133,11 +135,22 @@ final class FeedStore: ObservableObject {
     @Published private(set) var liked: Set<String> = []
     @Published private(set) var loaded = false
     @Published var word: String?
+    // Set while the feed came by the road: whether the house's last push is
+    // old, and when it was.
+    @Published private(set) var away: Away?
     private var at: Date?
     private var pending: [Mark] = []
+    private var sending: Set<Mark> = []
     private var reading = false
+    // The road is asked of the house once a run, when the house answers.
+    private var askedRoad = false
 
-    private struct Mark: Codable, Equatable {
+    enum Away: Equatable {
+        case road
+        case stale(Date?)
+    }
+
+    private struct Mark: Codable, Hashable {
         let id: String
         // "like", or the status posted.
         let what: String
@@ -193,63 +206,91 @@ final class FeedStore: ObservableObject {
         }
     }
 
-    // On opening: the phone's copy at once, the house's when it is stale,
-    // asked once the pane has risen so its rows never land mid-rise.
+    // On opening: the phone's copy at once, then the fresh one, asked once
+    // the pane has risen so its rows never land mid-rise.
     func open() async {
         await warm()
-        if let at, Date.now.timeIntervalSince(at) < 5 * 60 {
-            await flush()
-            return
-        }
         try? await Task.sleep(for: .seconds(0.8))
         await refresh()
     }
 
+    // Each time the app comes to the front, so the pane opens on new rows.
+    func freshen() async {
+        await warm()
+        await refresh()
+    }
+
     func refresh() async {
-        guard let house else {
-            word = "No house address yet. Add it in Settings."
-            loaded = true
-            return
-        }
         guard !reading else { return }
         reading = true
         defer { reading = false }
-        await flush()
-        async let feed = Result { try await house.feed() }
-        async let profile = Result { try await house.feedKept() }
-        let (f, p) = await (feed, profile)
-        switch f {
-        case .success(var fresh):
-            // A mark still on its way stands over what the house last said.
-            for mark in pending where mark.what != "like" {
-                if mark.what == "dismissed" { fresh.removeAll { $0.id == mark.id } }
-                if let i = fresh.firstIndex(where: { $0.id == mark.id }) { fresh[i].status = mark.what }
-            }
-            // Only a changed list is drawn again.
-            if rows != fresh { rows = fresh }
-            if case .success(var profile) = p {
-                for mark in pending where mark.what != "like" {
-                    if let i = profile.firstIndex(where: { $0.id == mark.id }) {
-                        if mark.what == "kept" || mark.what == "starred" { profile[i].status = mark.what } else { profile.remove(at: i) }
-                    } else if mark.what == "kept" || mark.what == "starred", var row = fresh.first(where: { $0.id == mark.id }) {
-                        row.status = mark.what
-                        profile.insert(row, at: 0)
-                    }
+        var answered = false
+        if let house {
+            async let feed = Result { try await house.feed() }
+            async let profile = Result { try await house.feedKept() }
+            let (f, p) = await (feed, profile)
+            switch f {
+            case .success(let fresh):
+                take(fresh, profile: try? p.get())
+                away = nil
+                answered = true
+                if !askedRoad {
+                    askedRoad = true
+                    if let road = await house.feedAway(), road != Keychain.loadRoad() { Keychain.saveRoad(road) }
                 }
-                if kept != profile { kept = profile }
+            case .failure(HouseError.noDoor):
+                word = "The house does not keep a feed yet."
+                answered = true
+            case .failure:
+                break
             }
-            at = .now
-            if word != nil { word = nil }
-            FeedPictures.shared.keepOnly(rows + kept)
-        case .failure(HouseError.noDoor):
-            word = "The house does not keep a feed yet."
-        case .failure:
-            word = rows.isEmpty && kept.isEmpty
-                ? "The house is not answering. Are you on the tailnet?"
-                : "The house is not answering; this is the feed as it last was."
+        }
+        if !answered {
+            if let road = Keychain.loadRoad(), let read = await FeedRoad.read(road) {
+                // His profile while away: what the phone kept, and any row
+                // the road says is kept that the phone did not hold yet.
+                let more = read.rows.filter { row in row.kept && !kept.contains { $0.id == row.id } }
+                take(read.rows, profile: kept + more)
+                away = read.stale ? .stale(read.pushed) : .road
+            } else {
+                away = nil
+                word = house == nil
+                    ? "No house address yet. Add it in Settings."
+                    : rows.isEmpty && kept.isEmpty
+                        ? "The house is not answering. Are you on the tailnet?"
+                        : "The house is not answering; this is the feed as it last was."
+            }
         }
         if !loaded { loaded = true }
         save()
+        // What waited goes now, the way the feed just came.
+        await flush()
+    }
+
+    // Fresh rows from either way, the marks still on their way laid over.
+    private func take(_ given: [FeedRow], profile given2: [FeedRow]?) {
+        var fresh = given
+        // A mark still on its way stands over what the feed last said.
+        for mark in pending where mark.what != "like" {
+            if mark.what == "dismissed" { fresh.removeAll { $0.id == mark.id } }
+            if let i = fresh.firstIndex(where: { $0.id == mark.id }) { fresh[i].status = mark.what }
+        }
+        // Only a changed list is drawn again.
+        if rows != fresh { rows = fresh }
+        if var profile = given2 {
+            for mark in pending where mark.what != "like" {
+                if let i = profile.firstIndex(where: { $0.id == mark.id }) {
+                    if mark.what == "kept" || mark.what == "starred" { profile[i].status = mark.what } else { profile.remove(at: i) }
+                } else if mark.what == "kept" || mark.what == "starred", var row = fresh.first(where: { $0.id == mark.id }) {
+                    row.status = mark.what
+                    profile.insert(row, at: 0)
+                }
+            }
+            if kept != profile { kept = profile }
+        }
+        at = .now
+        if word != nil { word = nil }
+        FeedPictures.shared.keepOnly(rows + kept)
     }
 
     // MARK: the marks
@@ -316,9 +357,8 @@ final class FeedStore: ObservableObject {
         if mark.what != "like" { pending.removeAll { $0.id == mark.id && $0.what != "like" } }
         pending.append(mark)
         save()
-        guard let house else { return }
         Task {
-            let told = await post(mark, to: house)
+            guard let told = await deliver(mark) else { return }
             switch told {
             case .heard:
                 pending.removeAll { $0 == mark }
@@ -333,16 +373,26 @@ final class FeedStore: ObservableObject {
         }
     }
 
-    private func post(_ mark: Mark, to house: HouseClient) async -> HouseClient.Told {
-        mark.what == "like" ? await house.feedLike(mark.id) : await house.feedMark(mark.id, status: mark.what)
+    // A mark goes the way the feed last came: the house, or the road while
+    // the house is away. Nil when it is already on its way, so nothing is
+    // ever sent twice at once.
+    private func deliver(_ mark: Mark) async -> HouseClient.Told? {
+        guard !sending.contains(mark) else { return nil }
+        sending.insert(mark)
+        defer { sending.remove(mark) }
+        if away == nil, let house {
+            return mark.what == "like" ? await house.feedLike(mark.id) : await house.feedMark(mark.id, status: mark.what)
+        }
+        guard let road = Keychain.loadRoad() else { return .unheard }
+        return await FeedRoad.mark(road, id: mark.id, what: mark.what)
     }
 
     // What waited goes now, in the order it was made; it stops at the
-    // first the house does not hear.
+    // first that is not heard.
     private func flush() async {
-        guard let house, !pending.isEmpty else { return }
+        guard !pending.isEmpty else { return }
         for mark in pending {
-            let told = await post(mark, to: house)
+            guard let told = await deliver(mark) else { continue }
             if told == .unheard { break }
             pending.removeAll { $0 == mark }
         }
@@ -356,6 +406,60 @@ final class FeedStore: ObservableObject {
         Self.writer.async {
             try? JSONEncoder().encode(saved).write(to: file, options: .atomic)
         }
+    }
+}
+
+// The road: the worker the house pushes its mix to, read when the house is
+// out of reach. Its two doors only, over https, with the phone's own key and
+// no cookies (BRIEF.md, the feed's exception to the one host).
+enum FeedRoad {
+    struct Read {
+        let rows: [FeedRow]
+        let stale: Bool
+        let pushed: Date?
+    }
+
+    private static let session: URLSession = {
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 15
+        config.httpShouldSetCookies = false
+        return URLSession(configuration: config)
+    }()
+
+    private static let agent = "chintan-ios/" + ((Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String) ?? "0")
+
+    private static func request(_ address: String, _ road: Keychain.Road) -> URLRequest? {
+        guard let url = URL(string: address), url.scheme == "https" else { return nil }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer " + road.token, forHTTPHeaderField: "Authorization")
+        request.setValue(agent, forHTTPHeaderField: "User-Agent")
+        return request
+    }
+
+    // {"at", "feed": [rows as the house serves them], "weights", "stale", "pushed": ms}
+    static func read(_ road: Keychain.Road) async -> Read? {
+        guard let request = request(road.url, road),
+              let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let rows = object["feed"] as? [[String: Any]] else { return nil }
+        let pushed = (object["pushed"] as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue / 1000) }
+        return Read(rows: rows.compactMap(FeedRow.init), stale: (object["stale"] as? Bool) ?? false, pushed: pushed)
+    }
+
+    // {"id", "status"} or {"id", "like": true}; the house drains them later.
+    static func mark(_ road: Keychain.Road, id: String, what: String) async -> HouseClient.Told {
+        guard var request = request(road.mark, road) else { return .unheard }
+        let body: [String: Any] = what == "like" ? ["id": id, "like": true] : ["id": id, "status": what]
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        guard let (_, response) = try? await session.data(for: request),
+              let http = response as? HTTPURLResponse else { return .unheard }
+        if (200..<300).contains(http.statusCode) { return .heard }
+        // A key the road no longer knows is not a refusal of the mark.
+        if [401, 403, 404, 405].contains(http.statusCode) { return .unheard }
+        return (400..<500).contains(http.statusCode) ? .refused : .unheard
     }
 }
 

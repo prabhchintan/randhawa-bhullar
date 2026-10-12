@@ -63,6 +63,45 @@ enum Keychain {
         SecItemAdd(attributes as CFDictionary, nil)
     }
 
+    // The road: where the feed is read while the house is out of reach, its
+    // door for marks, and the phone's own key for both, as the house named
+    // them (GET /v1/feed/away). Kept here only, never in defaults, never said.
+    struct Road: Codable, Equatable {
+        let url: String
+        let mark: String
+        let token: String
+    }
+
+    private static let roadAccount = "road"
+
+    static func loadRoad() -> Road? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: roadAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
+              let data = item as? Data else { return nil }
+        return try? JSONDecoder().decode(Road.self, from: data)
+    }
+
+    static func saveRoad(_ road: Road) {
+        guard let data = try? JSONEncoder().encode(road) else { return }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: roadAccount,
+        ]
+        SecItemDelete(query as CFDictionary)
+        var attributes = query
+        attributes[kSecValueData as String] = data
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(attributes as CFDictionary, nil)
+    }
+
     // A wake for a move comes with the phone locked more often than not, so
     // the address is readable after the first unlock, as the house's fixes
     // need; an address kept before this is moved over once, while unlocked.

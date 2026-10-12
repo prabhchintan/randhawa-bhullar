@@ -46,6 +46,8 @@ struct ChintanApp: App {
                 Metrics.shared.freshen()
                 // The widget hangs a fresh work each time the app is opened.
                 WidgetCenter.shared.reloadAllTimelines()
+                // And the feed is read again, so it opens on new rows.
+                Task { await FeedStore.shared.freshen() }
             }
             PhoneWord.shared.scene(now)
             if now == .background { Wakes.ask() }

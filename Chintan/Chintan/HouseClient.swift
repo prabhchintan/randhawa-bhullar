@@ -217,10 +217,26 @@ struct HouseClient {
         try await feedRows("/v1/feed/kept", key: "kept")
     }
 
+    // The road the feed takes while the house is away: {"url", "mark",
+    // "token"}, both doors https. Nil when the house has no such door.
+    func feedAway() async -> Keychain.Road? {
+        guard let url = url("/v1/feed/away") else { return nil }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 6
+        guard let (data, response) = try? await Self.session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let road = try? JSONDecoder().decode(Keychain.Road.self, from: data),
+              !road.token.isEmpty,
+              URL(string: road.url)?.scheme == "https",
+              URL(string: road.mark)?.scheme == "https" else { return nil }
+        return road
+    }
+
+    // Six seconds, then the feed takes the road.
     private func feedRows(_ path: String, key: String) async throws -> [FeedRow] {
         guard let url = url(path) else { throw HouseError.noAddress }
         var request = URLRequest(url: url)
-        request.timeoutInterval = 20
+        request.timeoutInterval = 6
         let (data, response) = try await Self.session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         if http.statusCode == 404 { throw HouseError.noDoor }

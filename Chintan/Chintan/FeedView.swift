@@ -40,6 +40,17 @@ struct FeedView: View {
                 .listRowInsets(EdgeInsets(top: 26, leading: 22, bottom: 14, trailing: 22))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+            // Away from the house: one thin line says where the rows came from.
+            if face == .feed, let away = store.away {
+                Text(Self.said(away))
+                    .font(.caption)
+                    .foregroundStyle(Theme.ink.opacity(0.62))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 22, bottom: 6, trailing: 22))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .accessibilityIdentifier("feed-away")
+            }
             if let word = store.word {
                 Text(word)
                     .font(.footnote)
@@ -135,6 +146,15 @@ struct FeedView: View {
         .buttonStyle(.borderless)
         .accessibilityAddTraits(face == which ? .isSelected : [])
         .accessibilityIdentifier("feed-face-\(name.lowercased())")
+    }
+
+    private static func said(_ away: FeedStore.Away) -> String {
+        guard case .stale(let pushed) = away else { return "from the road" }
+        guard let pushed else { return "the house has not pushed lately" }
+        let when = Calendar.current.isDateInToday(pushed)
+            ? pushed.formatted(date: .omitted, time: .shortened)
+            : pushed.formatted(.dateTime.month(.abbreviated).day().hour().minute())
+        return "the house has not pushed since " + when
     }
 
     private func open(_ row: FeedRow) {
