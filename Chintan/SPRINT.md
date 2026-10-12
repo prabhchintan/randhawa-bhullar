@@ -1054,8 +1054,17 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   MetricKit cannot be read from yantar (it only posts to the house); the
   door wanted is below. Release also shows "tabs, no hand" at 111.1 ms/s,
   one stall of about 730 ms on the first turn, worth a sample before the
-  cells. Next: the phone's number from the door, then the cells made lighter
-  (FeedText's hidden twin and mask, the painting card's material).
+  cells. Sprint 72 made the cells lighter (the mask a wash of the plaque's
+  colour, the painting card and a coming picture on a flat smoke): feed open
+  110.5 to 108.7, no hand 105.2 to 103.5, flat. The twin held back until the
+  pane had risen was tried and made it worse (130.1, no hand 124.5): the
+  cards drawn again as the rise ends land inside the opening; reverted. So
+  the cell bodies are not the cost either; the rest is UIKit's sheet and
+  collection view. Leave the feed's rise until the phone's own number comes
+  through the door. Next run, on the house's steer: the Study's own-word
+  bubbles and composer, bone glass in light and lamp black in dark as sprint
+  69 did for the pane, so no brown stands on the painting (seen brown in
+  /tmp/see/last/study-light.png).
   The door wanted: `GET /v1/metrics/last` on the house, read-only, giving
   {"build", "day", "scrollHitch": ms per s, "launch": ms, "hangs": s per
   hour} from the newest MetricKit payload the phone posted, or 404 when
@@ -1063,6 +1072,22 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-12 · sprint 72 (6932b7f and the commit carrying this line): the
+  reviewer's fix, as the house steered, one run. The feed's cards drawn
+  lighter: a cut text fades under a wash of the plaque's own colour, not a
+  mask, and the painting card's label and a picture still coming stand on a
+  flat smoke, not blurred glass; the look is unchanged, light and dark
+  (/tmp/see/2, /tmp/see/3, /tmp/see/last). Hitches, Debug, median of three:
+  before (/tmp/see/h0) feed open 110.5 ms/s, no hand 105.2, feed scroll
+  41.3, tabs 19.6, reveal 32.0, study scroll 7.8, board scroll 9.6, swipe
+  0.0, tabs with no hand 113.6; after (/tmp/see/h2) feed open 108.7, no hand
+  103.5, feed scroll 38.1, tabs 18.4, reveal 32.8, study scroll 9.4, board
+  scroll 6.3, swipe 0.0, tabs with no hand 109.6. Flat, so the cells are not
+  the cost. The twin held back until the pane had risen was tried and made
+  it worse (/tmp/see/h1: 130.1, no hand 124.5) and was reverted. Next run:
+  the Study's bubbles and composer (backlog). Door still wanted: GET
+  /v1/metrics/last. Funnel: nothing.
 
 - 2026-10-11 · sprint 71 (41647cc and the commit carrying this line): the
   reviewer's fix, as the house steered. The feed's rise read in a Release
