@@ -348,10 +348,8 @@ private struct FeedCard: View {
             .padding(.horizontal, 18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .overlay(Theme.lampBlack.opacity(0.68))
-                    .environment(\.colorScheme, .dark)
+                // A flat smoke over the soft ground, no glass to blur.
+                Theme.lampBlack.opacity(0.78)
             }
             .overlay(alignment: .top) {
                 Rectangle().fill(Theme.giltOnArt.opacity(0.45)).frame(height: 0.5)
@@ -440,7 +438,8 @@ private struct FeedCard: View {
     }
 }
 
-// The text, four lines and a fade, or the whole of it once read.
+// The text, four lines and a fade, or the whole of it once read. The fade
+// is the plaque's own colour laid over the last line, never a mask.
 private struct FeedText: View {
     let text: String
     let expanded: Bool
@@ -462,18 +461,18 @@ private struct FeedText: View {
                     .hidden()
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { whole = $0 }
             }
-            .mask {
-                VStack(spacing: 0) {
-                    Color.black
-                    LinearGradient(colors: [.black, .black.opacity(cut ? 0.1 : 1)], startPoint: .top, endPoint: .bottom)
+            .overlay(alignment: .bottom) {
+                if cut {
+                    LinearGradient(colors: [Theme.plaque.opacity(0), Theme.plaque.opacity(0.9)], startPoint: .top, endPoint: .bottom)
                         .frame(height: 22)
+                        .allowsHitTesting(false)
                 }
             }
     }
 }
 
 // A row's picture from the phone's copy, or brought down and faded in. The
-// frame it fills is the card's from the first paint, smoked glass until the
+// frame it fills is the card's from the first paint, a flat smoke until the
 // picture comes, so nothing below it moves. `whole` shows a painting entire,
 // never cropped; `ground` is the same picture drawn soft behind it.
 private struct FeedPicture: View {
@@ -491,10 +490,9 @@ private struct FeedPicture: View {
 
     var body: some View {
         // A whole painting stands over its own ground, which carries the glass.
+        // Flat smoke while it comes, no glass to blur.
         Rectangle()
-            .fill(whole ? AnyShapeStyle(Color.clear) : AnyShapeStyle(.ultraThinMaterial))
-            .overlay(whole ? .clear : Theme.lampBlack.opacity(ground ? 0.7 : 0.2))
-            .environment(\.colorScheme, .dark)
+            .fill(whole ? .clear : Theme.lampBlack.opacity(ground ? 0.85 : 0.5))
             .overlay {
                 if let picture {
                     if ground {
