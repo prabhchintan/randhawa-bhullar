@@ -1005,12 +1005,20 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   the three marks, the fold, the Kept face, the cache and the queue,
   (sprint 65) pictures on cards and the painting card, and (sprint 66) the
   walk, the hitch walk and the audit all reach the pane; the walk's swipe
-  is real and folds on the phone alone (`--feed-staged`). Left: the pane's
-  opening is still a jank on the Mac's frames (feed open 91 ms/s median,
-  feed scroll 33); next, the painting card's soft ground drawn from a
-  small cut instead of a live 30 point blur over the whole picture, then
-  read the numbers again. A mark made offline and sent when the house
-  answers is still unseen.
+  is real and folds on the phone alone (`--feed-staged`). Sprint 67: the
+  soft ground is a small cut softened once (no change in the numbers by
+  itself), the copy and first pictures are warmed while Home rests, and a
+  card's time is read once; feed open 86.5 to 75.9 ms/s. Left: one frame
+  of about 120 to 250 ms as UIKit's sheet transition builds the List's
+  first cells (sampled with `see.sh --hitches --sample --at S`, the
+  meter's own walk now opens the pane too, "feed open, no hand" 61.5).
+  Next: try the pane's first cells lighter (FeedText's hidden twin and
+  mask, the painting card's material) or the rows let in after the rise,
+  and read a Release build's frames, since Debug's first-use type lookups
+  show in the sample. Study scroll is one dropped frame per swipe of the
+  test hand (none on the board), 4.7 to 9.4 across runs with nothing in
+  the Study changed. A mark made offline and sent when the house answers
+  is still unseen.
 
 - **hawa's room answered that a word had come to it six times over.** The
   eyes' own `study@hawa` says a word on every launch it is given, light and
@@ -1021,6 +1029,26 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 67 (5a95899 and the commit carrying this line): the
+  reviewer's fix, as the house steered, in part. The painting card's soft
+  ground is now the picture cut to 40 pixels and softened once, away from
+  the screen, drawn large; it looks as before and alone moved nothing
+  (feed open 98.9, noise). The sample showed the real costs: every card
+  made date formatters on every drawing (now read once per stamp), and
+  the pane read its copy and pictures as it rose (now warmed while Home
+  rests, the house's fresh rows asked once the pane has risen, and saved
+  away from the screen). The pane letters only Feed and Kept under its
+  grabber, with room for the gilt rule, and its foot fade is short, so the
+  first card's heart, retweet and star read at rest (seen light and dark,
+  /tmp/see/2 to /tmp/see/5, /tmp/see/last). Hitches, median of three
+  (/tmp/see/h0 before, /tmp/see/h5 after): feed open 86.5 to 75.9, feed
+  scroll 38.8 to 31.4, study scroll 9.3 to 9.2, board scroll 3.1, tabs
+  24.5 to 18.3, reveal 29.2 to 29.3, swipe 0.0; the meter's own walk now
+  opens the feed, "feed open, no hand" 61.5. Not met: feed open under 10
+  and study scroll under 5; what is left is UIKit's sheet building the
+  first cells and the test hand's swipes (backlog). The eyes gain `see.sh
+  --hitches --sample --at S`. No new door. Funnel: nothing.
 
 - 2026-10-11 · sprint 66 (9d5f039, 3b761e0, and the commit carrying this
   line): the reviewer's fix, as the house steered. hawa's clear mark no
