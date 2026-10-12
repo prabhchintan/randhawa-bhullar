@@ -1044,14 +1044,31 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   look; `study@hawa` now speaks only to `scripts/standin.py` on the Mac and
   writes how many words reached it (NAME.count, 1 is right).
 
-- **Feed open, after the every-open read (sprint 69, median of three).**
-  97.1 ms/s (111.3, 97.1, 94.9; 75.9 in sprint 67), no hand 86.5 (61.5).
-  The every-open read costs about 20 ms/s as the pane rises; next, let the
-  pane's fresh read wait until it has risen and the first cells are drawn
-  (FeedView's `.task` calls `store.open()` at once), then read again.
+- **Feed open, after the read waits (sprint 70, median of three).** The
+  fresh read now waits for the sheet's own transition to finish and a card
+  to be drawn, and a read begun as the app came to the front waits too; it
+  moved nothing: 99.8 ms/s (97.1 in sprint 69), no hand 91.3 (86.5). So the
+  read was never the cost. A sample across the no-hand opening shows the
+  card bodies at a few percent and the rest UIKit's collection view laying
+  out the sheet's first cells. Next: a Release build's frames before any
+  more code, then the cells made lighter (FeedText's hidden twin and mask,
+  the painting card's material), as above.
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 70 (the commit carrying this line): the reviewer's
+  fix, as the house steered. The cards stand on the bone by their gilt
+  hairline alone: the 12 point shadow is gone from the plaque (the feed's
+  cards and word, the study's answers) and from the painting card, light and
+  dark (/tmp/see/2, /tmp/see/last). The feed's fresh read waits until the
+  sheet has finished rising, by its own transition, and a card is drawn, two
+  seconds at most; a read begun as the app comes to the front waits the same
+  way. Feed open, median of three (/tmp/see/h1): 99.8 ms/s (97.1 before),
+  no hand 91.3, feed scroll 34.3, tabs 17.2, reveal 28.9, study scroll 7.8,
+  board scroll 0.0, swipe 0.0; flat, so the read was not the cost, and a
+  sample (/tmp/see/h2) puts it in the sheet's first cell layout (backlog).
+  No new door. Funnel: nothing.
 
 - 2026-10-11 · sprint 69 (48f0882, 854b898, and the commit carrying this
   line): the reviewer's fix, as the house steered. hawa's six-times replay

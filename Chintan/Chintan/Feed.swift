@@ -206,11 +206,47 @@ final class FeedStore: ObservableObject {
         }
     }
 
+    // While the pane rises and draws its first cards, fresh rows wait, so a
+    // read never lands mid-rise (the reviewer's fix, 2026-10-11).
+    private var up = false
+    private var risen = false
+    private var drawn = false
+    private var rising: Bool { up && !(risen && drawn) }
+
+    // The pane is shown, and let go.
+    func rise() { up = true }
+    func fall() {
+        up = false
+        risen = false
+        drawn = false
+    }
+
+    // The sheet's own transition has finished.
+    func settle() { risen = true }
+
+    // A card has been drawn on the pane.
+    func drew() { drawn = true }
+
+    // Waits out the rise, two seconds at most, so a stalled pane never
+    // keeps the feed from arriving.
+    private func settled() async {
+        var waited = 0
+        while rising && waited < 40 {
+            try? await Task.sleep(for: .milliseconds(50))
+            waited += 1
+        }
+        if rising {
+            risen = true
+            drawn = true
+        }
+    }
+
     // On opening: the phone's copy at once, then the fresh one, asked once
-    // the pane has risen so its rows never land mid-rise.
+    // the pane has risen and its first cards are drawn.
     func open() async {
         await warm()
-        try? await Task.sleep(for: .seconds(0.8))
+        if rows.isEmpty { drawn = true }
+        await settled()
         await refresh()
     }
 
@@ -239,7 +275,7 @@ final class FeedStore: ObservableObject {
             let (f, p) = await (feed, profile)
             switch f {
             case .success(let fresh):
-                take(fresh, profile: try? p.get())
+                await take(fresh, profile: try? p.get())
                 away = nil
                 answered = true
                 if !askedRoad {
@@ -258,7 +294,7 @@ final class FeedStore: ObservableObject {
                 // His profile while away: what the phone kept, and any row
                 // the road says is kept that the phone did not hold yet.
                 let more = read.rows.filter { row in row.kept && !kept.contains { $0.id == row.id } }
-                take(read.rows, profile: kept + more)
+                await take(read.rows, profile: kept + more)
                 away = read.stale || Self.staleEyes ? .stale(read.pushed) : .road
             } else {
                 away = nil
@@ -276,7 +312,9 @@ final class FeedStore: ObservableObject {
     }
 
     // Fresh rows from either way, the marks still on their way laid over.
-    private func take(_ given: [FeedRow], profile given2: [FeedRow]?) {
+    private func take(_ given: [FeedRow], profile given2: [FeedRow]?) async {
+        // A read begun as the app came to the front waits for a rising pane.
+        if rising { await settled() }
         var fresh = given
         // A mark still on its way stands over what the feed last said.
         for mark in pending where mark.what != "like" {

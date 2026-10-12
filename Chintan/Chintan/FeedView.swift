@@ -78,6 +78,7 @@ struct FeedView: View {
                         .tint(Theme.gilt)
                     }
                     .accessibilityAction(named: "Dismiss") { withAnimation(.snappy) { store.dismiss(row) } }
+                    .onAppear { store.drew() }
                     .id(row.id)
             }
             Color.clear
@@ -94,6 +95,10 @@ struct FeedView: View {
         .fadedEdges(top: 18, bottom: 12)
         .accessibilityIdentifier("timeline")
         .refreshable { await store.refresh() }
+        // The fresh read waits for the sheet's rise to finish.
+        .background { Risen { store.settle() }.frame(width: 0, height: 0) }
+        .onAppear { store.rise() }
+        .onDisappear { store.fall() }
         .task {
             await store.open()
             await look(proxy)
@@ -353,11 +358,11 @@ private struct FeedCard: View {
         }
         .background { FeedPicture(image: image, ground: true) }
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        // It stands on the bone by its gilt hairline alone, no shadow.
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Theme.giltOnArt.opacity(0.55), lineWidth: 0.5))
         .background {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Theme.lampBlack)
-                .shadow(color: .black.opacity(0.25), radius: 12, y: 4)
         }
         .contentShape(Rectangle())
         .onTapGesture(perform: open)
@@ -537,4 +542,42 @@ private struct SafariView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
+}
+
+// Says when the sheet carrying it has finished rising: the presentation's
+// own coordinator, or at once when there is none to wait on.
+private struct Risen: UIViewControllerRepresentable {
+    let done: () -> Void
+
+    final class Watcher: UIViewController {
+        var done: () -> Void = {}
+        private var told = false
+
+        override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            if let rise = transitionCoordinator {
+                rise.animate(alongsideTransition: nil) { [weak self] _ in self?.tell() }
+            }
+        }
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            if transitionCoordinator == nil { tell() }
+        }
+
+        private func tell() {
+            guard !told else { return }
+            told = true
+            done()
+        }
+    }
+
+    func makeUIViewController(context: Context) -> Watcher {
+        let watcher = Watcher()
+        watcher.done = done
+        watcher.view.isUserInteractionEnabled = false
+        return watcher
+    }
+
+    func updateUIViewController(_ watcher: Watcher, context: Context) {}
 }

@@ -478,13 +478,12 @@ struct PaintedGround: View {
 
 extension View {
     // The densest text sits on a small plaque: bone or lamp black, a gilt
-    // hairline at its edge, the picture seen around it.
-    // The shadow falls from the plaque alone, never from its letters.
+    // hairline at its edge, the picture seen around it. No shadow: it stands
+    // by its hairline, the way a label stands on a gallery wall.
     func plaque(radius: CGFloat = 14) -> some View {
         background {
             RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .fill(Theme.plaque.opacity(0.97))
-                .shadow(color: .black.opacity(0.25), radius: 12, y: 4)
         }
         .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(Theme.gilt.opacity(0.55), lineWidth: 0.5))
     }
