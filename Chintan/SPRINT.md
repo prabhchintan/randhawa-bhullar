@@ -1060,18 +1060,38 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   pane had risen was tried and made it worse (130.1, no hand 124.5): the
   cards drawn again as the rise ends land inside the opening; reverted. So
   the cell bodies are not the cost either; the rest is UIKit's sheet and
-  collection view. Leave the feed's rise until the phone's own number comes
-  through the door. Next run, on the house's steer: the Study's own-word
-  bubbles and composer, bone glass in light and lamp black in dark as sprint
-  69 did for the pane, so no brown stands on the painting (seen brown in
-  /tmp/see/last/study-light.png).
-  The door wanted: `GET /v1/metrics/last` on the house, read-only, giving
-  {"build", "day", "scrollHitch": ms per s, "launch": ms, "hangs": s per
-  hour} from the newest MetricKit payload the phone posted, or 404 when
-  none has come.
+  collection view. Closed (sprint 73, the house's steer): the feed's rise is
+  no longer measured. The phone has posted no hitch metric in fourteen days,
+  so a `GET /v1/metrics/last` door would stay empty; it is not wanted. Open
+  it again only when the house has a payload from the phone in hand. The
+  Study's own-word bubbles and composer: done (sprint 73).
+
+- **The feed's rows, shaped by the house (sprint 73).** The app now drops a
+  card's body when it is only an address, a feed's own lettering around one
+  (fewer than six words once the addresses, labels and numbers are out, the
+  shape "Link: https://... Points: 12"), or the title said again; a title
+  that is only an address gives way to the text. That is the app's
+  tolerance, not the cure: the house should shape news and X rows itself so
+  `text` is a sentence of what the thing says, or empty. A Reddit row's body
+  still opens on its own lettering ("r/name, /u/name. Title.") before the
+  post; the house should cut that too.
 
 
 ## The ledger (newest first)
+
+- 2026-10-12 · sprint 73 (2077640 and the commit carrying this line): the
+  reviewer's fix, as the house steered. In the Study his own words and the
+  composer stand on bone glass in light and lamp black in dark, square
+  cornered (12 points) with a gilt hairline, graphite or bone ink; the brown
+  smoke and the capsule are gone, and the send mark is a gilt square when a
+  word is ready (/tmp/see/0 before, /tmp/see/1 and /tmp/see/last after,
+  light and dark). The feed's cards drop a body that is only an address, a
+  feed's link lettering, or the title again: a news card that read as two
+  addresses and a points count now shows its title alone (/tmp/see/2
+  before, /tmp/see/3 after); rows kept on the phone are read the same way.
+  The feed's rise is no longer measured, and the metrics door is no longer
+  wanted. Door wanted: the house shapes news, X and Reddit rows so `text` is
+  the thing's own sentence or empty. Funnel: nothing.
 
 - 2026-10-12 · sprint 72 (6932b7f and the commit carrying this line): the
   reviewer's fix, as the house steered, one run. The feed's cards drawn
