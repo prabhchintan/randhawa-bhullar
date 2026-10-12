@@ -55,8 +55,10 @@
 #                                                    study@waiting: a word left
 #                                                    waiting, taken up again;
 #                                                    study@hawa: hawa's room
-#                                                    empty, a word answered,
-#                                                    put away and back, then
+#                                                    empty, a word answered
+#                                                    by a stand-in, put away
+#                                                    and back three times, the
+#                                                    words heard counted, then
 #                                                    chintan's room;
 #                                                    study@in-hawa: hawa's room
 #                                                    as it stands, nothing said)
@@ -245,19 +247,30 @@ PY
     fi
     # study@hawa, after the empty room: a word said to hawa on launch and
     # its answer; the app put away behind the phone's Settings and brought
-    # back, the room empty again; what Application Support holds; and
-    # chintan's room, its history still there.
+    # back three times; what Application Support holds; and chintan's room,
+    # its history still there. The word goes to a stand-in on this Mac
+    # (standin.py), never the real hawa, and NAME.count says how many words
+    # reached it: 1 is right.
     if [ "$tab" = study@hawa ]; then
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
-      xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "${CHINTAN_HOUSE:-}" --tab study --open hawa \
+      HEARD="$OUT/$tab-$mode.heard"
+      : > "$HEARD"
+      python3 -I "$ROOT/Chintan/scripts/standin.py" 8799 "$HEARD" &
+      STANDIN=$!
+      sleep 1
+      xcrun simctl launch "$UDID" Prabhchintan.Chintan --house 127.0.0.1:8799 --tab study --open hawa \
         --say "Why does toast always land butter side down?" >/dev/null
-      sleep "${SEE_HAWA_WAIT:-45}"
+      sleep "${SEE_HAWA_WAIT:-12}"
       xcrun simctl io "$UDID" screenshot "$OUT/$tab-said-$mode.png" >/dev/null
-      xcrun simctl launch "$UDID" com.apple.Preferences >/dev/null
-      sleep 3
-      xcrun simctl launch "$UDID" Prabhchintan.Chintan >/dev/null
-      sleep 2
+      for _ in 1 2 3; do
+        xcrun simctl launch "$UDID" com.apple.Preferences >/dev/null
+        sleep 3
+        xcrun simctl launch "$UDID" Prabhchintan.Chintan >/dev/null
+        sleep 3
+      done
       xcrun simctl io "$UDID" screenshot "$OUT/$tab-back-$mode.png" >/dev/null
+      kill "$STANDIN" 2>/dev/null || true
+      grep -c ' POST /v1/say ' "$HEARD" > "$OUT/$tab-$mode.count" || true
       DATA=$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan data)
       { ls "$DATA/Library/Application Support"; cat "$DATA/Library/Application Support/waiting.json" 2>/dev/null || true; } >"$OUT/$tab-$mode.txt"
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
