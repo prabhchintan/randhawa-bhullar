@@ -182,7 +182,7 @@ struct JharokhaView: View {
         }
         .sheet(isPresented: $showFeed) {
             FeedView(face: Self.eyes == "kept" ? .kept : .feed, eyes: Self.eyes)
-                .presentationBackground(.ultraThinMaterial)
+                .presentationBackground { PaneGlass() }
                 .presentationDragIndicator(.visible)
         }
     }

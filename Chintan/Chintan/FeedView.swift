@@ -223,6 +223,18 @@ struct FeedView: View {
     }
 }
 
+// The pane's glass. In light the painting seen through bare glass read as
+// brown, so a bone wash lies over it; in dark the glass alone.
+struct PaneGlass: View {
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        Rectangle()
+            .fill(.ultraThinMaterial)
+            .overlay(scheme == .light ? Theme.bone.opacity(0.9) : .clear)
+    }
+}
+
 // One card on the timeline.
 private struct FeedCard: View {
     let row: FeedRow
