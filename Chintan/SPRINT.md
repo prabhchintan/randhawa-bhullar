@@ -166,7 +166,11 @@ one to four words, the hour a clock time or a word like "evening"), `/v1/wall/ne
 kind, title, url, text, score, status, image; `POST /v1/feed/ID {"status"}` and
 `POST /v1/feed/ID/like`; `image` an https address, a page's own picture or a
 museum's for kind "art", the one thing the app fetches from elsewhere, since
-sprint 65). Anything shown as a number, ring or bar comes from one of these or is
+sprint 65), `/v1/feed/away` (since sprint 68: {"url", "mark", "token"}, the
+worker's two https doors and the phone's own key, asked once a run when the
+house answers and kept in the Keychain; while the house is away the feed reads
+`url` and posts marks to `mark` with the key as a bearer, BRIEF.md's second
+exception). Anything shown as a number, ring or bar comes from one of these or is
 not shown.
 
 ## The rules of a sprint
@@ -1020,6 +1024,17 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   the Study changed. A mark made offline and sent when the house answers
   is still unseen.
 
+- **The feed from anywhere, what is left after sprint 68.** Built: read on
+  every opening, foreground and pull; the road when the house is away; marks
+  by the way the feed last came. Left: (a) the stale line ("the house has
+  not pushed since ...") wraps to two lines on the heading and lowers the
+  first card by about 40 points (see.sh `jharokha@feed-stale-away`, light
+  and dark); shorten its time or give it a line of its own above the names.
+  (b) A dismiss made while away was not posted by the eyes (the walk's fold
+  stays on the phone, so no real row leaves his feed); it takes the same
+  queue and road as the like, which was seen heard. (c) A mark queued with
+  both the house and the road out of reach, then sent, is unseen.
+
 - **hawa's room answered that a word had come to it six times over.** The
   eyes' own `study@hawa` says a word on every launch it is given, light and
   dark, so the repeats are most likely the looks of sprints 63 to 65, not
@@ -1029,6 +1044,26 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-11 · sprint 68 (ea39901 and the commit carrying this line): the
+  feed from anywhere, as the house steered. The feed is read again on every
+  opening, every return to the app and every pull (the five-minute gate is
+  gone), the phone's copy painted first; the house is given six seconds.
+  When it answers, the app asks `/v1/feed/away` once a run and keeps the
+  road (url, mark, key) in the Keychain, never shown. When it does not, the
+  feed reads the worker with the key as a bearer and `chintan-ios/<build>`
+  as its agent: the same cards, and on the heading's baseline, set right, a
+  caption, "from the road", or "the house has not pushed since 7:20 PM" when
+  stale; Kept stays as the phone held it, plus any row the road calls kept.
+  Marks go the way the feed last came, wait when unheard, and are never
+  sent twice at once. Seen: home (/tmp/see/1, /tmp/see/5), away with a
+  refusing address, 129 rows by the road (/tmp/see/3, /tmp/see/4), stale
+  staged in Debug (`feed-stale`), and a like made away heard by the road,
+  0 marks left waiting (`*.pending`). The eyes gain `see.sh --signed`
+  (signed to run locally, so the simulator app has a Keychain; unsigned,
+  the road was never kept, /tmp/see/2) and `-away` tabs. Left: the stale
+  line wraps and lowers the first card (backlog). Door used: GET
+  /v1/feed/away, live. Funnel: nothing.
 
 - 2026-10-11 · sprint 67 (5a95899 and the commit carrying this line): the
   reviewer's fix, as the house steered, in part. The painting card's soft

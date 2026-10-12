@@ -40,17 +40,6 @@ struct FeedView: View {
                 .listRowInsets(EdgeInsets(top: 26, leading: 22, bottom: 14, trailing: 22))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
-            // Away from the house: one thin line says where the rows came from.
-            if face == .feed, let away = store.away {
-                Text(Self.said(away))
-                    .font(.caption)
-                    .foregroundStyle(Theme.ink.opacity(0.62))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 22, bottom: 6, trailing: 22))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .accessibilityIdentifier("feed-away")
-            }
             if let word = store.word {
                 Text(word)
                     .font(.footnote)
@@ -121,9 +110,23 @@ struct FeedView: View {
     // The pane's two faces, the feed and his profile; the name he tapped on
     // Home is the pane's name, so it is not lettered again here.
     private var heading: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 22) {
+        // On the last baseline, so the away line's second line, if it has
+        // one, rises into the room above rather than lowering the names.
+        HStack(alignment: .lastTextBaseline, spacing: 22) {
             faceButton("Feed", .feed)
             faceButton("Kept", .kept)
+            // Away from the house, one thin line on the heading's baseline
+            // says where the rows came from, so the first card keeps its room.
+            if face == .feed, let away = store.away {
+                Spacer(minLength: 0)
+                Text(Self.said(away))
+                    .font(.caption)
+                    .foregroundStyle(Theme.ink.opacity(0.62))
+                    .multilineTextAlignment(.trailing)
+                    .lineLimit(2)
+                    .layoutPriority(-1)
+                    .accessibilityIdentifier("feed-away")
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

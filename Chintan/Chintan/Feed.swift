@@ -214,6 +214,14 @@ final class FeedStore: ObservableObject {
         await refresh()
     }
 
+    // For the house's eyes (`--open feed-stale`, a Debug build only): the
+    // road's rows lettered as if the house had stopped pushing.
+    #if DEBUG
+    private static let staleEyes = ProcessInfo.processInfo.arguments.contains("feed-stale")
+    #else
+    private static let staleEyes = false
+    #endif
+
     // Each time the app comes to the front, so the pane opens on new rows.
     func freshen() async {
         await warm()
@@ -251,7 +259,7 @@ final class FeedStore: ObservableObject {
                 // the road says is kept that the phone did not hold yet.
                 let more = read.rows.filter { row in row.kept && !kept.contains { $0.id == row.id } }
                 take(read.rows, profile: kept + more)
-                away = read.stale ? .stale(read.pushed) : .road
+                away = read.stale || Self.staleEyes ? .stale(read.pushed) : .road
             } else {
                 away = nil
                 word = house == nil

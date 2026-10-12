@@ -60,6 +60,13 @@
 #                                                    chintan's room;
 #                                                    study@in-hawa: hawa's room
 #                                                    as it stands, nothing said)
+#                                                    A tab ending -away (jharokha@feed-away,
+#                                                    jharokha@feed-like-away,
+#                                                    jharokha@feed-stale-away): the
+#                                                    house address refuses, so the
+#                                                    feed takes the road; needs --signed.
+#   bash Chintan/scripts/see.sh --signed OUTDIR ...  signed to run locally, so the app
+#                                                    has a Keychain in the simulator
 #   bash Chintan/scripts/see.sh --walk [OUTDIR]      the walk instead (walk.sh)
 #   bash Chintan/scripts/see.sh --hitches [--sample] OUTDIR [RUNS]
 #                                                    the hitch numbers alone, RUNS

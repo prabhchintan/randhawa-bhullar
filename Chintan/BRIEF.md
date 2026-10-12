@@ -73,7 +73,11 @@ background work, no Siri. Those are later rungs, on the maintainer's word.
   exception, on the house's steer of 2026-10-11: a feed card's picture is
   fetched from the https address the house names for it (a page's own
   picture, a museum's open-access file), with no cookies and nothing of
-  his sent.
+  his sent. A second, on his word of 2026-10-11 19:11, for the feed alone:
+  while the house is out of reach the app reads the worker's timeline door
+  and posts to its mark door, the two addresses the house names at
+  `/v1/feed/away`, over https only, with the phone's own key as a bearer
+  (kept in the Keychain), and calls that host for nothing else.
 - TestFlight internal testing only. Never `--submit`. Never external
   testers. A build expires ninety days after upload (Apple's rule, read
   from Apple's TestFlight overview 2026-09-21); the loop re-uploads before
