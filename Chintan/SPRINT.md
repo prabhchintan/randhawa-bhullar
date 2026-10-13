@@ -993,17 +993,13 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    bundle, Prabhchintan.Chintan.Widget, with no capabilities, which cloud
    signing registers by itself. Never register App Groups by API.
 
-- **Bugs, seen in sprint 65 at the largest text (see.sh --large).** (a) On
-  Home, the label held grows a plaque taller than the room above it: its
-  first lines run off the top of the phone and Visitors and The feed sit
-  over it (jharokha@label). The fix hides the two names while the label
-  is held and hangs the plaque from under them, as a held thing already
-  does at these sizes. (b) In the Study, a name held (study@held) grows a
-  plaque that runs down under the composer, and its word for the house
-  lands on the tab bar; the plaque should stop above the composer and
-  scroll. (c) The names' strip slides under the gear there, "dar" cut at
-  the gear's edge; a fade at the strip's end would say it scrolls. All
-  three were there before sprint 65; none shows at the default text.
+- **Bugs, seen in sprint 65 at the largest text: mended (sprint 74).** (a)
+  Home's label held hangs from the head, the two names away while it is
+  held, its type stopped at the first accessibility size. (b) The Study's
+  name held stands whole above the composer: its type stopped there too and
+  its lines bounded, so no scroll was needed and the word for the house
+  stays under the thumb's slide. (c) The names' strip dissolves over its
+  last 44 points before the gear.
 
 - **The feed, what is left after sprint 66.** Built: the pane, its cards,
   the three marks, the fold, the Kept face, the cache and the queue,
@@ -1078,6 +1074,20 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 
 ## The ledger (newest first)
+
+- 2026-10-13 · sprint 74 (c119b0c and the commit carrying this line): the
+  reviewer's fix, as the house steered, one cycle of three. The three
+  largest-text bugs from sprint 65, mended: on Home the painting's label
+  held hangs whole from the head, Visitors and The feed stepped away, where
+  its first lines had run off the phone under them; in the Study a name
+  held stands whole above the composer, its word for the house in reach,
+  where it had run under the composer onto the tab bar; and the names that
+  slide under the gear dissolve before it instead of being cut. And the
+  Study is one geometry: chintan's answers take the same 12 point corner as
+  his own words and the composer (/tmp/see/0 and /tmp/see/0large before,
+  /tmp/see/1, /tmp/see/1large and /tmp/see/last after; light and dark at
+  the default, the held states at the largest text). No hitch numbers
+  (nothing that moves was touched). No new door. Funnel: nothing.
 
 - 2026-10-12 · sprint 73 (2077640 and the commit carrying this line): the
   reviewer's fix, as the house steered. In the Study his own words and the
