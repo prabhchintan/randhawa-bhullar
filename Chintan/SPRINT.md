@@ -1073,7 +1073,40 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   post; the house should cut that too.
 
 
+- **The plain field, for the house to trim (asked in sprint 75).** A work
+  photographed on a plain studio field (grey or white seamless around a
+  panel with a broken edge, as an ancient painted panel often is) reaches
+  the phone with the field kept, so the work floats small in grey inside the
+  mirror. The house's trim before composing (K) should treat an even field
+  the way it treats a black line or a mount: find the work's own bounds
+  where the field's colour stops being near-flat, cut to them, then compose
+  at the frame's width. The app needs nothing new; the picture's path keys
+  on `fit`, so a recut work should come with a new fit word (say
+  "mirror2") so the phone and its caches take the new cut.
+
+- **Board's leaves and shelf names: done (sprint 75).** 12 point corners as
+  the Study; a shelf's name stands only once its first leaf is 36 points
+  clear of the foot's fade.
+
 ## The ledger (newest first)
+
+- 2026-10-13 · sprint 75 (bf76c20 and the commit carrying this line): the
+  reviewer's fix, as the house steered, two looks of three. On the Board
+  every leaf, the error line and the held heading's plaque take the Study's
+  12 point corner; and a shelf's name waits, unseen, until its first leaf
+  has come up 36 points clear of the foot's fade, then eases in, so the
+  board at rest no longer ends on a lone "Later" ghosting over the tabs
+  (/tmp/see/0 before, /tmp/see/1 and /tmp/see/last after, light and dark;
+  /tmp/see/2 scrolled to the last thing, its name standing over it). The
+  eyes: Home's two pictures were one file because Home is drawn dark in
+  both modes by its own choice (JharokhaView's colour scheme), so its dark
+  shot was real all along; see.sh now waits for the simulator to say back
+  the mode it holds before each mode's first launch, and prints "ONE
+  PICTURE" for any tab whose light and dark are the same bytes, so the
+  reviewer reads it as said rather than as a lost shot. Door wanted: the
+  house trims a photographer's plain field before composing (backlog, "The
+  plain field"). No hitch numbers (nothing that moves was touched).
+  Funnel: nothing.
 
 - 2026-10-13 · sprint 74 (c119b0c and the commit carrying this line): the
   reviewer's fix, as the house steered, one cycle of three. The three
