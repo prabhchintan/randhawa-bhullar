@@ -43,6 +43,8 @@ struct BoardView: View {
     @State private var wordLine = CGRect.zero
     // A word for the house being written, on its plaque above the keyboard.
     @State private var wording = BoardView.eyes == "word"
+    // The shelves whose first leaf has cleared the foot's fade.
+    @State private var shown: Set<String> = []
 
     private struct HeadHold: Equatable {
         var held = false
@@ -76,7 +78,7 @@ struct BoardView: View {
                         if !shelves.isEmpty || errorText != nil {
                             // The shelves step back behind a held plaque, so
                             // no leaf reads on with it.
-                            board
+                            board(clear: geo.size.height - Self.foot)
                                 .opacity(heldHead ? 0.3 : 1)
                         }
                     }
@@ -138,8 +140,8 @@ struct BoardView: View {
         // A leaf's own width and corners, opaque, so no leaf shows round it
         // or through it.
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .plaque()
+        .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .plaque(radius: 12)
         .accessibilityElement(children: .combine)
     }
 
@@ -228,8 +230,10 @@ struct BoardView: View {
     }
 
     // Each shelf is named on the art, and under it one leaf per day: the
-    // painting shows between the days instead of one long list.
-    private var board: some View {
+    // painting shows between the days instead of one long list. A name
+    // stands only once its first leaf has come out of the foot's fade, so
+    // no name waits alone over the tabs.
+    private func board(clear: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             if let errorText {
                 Label(errorText, systemImage: "wifi.slash")
@@ -238,7 +242,7 @@ struct BoardView: View {
                     .padding(.vertical, 14)
                     .padding(.horizontal, 18)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .plaque()
+                    .plaque(radius: 12)
             }
             ForEach(Array(shelves.enumerated()), id: \.element.title) { index, section in
                 Text(section.title)
@@ -246,9 +250,17 @@ struct BoardView: View {
                     .tracking(1)
                     .foregroundStyle(Theme.giltOnArt)
                     .mount()
+                    .opacity(shown.contains(section.title) ? 1 : 0)
+                    .animation(.easeOut(duration: 0.25), value: shown.contains(section.title))
                     .padding(.top, index == 0 ? 6 : 18)
-                ForEach(section.days) { day in
+                ForEach(Array(section.days.enumerated()), id: \.element.id) { i, day in
                     leaf(day.items, named: section.named)
+                        .onGeometryChange(for: Bool.self) { proxy in
+                            i > 0 || proxy.frame(in: .scrollView).minY + 36 < clear
+                        } action: { out in
+                            guard i == 0 else { return }
+                            if out { shown.insert(section.title) } else { shown.remove(section.title) }
+                        }
                 }
             }
         }
@@ -273,7 +285,7 @@ struct BoardView: View {
         .padding(.horizontal, 18)
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .plaque()
+        .plaque(radius: 12)
     }
 
     private func row(_ item: BoardItem, dated: Bool, marked: Bool) -> some View {

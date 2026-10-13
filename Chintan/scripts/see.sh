@@ -140,6 +140,11 @@ xcrun simctl install "$UDID" "$APP"
 xcrun simctl ui "$UDID" content_size "$TEXT"
 for mode in light dark; do
   xcrun simctl ui "$UDID" appearance "$mode"
+  # The switch settles before the first tab of a mode is launched; the
+  # simulator says back which mode it holds, and a look in the wrong one stops.
+  sleep 2
+  HELD=$(xcrun simctl ui "$UDID" appearance)
+  [ "$HELD" = "$mode" ] || { echo "the simulator held $HELD, not $mode"; exit 1; }
   for tab in $TABS; do
     xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
     # A tab written board@N is the board with its Nth thing opened on launch.
@@ -297,5 +302,14 @@ PY
 done
 xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
 xcrun simctl ui "$UDID" content_size large
+# A tab whose light and dark are one picture, byte for byte, is said so
+# (Home is drawn dark in both, its own choice), never passed off as two.
+for light in "$OUT"/*-light.png; do
+  [ -f "$light" ] || continue
+  dark=${light%-light.png}-dark.png
+  if [ -f "$dark" ] && cmp -s "$light" "$dark"; then
+    echo "ONE PICTURE: $(basename "${light%-light.png}") is drawn the same in light and dark"
+  fi
+done
 echo "BUILD OK, pictures:"
 ls "$OUT"/*.png
