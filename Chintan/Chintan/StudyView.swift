@@ -125,7 +125,7 @@ struct StudyView: View {
                         // It hangs from the names over the conversation, on
                         // the bubbles' edge, and grows down from them.
                         roomPlaque(held)
-                            .padding(.leading, 16)
+                            .padding(.horizontal, 16)
                             .padding(.top, 10)
                             .transition(.scale(scale: 0.6, anchor: .topLeading).combined(with: .opacity))
                     }
@@ -226,6 +226,15 @@ struct StudyView: View {
                         rooms
                         ScrollView(.horizontal) { rooms.padding(.vertical, 2) }
                             .scrollIndicators(.hidden)
+                            // The last name in view dissolves short of the
+                            // gear, which says the names slide on.
+                            .mask {
+                                HStack(spacing: 0) {
+                                    Color.black
+                                    LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+                                        .frame(width: 44)
+                                }
+                            }
                     }
                 } else {
                     rooms
@@ -378,15 +387,20 @@ struct StudyView: View {
             Text(v.clearable ? "Said here, gone when you clear it." : lines[v].map(Self.sentence) ?? "A room of the house.")
                 .font(.system(.title3, design: .serif))
                 .foregroundStyle(Theme.ink)
+                .lineLimit(typeSize.isAccessibilitySize ? 4 : nil)
             Text(v.clearable ? "The house keeps nothing from this room; your phone keeps it until you clear it."
                  : last.map { "Last spoke " + Self.spoke($0) } ?? "Nothing said here yet.")
                 .font(.system(.callout, design: .serif).italic())
                 .foregroundStyle(Theme.ink.opacity(0.8))
+                .lineLimit(typeSize.isAccessibilitySize ? 3 : nil)
             WordLine(onWord: onWord, space: "study") { wordLine = $0 }
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(16)
-        .frame(maxWidth: 320, alignment: .leading)
+        .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : 320, alignment: .leading)
+        // At the accessibility sizes it stands whole above the composer,
+        // its word for the house always in reach of the thumb.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .plaque(radius: 12)
         .accessibilityElement(children: .combine)
@@ -437,7 +451,9 @@ struct StudyView: View {
                     .textSelection(.enabled)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .plaque(radius: 16)
+                    // The same square corner as his own words: one
+                    // conversation, one geometry.
+                    .plaque(radius: 12)
                 Spacer(minLength: 36)
             }
         } else {
@@ -447,7 +463,7 @@ struct StudyView: View {
                     .foregroundStyle(Theme.ink)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
-                    .ownGlass(radius: 16)
+                    .ownGlass(radius: 12)
             }
         }
     }

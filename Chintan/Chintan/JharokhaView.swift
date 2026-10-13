@@ -107,7 +107,7 @@ struct JharokhaView: View {
                 .overlay(alignment: .bottomTrailing) {
                     // The label held: its plaque stands on the hairline over
                     // the label, and grows up from it.
-                    if heldLabel, let painting = gallery.painting, painting.title != nil {
+                    if heldLabel, !typeSize.isAccessibilitySize, let painting = gallery.painting, painting.title != nil {
                         let (name, about) = Self.split((painting.artist ?? "").plainDashes)
                         LabelPlaque(painting: painting, name: name, about: about, onWord: onWord) { wordLine = $0 }
                             .padding(.trailing, 22)
@@ -131,6 +131,8 @@ struct JharokhaView: View {
                     feedMount
                         .padding(.leading, typeSize.isAccessibilitySize ? 12 : 0)
                 }
+                // The label's plaque takes their room while it is held there.
+                .opacity(typeSize.isAccessibilitySize && heldLabel ? 0 : 1)
             }
             #if targetEnvironment(macCatalyst)
             .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles) }
@@ -144,6 +146,15 @@ struct JharokhaView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 22)
                         .padding(.top, 80)
+                        .transition(.scale(scale: 0.6, anchor: .top).combined(with: .opacity))
+                }
+                // So does the label held: taller there than the room over it,
+                // its plaque hangs from the head, where the names stood.
+                if typeSize.isAccessibilitySize, heldLabel, let painting = gallery.painting, painting.title != nil {
+                    let (name, about) = Self.split((painting.artist ?? "").plainDashes)
+                    LabelPlaque(painting: painting, name: name, about: about, onWord: onWord, wide: true) { wordLine = $0 }
+                        .padding(.horizontal, 22)
+                        .padding(.top, 8)
                         .transition(.scale(scale: 0.6, anchor: .top).combined(with: .opacity))
                 }
             }
@@ -739,11 +750,13 @@ private struct LabelPlaque: View {
     let name: String
     let about: String?
     let onWord: Bool
+    // The whole width, hung from the head at the accessibility sizes.
+    var wide = false
     // Where the word's line stands on Home.
     let placed: (CGRect) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: wide ? 6 : 8) {
             if let year = painting.year, !year.isEmpty {
                 Text(year.plainDashes)
                     .font(Theme.label(.caption))
@@ -781,7 +794,10 @@ private struct LabelPlaque: View {
         .multilineTextAlignment(.leading)
         .fixedSize(horizontal: false, vertical: true)
         .padding(16)
-        .frame(width: 300, alignment: .leading)
+        .frame(width: wide ? nil : 300, alignment: .leading)
+        .frame(maxWidth: wide ? .infinity : nil, alignment: .leading)
+        // Large enough to read, small enough to stand whole on the phone.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         // Whole, like the ring's: the label stands right under it.
         .background(Theme.plaque, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .plaque(radius: 12)
