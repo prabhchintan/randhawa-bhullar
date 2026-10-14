@@ -907,6 +907,17 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    detailed card; wall.sh gains `label`, the detailed card with the
    painting alone). Next: done by a click (`POST /v1/done`), then the mail
    column.
+   Done by a click built (sprint 77): a click on a thing in the column
+   opens a gilt Done under it, as the phone's leaf does; a click on Done
+   posts `/v1/done` with the line as the house printed it, the circle
+   turning while asked, and the thing fades from the column once the house
+   has it (kept gone through the minute's reads); a house without the door,
+   or one that does not answer, gets a plain line under it. The column's
+   shade takes no clicks, so a click on the art still steps the letterings.
+   wall.sh gains `column-done` (`--wall-open N`, the Nth thing opened). Seen
+   SELF only (yantar's display still cannot be photographed). Left: a click
+   seen lifting a real thing off (never in the eyes, since it would mark
+   his board), then the mail column (`GET /v1/mail`).
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -1083,16 +1094,11 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   at the frame's width. The app needs nothing new; the picture's path keys
   on `fit`, so a recut work should come with a new fit word (say
   "mirror2") so the phone and its caches take the new cut.
-  Sprint 76 found no recut on the shelf (every record still "mirror", today's
-  picture the same bytes as the kept one) and built the phone's tolerance
-  for the sides: Theme's `bordersTrimmed` reads the picture at 160 wide and
-  walks in from each side while the columns stay even, cutting at the last
-  step between bands, at most an eighth of the width, only when both sides
-  have one. Head and foot are left alone (there the house's mirror stands,
-  and an even reflection stepping into the work read as a border on five of
-  21 works). Across the shelf of 21 it cut one, the scroll with a mount and
-  a frame's lip down both sides. Left for the house: the plain field all
-  round, and a top or foot border on a work as tall as the frame.
+  Sprint 76 built a side trim on the phone; the reviewer turned it off
+  (sprint 77: it cut into today's scroll and halved the two seals the
+  house's picture shows whole). Border trimming is the house's alone: the
+  plain field all round, a side mount, and a top or foot border on a work
+  as tall as the frame, each with a new fit word. Do not trim on the phone.
 
 - **Board's leaves and shelf names: done (sprint 75).** 12 point corners as
   the Study; a shelf's name stands only once its first leaf is 36 points
@@ -1102,6 +1108,21 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-14 · sprint 77 (11c94e2 and the commit carrying this line): the
+  reviewer's fix, as the house steered, three looks of three. The phone's
+  side trim is off: today's scroll stands whole again with its mount, and
+  the two seals at its left edge are no longer halved, light and dark
+  (/tmp/see/1, /tmp/see/2 and /tmp/see/last). Then the next product slice,
+  the Mac wall's done by a click (chunk O): a click on a thing in the week's
+  column opens a gilt Done under it, a click on Done tells the house and
+  the thing fades out once the house has it. Seen in the wall's own
+  drawing (/tmp/see/wall2 first, the Done hugging the next thing;
+  /tmp/see/wall3 with room below it). The first look showed nothing open:
+  the real board read in before the invented week and spent the eyes'
+  open; mended. Door wanted: none new; `POST /v1/done` as the phone uses
+  it, and the house's border trim with a new fit word. No hitch numbers
+  (nothing that moves on the phone was touched). Funnel: nothing.
 
 - 2026-10-14 · sprint 76 (99936d0 and the commit carrying this line): the
   reviewer's fix, as the house steered, three looks of three. First the
