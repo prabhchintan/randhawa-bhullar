@@ -365,64 +365,12 @@ final class Gallery: ObservableObject {
     // Decoded once, off the main thread, at the size the screen fills with
     // it: a full scan left lazy is decoded and scaled again by every tab
     // that shows it, a stall of a tenth of a second on each tap.
-    private static func prepared(_ raw: UIImage) async -> UIImage {
-        let ui = bordersTrimmed(raw)
+    private static func prepared(_ ui: UIImage) async -> UIImage {
         let screen = UIScreen.main
         let fill = max(screen.bounds.width / ui.size.width, screen.bounds.height / ui.size.height) * 1.04
         guard fill < 1 else { return await ui.byPreparingForDisplay() ?? ui }
         let size = CGSize(width: (ui.size.width * fill).rounded(.up), height: (ui.size.height * fill).rounded(.up))
         return await ui.byPreparingThumbnail(ofSize: CGSize(width: size.width * screen.scale, height: size.height * screen.scale)) ?? ui
-    }
-
-    // The scan's own border cut away on the phone, until the house trims it
-    // before composing: the frame's lip, the mount, a ruled line, each an even
-    // band down the picture's whole height. From each side inward, while the
-    // bands stay even, the cut falls at the last step from one band to the
-    // next, never past an eighth of the width, and only when both sides have
-    // one. Only the sides: the house sets the work at the frame's width, so
-    // the head and foot are its mirror, and the fill takes any border there.
-    private static func bordersTrimmed(_ ui: UIImage) -> UIImage {
-        guard let cg = ui.cgImage, cg.width > 64, cg.height > 64 else { return ui }
-        let w = 160, h = max(64, Int((Double(cg.height) / Double(cg.width) * 160).rounded()))
-        var px = [UInt8](repeating: 0, count: w * h * 4)
-        let drawn = px.withUnsafeMutableBytes { buf -> Bool in
-            guard let ctx = CGContext(data: buf.baseAddress, width: w, height: h, bitsPerComponent: 8,
-                                      bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
-                                      bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return false }
-            ctx.interpolationQuality = .medium
-            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-            return true
-        }
-        guard drawn else { return ui }
-        func luma(_ x: Int, _ y: Int) -> Double {
-            let i = (y * w + x) * 4
-            return (0.299 * Double(px[i]) + 0.587 * Double(px[i + 1]) + 0.114 * Double(px[i + 2])) / 255
-        }
-        // Each column's mean and spread, read down its middle eight tenths.
-        func column(_ x: Int) -> (mean: Double, spread: Double) {
-            let values = (h / 10 ..< h - h / 10).map { luma(x, $0) }
-            let mean = values.reduce(0, +) / Double(values.count)
-            let spread = (values.map { ($0 - mean) * ($0 - mean) }.reduce(0, +) / Double(values.count)).squareRoot()
-            return (mean, spread)
-        }
-        func cut(_ columns: [Int]) -> Int {
-            var last = 0, previous: Double?
-            for (depth, x) in columns.enumerated() {
-                let c = column(x)
-                if let p = previous, abs(c.mean - p) > 0.08 { last = depth }
-                if c.spread > 0.05 { break }
-                previous = c.mean
-            }
-            return last == 0 ? 0 : last + 1
-        }
-        let left = cut(Array(0..<w / 8))
-        let right = cut(Array((w - w / 8..<w).reversed()))
-        guard left > 0, right > 0 else { return ui }
-        let sx = Double(cg.width) / Double(w)
-        let rect = CGRect(x: Double(left) * sx, y: 0,
-                          width: Double(w - left - right) * sx, height: Double(cg.height)).integral
-        guard let trimmed = cg.cropping(to: rect) else { return ui }
-        return UIImage(cgImage: trimmed, scale: ui.scale, orientation: ui.imageOrientation)
     }
 }
 

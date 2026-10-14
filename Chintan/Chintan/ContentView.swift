@@ -498,17 +498,32 @@ private struct WallLabel: View {
 // it in the serif, the hour apart; the week's later things stay the phone's.
 // Over a short shade from the corner, so it reads on any work. Home reads the
 // board every minute and hands it here only when it changed; a thing new to
-// the column fades in, one gone fades out, the rest stand still.
+// the column fades in, one gone fades out, the rest stand still. A click on a
+// thing opens its Done under it, the board's one action, as on the phone; a
+// click on Done tells the house, and the thing leaves once the house has it.
 struct WallBoard: View {
     let shelves: [BoardSection]
     let titles: [String: BoardItem.Short]
     // So the column never runs down onto the label in the same corner.
     private static let most = 9
 
+    @State private var open: String?
+    @State private var sending: String?
+    @State private var refused: [String: String] = [:]
+    @State private var gone: Set<String> = []
+
     private var u: CGFloat { WallLettering.unit }
 
+    // The board as read, less what the wall has marked done since.
+    private var kept: [BoardSection] {
+        shelves.compactMap { shelf in
+            let items = shelf.items.filter { !gone.contains($0.key) }
+            return items.isEmpty ? nil : BoardSection(title: shelf.title, items: items, named: shelf.named)
+        }
+    }
+
     var body: some View {
-        let shown = Self.cut(shelves)
+        let shown = Self.cut(kept)
         ZStack(alignment: .topTrailing) {
             if !shown.isEmpty {
                 // Held dark across the column's width before it falls away:
@@ -518,6 +533,7 @@ struct WallBoard: View {
                                        .init(color: Theme.lampBlack.opacity(0.6), location: 0.5),
                                        .init(color: Theme.lampBlack.opacity(0), location: 1)],
                                center: .topTrailing, startRadius: 0, endRadius: u * 720)
+                    .allowsHitTesting(false)
                     .transition(.opacity)
                 VStack(alignment: .leading, spacing: 16 * u) {
                     ForEach(shown, id: \.title) { shelf in
@@ -527,8 +543,22 @@ struct WallBoard: View {
                                 .tracking(1.2)
                                 .foregroundStyle(Theme.giltOnArt)
                             ForEach(shelf.items, id: \.key) { item in
-                                row(item)
-                                    .transition(.opacity)
+                                VStack(alignment: .leading, spacing: 7 * u) {
+                                    row(item)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            withAnimation(.easeInOut(duration: 0.2)) {
+                                                open = open == item.key ? nil : item.key
+                                            }
+                                        }
+                                    if open == item.key {
+                                        // Room below, so it reads as its own thing's.
+                                        doneMark(item)
+                                            .padding(.bottom, 6 * u)
+                                            .transition(.opacity)
+                                    }
+                                }
+                                .transition(.opacity)
                             }
                         }
                         .transition(.opacity)
@@ -546,7 +576,73 @@ struct WallBoard: View {
             }
         }
         .ignoresSafeArea()
-        .allowsHitTesting(false)
+        .onChange(of: shown.flatMap { $0.items.map(\.key) }, initial: true) { _, keys in
+            // For the house's eyes: `--wall-open N` opens the Nth thing, again
+            // whenever the one it opened has left the column (the real board
+            // reads in before an invented week replaces it).
+            let args = ProcessInfo.processInfo.arguments
+            guard open.map(keys.contains) != true, let i = args.firstIndex(of: "--wall-open"), i + 1 < args.count,
+                  let n = Int(args[i + 1]), keys.indices.contains(n) else { return }
+            open = keys[n]
+        }
+    }
+
+    // Done, lettered as on the phone's board: a hairline circle and the word
+    // in gilt; while the house is asked, the circle turns.
+    private func doneMark(_ item: BoardItem) -> some View {
+        VStack(alignment: .leading, spacing: 4 * u) {
+            Button {
+                Task { await markDone(item) }
+            } label: {
+                HStack(spacing: 6 * u) {
+                    ZStack {
+                        Circle().strokeBorder(Theme.giltOnArt, lineWidth: 0.8)
+                        if sending == item.key {
+                            ProgressView().controlSize(.mini).tint(Theme.giltOnArt)
+                        } else {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 7 * u, weight: .semibold))
+                        }
+                    }
+                    .frame(width: 15 * u, height: 15 * u)
+                    Text("Done")
+                        .font(.system(size: 10 * u, design: .serif).weight(.medium).smallCaps())
+                        .tracking(1.2)
+                }
+                .foregroundStyle(Theme.giltOnArt)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(sending != nil)
+            if let words = refused[item.key] {
+                Text(words)
+                    .font(.system(size: 11 * u, design: .serif).italic())
+                    .foregroundStyle(Theme.bone.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func markDone(_ item: BoardItem) async {
+        guard !item.line.isEmpty else {
+            withAnimation { refused[item.key] = "Only a thing the house wrote can be marked done." }
+            return
+        }
+        guard let address = Keychain.loadHouseAddress(), !address.isEmpty else { return }
+        sending = item.key
+        refused[item.key] = nil
+        defer { sending = nil }
+        do {
+            try await HouseClient(baseAddress: address).done(item.line)
+            withAnimation(.easeOut(duration: 0.8)) {
+                _ = gone.insert(item.key)
+                open = nil
+            }
+        } catch HouseError.noDoor {
+            withAnimation { refused[item.key] = "The house cannot take this from the wall yet." }
+        } catch {
+            withAnimation { refused[item.key] = "The house did not answer; still open." }
+        }
     }
 
     // A thing in its fewest words with the hour apart in gilt, after the
@@ -565,7 +661,7 @@ struct WallBoard: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    private var left: Int { shelves.reduce(0) { $0 + $1.items.count } - Self.cut(shelves).reduce(0) { $0 + $1.items.count } }
+    private var left: Int { kept.reduce(0) { $0 + $1.items.count } - Self.cut(kept).reduce(0) { $0 + $1.items.count } }
 
     // The first few things in order, whole days where they fit.
     private static func cut(_ shelves: [BoardSection]) -> [BoardSection] {
