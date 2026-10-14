@@ -1,7 +1,7 @@
-# Bhullar, App Store listing (v2.6)
+# Bhullar, App Store listing (v2.7)
 
 `scripts/asc.py release` reads the Promotional text, Keywords, Description and
-App Review notes sections of this file; What's New comes from `whatsnew-2.6.md`.
+App Review notes sections of this file; What's New comes from `whatsnew-2.7.md`.
 
 ---
 
@@ -48,7 +48,7 @@ Deliberately minimal:
 
 Glance, take it in, get on with your day.
 
-## What's New (from AppStore/whatsnew-2.6.md)
+## What's New (from AppStore/whatsnew-2.7.md)
 
 ## App Review notes (Review Information → Notes)
 Bhullar is the time-keeping sibling of our app Randhawa (Apple App ID
@@ -71,6 +71,13 @@ share, and turns their coordinates into place names with CLGeocoder, the same
 Apple lookup both apps have always used to name a memory's place. Randhawa
 3.2, submitted alongside this, is where those moments are gathered and where
 all location permission lives.
+
+NEW IN 2.7: the app reads whole at the largest accessibility text sizes and
+with VoiceOver (layout and accessibility labels only), the configurable
+"Dots at Any Scale" widget colours days that hold a memory as the other two
+widgets already did, and the month, week and day grids can step back to a
+past year that holds a memory. No new data, no new permission, no privacy
+label change.
 
 NEW IN 2.6: a bug fix only, shared with Randhawa since both compile the same
 MemoryKit source. Opening a span with more than one memory fired one
@@ -127,13 +134,12 @@ No new permission, no change to the privacy label.
 
 ---
 
-## Pre-submit checklist (v2.6)
-- [x] CloudKit: no schema change in 2.6 (the fix only changes the order
-      geocoder lookups run in, nothing new is stored)
+## Pre-submit checklist (v2.7)
+- [x] CloudKit: no schema change in 2.7 (layout, labels, the widget reading
+      the memories file it already read, and a year offset held in memory)
 - [x] No public promise changed: no new permission, App Privacy stays Data
-      Not Collected
-- [x] Screenshots unchanged: nothing about the fix is visible in a still
-      image, only in how soon a place name settles in
-- [x] Build 2.6 (11) archived and uploaded to App Store Connect
-- [x] `scripts/asc.py release ... --submit` run together with Randhawa 3.6
-      (20), since both carry the same geocoder queue fix
+      Not Collected, store copy unchanged beyond What's New
+- [x] Screenshots unchanged: at standard text size the screens look as in 2.6
+- [ ] Build 2.7 (12) archived and uploaded to App Store Connect
+- [ ] `scripts/asc.py release ... --submit` run for Bhullar alone; Randhawa
+      3.6 stays as is (chintan, 2026-10-14)
