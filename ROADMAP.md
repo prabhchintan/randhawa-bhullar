@@ -46,7 +46,8 @@ them, and the rule that keeps that story quiet live in
 - Shipped: 2.0, memories in the grid, gold days, "on this day". 2.1, swipe
   to change scale and dots you can open, with place names from Apple's
   geocoder. 2.2, gold memory days in the widgets, the camera in the composer,
-  and the shared place-name cache.
+  and the shared place-name cache. 2.7, the largest text and VoiceOver,
+  gold in the scale widget, and past years in the grid.
 - Next: whatever the loop learns.
 - Considering: a year picker to look at past years' grids; the minutes scale
   on Apple Watch someday.
@@ -133,7 +134,8 @@ item is written so a session can tell when it is done.
    stays hidden until a second year exists to look at). Both pieces are
    built and on main. Not shipped: chintan asked (2026-09-16, 2026-09-19)
    that the two halves go out together as one release candidate, which
-   waits on the shipping gate in LOOP.md, not on more code.
+   waits on the shipping gate in LOOP.md, not on more code. Shipped
+   2026-10-14 as Bhullar 2.7 (12), with FUNNEL cut 2, on chintan's word. Done.
 
 ## Both, eventually
 

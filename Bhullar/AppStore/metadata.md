@@ -140,6 +140,6 @@ No new permission, no change to the privacy label.
 - [x] No public promise changed: no new permission, App Privacy stays Data
       Not Collected, store copy unchanged beyond What's New
 - [x] Screenshots unchanged: at standard text size the screens look as in 2.6
-- [ ] Build 2.7 (12) archived and uploaded to App Store Connect
-- [ ] `scripts/asc.py release ... --submit` run for Bhullar alone; Randhawa
+- [x] Build 2.7 (12) archived and uploaded to App Store Connect
+- [x] `scripts/asc.py release ... --submit` run for Bhullar alone; Randhawa
       3.6 stays as is (chintan, 2026-10-14)
