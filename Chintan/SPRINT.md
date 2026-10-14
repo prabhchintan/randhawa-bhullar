@@ -1083,12 +1083,43 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   at the frame's width. The app needs nothing new; the picture's path keys
   on `fit`, so a recut work should come with a new fit word (say
   "mirror2") so the phone and its caches take the new cut.
+  Sprint 76 found no recut on the shelf (every record still "mirror", today's
+  picture the same bytes as the kept one) and built the phone's tolerance
+  for the sides: Theme's `bordersTrimmed` reads the picture at 160 wide and
+  walks in from each side while the columns stay even, cutting at the last
+  step between bands, at most an eighth of the width, only when both sides
+  have one. Head and foot are left alone (there the house's mirror stands,
+  and an even reflection stepping into the work read as a border on five of
+  21 works). Across the shelf of 21 it cut one, the scroll with a mount and
+  a frame's lip down both sides. Left for the house: the plain field all
+  round, and a top or foot border on a work as tall as the frame.
 
 - **Board's leaves and shelf names: done (sprint 75).** 12 point corners as
   the Study; a shelf's name stands only once its first leaf is 36 points
-  clear of the foot's fade.
+  clear of the foot's fade. Its scroll cost mended (sprint 76): board scroll
+  34.5 to 12.5 ms/s. Left: about 12.6 with no reveal at all on today's board,
+  above the bar of 10 and above sprint 72's 6.3; not the reveal. Next for
+  it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-14 · sprint 76 (99936d0 and the commit carrying this line): the
+  reviewer's fix, as the house steered, three looks of three. First the
+  board scroll walk, and the reveal did not hold: board scroll 34.5 ms/s,
+  median of three (/tmp/see/h0; sprint 72 had 6.3). Each name crossing the
+  fade set state on the whole Board, so every leaf was redrawn under the
+  moving scroll. The name now keeps its own state (ShelfName): 12.5
+  (/tmp/see/h1). Drawing its glass only once shown read 14.6 (/tmp/see/h2,
+  reverted); no reveal at all read 12.7 (/tmp/see/h3), so the reveal is now
+  free and the rest is the board's own, still over 10. Then Home judged edge
+  to edge: the house had not recut (every fit still "mirror"), and today's
+  scroll stood with a pale mount and a dark lip down both sides of Home, the
+  Board and the Study. The phone now cuts an even side border before showing
+  the work; the work meets the glass at both edges, light and dark
+  (/tmp/see/0 before, /tmp/see/1 and /tmp/see/last after). Other hitch
+  medians after: reveal 30.0, tabs 21.6, study scroll 7.7, swipe 3.8. Door
+  still wanted: the house's trim of a plain field and of head and foot
+  borders, with a new fit word. Funnel: nothing.
 
 - 2026-10-13 · sprint 75 (bf76c20 and the commit carrying this line): the
   reviewer's fix, as the house steered, two looks of three. On the Board
