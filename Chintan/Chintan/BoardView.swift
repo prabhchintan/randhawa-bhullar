@@ -43,8 +43,6 @@ struct BoardView: View {
     @State private var wordLine = CGRect.zero
     // A word for the house being written, on its plaque above the keyboard.
     @State private var wording = BoardView.eyes == "word"
-    // The shelves whose first leaf has cleared the foot's fade.
-    @State private var shown: Set<String> = []
 
     private struct HeadHold: Equatable {
         var held = false
@@ -232,7 +230,7 @@ struct BoardView: View {
     // Each shelf is named on the art, and under it one leaf per day: the
     // painting shows between the days instead of one long list. A name
     // stands only once its first leaf has come out of the foot's fade, so
-    // no name waits alone over the tabs.
+    // no name waits alone over the tabs (ShelfName).
     private func board(clear: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             if let errorText {
@@ -245,22 +243,10 @@ struct BoardView: View {
                     .plaque(radius: 12)
             }
             ForEach(Array(shelves.enumerated()), id: \.element.title) { index, section in
-                Text(section.title)
-                    .font(Theme.label())
-                    .tracking(1)
-                    .foregroundStyle(Theme.giltOnArt)
-                    .mount()
-                    .opacity(shown.contains(section.title) ? 1 : 0)
-                    .animation(.easeOut(duration: 0.25), value: shown.contains(section.title))
+                ShelfName(title: section.title, clear: clear)
                     .padding(.top, index == 0 ? 6 : 18)
-                ForEach(Array(section.days.enumerated()), id: \.element.id) { i, day in
+                ForEach(section.days, id: \.id) { day in
                     leaf(day.items, named: section.named)
-                        .onGeometryChange(for: Bool.self) { proxy in
-                            i > 0 || proxy.frame(in: .scrollView).minY + 36 < clear
-                        } action: { out in
-                            guard i == 0 else { return }
-                            if out { shown.insert(section.title) } else { shown.remove(section.title) }
-                        }
                 }
             }
         }
@@ -471,6 +457,27 @@ private struct Reasons: View {
             if fits(s) { best = s; lo = mid + 1 } else { hi = mid - 1 }
         }
         return best
+    }
+}
+
+// A shelf's name on its mount, standing only once the leaf under it is 36
+// points clear of the foot's fade. It keeps its own state, so a name coming
+// or going redraws the name alone, never the board under a moving scroll.
+private struct ShelfName: View {
+    let title: String
+    let clear: CGFloat
+    @State private var shown = false
+
+    var body: some View {
+        Text(title)
+            .font(Theme.label())
+            .tracking(1)
+            .foregroundStyle(Theme.giltOnArt)
+            .mount()
+            .opacity(shown ? 1 : 0)
+            .animation(.easeOut(duration: 0.25), value: shown)
+            // The leaf stands 10 points under the name.
+            .onGeometryChange(for: Bool.self) { $0.frame(in: .scrollView).maxY + 46 < clear } action: { shown = $0 }
     }
 }
 
