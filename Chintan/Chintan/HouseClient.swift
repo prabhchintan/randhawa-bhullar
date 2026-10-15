@@ -300,6 +300,58 @@ struct HouseClient {
         return Dictionary(entries.map { ($0.line, BoardItem.Short(title: $0.title, hour: $0.hour)) }) { a, _ in a }
     }
 
+    // His Imbox as the house lists it, the house's own cards left out:
+    // {"mail": [{id, who, subject, at}], "count"}. A label for the wall,
+    // never a to-do surface. A house without this door answers 404.
+    struct Mail: Decodable, Equatable {
+        struct Line: Decodable, Equatable {
+            let id: String
+            let who: String
+            let subject: String
+            let at: Date?
+
+            private enum Keys: String, CodingKey { case id, who, subject, at }
+
+            init(id: String, who: String, subject: String, at: Date?) {
+                (self.id, self.who, self.subject, self.at) = (id, who, subject, at)
+            }
+
+            // Lenient: an id as a number or a word, `at` as ISO 8601 or
+            // seconds since 1970, a line missing its words kept as blank.
+            init(from decoder: Decoder) throws {
+                let c = try decoder.container(keyedBy: Keys.self)
+                if let n = try? c.decode(Int.self, forKey: .id) { id = String(n) } else { id = try c.decode(String.self, forKey: .id) }
+                who = (try? c.decode(String.self, forKey: .who)) ?? ""
+                subject = (try? c.decode(String.self, forKey: .subject)) ?? ""
+                if let s = try? c.decode(Double.self, forKey: .at) {
+                    at = Date(timeIntervalSince1970: s)
+                } else if let s = try? c.decode(String.self, forKey: .at) {
+                    at = Mail.date(s)
+                } else {
+                    at = nil
+                }
+            }
+        }
+        let mail: [Line]
+        let count: Int?
+
+        private static func date(_ s: String) -> Date? {
+            let f = ISO8601DateFormatter()
+            if let d = f.date(from: s) { return d }
+            f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            return f.date(from: s)
+        }
+    }
+
+    func mail() async throws -> Mail {
+        guard let url = url("/v1/mail") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
+        guard http.statusCode == 200 else { throw HouseError.unreachable }
+        return try JSONDecoder().decode(Mail.self, from: data)
+    }
+
     // A thing marked done from the phone; the house runs `ghar done` with the
     // line as it printed it. A house without this door answers 404.
     func done(_ text: String) async throws {

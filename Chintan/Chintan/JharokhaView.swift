@@ -44,6 +44,8 @@ struct JharokhaView: View {
     // moves nothing on the wall; and its days, the wall's column.
     @State private var boardText: String?
     @State private var week: [BoardSection] = []
+    // His Imbox, the wall's second column; nil while the house has no door.
+    @State private var mail: HouseClient.Mail?
     #endif
 
     private struct LabelHold: Equatable {
@@ -135,7 +137,7 @@ struct JharokhaView: View {
                 .opacity(typeSize.isAccessibilitySize && heldLabel ? 0 : 1)
             }
             #if targetEnvironment(macCatalyst)
-            .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles) }
+            .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles, mail: mail) }
             #endif
             .overlay(alignment: .top) {
                 // At the accessibility sizes a thing held is taller than the
@@ -604,6 +606,9 @@ struct JharokhaView: View {
         if let p { pulse = p.meters.map(CockpitDay.Meter.init) }
         if let s, Self.eyes != "cut" { titles = s }
         if let b, Self.eyes != "empty" { take(b) }
+        #if targetEnvironment(macCatalyst)
+        await readMail(house)
+        #endif
         // For the house's eyes: `--open day` letters an invented day of three
         // things, and a thing held (`tN`) on a day with none holds one of them.
         if Self.eyes == "day" || (Self.eyes?.hasPrefix("t") == true && dated.isEmpty) {
@@ -611,6 +616,8 @@ struct JharokhaView: View {
             #if targetEnvironment(macCatalyst)
             // The wall's column gets an invented week around that day.
             week = BoardSection.week([BoardSection(title: "", items: BoardItem.stagedDay + BoardItem.stagedWeek)])
+            // And an invented Imbox under it.
+            mail = HouseClient.Mail.staged
             #endif
         }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
@@ -646,8 +653,25 @@ struct JharokhaView: View {
         let was = boardText
         if let s, s != titles { withAnimation(.easeInOut(duration: 1.2)) { titles = s } }
         if let b, Self.eyes != "empty" { take(b) }
-        print("wall-poll", b == nil ? "unheard" : was == boardText ? "same" : "changed")
+        let mailWas = mail
+        await readMail(house)
+        print("wall-poll", b == nil ? "unheard" : was == boardText ? "same" : "changed",
+              "mail", mail == nil ? "none" : mailWas == mail ? "same" : "changed")
         fflush(stdout)
+    }
+
+    // The Imbox, read with the board; taken only when it changed, so a new
+    // line fades in and the rest stand still. A house without the door, or
+    // one gone quiet, leaves the column as it stood or away.
+    private func readMail(_ house: HouseClient) async {
+        guard Self.eyes != "day" else { return }
+        do {
+            let read = try await house.mail()
+            guard read != mail else { return }
+            withAnimation(.easeInOut(duration: 1.2)) { mail = read }
+        } catch HouseError.noDoor {
+            if mail != nil { withAnimation(.easeInOut(duration: 1.2)) { mail = nil } }
+        } catch {}
     }
     #endif
 
@@ -1100,6 +1124,21 @@ extension BoardItem {
                                     : day.formatted(.dateTime.month(.abbreviated).day()))
     }
 }
+
+#if targetEnvironment(macCatalyst)
+extension HouseClient.Mail {
+    // An invented Imbox for the eyes, its lines the shape of real ones.
+    static var staged: HouseClient.Mail {
+        func ago(_ hours: Double) -> Date { .now.addingTimeInterval(-hours * 3600) }
+        return HouseClient.Mail(mail: [
+            .init(id: "1", who: "The reading group", subject: "Next month's book, and a new room for the meeting", at: ago(1)),
+            .init(id: "2", who: "An old friend", subject: "Photos from the hike", at: ago(5)),
+            .init(id: "3", who: "The garden club", subject: "Seed swap on Saturday morning", at: ago(30)),
+            .init(id: "4", who: "A cousin abroad", subject: "We land on the twelfth, can we stay two nights?", at: ago(80)),
+        ], count: 6)
+    }
+}
+#endif
 
 extension String {
     // The house's own rule: no long dashes on its screens, even in a museum's label.

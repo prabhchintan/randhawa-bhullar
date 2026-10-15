@@ -501,11 +501,18 @@ private struct WallLabel: View {
 // the column fades in, one gone fades out, the rest stand still. A click on a
 // thing opens its Done under it, the board's one action, as on the phone; a
 // click on Done tells the house, and the thing leaves once the house has it.
+// Under the week, his Imbox: sender, subject and when, a label and never a
+// to-do; a click on a line opens it in HEY, nothing sent or filed from here.
 struct WallBoard: View {
     let shelves: [BoardSection]
     let titles: [String: BoardItem.Short]
-    // So the column never runs down onto the label in the same corner.
-    private static let most = 9
+    var mail: HouseClient.Mail?
+    // So the column never runs down onto the label in the same corner; the
+    // week gives up two things when the Imbox stands under it.
+    private var most: Int { letters.isEmpty ? 9 : 7 }
+    private static let mostMail = 4
+
+    @Environment(\.openURL) private var openURL
 
     @State private var open: String?
     @State private var sending: String?
@@ -522,10 +529,12 @@ struct WallBoard: View {
         }
     }
 
+    private var letters: [HouseClient.Mail.Line] { Array((mail?.mail ?? []).prefix(Self.mostMail)) }
+
     var body: some View {
-        let shown = Self.cut(kept)
+        let shown = Self.cut(kept, most: most)
         ZStack(alignment: .topTrailing) {
-            if !shown.isEmpty {
+            if !shown.isEmpty || !letters.isEmpty {
                 // Held dark across the column's width before it falls away:
                 // a pale work let the first words of each line go grey
                 // (the wall's own drawing, sprint 58).
@@ -567,6 +576,11 @@ struct WallBoard: View {
                         Text(left == 1 ? "and one more this week" : "and \(left) more this week")
                             .font(.system(size: 10 * u, design: .serif).italic())
                             .foregroundStyle(Theme.bone.opacity(0.7))
+                    }
+                    if !letters.isEmpty {
+                        imbox
+                            .padding(.top, shown.isEmpty ? 0 : 10 * u)
+                            .transition(.opacity)
                     }
                 }
                 .frame(width: UIScreen.main.bounds.width * 0.2, alignment: .leading)
@@ -661,10 +675,72 @@ struct WallBoard: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    private var left: Int { kept.reduce(0) { $0 + $1.items.count } - Self.cut(kept).reduce(0) { $0 + $1.items.count } }
+    private var left: Int { kept.reduce(0) { $0 + $1.items.count } - Self.cut(kept, most: most).reduce(0) { $0 + $1.items.count } }
+
+    // The Imbox under a short gilt hairline, its name lettered as a day's
+    // is; each line the sender small with when in gilt, the subject under it.
+    private var imbox: some View {
+        VStack(alignment: .leading, spacing: 5 * u) {
+            Rectangle()
+                .fill(Theme.giltOnArt.opacity(0.6))
+                .frame(width: 28 * u, height: 0.75)
+                .padding(.bottom, 9 * u)
+            Text("Imbox")
+                .font(.system(size: 10 * u, design: .serif).weight(.medium).smallCaps())
+                .tracking(1.2)
+                .foregroundStyle(Theme.giltOnArt)
+            VStack(alignment: .leading, spacing: 9 * u) {
+                ForEach(letters, id: \.id) { line in
+                    letter(line)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            guard let url = URL(string: "https://app.hey.com/topics/\(line.id)") else { return }
+                            openURL(url)
+                        }
+                        .transition(.opacity)
+                }
+            }
+            let more = (mail?.count ?? 0) - letters.count
+            if more > 0 {
+                Text(more == 1 ? "and one more in the Imbox" : "and \(more) more in the Imbox")
+                    .font(.system(size: 10 * u, design: .serif).italic())
+                    .foregroundStyle(Theme.bone.opacity(0.7))
+                    .padding(.top, 2 * u)
+            }
+        }
+    }
+
+    private func letter(_ line: HouseClient.Mail.Line) -> some View {
+        VStack(alignment: .leading, spacing: 2 * u) {
+            (Text(line.who.plainDashes)
+                .foregroundStyle(Theme.bone.opacity(0.8))
+             + Text(line.at.map { "   " + Self.when($0) } ?? "")
+                .foregroundStyle(Theme.giltOnArt))
+                .font(.system(size: 10 * u, design: .serif).smallCaps())
+                .tracking(0.6)
+                .lineLimit(1)
+            Text(line.subject.plainDashes)
+                .font(.system(size: 13 * u, design: .serif))
+                .foregroundStyle(Theme.bone)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // When a letter came: the hour today, then the day's name in the week,
+    // then the date.
+    private static func when(_ at: Date) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(at) { return at.formatted(date: .omitted, time: .shortened) }
+        if calendar.isDateInYesterday(at) { return "yesterday" }
+        if let days = calendar.dateComponents([.day], from: at, to: .now).day, days < 7 {
+            return at.formatted(.dateTime.weekday(.abbreviated))
+        }
+        return at.formatted(.dateTime.month(.abbreviated).day())
+    }
 
     // The first few things in order, whole days where they fit.
-    private static func cut(_ shelves: [BoardSection]) -> [BoardSection] {
+    private static func cut(_ shelves: [BoardSection], most: Int) -> [BoardSection] {
         var room = most
         var kept: [BoardSection] = []
         for shelf in shelves where room > 0 {
