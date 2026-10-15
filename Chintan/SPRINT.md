@@ -1109,6 +1109,25 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 ## The ledger (newest first)
 
+- 2026-10-15 · sprint 78 (73714a6 and the commit carrying this line): the
+  reviewer's fix, as the house steered, two looks of three, nothing on the
+  phone's face changed. Sprint 77 photographed as it stands: today's scroll
+  whole with its mount and both seals, Home, the Board and the Study, light
+  and dark (/tmp/see/0, and /tmp/see/1 and /tmp/see/last after, the same).
+  Then the board scroll sampled. The walk with no hand now scrolls the Board
+  to its foot and back twice ("board scroll, no hand", about 27 s in, so
+  `see.sh --hitches --sample --at 27 OUT` samples it). Medians of three:
+  before, with the hand, board scroll 13.9 ms/s (13.9 7.1 16.3, /tmp/see/h0);
+  after, with the hand 11.3 (11.3 9.8 13.9), with no hand 0.0 (2.9 0.0 0.0,
+  /tmp/see/h1). The sample caught UIKit's scroll animation running and the
+  main thread waiting in 263 of 291 samples: the Board's own scroll is under
+  10 and under 5, and what stays over 10 is the test hand reading the
+  accessibility tree at each fling, which a phone never does. So no change to
+  the Board; read board scroll by its no-hand line from here. Other medians:
+  reveal 27.8, tabs 18.6, study scroll 6.1, swipe 3.8, tabs with no hand
+  108.6 and feed open with no hand 101.1 (the next costs worth a sample). No
+  new door. Funnel: nothing.
+
 - 2026-10-14 · sprint 77 (11c94e2 and the commit carrying this line): the
   reviewer's fix, as the house steered, three looks of three. The phone's
   side trim is off: today's scroll stands whole again with its mount, and
