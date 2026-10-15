@@ -185,6 +185,7 @@ enum Wall {
 final class HitchMeter: NSObject {
     static let shared = HitchMeter()
     static let feed = Notification.Name("chintan.selfwalk.feed")
+    static let board = Notification.Name("chintan.selfwalk.board")
     private var link: CADisplayLink?
     private var last: CFTimeInterval = 0
     private var file: FileHandle?
@@ -241,6 +242,18 @@ final class HitchMeter: NSObject {
         }
         NotificationCenter.default.post(name: HitchMeter.feed, object: false)
         try? await Task.sleep(for: .seconds(1.5))
+        // The Board scrolled to its foot and back, by the meter's own hand,
+        // about 27 s in (`see.sh --hitches --sample --at 27` catches it).
+        turn(.board)
+        try? await Task.sleep(for: .seconds(1.5))
+        await window("board scroll, no hand") {
+            for _ in 0..<2 {
+                NotificationCenter.default.post(name: HitchMeter.board, object: true)
+                try? await Task.sleep(for: .seconds(1.4))
+                NotificationCenter.default.post(name: HitchMeter.board, object: false)
+                try? await Task.sleep(for: .seconds(1.4))
+            }
+        }
         try? log?.close()
         FileManager.default.createFile(atPath: caches.appendingPathComponent("self-done").path, contents: nil)
     }

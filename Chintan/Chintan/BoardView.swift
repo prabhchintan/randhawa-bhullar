@@ -73,11 +73,13 @@ struct BoardView: View {
                             .padding(.horizontal, 6)
                             // The held plaque stands over the shelves.
                             .zIndex(1)
+                            .id("heading-top")
                         if !shelves.isEmpty || errorText != nil {
                             // The shelves step back behind a held plaque, so
                             // no leaf reads on with it.
                             board(clear: geo.size.height - Self.foot)
                                 .opacity(heldHead ? 0.3 : 1)
+                                .id("shelves-end")
                         }
                     }
                     .padding(.horizontal, 16)
@@ -90,6 +92,13 @@ struct BoardView: View {
                     if launchOpened, let id = open.first {
                         launchOpened = false
                         proxy.scrollTo(id, anchor: .center)
+                    }
+                }
+                // The hitch meter's walk with no hand: to the foot and back.
+                .onReceive(NotificationCenter.default.publisher(for: HitchMeter.board)) { note in
+                    let down = (note.object as? Bool) ?? false
+                    withAnimation(.easeInOut(duration: 1.1)) {
+                        proxy.scrollTo(down ? "shelves-end" : "heading-top", anchor: down ? .bottom : .top)
                     }
                 }
             }
