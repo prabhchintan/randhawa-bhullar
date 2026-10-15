@@ -166,7 +166,8 @@ one to four words, the hour a clock time or a word like "evening"), `/v1/wall/ne
 kind, title, url, text, score, status, image; `POST /v1/feed/ID {"status"}` and
 `POST /v1/feed/ID/like`; `image` an https address, a page's own picture or a
 museum's for kind "art", the one thing the app fetches from elsewhere, since
-sprint 65), `/v1/feed/away` (since sprint 68: {"url", "mark", "token"}, the
+sprint 65), `/v1/mail` (the Mac wall's Imbox, {"mail": [{id, who, subject, at}],
+"count"}, answering by sprint 79), `/v1/feed/away` (since sprint 68: {"url", "mark", "token"}, the
 worker's two https doors and the phone's own key, asked once a run when the
 house answers and kept in the Keychain; while the house is away the feed reads
 `url` and posts marks to `mark` with the key as a bearer, BRIEF.md's second
@@ -918,6 +919,20 @@ O. The Mac wall (Prab, 2026-09-27 08:48, the study line, verbatim: "loving
    SELF only (yantar's display still cannot be photographed). Left: a click
    seen lifting a real thing off (never in the eyes, since it would mark
    his board), then the mail column (`GET /v1/mail`).
+   The mail column built (sprint 79): under the week, past a short gilt
+   hairline, "Imbox" lettered as a day's name is, then four letters at most,
+   each the sender small with when in gilt (the hour today, yesterday, the
+   day's name in the week, then the date) and the subject under it in the
+   serif, two lines at most; "and N more in the Imbox" from `count`. The week
+   gives up two things (seven, not nine) while the Imbox stands under it. Read
+   at the open and with the board every minute, taken only when it changed,
+   so a new letter fades in; a 404 takes the column away, a silent house
+   leaves it standing. A click on a letter opens app.hey.com/topics/ID.
+   `--open day` letters an invented Imbox under the invented week (wall.sh's
+   `column`), and each poll says `mail none|same|changed`. Seen SELF, against
+   the real house's door as well. Left: a click seen opening a letter in the
+   browser (never in the eyes, it would open his mail on the desk), and the
+   CONFIRMED look the display has not yet allowed.
 
 P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    decouple the skeleton from the UI (including the background), we can push
@@ -1108,6 +1123,23 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-15 · sprint 79 (2921487 and the commit carrying this line): the
+  reviewer's fix, as the house steered, one look of three; the phone's look
+  and its hitch numbers left alone. The Mac wall's mail column (chunk O):
+  under the week's things, past a short gilt hairline, the Imbox, four
+  letters at most, each the sender small with when in gilt and the subject
+  under it in the serif, then "and 2 more in the Imbox" when there are more.
+  A click on a letter opens it in HEY in the browser; nothing is sent or
+  filed from the wall. Read with the board every minute, a new letter fading
+  in; a house without the door shows no column. Seen in the wall's own
+  drawing with an invented Imbox under the invented week (/tmp/see/wall1
+  column-self) and against the real house, which already answers the door
+  (wall-self; every poll said `mail same`); the column ends well above the
+  detailed label. The phone re-seen unchanged (/tmp/see/1). Door used:
+  `GET /v1/mail` as chunk O wrote it, `at` read as ISO 8601 or seconds,
+  `id` as a word or a number. No hitch numbers (nothing on the phone moved).
+  Funnel: nothing.
 
 - 2026-10-15 · sprint 78 (73714a6 and the commit carrying this line): the
   reviewer's fix, as the house steered, two looks of three, nothing on the
