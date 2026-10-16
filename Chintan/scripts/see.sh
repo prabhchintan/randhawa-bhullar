@@ -164,6 +164,10 @@ for mode in light dark; do
     case "$tab" in settings@foot) EXTRA=(--settings --open foot) ;; esac
     # study@in-hawa: hawa's room as the phone holds it, nothing said.
     case "$tab" in study@in-hawa) EXTRA=(--open hawa) ;; esac
+    # A tab ending @look (board@look): drawn in the look at CHINTAN_LOOK
+    # (/tmp/see/look.json unless named), a file shaped as /v1/look, so a
+    # look the house has not served is seen.
+    case "$tab" in *@look) EXTRA=(--look "${CHINTAN_LOOK:-/tmp/see/look.json}") ;; esac
     # A tab ending -away (jharokha@feed-away, jharokha@feed-like-away): the
     # same look with a house address that refuses, so the feed takes the road.
     HOUSE_ARG=${CHINTAN_HOUSE:-}

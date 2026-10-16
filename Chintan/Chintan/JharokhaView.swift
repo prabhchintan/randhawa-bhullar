@@ -46,6 +46,9 @@ struct JharokhaView: View {
     @State private var week: [BoardSection] = []
     // His Imbox, the wall's second column; nil while the house has no door.
     @State private var mail: HouseClient.Mail?
+    // When the Imbox last answered, and whether it has since gone quiet.
+    @State private var mailHeard: Date?
+    @State private var mailQuiet = false
     #endif
 
     private struct LabelHold: Equatable {
@@ -137,7 +140,8 @@ struct JharokhaView: View {
                 .opacity(typeSize.isAccessibilitySize && heldLabel ? 0 : 1)
             }
             #if targetEnvironment(macCatalyst)
-            .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles, mail: mail) }
+            .overlay(alignment: .topTrailing) { WallBoard(shelves: week, titles: titles, mail: mail,
+                                                                         quietSince: mailQuiet ? mailHeard : nil) }
             #endif
             .overlay(alignment: .top) {
                 // At the accessibility sizes a thing held is taller than the
@@ -591,7 +595,12 @@ struct JharokhaView: View {
         async let beat = try? house.pulse()
         async let short = try? house.titles()
         async let book = try? house.visitors()
+        async let look: Result<Data?, Error> = {
+            do { return .success(try await house.look()) } catch { return .failure(error) }
+        }()
         let (c, b, p, s, v) = await (cockpit, board, beat, short, book)
+        // A quiet house leaves the look as it was kept.
+        if case .success(let data) = await look { Look.take(data) }
         if let v {
             guests = v
             // The first time the book is read, its time is set and nothing is new.
@@ -616,8 +625,12 @@ struct JharokhaView: View {
             #if targetEnvironment(macCatalyst)
             // The wall's column gets an invented week around that day.
             week = BoardSection.week([BoardSection(title: "", items: BoardItem.stagedDay + BoardItem.stagedWeek)])
-            // And an invented Imbox under it.
+            // And an invented Imbox under it; `--mail-quiet` as if the house
+            // had last answered two hours ago.
             mail = HouseClient.Mail.staged
+            if ProcessInfo.processInfo.arguments.contains("--mail-quiet") {
+                (mailHeard, mailQuiet) = (.now.addingTimeInterval(-2 * 3600), true)
+            }
             #endif
         }
         errorText = (c == nil && b == nil) ? "The house is not answering. Are you on the tailnet?" : nil
@@ -656,22 +669,30 @@ struct JharokhaView: View {
         let mailWas = mail
         await readMail(house)
         print("wall-poll", b == nil ? "unheard" : was == boardText ? "same" : "changed",
-              "mail", mail == nil ? "none" : mailWas == mail ? "same" : "changed")
+              "mail", mail == nil ? "none" : mailQuiet ? "quiet" : mailWas == mail ? "same" : "changed")
         fflush(stdout)
     }
 
     // The Imbox, read with the board; taken only when it changed, so a new
     // line fades in and the rest stand still. A house without the door, or
-    // one gone quiet, leaves the column as it stood or away.
+    // one gone quiet, leaves the column as it stood or away. Quiet past a
+    // few minutes' reads, the column says since when, so a still Imbox is
+    // never taken for an empty one.
     private func readMail(_ house: HouseClient) async {
         guard Self.eyes != "day" else { return }
         do {
             let read = try await house.mail()
+            mailHeard = .now
+            if mailQuiet { withAnimation(.easeInOut(duration: 1.2)) { mailQuiet = false } }
             guard read != mail else { return }
             withAnimation(.easeInOut(duration: 1.2)) { mail = read }
         } catch HouseError.noDoor {
             if mail != nil { withAnimation(.easeInOut(duration: 1.2)) { mail = nil } }
-        } catch {}
+        } catch {
+            guard mail != nil, let heard = mailHeard, !mailQuiet,
+                  Date.now.timeIntervalSince(heard) > 150 else { return }
+            withAnimation(.easeInOut(duration: 1.2)) { mailQuiet = true }
+        }
     }
     #endif
 

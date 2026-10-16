@@ -507,6 +507,8 @@ struct WallBoard: View {
     let shelves: [BoardSection]
     let titles: [String: BoardItem.Short]
     var mail: HouseClient.Mail?
+    // When the Imbox last answered, once it has gone quiet; nil while it answers.
+    var quietSince: Date?
     // So the column never runs down onto the label in the same corner; the
     // week gives up two things when the Imbox stands under it.
     private var most: Int { letters.isEmpty ? 9 : 7 }
@@ -707,7 +709,21 @@ struct WallBoard: View {
                     .foregroundStyle(Theme.bone.opacity(0.7))
                     .padding(.top, 2 * u)
             }
+            if let quietSince {
+                Text("house quiet since " + Self.since(quietSince))
+                    .font(.system(size: 10 * u, design: .serif).italic())
+                    .foregroundStyle(Theme.bone.opacity(0.7))
+                    .padding(.top, 2 * u)
+                    .transition(.opacity)
+            }
         }
+    }
+
+    // The hour on the day itself, the date on any other, as the feed says it.
+    private static func since(_ at: Date) -> String {
+        Calendar.current.isDateInToday(at)
+            ? at.formatted(date: .omitted, time: .shortened)
+            : at.formatted(.dateTime.month(.abbreviated).day())
     }
 
     private func letter(_ line: HouseClient.Mail.Line) -> some View {

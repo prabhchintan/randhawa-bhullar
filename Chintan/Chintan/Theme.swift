@@ -7,21 +7,23 @@ import UIKit
 // and the active tab, saffron only as a single mark. Each colour has its
 // own light and dark in the asset catalog. The painting is the real ground
 // of every screen; the colours are for what sits on it.
+// The house may say any of them otherwise (`GET /v1/look`, chunk P); what
+// it leaves unsaid, or a house without the door, keeps the shipped look.
 enum Theme {
-    static let ground = Color("Ground")
-    static let plaque = Color("Plaque")
-    static let ink = Color("Ink")
-    static let gilt = Color("AccentColor")
-    static let saffron = Color("Saffron")
-    static let spacing: CGFloat = 16
+    static var ground: Color { Look.current.ground ?? Color("Ground") }
+    static var plaque: Color { Look.current.plaque ?? Color("Plaque") }
+    static var ink: Color { Look.current.ink ?? Color("Ink") }
+    static var gilt: Color { Look.current.gilt ?? Color("AccentColor") }
+    static var saffron: Color { Look.current.saffron ?? Color("Saffron") }
+    static var spacing: CGFloat { Look.current.spacing ?? 16 }
     // How tall a scroll dissolves into the painting above the bar: a line
     // that runs under it fades out as a leaf, never cut mid-word.
-    static let foot: CGFloat = 96
+    static var foot: CGFloat { Look.current.foot ?? 96 }
 
     // What is lettered straight onto the art, in either mode.
-    static let bone = Color(red: 0.925, green: 0.910, blue: 0.875)
-    static let lampBlack = Color(red: 0.071, green: 0.067, blue: 0.063)
-    static let giltOnArt = Color(red: 0.788, green: 0.647, blue: 0.373)
+    static var bone: Color { Look.current.bone ?? Color(red: 0.925, green: 0.910, blue: 0.875) }
+    static var lampBlack: Color { Look.current.lampBlack ?? Color(red: 0.071, green: 0.067, blue: 0.063) }
+    static var giltOnArt: Color { Look.current.giltOnArt ?? Color(red: 0.788, green: 0.647, blue: 0.373) }
 
     static func title(_ style: Font.TextStyle = .title2) -> Font {
         .system(style, design: .serif).weight(.semibold)
@@ -49,6 +51,90 @@ enum Theme {
         let weighted = base.fontDescriptor.addingAttributes([.traits: [UIFontDescriptor.TraitKey.weight: weight.rawValue]])
         let descriptor = weighted.withDesign(.serif) ?? weighted
         return UIFont(descriptor: descriptor, size: base.pointSize)
+    }
+}
+
+// The look as the house says it: {"palette": {NAME: "#RRGGBB" or {"light",
+// "dark"}}, "spacing", "foot"}, the names Theme's own. Kept on the phone
+// as last read, so the house's look opens with the app, house or no house;
+// a fresh read is taken at the next drawing. Anything unsaid or unreadable
+// is nil, and Theme draws the shipped value.
+struct Look: Decodable, Equatable {
+    var ground, plaque, ink, gilt, saffron, bone, lampBlack, giltOnArt: Color?
+    var spacing, foot: CGFloat?
+
+    static let shipped = Look()
+    private(set) static var current: Look = kept()
+
+    private static let file: URL = FileManager.default
+        .urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("look.json")
+
+    // `--look PATH` is the house's eyes' own: a look read from a file, so a
+    // look the house has not served yet can be seen.
+    private static func kept() -> Look {
+        let args = ProcessInfo.processInfo.arguments
+        if let i = args.firstIndex(of: "--look"), i + 1 < args.count {
+            return (try? Data(contentsOf: URL(fileURLWithPath: args[i + 1]))).flatMap(read) ?? .shipped
+        }
+        return (try? Data(contentsOf: file)).flatMap(read) ?? .shipped
+    }
+
+    private static func read(_ data: Data) -> Look? { try? JSONDecoder().decode(Look.self, from: data) }
+
+    // The house's answer: kept and drawn from; a house without the door
+    // (nil) returns the phone to the shipped look.
+    static func take(_ data: Data?) {
+        guard !ProcessInfo.processInfo.arguments.contains("--look") else { return }
+        guard let data else {
+            try? FileManager.default.removeItem(at: file)
+            current = .shipped
+            return
+        }
+        guard let look = read(data) else { return }
+        try? data.write(to: file, options: .atomic)
+        current = look
+    }
+
+    init() {}
+
+    private enum Keys: String, CodingKey { case palette, spacing, foot }
+    private struct Name: CodingKey {
+        var stringValue: String
+        var intValue: Int? { nil }
+        init(_ s: String) { stringValue = s }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { nil }
+    }
+    private struct Pair: Decodable { let light: String; let dark: String }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: Keys.self)
+        spacing = (try? c.decode(Double.self, forKey: .spacing)).map { CGFloat($0) }
+        foot = (try? c.decode(Double.self, forKey: .foot)).map { CGFloat($0) }
+        guard let p = try? c.nestedContainer(keyedBy: Name.self, forKey: .palette) else { return }
+        func colour(_ name: String) -> Color? {
+            if let hex = try? p.decode(String.self, forKey: Name(name)) { return Self.colour(hex, hex) }
+            if let pair = try? p.decode(Pair.self, forKey: Name(name)) { return Self.colour(pair.light, pair.dark) }
+            return nil
+        }
+        (ground, plaque, ink, gilt, saffron) = (colour("ground"), colour("plaque"), colour("ink"), colour("gilt"), colour("saffron"))
+        (bone, lampBlack, giltOnArt) = (colour("bone"), colour("lampBlack"), colour("giltOnArt"))
+    }
+
+    // One colour for each mode; both must read, or the shipped one stands.
+    private static func colour(_ light: String, _ dark: String) -> Color? {
+        guard let l = ui(light), let d = ui(dark) else { return nil }
+        return Color(UIColor { $0.userInterfaceStyle == .dark ? d : l })
+    }
+
+    private static func ui(_ hex: String) -> UIColor? {
+        var s = hex.trimmingCharacters(in: .whitespaces)
+        if s.hasPrefix("#") { s.removeFirst() }
+        guard s.count == 6 || s.count == 8, let v = UInt64(s, radix: 16) else { return nil }
+        let rgb = s.count == 8 ? v >> 8 : v
+        let a = s.count == 8 ? CGFloat(v & 0xFF) / 255 : 1
+        return UIColor(red: CGFloat((rgb >> 16) & 0xFF) / 255, green: CGFloat((rgb >> 8) & 0xFF) / 255,
+                       blue: CGFloat(rgb & 0xFF) / 255, alpha: a)
     }
 }
 

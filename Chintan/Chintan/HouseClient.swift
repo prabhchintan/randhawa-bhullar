@@ -352,6 +352,17 @@ struct HouseClient {
         return try JSONDecoder().decode(Mail.self, from: data)
     }
 
+    // The look as the house says it (Look in Theme.swift), as it came; nil
+    // from a house without the door, so the shipped look stands.
+    func look() async throws -> Data? {
+        guard let url = url("/v1/look") else { throw HouseError.noAddress }
+        let (data, response) = try await Self.session.data(from: url)
+        guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
+        if http.statusCode == 404 || http.statusCode == 405 { return nil }
+        guard http.statusCode == 200 else { throw HouseError.unreachable }
+        return data
+    }
+
     // A thing marked done from the phone; the house runs `ghar done` with the
     // line as it printed it. A house without this door answers 404.
     func done(_ text: String) async throws {
