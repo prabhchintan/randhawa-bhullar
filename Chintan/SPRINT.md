@@ -167,7 +167,9 @@ kind, title, url, text, score, status, image; `POST /v1/feed/ID {"status"}` and
 `POST /v1/feed/ID/like`; `image` an https address, a page's own picture or a
 museum's for kind "art", the one thing the app fetches from elsewhere, since
 sprint 65), `/v1/mail` (the Mac wall's Imbox, {"mail": [{id, who, subject, at}],
-"count"}, answering by sprint 79), `/v1/feed/away` (since sprint 68: {"url", "mark", "token"}, the
+"count"}, answering by sprint 79), `/v1/look` (wanted, chunk P: the look as
+tokens, its shape under P; the app reads it since sprint 80 and draws the
+shipped look while the house answers 404), `/v1/feed/away` (since sprint 68: {"url", "mark", "token"}, the
 worker's two https doors and the phone's own key, asked once a run when the
 house answers and kept in the Keychain; while the house is away the feed reads
 `url` and posts marks to `mark` with the key as a bearer, BRIEF.md's second
@@ -980,6 +982,18 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    the painting layer and its alone view, the gestures, the haptics, the
    senses. The rule: the house decides what and where, the app decides
    how it feels.
+   Slice (1), the app side, built (sprint 80): Look (Theme.swift) reads
+   `GET /v1/look` with Home's every refresh, keeps it in Caches/look.json so
+   it opens with the app, and Theme draws each of its values through it, the
+   shipped value wherever the house says nothing; a 404 returns the phone to
+   the shipped look, a quiet house leaves the kept one. The shape it reads:
+   {"palette": {"ground", "plaque", "ink", "gilt", "saffron", "bone",
+   "lampBlack", "giltOnArt": "#RRGGBB" or {"light": "#RRGGBB", "dark":
+   "#RRGGBB"}}, "spacing": 16, "foot": 96}, every key optional, a colour
+   only taken when both its modes read. `see.sh OUT board@look` draws a tab
+   in the look at /tmp/see/look.json (or CHINTAN_LOOK). Left of (1): the
+   house's door itself, then the type scale and the scrims as tokens (Theme
+   has no scrim value yet; each screen draws its own).
 Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    i want it as a widget on the iphone. you would need to figure out how to
    display it in different aspect ratios because i know widgets have certain
@@ -1123,6 +1137,26 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-16 · sprint 80 (4009f5c and the commit carrying this line): the
+  reviewer's fix, as the house steered, two looks of three, nothing on the
+  phone's face changed. The app now reads its look from the house (chunk P,
+  slice 1): `GET /v1/look` with every refresh of Home, kept for the next
+  open, each colour, the spacing and the foot drawn from it where it speaks
+  and from the shipped look where it does not. The house has no door yet, so
+  the phone is drawn exactly as before (/tmp/see/1, Home, the Board and the
+  Study, light and dark); an invented look turning the gilt to a pale blue
+  and the plaque cool was seen taking the Board's day names, its active tab
+  and its leaves in both modes (/tmp/see/1 board@look). And on the Mac wall,
+  once the mail door has missed for a few minutes' reads, "house quiet since"
+  and the hour it last answered stands under the Imbox in the column's small
+  italic, so a still Imbox is never taken for an empty one; it leaves at the
+  next answer. Seen in the wall's own drawing with the invented Imbox
+  (/tmp/see/wall1 column-quiet-self, beside column-self without it); every
+  real poll said `mail same`. Doors wanted from the house: `GET /v1/look` as
+  chunk P now writes it, 404 until then; and `/v1/mail`'s `who` shaped as a
+  short name for a person, a name and not an address or a list. No hitch
+  numbers (nothing on the phone moved). Funnel: nothing.
 
 - 2026-10-15 · sprint 79 (2921487 and the commit carrying this line): the
   reviewer's fix, as the house steered, one look of three; the phone's look
