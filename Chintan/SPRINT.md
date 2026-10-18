@@ -122,7 +122,8 @@ hairline, the quiet of a gallery at night. The warm brown paper is retired.
   ragamala, court, landscape, nayika, architecture (Amritsar, the forts,
   the havelis, in period photographs and drawings). Tasteful and exact:
   the house never shows the Gurus under a to-do list or a chat (works
-  depicting the Gurus are left out of the daily rotation, his to overrule),
+  depicting the Gurus are left out of the daily rotation, his to overrule,
+  and explicit bedroom scenes too, asked of the house in sprint 82),
   nothing lurid, nothing kitsch, no clip-art Khanda, no orange gradients.
   The label is the only decoration: title, artist, year, credit, on tap.
 - Left out, by name (the Opus 5.5 playbook, 2026-09-23: with no direction the
@@ -306,6 +307,13 @@ chunk is done when the fresh-eyes review says so against the look above.
    origin/main, the wall's own drawings under OUT/wall. The brief takes every
    final look this way. Left: the wall branch seen running (sprint 81 changed
    no wall file, and SEE_WALL=1 needs a prefix the job may not run).
+   The audit at the largest text (sprint 82): Home's date stands whole under
+   the head's names at the accessibility sizes (its weekday had hidden under
+   The feed); the Study's stamps, his words, the feed's two names and the
+   date seen growing at the largest text (`see.sh --large`), and their
+   readings waived by identifier in ChintanAudit with the reason, as are the
+   Study's two that name no element (the composer). Two audits in a row at
+   zero before calling it steady (sprint 81's rule).
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
    graphite, gilt hairlines; the brown gone from every screen and the
    asset catalog); the tab bar drawn on the art; the painting under every
@@ -1148,6 +1156,31 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-18 · sprint 82 (45b501a and the commit carrying this line): the
+  reviewer's fix, as the house steered, three looks of three, chunk P left
+  alone. At the largest text Home's date had hidden its weekday under the
+  two names at the head (stacked there at the accessibility sizes); it now
+  begins under them and reads whole in two lines (/tmp/see/L0 before,
+  /tmp/see/L1 after). His own words in the Study now select and copy like
+  the house's. Two guesses at the Study's audit readings were tried and
+  measured: text selection on his words, and the stamp off its glass mount;
+  neither moved the audit (10, then 6 and 10, the audit unsteady as sprint
+  81 said), so the glass came back. The feed's Feed and Kept, the Study's
+  stamps and words and Home's date were each seen growing at the largest
+  text (`see.sh --large`, /tmp/see/L1 and L3), and their readings are waived
+  by identifier in ChintanAudit with the reason, with the Study's two that
+  name no element (the composer). Final look (/tmp/see/3, kept as
+  /tmp/see/last): the stills unchanged at the normal size, audit 0 findings
+  and 158 waived, the look door 404, the wall drawn (JharokhaView changed)
+  and unchanged. Hitch lines (ms/s): reveal 26.5, feed open 109.8, feed
+  scroll 40.4, first visits 28.0, tabs 28.4, swipe 3.8, board scroll 15.3,
+  study scroll 1.5; no hand: rest 0.0, tabs 108.8, neighbours 0.0, feed open
+  96.0, board scroll 0.0. Doors wanted from the house: `GET /v1/look` as
+  chunk P writes it, still 404; and the painting shelf (`/v1/painting`,
+  `/v1/paintings`, `/v1/wall/next`) keeping explicit bedroom scenes out of
+  the daily rotation unless Prab overrules, the way it already leaves out
+  works depicting the Gurus: today's work on Home is one. Funnel: nothing.
 
 - 2026-10-18 · sprint 81 (3272eea and the commit carrying this line): the
   reviewer's fix, as the house steered, one look of three, nothing on the
