@@ -312,8 +312,9 @@ chunk is done when the fresh-eyes review says so against the look above.
    The feed); the Study's stamps, his words, the feed's two names and the
    date seen growing at the largest text (`see.sh --large`), and their
    readings waived by identifier in ChintanAudit with the reason, as are the
-   Study's two that name no element (the composer). Two audits in a row at
-   zero before calling it steady (sprint 81's rule).
+   Study's two that name no element (the composer). Two audits in a row read
+   zero (/tmp/see/3 and /tmp/see/last), so the audit item is done; a new
+   finding is a defect again.
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
    graphite, gilt hairlines; the brown gone from every screen and the
    asset catalog); the tab bar drawn on the art; the painting under every
@@ -1170,9 +1171,9 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   stamps and words and Home's date were each seen growing at the largest
   text (`see.sh --large`, /tmp/see/L1 and L3), and their readings are waived
   by identifier in ChintanAudit with the reason, with the Study's two that
-  name no element (the composer). Final look (/tmp/see/3, kept as
-  /tmp/see/last): the stills unchanged at the normal size, audit 0 findings
-  and 158 waived, the look door 404, the wall drawn (JharokhaView changed)
+  name no element (the composer). Final look (/tmp/see/3, then the same
+  pass again as /tmp/see/last): the stills unchanged at the normal size,
+  audit 0 findings both times (158 and 153 waived), the look door 404, the wall drawn (JharokhaView changed)
   and unchanged. Hitch lines (ms/s): reveal 26.5, feed open 109.8, feed
   scroll 40.4, first visits 28.0, tabs 28.4, swipe 3.8, board scroll 15.3,
   study scroll 1.5; no hand: rest 0.0, tabs 108.8, neighbours 0.0, feed open
