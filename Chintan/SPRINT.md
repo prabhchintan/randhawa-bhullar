@@ -298,6 +298,14 @@ chunk is done when the fresh-eyes review says so against the look above.
    readings, see the ledger); the house builds
    `/v1/metrics` and `/v1/word` (live 09-23 03:30); the app's MetricKit
    subscriber and the long-press "a word for the house" come with chunk G.
+   The look folder whole (sprint 81, the reviewer's fix of 2026-10-11):
+   `see.sh --evidence OUT` takes the stills, then writes OUT/EVIDENCE.txt
+   with the look door's answer (its body kept as look-door.json when it
+   answers), the walk under OUT/walk (contact sheets, hitch lines, audit
+   list) and, when a Swift file with Mac code or wall.sh changed since
+   origin/main, the wall's own drawings under OUT/wall. The brief takes every
+   final look this way. Left: the wall branch seen running (sprint 81 changed
+   no wall file, and SEE_WALL=1 needs a prefix the job may not run).
 A. The canvas (now). The palette re-cut to the look (bone, lamp black,
    graphite, gilt hairlines; the brown gone from every screen and the
    asset catalog); the tab bar drawn on the art; the painting under every
@@ -993,7 +1001,10 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    only taken when both its modes read. `see.sh OUT board@look` draws a tab
    in the look at /tmp/see/look.json (or CHINTAN_LOOK). Left of (1): the
    house's door itself, then the type scale and the scrims as tokens (Theme
-   has no scrim value yet; each screen draws its own).
+   has no scrim value yet; each screen draws its own). Held (the reviewer's
+   fix, 2026-10-11): nothing deeper in P until the door answers and a real
+   look is photographed on the phone; EVIDENCE.txt says the door's answer on
+   every look (404 on 2026-10-18).
 Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    i want it as a widget on the iphone. you would need to figure out how to
    display it in different aspect ratios because i know widgets have certain
@@ -1137,6 +1148,27 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-18 · sprint 81 (3272eea and the commit carrying this line): the
+  reviewer's fix, as the house steered, one look of three, nothing on the
+  phone's face changed and nothing deeper built in chunk P. Every look folder
+  now carries its evidence: `see.sh --evidence OUT` takes the stills, asks
+  the look door, runs the walk, draws the wall when the wall changed, and
+  names it all in EVIDENCE.txt; the brief takes the final look that way.
+  First run (/tmp/see/1; the same pass again is /tmp/see/last): six stills unchanged, the
+  look door 404 so the stills are the shipped look, 48 contact sheets, the
+  audit at 10 findings (Home's date line may clip at larger type; the
+  Study's time stamp and bubbles and one unnamed element do not take dynamic
+  type), wall unchanged so not drawn. Hitch lines from the one walk (ms/s):
+  reveal 33.6, feed open 110.8, feed scroll 36.5, first visits 30.3, tabs
+  31.6, swipe 3.8, board scroll 10.3, study scroll 3.1; no hand: rest 0.0,
+  tabs 113.7, neighbours 0.0, feed open 98.4, board scroll 0.0. The second
+  pass (/tmp/see/last) read within a few ms/s of these, and its audit found
+  14: the same 10 plus the feed's two face names not taking dynamic type, in
+  both modes, which the first pass did not reach; the audit is not steady
+  from run to run, so read two before calling a finding gone. Door wanted
+  from the house: `GET /v1/look` as chunk P writes it, still 404. Funnel:
+  nothing.
 
 - 2026-10-16 · sprint 80 (4009f5c and the commit carrying this line): the
   reviewer's fix, as the house steered, two looks of three, nothing on the
