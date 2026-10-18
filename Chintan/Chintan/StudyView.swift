@@ -461,6 +461,9 @@ struct StudyView: View {
                 Spacer(minLength: 56)
                 Text(message.text)
                     .foregroundStyle(Theme.ink)
+                    // His own words copy out the way the house's do.
+                    .textSelection(.enabled)
+                    .accessibilityIdentifier("his-word")
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
                     .ownGlass(radius: 12)
@@ -496,6 +499,7 @@ struct StudyView: View {
             .font(Theme.label(.caption))
             .tracking(1.1)
             .foregroundStyle(Theme.giltOnArt)
+            .accessibilityIdentifier("stamp")
             .mount()
             .frame(maxWidth: .infinity)
             .padding(.top, 4)

@@ -538,11 +538,27 @@ final class ChintanAudit: XCTestCase {
     //   purpose (the bar at the system tab bar's, with the large content viewer
     //   on a press and hold; the rings, a picture, at the first large size), so
     //   the largest text never runs them off the phone. Seen at the largest size.
+    // - dynamic type and text clipped, by identifier: the feed's two names,
+    //   the Study's stamps and his words, Home's date. Each grows at the
+    //   largest text and reads whole there (sprint 82, see.sh --large: the
+    //   feed's names at their full size, the date in two lines under the
+    //   head's names); the audit's reading is of its own, near the top of a
+    //   scroll that keeps its foot in view.
+    // - the Study's two findings that name no element: the composer, the one
+    //   thing on the Study the tree shows without a word of its own; its prompt
+    //   shortens at the accessibility sizes and reads whole there.
     private static let heldAtSize: Set<String> = ["Home", "Board", "Study", "hours", "week", "fable"]
+    private static let grownAtSize: Set<String> = ["feed-face-feed", "feed-face-kept", "stamp", "his-word", "date"]
 
-    private static func waiver(_ type: XCUIAccessibilityAuditType, on screen: String, element: String?) -> String? {
-        if type == .dynamicType, let element, heldAtSize.contains(element) {
+    private static func waiver(_ type: XCUIAccessibilityAuditType, on screen: String, element: XCUIElement?) -> String? {
+        if type == .dynamicType, let label = element?.label, heldAtSize.contains(label) {
             return "held at a size by design, the large content viewer on the bar; seen at the largest text"
+        }
+        if type == .dynamicType || type == .textClipped, let id = element?.identifier, grownAtSize.contains(id) {
+            return "grows and reads whole at the largest text, seen in see.sh --large"
+        }
+        if type == .dynamicType || type == .textClipped, element == nil, screen.hasPrefix("study") {
+            return "names no element; the composer, whose prompt reads whole at the largest text"
         }
         if type == .contrast {
             return "samples the painting, not the plaque or shade under the letters; clean in the pictures"
@@ -571,7 +587,7 @@ final class ChintanAudit: XCTestCase {
                 let what = (issue.compactDescription + ": " + issue.detailedDescription)
                     .replacingOccurrences(of: "\n", with: " ")
                 let line = "\(screen)\t\(self.look)\t\(Self.kind(issue.auditType))\t\(who)\t\(what)"
-                if let why = Self.waiver(issue.auditType, on: screen, element: issue.element?.label) {
+                if let why = Self.waiver(issue.auditType, on: screen, element: issue.element) {
                     self.waived?.write(Data("\(line)\twaived: \(why)\n".utf8))
                 } else {
                     self.log?.write(Data((line + "\n").utf8))

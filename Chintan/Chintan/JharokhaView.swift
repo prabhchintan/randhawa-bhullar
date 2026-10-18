@@ -17,6 +17,8 @@ struct JharokhaView: View {
     @State private var titles: [String: BoardItem.Short] = [:]
     @State private var pulse: [CockpitDay.Meter] = []
     @State private var errorText: String?
+    // How tall the names at the head stand, so the date starts under them.
+    @State private var headHeight: CGFloat = 0
     @State private var showCredit = false
     @State private var openMeter: String?
     @State private var showVisitors = false
@@ -94,7 +96,9 @@ struct JharokhaView: View {
                         // them). Only a day too tall for the wall scrolls.
                         overlay
                             .padding(.horizontal, 22)
-                            .padding(.top, 80)
+                            // At the accessibility sizes the names stand one over
+                            // the other, so the date begins under the pair, whole.
+                            .padding(.top, typeSize.isAccessibilitySize ? max(80, headHeight + 8) : 80)
                             // The last line clears the fade whole, above the foot.
                             .padding(.bottom, 40)
                             .frame(minHeight: wall.size.height, alignment: .bottomLeading)
@@ -136,6 +140,7 @@ struct JharokhaView: View {
                     feedMount
                         .padding(.leading, typeSize.isAccessibilitySize ? 12 : 0)
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headHeight = $0 }
                 // The label's plaque takes their room while it is held there.
                 .opacity(typeSize.isAccessibilitySize && heldLabel ? 0 : 1)
             }
@@ -293,6 +298,7 @@ struct JharokhaView: View {
                 .foregroundStyle(Theme.bone)
                 // At the largest sizes the date takes a second line, never cut.
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("date")
                 // A thing held names its own day; the date steps aside.
                 .opacity(heldThing == nil ? 1 : 0)
             .frame(maxWidth: .infinity, alignment: .leading)
