@@ -39,7 +39,11 @@ you need, tolerant of the door not existing yet.
 Before you finish: update Chintan/SPRINT.md (the backlog item done or
 narrowed, one ledger line newest first naming the commits and what a person
 would notice, and any door you need from the house), commit it, and leave
-the last pictures in /tmp/see/last (`cp -r` the final look there). End the
+the last pictures in /tmp/see/last (`cp -r` the final look there). Take
+that final look with `bash Chintan/scripts/see.sh --evidence /tmp/see/N`,
+so the folder carries EVIDENCE.txt (the look door's answer, the walk's
+contact sheets, hitch lines and audit list, and the wall's own drawings
+whenever the wall changed) and the review judges from it. End the
 ledger line with `Funnel:` and one sentence naming what in this sprint a
 stranger carrying Randhawa or Bhullar would want, in those apps' own terms
 and with no house words, or `Funnel: nothing`; the house reads it into

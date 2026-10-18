@@ -79,7 +79,80 @@
 #                                                    gallery and placed (widget.sh)
 #   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
 #                                                    text size, then back to normal
+#   bash Chintan/scripts/see.sh --evidence OUTDIR [tab ...]
+#                                                    the stills, then the evidence the
+#                                                    review reads beside them: the look
+#                                                    door's answer, the walk (OUTDIR/walk:
+#                                                    contact sheets, hitch lines, audit
+#                                                    list), the wall's own drawings
+#                                                    (OUTDIR/wall) when the wall changed
+#                                                    since origin/main (SEE_WALL=1 forces
+#                                                    it), and EVIDENCE.txt naming each
 set -euo pipefail
+if [ "${1:-}" = "--evidence" ]; then
+  shift
+  OUT=${1:?usage: see.sh --evidence OUTDIR [tab ...]}
+  HERE=$(cd "$(dirname "$0")" && pwd)
+  ROOT=$(cd "$HERE/../.." && pwd)
+  bash "$HERE/see.sh" "$@" || exit 1
+  EV="$OUT/EVIDENCE.txt"
+  {
+    echo "The look folder, $(date '+%Y-%m-%d %H:%M'), at $(git -C "$ROOT" rev-parse --short HEAD)"
+    echo "Stills: $(ls "$OUT"/*.png 2>/dev/null | grep -c . || true)"
+  } > "$EV"
+  # The look door: what the house says to GET /v1/look, so the review knows
+  # whether the stills are the house's look or the shipped one.
+  python3 - "$OUT/look-door.json" >> "$EV" <<'PY'
+import os, sys, urllib.request, urllib.error
+house = os.environ.get("CHINTAN_HOUSE", "")
+url = (house if "://" in house else "http://" + house).rstrip("/") + "/v1/look"
+try:
+    with urllib.request.urlopen(url, timeout=10) as r:
+        body = r.read()
+    open(sys.argv[1], "wb").write(body)
+    print(f"Look door: {r.status}, {len(body)} bytes kept in look-door.json; the stills are the house's look")
+except urllib.error.HTTPError as e:
+    print(f"Look door: {e.code}; the stills are the shipped look")
+except Exception as e:
+    print(f"Look door: no answer ({type(e).__name__}); the stills are the kept or shipped look")
+PY
+  # The walk: film, contact sheets, hitch lines and audit list in one run.
+  WALK_STATUS=0
+  bash "$HERE/walk.sh" "$OUT/walk" > "$OUT/walk.txt" 2>&1 || WALK_STATUS=$?
+  {
+    if [ "$WALK_STATUS" -ne 0 ]; then echo "Walk: FAILED ($WALK_STATUS), its words in walk.txt"; else echo "Walk: done"; fi
+    echo "Contact sheets: $(ls "$OUT"/walk/sheets/*.png 2>/dev/null | grep -c . || true) (walk/sheets)"
+    echo "Hitch lines (walk/hitches.txt, ms/s, under 5 good, over 10 a jank):"
+    sed 's/^/  /' "$OUT/walk/hitches.txt" 2>/dev/null || echo "  none"
+    if [ -f "$OUT/walk/audit.tsv" ]; then
+      echo "Audit: $(grep -c . "$OUT/walk/audit.tsv" || true) findings (walk/audit.tsv), $(grep -c . "$OUT/walk/audit-waived.tsv" 2>/dev/null || echo 0) waived"
+      sort "$OUT/walk/audit.tsv" | sed 's/^/  /'
+    else
+      echo "Audit: did not run (walk/audit-light.log)"
+    fi
+  } >> "$EV"
+  # The wall: drawn again only when a file it is built from changed since
+  # the last push (a Swift file with Mac code in it, or the wall's eyes).
+  CHANGED=$( { git -C "$ROOT" diff --name-only origin/main...HEAD 2>/dev/null; git -C "$ROOT" diff --name-only HEAD; } | sort -u)
+  WALLED=""
+  for f in $CHANGED; do
+    case "$f" in
+      Chintan/scripts/wall.sh) WALLED="$WALLED $f" ;;
+      Chintan/Chintan/*.swift) [ -f "$ROOT/$f" ] && grep -q macCatalyst "$ROOT/$f" && WALLED="$WALLED $f" ;;
+    esac
+  done
+  if [ -n "$WALLED" ] || [ "${SEE_WALL:-}" = 1 ]; then
+    bash "$HERE/wall.sh" "$OUT/wall" > "$OUT/wall.txt" 2>&1 || true
+    {
+      echo "Wall: changed (${WALLED# }${SEE_WALL:+, forced}); its words in wall.txt"
+      grep -E "SELF|CONFIRMED|NOT DRAWN|BUILD FAILED" "$OUT/wall.txt" | sed "s#$OUT/##; s/^/  /" || echo "  no drawing said"
+    } >> "$EV"
+  else
+    echo "Wall: unchanged since origin/main, not drawn" >> "$EV"
+  fi
+  cat "$EV"
+  exit 0
+fi
 if [ "${1:-}" = "--walk" ]; then
   shift
   exec bash "$(dirname "$0")/walk.sh" "$@"
