@@ -184,4 +184,6 @@ Touches: views only. Needs his word: no.
 
 ## Shipped
 
-(empty)
+- 2. The largest text and VoiceOver, Bhullar half: Bhullar 2.7 (12),
+  released 2026-10-15, with cut 1's identifiers riding along. Randhawa's
+  half stays on main until Randhawa's next earned release.
