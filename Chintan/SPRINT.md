@@ -1167,7 +1167,7 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   Visitors and The feed, the Study's names slide under the thumb and fade
   short of the gear, the Board's title wraps clean; at the normal size
   (/tmp/see/0) the stills are unchanged in both modes. Final look
-  (/tmp/see/1, kept as /tmp/see/last): audit 0 findings and 147 waived, a
+  (/tmp/see/1; this run's sandbox refused the copy to /tmp/see/last): audit 0 findings and 147 waived, a
   third zero in a row, the look door 404, the wall unchanged and not drawn.
   Hitch lines (ms/s): reveal 34.1, feed open 114.3, feed scroll 35.8, first
   visits 24.0, tabs 19.7, swipe 0.0, board scroll 6.1, study scroll 1.5; no
