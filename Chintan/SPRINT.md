@@ -1158,6 +1158,23 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 ## The ledger (newest first)
 
+- 2026-10-19 · sprint 83 (the commit carrying this line): the read back of
+  sprint 82, as the house steered, two looks of three, no Swift changed and
+  chunk P left alone. Sprint 82 had pushed everything it named before its
+  unit's clock cut it off (45b501a, 3863d0a, 471dd05; build 202610181913 is
+  that code), so nothing was left undone on main. Seen again here: at the
+  largest text (/tmp/see/L1) Home's date stands whole in two lines under
+  Visitors and The feed, the Study's names slide under the thumb and fade
+  short of the gear, the Board's title wraps clean; at the normal size
+  (/tmp/see/0) the stills are unchanged in both modes. Final look
+  (/tmp/see/1, kept as /tmp/see/last): audit 0 findings and 147 waived, a
+  third zero in a row, the look door 404, the wall unchanged and not drawn.
+  Hitch lines (ms/s): reveal 34.1, feed open 114.3, feed scroll 35.8, first
+  visits 24.0, tabs 19.7, swipe 0.0, board scroll 6.1, study scroll 1.5; no
+  hand: rest 0.0, tabs 109.3, neighbours 0.0, feed open 105.2, board scroll
+  0.0. Door wanted from the house, unchanged: `GET /v1/look` as chunk P
+  writes it. Funnel: nothing.
+
 - 2026-10-18 · sprint 82 (45b501a and the commit carrying this line): the
   reviewer's fix, as the house steered, three looks of three, chunk P left
   alone. At the largest text Home's date had hidden its weekday under the
