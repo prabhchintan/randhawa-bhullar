@@ -530,6 +530,8 @@ private struct TrailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     @State private var confirmingForget = false
 
     private var cadence: TrailCadence { trail.cadence }
@@ -546,20 +548,7 @@ private struct TrailSheet: View {
                         Button {
                             choose(option)
                         } label: {
-                            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(option.title)
-                                        .foregroundStyle(.primary)
-                                    Text(option.detail)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer(minLength: 0)
-                                if option == cadence {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(.orange)
-                                }
-                            }
+                            cadenceRow(option)
                         }
                         .buttonStyle(.plain)
                     }
@@ -614,6 +603,42 @@ private struct TrailSheet: View {
             }
         }
         .presentationDetents([.large])
+    }
+
+    /// At the accessibility sizes the check rides the title's line, so the
+    /// detail takes the full width instead of a column beside the check.
+    @ViewBuilder
+    private func cadenceRow(_ option: TrailCadence) -> some View {
+        let chosen = option == cadence
+        let detail = Text(option.detail)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        if typeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text(option.title)
+                        .foregroundStyle(.primary)
+                    Spacer(minLength: 0)
+                    if chosen { checkmark }
+                }
+                detail
+            }
+        } else {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(option.title)
+                        .foregroundStyle(.primary)
+                    detail
+                }
+                Spacer(minLength: 0)
+                if chosen { checkmark }
+            }
+        }
+    }
+
+    private var checkmark: some View {
+        Image(systemName: "checkmark")
+            .foregroundStyle(.orange)
     }
 
     private var gatheredFooter: String {
