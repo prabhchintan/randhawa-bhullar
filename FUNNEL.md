@@ -181,6 +181,9 @@ Touches: views only. Needs his word: no.
   unnamed elements are the keyboard's suggestion bar). Audit 183 to 176,
   clipped text 28 to 20, none of it in the composer. Contrast stays as
   narrowed above.
+  Third piece on main 2026-10-21 (9526f3a): at the largest text the trail
+  screen's check rides the title's line, so each choice's detail reads
+  across the full width. Walk audit 182 to 162.
 
 ## Shipped
 
