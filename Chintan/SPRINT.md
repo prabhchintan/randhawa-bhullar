@@ -1027,7 +1027,10 @@ P. The house draws (Prab, 2026-09-27 12:07, the study line, verbatim: "if we
    has no scrim value yet; each screen draws its own). Held (the reviewer's
    fix, 2026-10-11): nothing deeper in P until the door answers and a real
    look is photographed on the phone; EVIDENCE.txt says the door's answer on
-   every look (404 on 2026-10-18).
+   every look (404 on 2026-10-18 and 2026-10-22). The one sprint the steer
+   allowed while it waits, a held leaf answering with a plaque, is done
+   (sprint 85, the Board's things). Next, once the door answers: the real
+   look photographed, then slice (2), Home as a tree.
 Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
    i want it as a widget on the iphone. you would need to figure out how to
    display it in different aspect ratios because i know widgets have certain
@@ -1171,6 +1174,31 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-22 · sprint 85 (58e5281 and the commit carrying this line): the
+  reviewer's fix, as the house steered, three looks of three. The look door is
+  still 404, so this sprint did no polish and left chunk P alone. It did the
+  one thing the steer allowed: a held leaf now answers with a plaque. A thing
+  on the Board answered only to a tap; pressed and held, it now grows the
+  plaque Home's things grow, the leaf's width, standing just above it and
+  rising from its foot (`.snappy`, a soft impact). The plaque carries the day
+  in gilt words ("Tomorrow, Friday, October 23"), the thing in the serif, and
+  the whole of its why. The thing held turns gilt. Let go and it folds. First
+  look (/tmp/see/1) had the leaf's own gilt edge drawn across the plaque where
+  it rose over the leaf's earlier rows. The leaf's fill and hairline now stand
+  under its rows, so nothing crosses it (/tmp/see/2, a third thing held, dark).
+  The resting Board is unchanged in both modes. `see.sh OUT board@tN` holds
+  the Nth thing. Final look /tmp/see/3, by the evidence pass (the sandbox
+  refused the copy to /tmp/see/last again): look door 404, audit 0 findings
+  and 162 waived, the wall drawn (JharokhaView changed) and unchanged. Hitch
+  lines (ms/s): reveal 32.5, feed open 111.8, feed scroll 34.7, first visits
+  21.4, tabs 28.4, swipe 7.8, board scroll 14.1 (10.0 last sprint, 6.1 and
+  15.3 before, within its spread), study scroll 4.7; no hand: rest 0.0, tabs
+  107.7, neighbours 0.0, feed open 106.8, board scroll 0.0. The walk does not
+  yet hold a leaf on the Board, so the new reveal has no number of its own.
+  Door wanted from the house, unchanged: `GET /v1/look` in sprint 80's shape.
+  Funnel: a pin in a map or a day in a year that, pressed and held, grows a
+  small card with all of it saves a tap and a screen.
 
 - 2026-10-22 · sprint 84 (6b27308 and the commit carrying this line): the
   house's steer, the phone's own evidence first, three looks of three, chunk
