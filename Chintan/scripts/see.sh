@@ -79,6 +79,9 @@
 #                                                    gallery and placed (widget.sh)
 #   bash Chintan/scripts/see.sh --large OUTDIR ...   at the largest accessibility
 #                                                    text size, then back to normal
+#   bash Chintan/scripts/see.sh --resume OUTDIR [RUNS]
+#                                                    the return to the front, sampled
+#                                                    (OUTDIR/resumeN.txt, resume.txt)
 #   bash Chintan/scripts/see.sh --evidence OUTDIR [tab ...]
 #                                                    the stills, then the evidence the
 #                                                    review reads beside them: the look
@@ -173,6 +176,11 @@ if [ "${1:-}" = "--signed" ]; then
   SEE_SIGN=1
   shift
 fi
+RESUME=""
+if [ "${1:-}" = "--resume" ]; then
+  RESUME=1
+  shift
+fi
 TEXT=large
 if [ "${1:-}" = "--large" ]; then
   TEXT=accessibility-extra-extra-extra-large
@@ -211,6 +219,47 @@ xcrun simctl bootstatus "$UDID" -b >/dev/null
 APP="$DD/Build/Products/Debug-iphonesimulator/Chintan.app"
 xcrun simctl install "$UDID" "$APP"
 xcrun simctl ui "$UDID" content_size "$TEXT"
+# --resume: the return to the front, the moment the phone's MetricKit times.
+# Each run launches Home with the feed open and every card's picture drawn,
+# as after a long scroll (SEE_RESUME_OPEN names another --open word), lets
+# the shelf and the cards come down, puts the app behind
+# Settings, then brings it back while sampling it: OUT/resumeN.txt holds the
+# stacks, and one line says the frames late after the return and the app's
+# memory before and after.
+if [ -n "$RESUME" ]; then
+  RUNS=${1:-1}
+  DATA=$(xcrun simctl get_app_container "$UDID" Prabhchintan.Chintan data)
+  for n in $(seq 1 "$RUNS"); do
+    xcrun simctl launch --terminate-running-process "$UDID" Prabhchintan.Chintan \
+      --house "${CHINTAN_HOUSE:-}" --tab jharokha --open "${SEE_RESUME_OPEN:-feed-all}" --hitches > /dev/null
+    sleep 25
+    PID=$(pgrep -f "Chintan.app/Chintan" | head -1)
+    xcrun simctl launch "$UDID" com.apple.Preferences > /dev/null
+    sleep 8
+    # The footprint iOS judges an app by (decoded pictures included), as
+    # the phone's MetricKit counts peak memory; resident size misses them.
+    footprint "$PID" > "$OUT/footprint$n.txt" 2>&1 || true
+    BEFORE=$(ps -o rss= -p "$PID" | awk '{printf "%.0f", $1/1024}')
+    FOOT=$(grep -m1 -iE "footprint:" "$OUT/footprint$n.txt" | sed 's/^ *//' || true)
+    echo "resume $n: behind, $FOOT" | tee -a "$OUT/resume.txt"
+    /usr/bin/sample "$PID" 4 1 -file "$OUT/resume$n.txt" > /dev/null 2>&1 &
+    SP=$!
+    sleep 0.3
+    T0=$(python3 -c 'import time; print(time.time())')
+    xcrun simctl launch "$UDID" Prabhchintan.Chintan > /dev/null
+    wait "$SP" || true
+    sleep 2
+    AFTER=$(ps -o rss= -p "$PID" | awk '{printf "%.0f", $1/1024}')
+    footprint "$PID" > "$OUT/footprint$n-back.txt" 2>&1 || true
+    echo "resume $n: back, $(grep -m1 -iE "footprint:" "$OUT/footprint$n-back.txt" | sed 's/^ *//' || true), $(grep -m1 phys_footprint_peak "$OUT/footprint$n-back.txt" | sed 's/^ *//' || true)" | tee -a "$OUT/resume.txt"
+    awk -v t="$T0" -v n="$n" -v b="$BEFORE" -v a="$AFTER" '
+      $1 >= t && $1 <= t + 6 { late += $2; if ($2 > worst) worst = $2; k++ }
+      END { printf "resume %d: %d frames late, %.0f ms in all, worst %.0f ms; memory %s MB behind, %s MB back\n", n, k, late, worst, b, a }' \
+      "$DATA/Library/Caches/hitches.tsv" | tee -a "$OUT/resume.txt"
+  done
+  xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+  exit 0
+fi
 for mode in light dark; do
   xcrun simctl ui "$UDID" appearance "$mode"
   # The switch settles before the first tab of a mode is launched; the

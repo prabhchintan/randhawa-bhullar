@@ -253,7 +253,7 @@ final class FeedStore: ObservableObject {
                 loaded = true
             }
         }
-        for row in rows.prefix(3) {
+        for row in rows.prefix(Self.allEyes ? rows.count : 3) {
             guard let image = row.image else { continue }
             _ = await FeedPictures.shared.picture(image)
             if row.art { _ = await FeedPictures.shared.softPicture(image) }
@@ -306,10 +306,14 @@ final class FeedStore: ObservableObject {
 
     // For the house's eyes (`--open feed-stale`, a Debug build only): the
     // road's rows lettered as if the house had stopped pushing.
+    // And `--open feed-all` (`see.sh --resume`): every card's picture drawn
+    // on opening, as a session that scrolled the whole feed would have them.
     #if DEBUG
     private static let staleEyes = ProcessInfo.processInfo.arguments.contains("feed-stale")
+    private static let allEyes = ProcessInfo.processInfo.arguments.contains("feed-all")
     #else
     private static let staleEyes = false
+    private static let allEyes = false
     #endif
 
     // Each time the app comes to the front, so the pane opens on new rows.
@@ -573,9 +577,30 @@ enum FeedRoad {
 final class FeedPictures {
     static let shared = FeedPictures()
 
-    private var held: [String: UIImage] = [:]
+    // Drawn pictures, a few cards' worth by their bytes: each is up to 1400
+    // pixels long, five megabytes drawn, and a session's scroll once kept
+    // every one (the phone's peak of 306 MB, 2026-10-17). The rest stay on
+    // disk and are drawn again when scrolled back to; none are held while
+    // the app is away.
+    private let held: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.totalCostLimit = 40 << 20
+        return cache
+    }()
     private var soft: [String: UIImage] = [:]
     private var asking: [String: Task<UIImage?, Never>] = [:]
+
+    private init() {
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
+                                               object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { FeedPictures.shared.held.removeAllObjects() }
+        }
+    }
+
+    private static func bytes(_ one: UIImage) -> Int {
+        guard let cg = one.cgImage else { return Int(one.size.width * one.size.height * one.scale * one.scale * 4) }
+        return cg.bytesPerRow * cg.height
+    }
 
     private static let folder: URL = {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
@@ -599,7 +624,7 @@ final class FeedPictures {
     // kept file is never read here: read and decoded as the pane rose, it
     // stalled the pane's first frames (the walk's "feed open", sprint 66).
     func held(_ image: String) -> UIImage? {
-        held[image]
+        held.object(forKey: image as NSString)
     }
 
     func picture(_ image: String) async -> UIImage? {
@@ -621,7 +646,7 @@ final class FeedPictures {
         asking[image] = task
         let one = await task.value
         asking[image] = nil
-        if let one { held[image] = one }
+        if let one { held.setObject(one, forKey: image as NSString, cost: Self.bytes(one)) }
         return one
     }
 
@@ -669,7 +694,6 @@ final class FeedPictures {
                 try? FileManager.default.removeItem(at: folder.appendingPathComponent(name))
             }
         }
-        held = held.filter { keep.contains(Self.name($0.key)) }
         soft = soft.filter { keep.contains(Self.name($0.key)) }
     }
 

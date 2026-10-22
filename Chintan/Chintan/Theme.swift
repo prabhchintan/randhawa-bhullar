@@ -154,8 +154,34 @@ final class Gallery: ObservableObject {
     // The painting that stood the day before today's, kept on the phone.
     @Published private(set) var yesterday: HouseClient.Painting?
 
+    // Drawn pictures, the last three shown at most: each is thirteen
+    // megabytes drawn at the phone's size, and the whole shelf once stayed
+    // drawn. The rest wait on disk; while the app is away only the work on
+    // the wall stays drawn.
     private var pictures: [String: UIImage] = [:]
+    private var drawn: [String] = []
+    private static let drawnKept = 3
     private var fetching = false
+
+    init() {
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification,
+                                               object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.away() }
+        }
+    }
+
+    private func hold(_ ui: UIImage, for key: String) {
+        pictures[key] = ui
+        drawn.removeAll { $0 == key }
+        drawn.append(key)
+        while drawn.count > Self.drawnKept { pictures[drawn.removeFirst()] = nil }
+    }
+
+    private func away() {
+        let wall = painting?.key
+        pictures = pictures.filter { $0.key == wall }
+        drawn = drawn.filter { $0 == wall }
+    }
 
     private static let folder: URL = {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
@@ -234,7 +260,7 @@ final class Gallery: ObservableObject {
         // The rest of the shelf comes down quietly, so next and an evening
         // without the house both have pictures; what left the shelf leaves the phone.
         for p in fresh where !FileManager.default.fileExists(atPath: Self.file(p).path) {
-            _ = await picture(p, from: house)
+            _ = await fetch(p, from: house)
         }
         let keep = Set((fresh + hung + [yesterday].compactMap { $0 }).map { $0.key + ".jpg" } + ["shelf.json", "yesterday.json", "hung.json"])
         for name in (try? FileManager.default.contentsOfDirectory(atPath: Self.folder.path)) ?? [] where !keep.contains(name) {
@@ -329,7 +355,7 @@ final class Gallery: ObservableObject {
         let house = HouseClient(baseAddress: address)
         guard let p = try? await house.wallNext() else { return false }
         if pictures[p.key] == nil, !FileManager.default.fileExists(atPath: Self.file(p).path) {
-            guard await picture(p, from: house) != nil else { return false }
+            guard await fetch(p, from: house) != nil else { return false }
         }
         hung.removeAll { $0.key == p.key }
         hung.append(p)
@@ -402,12 +428,12 @@ final class Gallery: ObservableObject {
         var ui = pictures[p.key]
         if ui == nil, let data = try? Data(contentsOf: Self.file(p)), let raw = UIImage(data: data) {
             ui = await Self.prepared(raw)
-            pictures[p.key] = ui
         }
         if ui == nil, let address = Keychain.loadHouseAddress(), !address.isEmpty {
             ui = await picture(p, from: HouseClient(baseAddress: address))
         }
         guard let ui, painting?.key == p.key else { return }
+        hold(ui, for: p.key)
         #if targetEnvironment(macCatalyst)
         // The wall turns by a slow crossfade: the old picture stays whole
         // under the new one while it comes up, so nothing dips and nothing slides.
@@ -424,13 +450,17 @@ final class Gallery: ObservableObject {
         }
     }
 
-    // One picture from the house, kept on disk and decoded once.
+    // One picture from the house, kept on disk and drawn for the wall.
     private func picture(_ p: HouseClient.Painting, from house: HouseClient) async -> UIImage? {
-        guard let data = try? await house.paintingImage(p), let raw = UIImage(data: data) else { return nil }
+        guard let data = await fetch(p, from: house), let raw = UIImage(data: data) else { return nil }
+        return await Self.prepared(raw)
+    }
+
+    // One picture from the house, kept on disk only, for the shelf.
+    private func fetch(_ p: HouseClient.Painting, from house: HouseClient) async -> Data? {
+        guard let data = try? await house.paintingImage(p), UIImage(data: data) != nil else { return nil }
         try? data.write(to: Self.file(p), options: .atomic)
-        let ui = await Self.prepared(raw)
-        pictures[p.key] = ui
-        return ui
+        return data
     }
 
     // Whether a kept picture is the phone's frame (1179 by 2556), read from

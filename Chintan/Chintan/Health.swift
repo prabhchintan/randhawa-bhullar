@@ -268,7 +268,12 @@ final class Health: ObservableObject {
             }
             let descriptor = HKAnchoredObjectQueryDescriptor(predicates: [.sample(type: type)], anchor: anchor, limit: 2000)
             guard let result = try? await descriptor.result(for: store) else { return false }
-            let rows = result.addedSamples.compactMap { Self.row($0, unit: unit) }
+            // Up to 2,000 samples lettered away from the screen, which may be
+            // coming to the front as this runs.
+            let samples = result.addedSamples
+            let rows = await Task.detached(priority: .utility) {
+                samples.compactMap { Self.row($0, unit: unit) }
+            }.value
             guard await post(rows, client: client) else { return false }
             if let data = try? NSKeyedArchiver.archivedData(withRootObject: result.newAnchor, requiringSecureCoding: true) {
                 defaults.set(data, forKey: key)
@@ -283,7 +288,9 @@ final class Health: ObservableObject {
     private func post(_ rows: [Row], client: HouseClient) async -> Bool {
         for start in stride(from: 0, to: rows.count, by: 2000) {
             let batch = Batch(samples: Array(rows[start..<min(start + 2000, rows.count)]))
-            guard let body = try? JSONEncoder().encode(batch) else { continue }
+            guard let body = await Task.detached(priority: .utility, operation: {
+                try? JSONEncoder().encode(batch)
+            }).value else { continue }
             switch await client.health(body) {
             case .heard:
                 heard = Date()
@@ -297,7 +304,7 @@ final class Health: ObservableObject {
         return true
     }
 
-    private static func row(_ sample: HKSample, unit: HKUnit?) -> Row? {
+    nonisolated private static func row(_ sample: HKSample, unit: HKUnit?) -> Row? {
         let source = sample.sourceRevision.source.name
         let minutes = HKUnit.minute()
         let length = sample.endDate.timeIntervalSince(sample.startDate) / 60
@@ -326,11 +333,11 @@ final class Health: ObservableObject {
         return nil
     }
 
-    private static func trim(_ value: Double) -> Double {
+    nonisolated private static func trim(_ value: Double) -> Double {
         (value * 100).rounded() / 100
     }
 
-    private static func stage(_ value: Int) -> String {
+    nonisolated private static func stage(_ value: Int) -> String {
         switch HKCategoryValueSleepAnalysis(rawValue: value) {
         case .inBed: return "inBed"
         case .awake: return "awake"
@@ -341,7 +348,7 @@ final class Health: ObservableObject {
         }
     }
 
-    private static func activity(_ type: HKWorkoutActivityType) -> String {
+    nonisolated private static func activity(_ type: HKWorkoutActivityType) -> String {
         switch type {
         case .walking: return "walking"
         case .running: return "running"
