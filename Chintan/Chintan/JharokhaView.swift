@@ -857,8 +857,8 @@ private struct LabelPlaque: View {
 }
 
 // A thing held: its day in words, the thing by the name Home gives it, and
-// the whole of its why, on a small plaque.
-private struct ThingPlaque: View {
+// the whole of its why, on a small plaque. The Board's leaves grow it too.
+struct ThingPlaque: View {
     let item: BoardItem
     let short: BoardItem.Short
     @Environment(\.dynamicTypeSize) private var typeSize

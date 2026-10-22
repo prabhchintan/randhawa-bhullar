@@ -43,6 +43,9 @@ struct BoardView: View {
     @State private var wordLine = CGRect.zero
     // A word for the house being written, on its plaque above the keyboard.
     @State private var wording = BoardView.eyes == "word"
+    // A thing pressed and held, its plaque grown out of its leaf; `--open tN`
+    // holds the Nth for the house's eyes.
+    @State private var heldThing: UUID?
 
     private struct HeadHold: Equatable {
         var held = false
@@ -79,6 +82,8 @@ struct BoardView: View {
                             // no leaf reads on with it.
                             board(clear: geo.size.height - Self.foot)
                                 .opacity(heldHead ? 0.3 : 1)
+                                // A held thing's plaque may rise over the heading.
+                                .zIndex(heldThing == nil ? 0 : 2)
                                 .id("shelves-end")
                         }
                     }
@@ -111,6 +116,7 @@ struct BoardView: View {
         // A soft impact as the plaque grows, a tick as the thumb comes onto
         // the word for the house.
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldHead) { _, now in now }
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: heldThing) { _, now in now != nil }
         .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
     }
 
@@ -256,6 +262,7 @@ struct BoardView: View {
                     .padding(.top, index == 0 ? 6 : 18)
                 ForEach(section.days, id: \.id) { day in
                     leaf(day.items, named: section.named)
+                        .zIndex(day.items.contains { $0.id == heldThing } ? 1 : 0)
                 }
             }
         }
@@ -274,13 +281,20 @@ struct BoardView: View {
                     row(item, dated: i == 0, marked: !named || item.since != nil)
                 }
                 .id(item.id)
+                .zIndex(item.id == heldThing ? 1 : 0)
                 .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .offset(y: -18))))
             }
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .plaque(radius: 12)
+        // The plaque's fill and hairline both under the rows, so a held
+        // thing's plaque rising over the leaf is never crossed by its edge.
+        .background {
+            let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+            shape.fill(Theme.plaque.opacity(0.97))
+                .overlay(shape.strokeBorder(Theme.gilt.opacity(0.55), lineWidth: 0.5))
+        }
     }
 
     private func row(_ item: BoardItem, dated: Bool, marked: Bool) -> some View {
@@ -291,7 +305,7 @@ struct BoardView: View {
                 // its last word, so a title that wraps never splits around it.
                 let short = titles[item.line] ?? item.short
                 (Text(short.title.plainDashes)
-                    .foregroundStyle(Theme.ink.opacity(item.done ? 0.45 : 1))
+                    .foregroundStyle(heldThing == item.id ? Theme.gilt : Theme.ink.opacity(item.done ? 0.45 : 1))
                     .strikethrough(item.done, color: Theme.ink.opacity(0.45))
                  + Text(short.hour.map { "   " + $0 } ?? "")
                     .font(Theme.label())
@@ -319,6 +333,22 @@ struct BoardView: View {
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.2)) {
                 if isOpen { open.remove(item.id) } else { open.insert(item.id) }
+            }
+        }
+        // Pressed and held, the thing grows Home's plaque out of its leaf,
+        // the leaf's width, standing just above it; let go, it folds back.
+        .onLongPressGesture(minimumDuration: 0.3, maximumDistance: 24) {
+            withAnimation(.snappy) { heldThing = item.id }
+        } onPressingChanged: { pressing in
+            if !pressing, heldThing != nil { withAnimation(.snappy) { heldThing = nil } }
+        }
+        .overlay(alignment: .top) {
+            if heldThing == item.id {
+                ThingPlaque(item: item, short: titles[item.line] ?? item.short)
+                    .padding(.horizontal, -18)
+                    .frame(height: 0, alignment: .bottom)
+                    .offset(y: -10)
+                    .transition(.scale(scale: 0.6, anchor: .bottom).combined(with: .opacity))
             }
         }
     }
@@ -400,6 +430,11 @@ struct BoardView: View {
                     launchOpened = true
                     open = [all[n].id]
                 }
+            }
+            if let i = args.firstIndex(of: "--open"), i + 1 < args.count, args[i + 1].hasPrefix("t"),
+               let n = Int(args[i + 1].dropFirst()) {
+                let all = shelves.flatMap(\.items)
+                if n < all.count { heldThing = all[n].id }
             }
         } catch {
             errorText = "The house is not answering. Are you on the tailnet?"
