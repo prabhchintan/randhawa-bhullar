@@ -456,6 +456,20 @@ G. Feel. Haptics on every gesture that deserves one (`.sensoryFeedback`,
    Since both waits are `MTLSimDevice` round trips, the stall may be the
    simulator's alone; read the phone's own hitch ratio from MetricKit before
    building anything more for it. G is whole on the app side otherwise.
+   The phone's own evidence (sprint 84, the house's steer): MetricKit filed
+   one 13.4 s resume on 2026-10-17 with peak memory at 306 MB. The return is
+   now sampled on yantar (`see.sh --resume OUT [RUNS]`: Home with the feed
+   open and every card's picture drawn, put behind Settings, brought back
+   under `sample`, the footprint read behind and back). The simulator's main
+   thread on the return is light (about 1 s of late frames, SwiftUI's
+   layout, none of the app's own work heavy), but the memory was not: the
+   feed held every card's picture drawn for the whole session, 337 MB behind
+   another app, peak 620. Now a few cards' worth by their bytes and none
+   while away, the shelf drawn only for the last three works shown, and
+   Health's rows lettered and encoded off the main thread: 121 MB behind,
+   peak 195. Left: the phone's next MetricKit days, resume time and peak
+   memory, read against 13.4 s and 306 MB; the simulator cannot run the
+   senses, so Health and Motion on the return are read only there.
 H. The guest book (Prab, 2026-09-23 07:15, his word: "a running list of
    actual humans who visited, where from, and if I want I can click on it
    and it shows me details of where all they went and how much time they
@@ -1157,6 +1171,39 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
 ## The ledger (newest first)
+
+- 2026-10-22 · sprint 84 (6b27308 and the commit carrying this line): the
+  house's steer, the phone's own evidence first, three looks of three, chunk
+  P left alone and the simulator's first-turn stall no longer chased.
+  MetricKit had one 13.4 s resume on 10-17 with a 306 MB peak. The return is
+  now sampled (`see.sh --resume OUT [RUNS]`). On the simulator the main
+  thread is light on the return (about 1 s of late frames, SwiftUI's layout,
+  nothing of the app's own heavy), but the memory was not: a whole feed seen
+  once kept every card's picture drawn, 337 MB behind another app, peak 620
+  (/tmp/see/r4). Now the feed keeps a few cards' worth by their bytes and none
+  while away, the painting shelf keeps the last three works shown and only
+  the one on the wall while away, and the shelf's quiet downloads go to disk
+  without being drawn: 121 MB behind, peak 195 (/tmp/see/r3, r5). Health's
+  rows are now built and encoded off the main thread, so a drain that starts
+  as the app comes forward no longer holds the screen. Nothing on the phone's
+  face changed (/tmp/see/1 matches /tmp/see/0 in both modes). Final look
+  /tmp/see/1 (the sandbox refused the copy to /tmp/see/last again): look
+  door 404; hitch lines (ms/s) reveal 29.4, feed open 109.6, feed scroll
+  39.3, first visits 28.6, tabs 30.6, swipe 12.4, board scroll 10.0, study
+  scroll 3.1; no hand: rest 0.0, tabs 106.3, neighbours 0.0, feed open 110.4,
+  board scroll 0.0. The audit read 4 findings, then 5 when run alone
+  (/tmp/see/a2): unnamed dynamic type readings in light only, on the feed's
+  face the first time and on Kept the second. No feed view was changed and
+  no card letters at a fixed size, so they are read as the audit's
+  unsteadiness on today's rows (a picture card now leads the feed). They
+  stand open, to be found in the tree and named or mended, not waived blind.
+  The evidence pass hit its time limit before drawing the wall (Theme.swift
+  changed): the Mac's Gallery now draws a work on hanging, not on
+  downloading too. Door wanted from the house, unchanged: `GET /v1/look`;
+  and the phone's next MetricKit days read against 13.4 s and 306 MB. Funnel:
+  a map or a calendar holding many pictures stays quick to come back to
+  when it keeps only the few on screen drawn and lets the rest go while it
+  is away.
 
 - 2026-10-19 · sprint 83 (the commit carrying this line): the read back of
   sprint 82, as the house steered, two looks of three, no Swift changed and
