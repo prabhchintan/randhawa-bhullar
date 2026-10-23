@@ -596,7 +596,7 @@ private struct DueMark: View {
 
 extension BoardItem {
     // What a thing is known by from one read to the next.
-    fileprivate var key: String { (done ? "x " : "  ") + (line.isEmpty ? text : line) }
+    fileprivate var known: String { (done ? "x " : "  ") + (line.isEmpty ? text : line) }
 
     // The reasons after the gist, as the house wrote them.
     var why: String {
@@ -631,12 +631,12 @@ extension BoardSection {
     // id it had, matched by its line (a repeat by its place among repeats).
     static func carried(_ fresh: [BoardSection], from old: [BoardSection]) -> [BoardSection] {
         var ids: [String: [UUID]] = [:]
-        for item in old.flatMap(\.items) { ids[item.key, default: []].append(item.id) }
+        for item in old.flatMap(\.items) { ids[item.known, default: []].append(item.id) }
         return fresh.map { section in
             let items = section.items.map { item in
                 var item = item
-                if let id = ids[item.key]?.first {
-                    ids[item.key]?.removeFirst()
+                if let id = ids[item.known]?.first {
+                    ids[item.known]?.removeFirst()
                     item.id = id
                 }
                 return item
