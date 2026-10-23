@@ -1211,7 +1211,8 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   twice, so the scene's first turn to active is now left to the first read
   (/tmp/see/2: 3 reads, Home's and the Board's at launch and the Board's on
   return). The wall's Mac build refused a name clash with Home's and was
-  mended (37cc5b5). Final look /tmp/see/4, by the evidence pass, with
+  mended (37cc5b5). Final look /tmp/see/4 (the sandbox refused the copy to
+  /tmp/see/last again), by the evidence pass, with
   board@back in both modes: look door 404, audit 0 findings and 142 waived,
   the wall built and drew nothing new. Hitch lines (ms/s): reveal 47.2, feed
   open 67.5, feed scroll 34.1, first visits 26.0, tabs 36.5, swipe 39.3,
