@@ -1186,7 +1186,39 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   above the bar of 10 and above sprint 72's 6.3; not the reveal. Next for
   it: a sample across the board scroll (`see.sh --hitches --sample --at S`).
 
+- **A thing done leaves the phone with the house's list: done (sprint 87,
+  the house's steer of 2026-10-23).** The Board reads `/v1/board` again on
+  every return to the front, every turn onto its page, and once more after
+  a done is taken, and moves only the rows that left or came (a thing keeps
+  its id across reads, matched by its line). `see.sh OUT board@back` proves
+  it at the stand-in (NAME.reads, 3 is right). Left, unseen: whether Home's
+  things follow a done made on the Board before Home's own next read.
+
 ## The ledger (newest first)
+
+- 2026-10-23 · sprint 87 (447a354, 37cc5b5 and the commit carrying this
+  line): the house's steer, three looks of three. Before this, a thing done
+  elsewhere stayed on the Board until a pull. Now the Board reads the house
+  again each time the app comes back to the front, each time its page is
+  turned to, and once right after a done is taken. The rows that stayed keep
+  their ids, so only a thing that left lifts off its leaf and a thing that
+  came fades in. Nothing else flashes, and an open thing stays open. A read
+  asked for while another runs wins, so a stale read never brings a done
+  thing back. The eyes' stand-in now keeps an invented board, and `see.sh OUT
+  board@back` drops a thing at the house while the app is put away. First
+  look (/tmp/see/1): four things before, three after the return with no
+  pull, and the returning frame caught the row mid-lift. The launch read
+  twice, so the scene's first turn to active is now left to the first read
+  (/tmp/see/2: 3 reads, Home's and the Board's at launch and the Board's on
+  return). The wall's Mac build refused a name clash with Home's and was
+  mended (37cc5b5). Final look /tmp/see/4, by the evidence pass, with
+  board@back in both modes: look door 404, audit 0 findings and 142 waived,
+  the wall built and drew nothing new. Hitch lines (ms/s): reveal 47.2, feed
+  open 67.5, feed scroll 34.1, first visits 26.0, tabs 36.5, swipe 39.3,
+  board scroll 7.0, study scroll 4.6; no hand: rest 0.0, tabs 140.8 (worst
+  765 ms, the first-turn stall already named), neighbours 36.6, feed open
+  83.2, board scroll 0.0. Funnel: a list that drops a thing the moment it is
+  finished anywhere, with no pull, so it never shows what is already done.
 
 - 2026-10-22 · sprint 85 (58e5281 and the commit carrying this line): the
   reviewer's fix, as the house steered, three looks of three. The look door is
