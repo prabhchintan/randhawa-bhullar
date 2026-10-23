@@ -1,3 +1,4 @@
+import Combine
 import SafariServices
 import SwiftUI
 
@@ -14,9 +15,18 @@ struct FeedView: View {
     enum Face { case feed, kept }
 
     @ObservedObject private var store = FeedStore.shared
-    @State var face: Face = .feed
+    @ObservedObject var pane: FeedPane
+    @State private var face: Face
+    private let start: Face
     // For the house's eyes: what to do once the rows are in.
     var eyes: String?
+
+    init(pane: FeedPane, face: Face = .feed, eyes: String? = nil) {
+        self.pane = pane
+        self.start = face
+        self.eyes = eyes
+        _face = State(initialValue: face)
+    }
     @State private var expanded: Set<String> = []
     @State private var link: Link?
     @State private var likes = 0
@@ -82,7 +92,7 @@ struct FeedView: View {
                     .id(row.id)
             }
             Color.clear
-                .frame(height: 24)
+                .frame(height: 24 + pane.foot)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 // Room at the foot, nothing to read.
@@ -95,11 +105,14 @@ struct FeedView: View {
         .fadedEdges(top: 18, bottom: 12)
         .accessibilityIdentifier("timeline")
         .refreshable { await store.refresh() }
-        // The fresh read waits for the sheet's rise to finish.
-        .background { Risen { store.settle() }.frame(width: 0, height: 0) }
-        .onAppear { store.rise() }
-        .onDisappear { store.fall() }
-        .task {
+        // Each opening of the pane, laid out long before it: the feed's own
+        // face again, the fresh read once it has risen, then the eyes.
+        .task(id: pane.opened) {
+            guard pane.opened > 0 else { return }
+            if pane.opened > 1 {
+                face = start
+                expanded = []
+            }
             await store.open()
             await look(proxy)
         }
@@ -551,40 +564,169 @@ private struct SafariView: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
 }
 
-// Says when the sheet carrying it has finished rising: the presentation's
-// own coordinator, or at once when there is none to wait on.
-private struct Risen: UIViewControllerRepresentable {
-    let done: () -> Void
+// The pane's openings, counted, so the feed held between them knows each;
+// and the room the home bar takes at its foot, given once, before it is laid
+// out, since the pane does not read the screen's safe area.
+@MainActor final class FeedPane: ObservableObject {
+    @Published var opened = 0
+    @Published var foot: CGFloat = 0
+}
 
-    final class Watcher: UIViewController {
-        var done: () -> Void = {}
-        private var told = false
+// The feed's door on Home. SwiftUI's own sheet built the List's first cells
+// inside the rise, one long frame every opening (the walk's "feed open",
+// near 110 ms/s since sprint 66). So the pane is made once, while Home
+// rests, and laid out off the screen at the phone's size; the sheet rises on
+// cards already drawn, and keeps them between openings.
+struct FeedDoor: UIViewControllerRepresentable {
+    @Binding var shown: Bool
+    var face: FeedView.Face = .feed
+    var eyes: String?
 
-        override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            if let rise = transitionCoordinator {
-                rise.animate(alongsideTransition: nil) { [weak self] _ in self?.tell() }
-            }
-        }
+    func makeCoordinator() -> Door { Door(face: face, eyes: eyes) }
+
+    func makeUIViewController(context: Context) -> Anchor {
+        let anchor = Anchor()
+        anchor.door = context.coordinator
+        anchor.view.isUserInteractionEnabled = false
+        return anchor
+    }
+
+    func updateUIViewController(_ anchor: Anchor, context: Context) {
+        context.coordinator.closed = { shown = false }
+        context.coordinator.want = shown
+        context.coordinator.sync(from: anchor)
+    }
+
+    // Where the door is hung; presents once it is on the screen.
+    final class Anchor: UIViewController {
+        weak var door: Door?
 
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
-            if transitionCoordinator == nil { tell() }
-        }
-
-        private func tell() {
-            guard !told else { return }
-            told = true
-            done()
+            door?.lay(in: view.window)
+            door?.sync(from: self)
         }
     }
 
-    func makeUIViewController(context: Context) -> Watcher {
-        let watcher = Watcher()
-        watcher.done = done
-        watcher.view.isUserInteractionEnabled = false
-        return watcher
+    // The pane itself, its own glass under it, as SwiftUI's sheet had it.
+    final class Pane: UIHostingController<AnyView> {
+        let state: FeedPane
+
+        init(face: FeedView.Face, eyes: String?) {
+            let state = FeedPane()
+            self.state = state
+            super.init(rootView: AnyView(
+                FeedView(pane: state, face: face, eyes: eyes)
+                    .background { PaneGlass().ignoresSafeArea() }
+            ))
+            view.backgroundColor = .clear
+            // The sheet's safe area differs from the one off the screen, and
+            // a change of it laid the whole pane out again inside the rise.
+            safeAreaRegions = []
+            modalPresentationStyle = .pageSheet
+            if let sheet = sheetPresentationController {
+                sheet.detents = [.large()]
+                sheet.prefersGrabberVisible = true
+            }
+        }
+
+        @MainActor required dynamic init?(coder: NSCoder) { nil }
+
+        override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            FeedStore.shared.rise()
+            state.opened += 1
+        }
+
+        // The fresh read waits for the rise to finish. The sheet's own size
+        // is kept, so the pane is next laid out at exactly it.
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            FeedStore.shared.settle()
+            risen(view.bounds.size)
+        }
+
+        var risen: (CGSize) -> Void = { _ in }
+
+        override func viewDidDisappear(_ animated: Bool) {
+            super.viewDidDisappear(animated)
+            FeedStore.shared.fall()
+        }
     }
 
-    func updateUIViewController(_ watcher: Watcher, context: Context) {}
+    @MainActor final class Door: NSObject, UIAdaptivePresentationControllerDelegate {
+        let pane: Pane
+        var want = false
+        var closed: () -> Void = {}
+        private var size = CGSize.zero
+        private weak var window: UIWindow?
+        private var laid = ""
+        private var watch: AnyCancellable?
+
+        init(face: FeedView.Face, eyes: String?) {
+            pane = Pane(face: face, eyes: eyes)
+            super.init()
+            pane.presentationController?.delegate = self
+            pane.risen = { [weak self] in self?.size = $0 }
+            // New rows while the pane is put away are laid out then, not as
+            // it next rises.
+            watch = FeedStore.shared.objectWillChange
+                .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+                .sink { [weak self] _ in MainActor.assumeIsolated { self?.relay() } }
+        }
+
+        // The copy and first pictures warmed, then the pane laid out off the
+        // screen at the size the sheet will give it: the window's, less the
+        // head of the screen and the sheet's own gap.
+        func lay(in window: UIWindow?) {
+            guard let window, size == .zero else { return }
+            self.window = window
+            let bounds = window.bounds.size
+            size = CGSize(width: bounds.width, height: bounds.height - window.safeAreaInsets.top - 10)
+            pane.state.foot = window.safeAreaInsets.bottom
+            Task { @MainActor in
+                await FeedStore.shared.warm()
+                relay()
+            }
+        }
+
+        // SwiftUI draws nothing for a view with no window, so the pane is
+        // hung in this one for the pass, under the screen's foot and behind
+        // the rest, and taken down again (left hung, it made every gesture
+        // elsewhere heavier). Laid out again only when what it shows has
+        // changed: a pass makes the store speak, and answering each word
+        // laid it out twice a second.
+        private func relay() {
+            guard size != .zero, let window, pane.presentingViewController == nil,
+                  pane.view.superview == nil else { return }
+            let store = FeedStore.shared
+            let shows = [store.rows.map(\.id).joined(separator: " "), store.kept.map(\.id).joined(separator: " "),
+                         store.liked.sorted().joined(separator: " "), store.word ?? "", "\(store.loaded)",
+                         "\(String(describing: store.away))"].joined(separator: "\n")
+            guard shows != laid else { return }
+            laid = shows
+            pane.view.frame = CGRect(origin: CGPoint(x: 0, y: window.bounds.height), size: size)
+            window.insertSubview(pane.view, at: 0)
+            pane.view.setNeedsLayout()
+            pane.view.layoutIfNeeded()
+            pane.view.removeFromSuperview()
+        }
+
+        func sync(from anchor: UIViewController) {
+            let up = pane.presentingViewController != nil
+            if want, !up {
+                guard anchor.view.window != nil else { return }
+                var top: UIViewController = anchor
+                while let next = top.presentedViewController { top = next }
+                top.present(pane, animated: true)
+            } else if !want, up, !pane.isBeingDismissed {
+                pane.dismiss(animated: true)
+            }
+        }
+
+        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+            want = false
+            closed()
+        }
+    }
 }

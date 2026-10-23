@@ -174,8 +174,12 @@ struct JharokhaView: View {
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
-        // The feed's copy and first pictures made ready before it is opened.
-        .task { await FeedStore.shared.warm() }
+        // The feed's pane, its copy and first cards made ready before it is
+        // opened, and risen from here.
+        .background {
+            FeedDoor(shown: $showFeed, face: Self.eyes == "kept" ? .kept : .feed, eyes: Self.eyes)
+                .frame(width: 0, height: 0)
+        }
         // The hitch meter's walk with no hand opens and lets go the feed.
         .onReceive(NotificationCenter.default.publisher(for: HitchMeter.feed)) { showFeed = ($0.object as? Bool) ?? false }
         #if targetEnvironment(macCatalyst)
@@ -200,11 +204,6 @@ struct JharokhaView: View {
         .sheet(isPresented: $showVisitors, onDismiss: { newcomers = GuestBook.newcomers(guests) }) {
             VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked, openBusiest: Self.eyes == "person")
                 .presentationBackground(.ultraThinMaterial)
-                .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showFeed) {
-            FeedView(face: Self.eyes == "kept" ? .kept : .feed, eyes: Self.eyes)
-                .presentationBackground { PaneGlass() }
                 .presentationDragIndicator(.visible)
         }
     }
