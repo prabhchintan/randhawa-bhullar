@@ -412,6 +412,35 @@ PY
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       xcrun simctl spawn "$UDID" defaults write Prabhchintan.Chintan studyVoice chintan
     fi
+    # board@back: a board of invented things from the stand-in (standin.py);
+    # one is taken off at the house while the app is put away behind the
+    # phone's Settings, and the board brought back with no pull should show
+    # it gone. NAME.reads counts the board's reads: 3 is right, Home's and
+    # the board's at launch, and the board's alone on return.
+    if [ "$tab" = board@back ]; then
+      xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+      HEARD="$OUT/$tab-$mode.heard"
+      : > "$HEARD"
+      rm -f "$HEARD.gone"
+      python3 -I "$ROOT/Chintan/scripts/standin.py" 8799 "$HEARD" &
+      STANDIN=$!
+      sleep 1
+      xcrun simctl launch "$UDID" Prabhchintan.Chintan --house 127.0.0.1:8799 --tab board >/dev/null
+      sleep 5
+      xcrun simctl io "$UDID" screenshot "$OUT/$tab-before-$mode.png" >/dev/null
+      xcrun simctl launch "$UDID" com.apple.Preferences >/dev/null
+      sleep 2
+      touch "$HEARD.gone"
+      sleep 1
+      xcrun simctl launch "$UDID" Prabhchintan.Chintan >/dev/null
+      sleep "${SEE_BACK_WAIT:-0.6}"
+      xcrun simctl io "$UDID" screenshot "$OUT/$tab-returning-$mode.png" >/dev/null
+      sleep 3
+      xcrun simctl io "$UDID" screenshot "$OUT/$tab-after-$mode.png" >/dev/null
+      kill "$STANDIN" 2>/dev/null || true
+      grep -c ' GET /v1/board ' "$HEARD" > "$OUT/$tab-$mode.reads" || true
+      xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+    fi
     if [ "$tab" = settings@on ] || [ "$tab" = settings@senses ] || [ "$tab" = settings@move ] || [ "$tab" = settings@apps ]; then
       xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
       xcrun simctl privacy "$UDID" reset location-always Prabhchintan.Chintan 2>/dev/null || true

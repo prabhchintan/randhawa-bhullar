@@ -4,7 +4,9 @@ import SwiftUI
 // and lettered on a plaque over the painting, soonest first under Today,
 // each day left in the week, and Later. A thing opened on tap can be marked done.
 struct BoardItem: Identifiable {
-    let id = UUID()
+    // Fresh on each parse; a read of the board again carries the old ids
+    // over (BoardSection.carried), so only what moved is drawn anew.
+    var id = UUID()
     let text: String
     let date: String?
     let done: Bool
@@ -24,7 +26,16 @@ struct BoardSection: Identifiable {
 // plaque below it, each thing by Home's short name with the reasons in a
 // smaller hand, the rest on tap.
 struct BoardView: View {
+    // The board is the page in view; each time it comes, it is read again.
+    var shown = true
+    @Environment(\.scenePhase) private var phase
     @State private var sections: [BoardSection] = []
+    // The board as last read, so a read that brings nothing new moves nothing.
+    @State private var lastRead: String?
+    // A read under way, and whether another was asked for while it ran: that
+    // one wins, since it started after whatever asked (a done, a return).
+    @State private var reading = false
+    @State private var readAgain = false
     @State private var errorText: String?
     @State private var loaded = false
     @State private var open: Set<UUID> = []
@@ -113,6 +124,15 @@ struct BoardView: View {
         .wordStage($wording, screen: "board", place: "the Board")
         .refreshable { await refresh() }
         .task { await refresh() }
+        // Read again on every return to the front and every turn onto the
+        // board, so a thing done anywhere leaves without a pull.
+        .onChange(of: phase) { _, now in
+            // The launch's own turn to active is the first read's already.
+            if now == .active, loaded { Task { await refresh() } }
+        }
+        .onChange(of: shown) { _, now in
+            if now { Task { await refresh() } }
+        }
         // A soft impact as the plaque grows, a tick as the thumb comes onto
         // the word for the house.
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldHead) { _, now in now }
@@ -400,6 +420,8 @@ struct BoardView: View {
                 _ = gone.insert(item.line)
                 open.remove(item.id)
             }
+            // And read from the house, so the thing is seen gone there too.
+            await refresh()
         } catch HouseError.noDoor {
             withAnimation { refused[item.id] = "The house cannot take this from the phone yet." }
         } catch {
@@ -408,6 +430,19 @@ struct BoardView: View {
     }
 
     private func refresh() async {
+        if reading {
+            readAgain = true
+            return
+        }
+        reading = true
+        defer { reading = false }
+        repeat {
+            readAgain = false
+            await read()
+        } while readAgain
+    }
+
+    private func read() async {
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errorText = "No house address yet. Add it in Settings."
             loaded = true
@@ -417,11 +452,25 @@ struct BoardView: View {
         async let short = try? house.titles()
         do {
             let text = try await house.board()
-            if let s = await short { titles = s }
-            sections = BoardParser.parse(text)
-            gone = []
+            let s = await short
+            // A later read was asked for while this one ran; this one is stale.
+            if readAgain { return }
+            if let s, s != titles { titles = s }
+            if errorText != nil { errorText = nil }
+            guard text != lastRead else {
+                loaded = true
+                return
+            }
+            let first = !loaded
+            lastRead = text
+            // The first read letters the board; later ones move only the rows
+            // that left or came, the rest kept by their old ids.
+            withAnimation(first ? nil : .easeOut(duration: 0.35)) {
+                sections = BoardSection.carried(BoardParser.parse(text), from: sections)
+                gone = []
+            }
             refused = [:]
-            errorText = nil
+            guard first else { return }
             // For the house's eyes: a thing opened on launch, to see the action.
             let args = ProcessInfo.processInfo.arguments
             if let i = args.firstIndex(of: "--open"), i + 1 < args.count, let n = Int(args[i + 1]) {
@@ -437,6 +486,7 @@ struct BoardView: View {
                 if n < all.count { heldThing = all[n].id }
             }
         } catch {
+            if readAgain { return }
             errorText = "The house is not answering. Are you on the tailnet?"
         }
         loaded = true
@@ -448,7 +498,7 @@ struct BoardView: View {
 // heading's gesture state (which SwiftUI cannot compare) made every turn
 // rebuild the whole board.
 extension BoardView: Equatable {
-    static func == (_: BoardView, _: BoardView) -> Bool { true }
+    static func == (a: BoardView, b: BoardView) -> Bool { a.shown == b.shown }
 }
 
 // A thing's reasons in the smaller hand, two lines when closed, cut after
@@ -545,6 +595,9 @@ private struct DueMark: View {
 }
 
 extension BoardItem {
+    // What a thing is known by from one read to the next.
+    fileprivate var key: String { (done ? "x " : "  ") + (line.isEmpty ? text : line) }
+
     // The reasons after the gist, as the house wrote them.
     var why: String {
         // The vault's code and bold marks are for the vault, not the leaf.
@@ -572,6 +625,24 @@ extension BoardSection {
     struct Day: Identifiable {
         let id: String
         let items: [BoardItem]
+    }
+
+    // The same sections with each thing that was there before keeping the
+    // id it had, matched by its line (a repeat by its place among repeats).
+    static func carried(_ fresh: [BoardSection], from old: [BoardSection]) -> [BoardSection] {
+        var ids: [String: [UUID]] = [:]
+        for item in old.flatMap(\.items) { ids[item.key, default: []].append(item.id) }
+        return fresh.map { section in
+            let items = section.items.map { item in
+                var item = item
+                if let id = ids[item.key]?.first {
+                    ids[item.key]?.removeFirst()
+                    item.id = id
+                }
+                return item
+            }
+            return BoardSection(title: section.title, items: items, named: section.named)
+        }
     }
 
     var days: [Day] {

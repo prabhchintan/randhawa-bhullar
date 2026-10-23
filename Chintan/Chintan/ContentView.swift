@@ -230,7 +230,7 @@ struct ContentView: View {
         switch t {
         // Each page says when it is unchanged, so a turn letters only what moved.
         case .jharokha: JharokhaView().equatable()
-        case .board: BoardView().equatable()
+        case .board: BoardView(shown: tab == .board).equatable()
         case .study: StudyView(open: tab == .study).equatable()
         }
     }
