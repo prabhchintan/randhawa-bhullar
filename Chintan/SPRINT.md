@@ -1137,7 +1137,20 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   no longer measured. The phone has posted no hitch metric in fourteen days,
   so a `GET /v1/metrics/last` door would stay empty; it is not wanted. Open
   it again only when the house has a payload from the phone in hand. The
-  Study's own-word bubbles and composer: done (sprint 73).
+  Study's own-word bubbles and composer: done (sprint 73). Opened again on
+  the reviewer's fix (sprint 86): the pane is now a UIKit sheet over a
+  hosting controller made once and laid out while Home rests (`FeedDoor`),
+  and the open fell from 110 to about 60 ms/s, with no hand 109 to 58. The
+  samples taught three things: a hosting view with no window draws nothing,
+  so the pass hangs it in the window under the screen's foot and takes it
+  down again; the sheet's own safe area laid the pane out again inside the
+  rise, so the pane reads none (`safeAreaRegions = []`) and carries the
+  home bar's room at its foot; and left hung, the pane made every other
+  gesture heavier (study scroll 3 to 37). Left: one frame of about 130 ms
+  as the sheet re-adds the pane, and one of about 60 ms about a second
+  later as the house's fresh rows land. Next: sample the 130 (the sheet's
+  shadow image and the pane's re-render on re-adding were both in the
+  stacks), and let the fresh rows in without a re-layout of the cards above.
 
 - **The feed's rows, shaped by the house (sprint 73).** The app now drops a
   card's body when it is only an address, a feed's own lettering around one
