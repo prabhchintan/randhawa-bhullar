@@ -27,6 +27,7 @@
 		CA00000000000000000000A1 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A1 /* Health.swift */; };
 		CA00000000000000000000A2 /* Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A2 /* Motion.swift */; };
 		CA00000000000000000000A3 /* Wakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A3 /* Wakes.swift */; };
+		CA00000000000000000000D1 /* Faisla.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000D1 /* Faisla.swift */; };
 		CA00000000000000000000A4 /* AppOpened.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A4 /* AppOpened.swift */; };
 		CA00000000000000000000A5 /* HouseWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A5 /* HouseWord.swift */; };
 		CA00000000000000000000A6 /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A6 /* Metrics.swift */; };
@@ -91,6 +92,7 @@
 		CA10000000000000000000A1 /* Health.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Health.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A2 /* Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A3 /* Wakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wakes.swift; sourceTree = "<group>"; };
+		CA10000000000000000000D1 /* Faisla.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Faisla.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A4 /* AppOpened.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpened.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A5 /* HouseWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseWord.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A6 /* Metrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metrics.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				CA10000000000000000000A1 /* Health.swift */,
 				CA10000000000000000000A2 /* Motion.swift */,
 				CA10000000000000000000A3 /* Wakes.swift */,
+				CA10000000000000000000D1 /* Faisla.swift */,
 				CA10000000000000000000A4 /* AppOpened.swift */,
 				CA10000000000000000000A5 /* HouseWord.swift */,
 				CA10000000000000000000A6 /* Metrics.swift */,
@@ -337,6 +340,7 @@
 				CA00000000000000000000A1 /* Health.swift in Sources */,
 				CA00000000000000000000A2 /* Motion.swift in Sources */,
 				CA00000000000000000000A3 /* Wakes.swift in Sources */,
+				CA00000000000000000000D1 /* Faisla.swift in Sources */,
 				CA00000000000000000000A4 /* AppOpened.swift in Sources */,
 				CA00000000000000000000A5 /* HouseWord.swift in Sources */,
 				CA00000000000000000000A6 /* Metrics.swift in Sources */,

@@ -57,6 +57,8 @@ struct BoardView: View {
     // A thing pressed and held, its plaque grown out of its leaf; `--open tN`
     // holds the Nth for the house's eyes.
     @State private var heldThing: UUID?
+    // The decisions waiting on his word, read with the board.
+    @State private var queue = FaislaQueue()
 
     private struct HeadHold: Equatable {
         var held = false
@@ -88,6 +90,14 @@ struct BoardView: View {
                             // The held plaque stands over the shelves.
                             .zIndex(1)
                             .id("heading-top")
+                        // Your word, above Today, only while a decision waits.
+                        if !queue.items.isEmpty {
+                            FaislaShelf(queue: queue)
+                                .opacity(heldHead ? 0.3 : 1)
+                                // Over the heading's shade, which would grey
+                                // the card's head; under a held plaque.
+                                .zIndex(heldHead ? 0 : 2)
+                        }
                         if !shelves.isEmpty || errorText != nil {
                             // The shelves step back behind a held plaque, so
                             // no leaf reads on with it.
@@ -103,6 +113,7 @@ struct BoardView: View {
                     .padding(.bottom, Self.foot + 8)
                 }
                 .fadedEdges(bottom: Self.foot)
+                .scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("shelves")
                 .onChange(of: open) {
                     if launchOpened, let id = open.first {
@@ -440,6 +451,9 @@ struct BoardView: View {
             readAgain = false
             await read()
         } while readAgain
+        if let address = Keychain.loadHouseAddress(), !address.isEmpty {
+            await queue.read(HouseClient(baseAddress: address))
+        }
     }
 
     private func read() async {

@@ -61,7 +61,10 @@
 #                                                    words heard counted, then
 #                                                    chintan's room;
 #                                                    study@in-hawa: hawa's room
-#                                                    as it stands, nothing said)
+#                                                    as it stands, nothing said;
+#                                                    board@faisla-0|1|3|chon|raay|
+#                                                    answer|refused: Your word over
+#                                                    a stand-in's invented queue)
 #                                                    A tab ending -away (jharokha@feed-away,
 #                                                    jharokha@feed-like-away,
 #                                                    jharokha@feed-stale-away): the
@@ -348,6 +351,32 @@ json.dump(kept, open(os.path.join(d, "yesterday.json"), "w"))
 PY
       ;;
     esac
+    # board@faisla-SPEC: the board at the stand-in (standin.py), its queue of
+    # invented decisions named by SPEC: 0, 1 (a yes or no), 3 (yes or no,
+    # choice, opinion), chon, raay, answer (three, the first answered by the
+    # app on its own, so the next is seen risen) or refused (so, the door's
+    # 422 said on the card).
+    FAISLA=""
+    case "$tab" in board@faisla-*)
+      FAISLA=${tab#board@faisla-}
+      HEARD="$OUT/$tab-$mode.heard"
+      : > "$HEARD"
+      rm -f "$HEARD.refuse"
+      case "$FAISLA" in
+        0) rm -f "$HEARD.faisla" ;;
+        1) echo haan > "$HEARD.faisla" ;;
+        chon) echo chon haan > "$HEARD.faisla" ;;
+        raay) echo raay > "$HEARD.faisla" ;;
+        refused) echo haan chon > "$HEARD.faisla"; touch "$HEARD.refuse" ;;
+        *) echo haan chon raay > "$HEARD.faisla" ;;
+      esac
+      python3 -I "$ROOT/Chintan/scripts/standin.py" 8799 "$HEARD" &
+      STANDIN=$!
+      sleep 1
+      HOUSE_ARG=127.0.0.1:8799
+      EXTRA=(--open "faisla-$FAISLA")
+      ;;
+    esac
     xcrun simctl launch "$UDID" Prabhchintan.Chintan --house "$HOUSE_ARG" --tab "$NAME" "${EXTRA[@]+"${EXTRA[@]}"}" >/dev/null
     if [ "$tab" = study@waiting ]; then
       sleep 1.5
@@ -355,6 +384,10 @@ PY
     fi
     sleep 6
     xcrun simctl io "$UDID" screenshot "$OUT/$tab-$mode.png" >/dev/null
+    if [ -n "$FAISLA" ]; then
+      kill "$STANDIN" 2>/dev/null || true
+      xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
+    fi
     # After an -away look: how many marks the phone still holds unsent.
     case "$tab" in *-away)
       sleep 3
