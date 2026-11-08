@@ -330,6 +330,10 @@ struct FaislaCard: View {
             .lineLimit(commenting || !comment.isEmpty ? 3...6 : 1...1)
             .focused($commenting)
             .padding(.vertical, 6)
+            // A thumb's height to touch, the line itself still small.
+            .frame(minHeight: 44, alignment: .bottom)
+            .contentShape(Rectangle())
+            .onTapGesture { commenting = true }
             .overlay(alignment: .bottom) {
                 Rectangle().fill(Theme.gilt.opacity(commenting ? 0.7 : 0.3)).frame(height: 0.5)
             }
@@ -399,7 +403,8 @@ private struct Thumb: View {
                 VStack(spacing: 4) {
                     Image(systemName: "doc.text").font(.system(size: 15, weight: .light))
                     if let caption = evidence.caption {
-                        Text(caption).font(.system(size: 9)).lineLimit(2).multilineTextAlignment(.center)
+                        Text(caption).font(.caption2).lineLimit(2)
+                            .multilineTextAlignment(.center)
                     }
                 }
                 .foregroundStyle(Theme.gilt)
@@ -407,6 +412,8 @@ private struct Thumb: View {
             }
         }
         .frame(width: 64, height: 64)
+        // One element, named by its caption on the button around it.
+        .accessibilityElement(children: .ignore)
         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(Theme.gilt.opacity(0.55), lineWidth: 0.5))
     }

@@ -1194,7 +1194,68 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   it at the stand-in (NAME.reads, 3 is right). Left, unseen: whether Home's
   things follow a done made on the Board before Home's own next read.
 
+- **Your word, the faisla shelf: built (sprint 88, his steer of
+  2026-11-08).** On the Board above Today, only while `GET /v1/faisla` has
+  items: the first card whole (Faisla.swift), the next ones as edges under
+  it. A yes or no is two plaques, a choice a column closing on None of these
+  (added by the phone when the house leaves it off), an opinion a field with
+  the keyboard's mic and a Give it plaque. A comment under every card grows
+  when touched. A plaque posts `/v1/faisla/answer`, the card folds and the
+  next rises. A refusal leaves the card and says the door's own text. A long
+  question stands at four lines, whole on tap. `see.sh OUT
+  board@faisla-0|1|3|chon|raay|answer|refused` draws each from the
+  stand-in's invented queue. Left, in order: (a) the voice batch (long press
+  on the shelf's name, `/v1/faisla/batch` and `/confirm`, the mapping as a
+  checklist), the next sprint by his word; (b) the house's lean runs four
+  italic lines on a real card, so cut it at two, whole on tap, as the
+  question is; (c) a decided card re-opened from the day's done shelf
+  within the hour, which needs the door to take a second answer on an id
+  (today it answers 422); (d) the eyes: after the first stand-in look in a
+  run, later ones draw on lamp black, not the painting, so put a real board
+  look first in each mode; (e) the audit's four open findings, all the file
+  tile's caption in the evidence strip ("partially unsupported" dynamic
+  type, light and dark, resting and with a leaf open): the caption grows
+  but the tile is a fixed 64 points. Let the tile grow with the text, or
+  letter the caption under the tile, not inside it.
+
 ## The ledger (newest first)
+
+- 2026-11-08 · sprint 88 (60aec4f and the commit carrying this line): his
+  steer, the faisla shelf, three looks of three. Before this, a decision the
+  house drew up reached him only off the phone. Now the Board opens with
+  Your word above Today while any wait. One card stands at a time in the
+  museum look: when it is due in gilt capitals, the title in the serif, the
+  question, the house's lean in gilt italic, what happens if left, the
+  evidence as small framed thumbnails that open full screen, then the answer
+  by its shape, then a small comment line. The cards after it show as two
+  edges under it, so how many wait is seen and not counted. A press sends
+  the answer with the comment, gives a success tap, and the card folds as
+  the next rises. A door that refuses leaves the card and says its own
+  reason in saffron. First look (/tmp/see/1): every shape drawn right, but
+  the heading's shade greyed the card's head in light, and the stand-in
+  looks after the first lost the painting. The shelf now stands over that
+  shade, and a real board look goes first (/tmp/see/2). The live queue's
+  first card had a question a paragraph long that pushed the plaques off
+  the screen. It now stands at four lines, whole on tap (/tmp/see/3, the
+  final look). Seen with 0, 1 and 3 waiting in light and dark, a choice, an
+  opinion, an answer taken and a refusal. The Board below is unchanged.
+  The evidence pass (/tmp/see/3; the sandbox refused the copy to
+  /tmp/see/last again): look door 404, the wall unchanged. Hitch lines
+  (ms/s): reveal 30.0, feed open 72.0, feed scroll 36.6, first visits 37.6,
+  tabs 55.4, swipe 89.8, board scroll 21.0, study scroll 3.0; no hand: rest
+  0.0, tabs 137.4 (worst 753 ms, the first-turn stall already named),
+  neighbours 30.5, feed open 54.2, board scroll 0.0. The board scroll and
+  swipe ran higher than sprint 87 (7.0 and 39.3), with a taller card now at
+  the head of the Board, so read them again before calling it a cost. The
+  audit read 6 findings, all new on the shelf. Mended after that look, in
+  the second commit: the comment line now takes a touch 44 points tall (the
+  field's own frame stays one line, waived by name in ChintanWalk), and the
+  file tile is one element. Four stand open, (e) above (/tmp/see/a5).
+  Door wanted from the house: none new; the four live doors are what the
+  shelf reads, and (c) above wants the answer door to take a second answer
+  within the hour. Funnel: a short card that asks one clear question with
+  two or three large answers, and folds away once answered, would suit a
+  pin or a day that needs a yes or no from its owner.
 
 - 2026-10-23 · sprint 87 (447a354, 37cc5b5 and the commit carrying this
   line): the house's steer, three looks of three. Before this, a thing done

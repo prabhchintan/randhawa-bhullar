@@ -560,6 +560,12 @@ final class ChintanAudit: XCTestCase {
         if type == .dynamicType || type == .textClipped, element == nil, screen.hasPrefix("study") {
             return "names no element; the composer, whose prompt reads whole at the largest text"
         }
+        // - hit region, Your word's comment line: the field's own frame is one
+        //   line of text, but the line around it takes a touch 44 points tall
+        //   and puts the cursor in it (sprint 88).
+        if type == .hitRegion, element?.identifier == "faisla-comment" {
+            return "the line around the field takes a touch 44 points tall"
+        }
         if type == .contrast {
             return "samples the painting, not the plaque or shade under the letters; clean in the pictures"
         }
