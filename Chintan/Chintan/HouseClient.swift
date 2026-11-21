@@ -214,6 +214,17 @@ struct HouseClient {
         return try JSONDecoder().decode(One.self, from: data).visitor
     }
 
+    // The morning letter as the house's pieces (since 2026-11-21), raw so the
+    // phone keeps the same bytes it reads. Six seconds, then the road.
+    func letter() async throws -> Data {
+        guard let url = url("/v1/letter") else { throw HouseError.noAddress }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 6
+        let (data, response) = try await Self.session.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
+        return data
+    }
+
     // The feed: things to look at with nothing asked of him, already mixed
     // by the house, newest first, dismissed rows left out. A house without
     // this door answers 404.

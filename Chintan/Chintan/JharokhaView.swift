@@ -32,6 +32,10 @@ struct JharokhaView: View {
     // The feed, opened from beside the guest book; `--open feed...` opens it
     // on launch for the house's eyes, `--open kept` on its second face.
     @State private var showFeed = JharokhaView.eyes.map { $0.hasPrefix("feed") || $0 == "kept" } ?? false
+    // The morning letter, opened from beside the feed (2026-11-21);
+    // `--open letter` opens it on launch for the house's eyes.
+    @State private var showLetter = JharokhaView.eyes == "letter"
+    @ObservedObject private var letter = LetterStore.shared
     // How many have come to the site since he last opened the book.
     @State private var newcomers = 0
     @State private var guests: [HouseClient.Visitor] = []
@@ -152,6 +156,8 @@ struct JharokhaView: View {
                     guestBook
                     feedMount
                         .padding(.leading, typeSize.isAccessibilitySize ? 12 : 0)
+                    letterMount
+                        .padding(.leading, typeSize.isAccessibilitySize ? 12 : 0)
                 }
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headHeight = $0 }
                 // The label's plaque takes their room while it is held there.
@@ -228,11 +234,44 @@ struct JharokhaView: View {
         .sensoryFeedback(.impact(flexibility: .soft), trigger: heldLabel) { _, now in now }
         // A tick as the thumb comes onto the word for the house.
         .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
+        .sheet(isPresented: $showLetter) {
+            LetterView()
+                .presentationBackground(.ultraThinMaterial)
+                .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showVisitors, onDismiss: { newcomers = GuestBook.newcomers(guests) }) {
             VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked, openBusiest: Self.eyes == "person", seed: guests)
                 .presentationBackground(.ultraThinMaterial)
                 .presentationDragIndicator(.visible)
         }
+    }
+
+    // The morning letter, lettered beside the feed. An issue he has not yet
+    // opened puts a gilt point after the word, the way the guest book does.
+    private var letterMount: some View {
+        Button {
+            showLetter = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "envelope")
+                    .font(.caption)
+                Text("Letter")
+                    .font(Theme.label(.caption))
+                    .tracking(1)
+                if letter.unread {
+                    NewPoint()
+                        .transition(.opacity)
+                }
+            }
+            .foregroundStyle(Theme.bone.opacity(0.9))
+            .mount()
+            .padding(.trailing, 22)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("letter")
+        .accessibilityLabel(letter.unread ? "The morning letter, a new issue" : "The morning letter")
     }
 
     // The feed, lettered beside the guest book: things to look at, nothing
@@ -251,7 +290,7 @@ struct JharokhaView: View {
             .foregroundStyle(Theme.bone.opacity(0.9))
             // On its mount, so the picture's own lettering never swallows it.
             .mount()
-            .padding(.trailing, 22)
+            .padding(.trailing, 10)
             .padding(.vertical, 6)
             .contentShape(Rectangle())
         }
@@ -704,6 +743,7 @@ struct JharokhaView: View {
         // pictures come down on their own.
         Task { await gallery.load() }
         Task { await MirrorStore.shared.read() }
+        Task { await LetterStore.shared.read() }
         async let cockpit = try? house.cockpit()
         async let board = try? house.board()
         async let beat = try? house.pulse()
