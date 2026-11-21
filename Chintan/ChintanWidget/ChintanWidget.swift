@@ -9,7 +9,17 @@ import WidgetKit
 // walls' own loop, already cut at the phone's size for that frame, and the
 // widget hangs it edge to edge, lettered as the house says. Off the tailnet
 // it keeps the last picture it hung, never a blank.
+// Two widgets since 2026-11-21 (Prab: "the two widgets provide me art and
+// insightful info about my day to day life as I peek the two widgets in
+// passing"): the wall, and the day in the medium frame beside it.
 @main
+struct ChintanWidgets: WidgetBundle {
+    var body: some Widget {
+        ChintanWall()
+        ChintanDay()
+    }
+}
+
 struct ChintanWall: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "wall", provider: Hanger()) { work in
@@ -28,6 +38,33 @@ struct Hung: TimelineEntry {
     let record: Record?
     let picture: UIImage?
     var line: Said? = nil
+    var glance: Glance? = nil
+}
+
+// The widgets' one ask of the house (GET /v1/glance): the hour's line, the
+// Imbox in three lines, and his day in three. Every part is short: a peek.
+struct Glance: Codable {
+    struct Mail: Codable {
+        struct Line: Codable {
+            let who: String
+            let subject: String
+        }
+        let count: Int
+        let lines: [Line]
+        var known: Bool?
+    }
+    struct Day: Codable {
+        struct Row: Codable {
+            let k: String
+            let t: String
+            var hot: Bool?
+        }
+        let kicker: String
+        let lines: [Row]
+    }
+    var line: Said?
+    var mail: Mail?
+    var day: Day?
 }
 
 // Home's one line as the house gives it (GET /v1/mirror, since 2026-11-20):
@@ -66,7 +103,23 @@ enum Shared {
         guard let data = try? Data(contentsOf: folder.appendingPathComponent(frame + ".json")),
               let record = try? JSONDecoder().decode(Record.self, from: data),
               let picture = UIImage(contentsOfFile: folder.appendingPathComponent(frame + ".jpg").path) else { return nil }
-        return Hung(date: .now, record: record, picture: picture, line: keptLine())
+        return Hung(date: .now, record: record, picture: picture, line: keptLine(), glance: keptGlance())
+    }
+
+    // The glance as last heard. His day is good for a day; the Imbox goes
+    // stale sooner, so past three hours it is left off rather than shown old.
+    static func keptGlance() -> Glance? {
+        let file = folder.appendingPathComponent("glance.json")
+        guard let made = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date,
+              Date.now.timeIntervalSince(made) < 86400,
+              let data = try? Data(contentsOf: file),
+              var glance = try? JSONDecoder().decode(Glance.self, from: data) else { return nil }
+        if Date.now.timeIntervalSince(made) > 3 * 3600 { glance.mail = nil }
+        return glance
+    }
+
+    static func keep(_ glance: Glance) {
+        try? JSONEncoder().encode(glance).write(to: folder.appendingPathComponent("glance.json"), options: .atomic)
     }
 
     // The line as last heard, good for a day; an older one is left off.
@@ -121,7 +174,7 @@ struct Hanger: TimelineProvider {
 
     // The house's next work for this frame, brought down, kept and hung;
     // nil when the house is out of reach.
-    static func fresh(_ frame: String) async -> Hung? {
+    static func fresh(_ frame: String, keptAs: String? = nil) async -> Hung? {
         guard var address = House.address?.trimmingCharacters(in: .whitespacesAndNewlines), !address.isEmpty else { return nil }
         if !address.contains("://") { address = "http://" + address }
         while address.hasSuffix("/") { address.removeLast() }
@@ -137,16 +190,17 @@ struct Hanger: TimelineProvider {
               (said as? HTTPURLResponse)?.statusCode == 200,
               let picture = fitted(jpeg) else { return nil }
         let small = picture.jpegData(compressionQuality: 0.88) ?? jpeg
-        Shared.keep(record, small, frame)
-        // The day's line rides the same ask; a house without it leaves the last one.
-        struct Mirror: Decodable { let line: Said? }
-        if let asked = URL(string: address + "/v1/mirror"),
+        Shared.keep(record, small, keptAs ?? frame)
+        // The glance rides the same ask: the hour's line, the Imbox, his day.
+        // A house without the door leaves the last one.
+        if let asked = URL(string: address + "/v1/glance"),
            let (data, answer) = try? await session.data(from: asked),
            (answer as? HTTPURLResponse)?.statusCode == 200,
-           let line = (try? JSONDecoder().decode(Mirror.self, from: data))?.line {
-            Shared.keep(line)
+           let glance = try? JSONDecoder().decode(Glance.self, from: data) {
+            Shared.keep(glance)
+            if let line = glance.line { Shared.keep(line) }
         }
-        return Hung(date: .now, record: record, picture: picture, line: Shared.keptLine())
+        return Hung(date: .now, record: record, picture: picture, line: Shared.keptLine(), glance: Shared.keptGlance())
     }
 
     // Decoded at no more than the large frame's own size: a widget that
@@ -206,8 +260,42 @@ struct WallFace: View {
                     }
                     .multilineTextAlignment(.leading)
                     .shadow(color: .black.opacity(0.5), radius: 3)
-                    .frame(maxWidth: 210, alignment: .leading)
+                    .frame(maxWidth: family == .systemLarge && mail != nil ? 172 : 210, alignment: .leading)
                     .padding(.leading, margin)
+                    .padding(.top, margin)
+                }
+            }
+        }
+        // The Imbox at the head's other end, on the large frame: how many
+        // wait and the newest three, so the mail's own widget can go.
+        .overlay(alignment: .topTrailing) {
+            if family == .systemLarge, work.picture != nil, letters != "off", let mail {
+                ZStack(alignment: .topTrailing) {
+                    RadialGradient(colors: [Self.lampBlack.opacity(0.66), Self.lampBlack.opacity(0)],
+                                   center: .topTrailing, startRadius: 0, endRadius: mail.lines.isEmpty ? 110 : 190)
+                    VStack(alignment: .trailing, spacing: 3) {
+                        Text(mail.count == 0 ? "Imbox clear" : "Imbox \u{00B7} \(mail.count)")
+                            .font(.system(size: 9, design: .serif).smallCaps())
+                            .tracking(0.8)
+                            .foregroundStyle(Self.gilt)
+                            .lineLimit(1)
+                        ForEach(Array(mail.lines.prefix(3).enumerated()), id: \.offset) { _, row in
+                            VStack(alignment: .trailing, spacing: 0) {
+                                Text(plain(row.who))
+                                    .font(.system(size: 10.5, design: .serif).weight(.semibold))
+                                    .foregroundStyle(Self.bone)
+                                    .lineLimit(1)
+                                Text(plain(row.subject))
+                                    .font(.system(size: 9.5, design: .serif).italic())
+                                    .foregroundStyle(Self.bone.opacity(0.82))
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+                    .multilineTextAlignment(.trailing)
+                    .shadow(color: .black.opacity(0.5), radius: 3)
+                    .frame(maxWidth: 132, alignment: .trailing)
+                    .padding(.trailing, margin)
                     .padding(.top, margin)
                 }
             }
@@ -222,6 +310,12 @@ struct WallFace: View {
             }
         }
         .widgetURL(URL(string: "chintan://painting/" + (work.record?.id ?? "")))
+    }
+
+    // The Imbox as the house last read it; nil when the house could not read it.
+    private var mail: Glance.Mail? {
+        guard let mail = work.glance?.mail, mail.known != false else { return nil }
+        return mail
     }
 
     // The house's word; the small frame has no room for the full card.
@@ -293,6 +387,121 @@ struct WallFace: View {
     }
 
     // The museums' dashes, lettered as the house's plain hyphen and comma.
+    private func plain(_ s: String?) -> String {
+        (s ?? "").replacingOccurrences(of: "\u{2014}", with: ", ").replacingOccurrences(of: "\u{2013}", with: "-")
+    }
+}
+
+// The day, in the medium frame (2026-11-21): a work off the same loop behind,
+// and his day in three short lines over it, as the house composes them: what
+// waits on his word first, the next dated thing, then his own numbers, which
+// turn by the hour. A peek in passing, never a list to work through.
+struct ChintanDay: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "day", provider: DayHanger()) { work in
+            DayFace(work: work)
+        }
+        .configurationDisplayName("The day")
+        .description("Your day in three lines, over a painting.")
+        .supportedFamilies([.systemMedium])
+        .contentMarginsDisabled()
+    }
+}
+
+struct DayHanger: TimelineProvider {
+    private static let pace: TimeInterval = 15 * 60
+
+    func placeholder(in context: Context) -> Hung {
+        Shared.kept("day") ?? Hung(date: .now, record: nil, picture: nil)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (Hung) -> Void) {
+        if let kept = Shared.kept("day") { return completion(kept) }
+        Task { completion(await Hanger.fresh("medium", keptAs: "day") ?? Hung(date: .now, record: nil, picture: nil)) }
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<Hung>) -> Void) {
+        Task {
+            let work = await Hanger.fresh("medium", keptAs: "day") ?? Shared.kept("day") ?? Hung(date: .now, record: nil, picture: nil)
+            completion(Timeline(entries: [work], policy: .after(.now.addingTimeInterval(Self.pace))))
+        }
+    }
+}
+
+struct DayFace: View {
+    let work: Hung
+
+    private static let bone = Color(red: 0.925, green: 0.910, blue: 0.875)
+    private static let lampBlack = Color(red: 0.071, green: 0.067, blue: 0.063)
+    private static let gilt = Color(red: 0.788, green: 0.647, blue: 0.373)
+    private static let saffron = Color(red: 0.898, green: 0.588, blue: 0.180)
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            // The lines stand on a shade drawn from their side; the work is whole on the other.
+            LinearGradient(stops: [.init(color: Self.lampBlack.opacity(0.86), location: 0),
+                                   .init(color: Self.lampBlack.opacity(0.62), location: 0.5),
+                                   .init(color: Self.lampBlack.opacity(0), location: 0.82)],
+                           startPoint: .leading, endPoint: .trailing)
+            if let day = work.glance?.day, !day.lines.isEmpty {
+                VStack(alignment: .leading, spacing: 7) {
+                    Text(plain(day.kicker))
+                        .font(.system(size: 10, design: .serif).smallCaps())
+                        .tracking(1)
+                        .foregroundStyle(Self.bone.opacity(0.7))
+                        .lineLimit(1)
+                    ForEach(Array(day.lines.prefix(3).enumerated()), id: \.offset) { _, row in
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(plain(row.k))
+                                .font(.system(size: 8.5, design: .serif).smallCaps())
+                                .tracking(0.9)
+                                .foregroundStyle(row.hot == true ? Self.saffron : Self.gilt)
+                                .lineLimit(1)
+                            Text(plain(row.t))
+                                .font(.system(size: 12.5, design: .serif))
+                                .foregroundStyle(Self.bone)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                    }
+                }
+                .shadow(color: .black.opacity(0.5), radius: 3)
+                .frame(maxWidth: 232, alignment: .leading)
+                .padding(.leading, 16)
+                .padding(.vertical, 12)
+            } else {
+                Text(work.picture == nil ? "The day comes when the house is in reach." : "")
+                    .font(.system(size: 11, design: .serif).italic())
+                    .foregroundStyle(Self.bone.opacity(0.72))
+                    .padding(16)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        // The work's name, small at the foot's far end.
+        .overlay(alignment: .bottomTrailing) {
+            if let title = work.record?.title, work.picture != nil {
+                Text(plain(title))
+                    .font(.system(size: 9, design: .serif).italic())
+                    .foregroundStyle(Self.bone.opacity(0.85))
+                    .lineLimit(1)
+                    .shadow(color: .black.opacity(0.7), radius: 3)
+                    .frame(maxWidth: 110, alignment: .trailing)
+                    .padding(.trailing, 12)
+                    .padding(.bottom, 9)
+            }
+        }
+        .containerBackground(for: .widget) {
+            if let picture = work.picture {
+                Image(uiImage: picture)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Self.lampBlack
+            }
+        }
+        .widgetURL(URL(string: "chintan://painting/" + (work.record?.id ?? "")))
+    }
+
     private func plain(_ s: String?) -> String {
         (s ?? "").replacingOccurrences(of: "\u{2014}", with: ", ").replacingOccurrences(of: "\u{2013}", with: "-")
     }

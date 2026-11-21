@@ -497,6 +497,11 @@ struct HouseClient {
     // unheard otherwise, kept for the next.
     enum Told { case heard, refused, unheard }
 
+    // His own mark on a thing (Marks), told like the senses.
+    func mark(_ body: Data) async -> Told {
+        await tell("/v1/mark", body, within: 12)
+    }
+
     func phone(_ body: Data) async -> Told {
         await tell("/v1/phone", body, within: 15)
     }

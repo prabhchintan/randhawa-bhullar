@@ -30,6 +30,7 @@
 		CA00000000000000000000D1 /* Faisla.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000D1 /* Faisla.swift */; };
 		CA00000000000000000000D2 /* Mirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000D2 /* Mirror.swift */; };
 		CA00000000000000000000D3 /* Letter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000D3 /* Letter.swift */; };
+		CA00000000000000000000D4 /* Marks.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000D4 /* Marks.swift */; };
 		CA00000000000000000000A4 /* AppOpened.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A4 /* AppOpened.swift */; };
 		CA00000000000000000000A5 /* HouseWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A5 /* HouseWord.swift */; };
 		CA00000000000000000000A6 /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10000000000000000000A6 /* Metrics.swift */; };
@@ -97,6 +98,7 @@
 		CA10000000000000000000D1 /* Faisla.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Faisla.swift; sourceTree = "<group>"; };
 		CA10000000000000000000D2 /* Mirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mirror.swift; sourceTree = "<group>"; };
 		CA10000000000000000000D3 /* Letter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Letter.swift; sourceTree = "<group>"; };
+		CA10000000000000000000D4 /* Marks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marks.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A4 /* AppOpened.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpened.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A5 /* HouseWord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseWord.swift; sourceTree = "<group>"; };
 		CA10000000000000000000A6 /* Metrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metrics.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				CA10000000000000000000D1 /* Faisla.swift */,
 				CA10000000000000000000D2 /* Mirror.swift */,
 				CA10000000000000000000D3 /* Letter.swift */,
+				CA10000000000000000000D4 /* Marks.swift */,
 				CA10000000000000000000A4 /* AppOpened.swift */,
 				CA10000000000000000000A5 /* HouseWord.swift */,
 				CA10000000000000000000A6 /* Metrics.swift */,
@@ -349,6 +352,7 @@
 				CA00000000000000000000D1 /* Faisla.swift in Sources */,
 				CA00000000000000000000D2 /* Mirror.swift in Sources */,
 				CA00000000000000000000D3 /* Letter.swift in Sources */,
+				CA00000000000000000000D4 /* Marks.swift in Sources */,
 				CA00000000000000000000A4 /* AppOpened.swift in Sources */,
 				CA00000000000000000000A5 /* HouseWord.swift in Sources */,
 				CA00000000000000000000A6 /* Metrics.swift in Sources */,

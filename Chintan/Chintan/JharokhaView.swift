@@ -706,6 +706,11 @@ struct JharokhaView: View {
                 .foregroundStyle(lineOpen ? Theme.ink : Theme.bone.opacity(0.92))
                 .lineSpacing(lineOpen ? 3 : 0)
                 .fixedSize(horizontal: false, vertical: true)
+            // His marks on the line, there once it is opened whole.
+            if lineOpen {
+                MarkRow(surface: "line", thing: line.kind + ":" + (line.id ?? ""), title: line.text)
+                    .padding(.top, 2)
+            }
         }
         .padding(.horizontal, lineOpen ? 16 : 0)
         .padding(.vertical, lineOpen ? 13 : 0)
@@ -722,7 +727,7 @@ struct JharokhaView: View {
             if lineOpen { Taps.shared.begin("line", id: line.kind) } else { Taps.shared.end("line") }
         }
         .transition(.opacity)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: lineOpen ? .contain : .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityHint(lineOpen ? "Folds it" : "Opens the whole of it")
         .accessibilityIdentifier("line")

@@ -781,7 +781,8 @@ final class ChintanWidgetEyes: XCTestCase {
         sleep(12)
         tree("sizes")
         shot("gallery-small")
-        for size in ["medium", "large"] {
+        // The day widget is the bundle's second, one page past the wall's large.
+        for size in ["medium", "large", "day"] {
             board.swipeLeft()
             sleep(6)
             shot("gallery-" + size)

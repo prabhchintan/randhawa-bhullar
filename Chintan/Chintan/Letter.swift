@@ -160,7 +160,10 @@ struct LetterView: View {
             proxy.scrollTo(pieces[n].id, anchor: .top)
         }
         }
-        .task { await store.read() }
+        .task {
+            await store.read()
+            Marks.shared.flush()
+        }
         // The letter while it is open, by its number; each piece by its seconds.
         .task(id: store.issue?.issue) {
             guard let no = store.issue?.issue else { return }
@@ -192,9 +195,9 @@ struct LetterView: View {
     private var heading: some View {
         VStack(spacing: 0) {
             Text("NICHOR")
-                .font(Face.roman(28, .title))
-                .tracking(10)
-                .padding(.leading, 10)
+                .font(Face.roman(24, .title))
+                .tracking(9)
+                .padding(.leading, 9)
                 .foregroundStyle(Theme.ink)
             Text("THE LONG THINGS AND THE WIDE NET, FOR PRAB")
                 .font(.system(size: 10, weight: .medium))
@@ -208,7 +211,7 @@ struct LetterView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 14)
             Text(headLine.plainDashes)
-                .font(Face.italic(15, .footnote))
+                .font(Face.italic(14, .footnote))
                 .foregroundStyle(Theme.ink.opacity(0.62))
         }
         .frame(maxWidth: .infinity)
@@ -226,8 +229,8 @@ struct LetterView: View {
             .font(Face.roman(20))
             .foregroundStyle(Theme.gilt)
             .frame(maxWidth: .infinity)
-            .padding(.top, 34)
-            .padding(.bottom, 30)
+            .padding(.top, 28)
+            .padding(.bottom, 26)
             .accessibilityHidden(true)
     }
 
@@ -280,9 +283,9 @@ struct LetterView: View {
             if let title = piece.title, !title.isEmpty {
                 Group {
                     if centred {
-                        Text(title.plainDashes).font(Face.italic(16, .callout)).foregroundStyle(Theme.ink.opacity(0.7))
+                        Text(title.plainDashes).font(Face.italic(14.5, .callout)).foregroundStyle(Theme.ink.opacity(0.7))
                     } else {
-                        Text(title.plainDashes).font(Face.bold(piece.kind == "talk" ? 27 : 22)).foregroundStyle(Theme.ink)
+                        Text(title.plainDashes).font(Face.bold(piece.kind == "talk" ? 23 : 19)).foregroundStyle(Theme.ink)
                     }
                 }
                 .lineSpacing(2)
@@ -293,7 +296,7 @@ struct LetterView: View {
             }
             if let meta = piece.meta, !meta.isEmpty {
                 Text(meta.plainDashes)
-                    .font(centred ? .system(size: 11) : Face.italic(15, .footnote))
+                    .font(centred ? .system(size: 10.5) : Face.italic(13.5, .footnote))
                     .tracking(centred ? 0.6 : 0)
                     .foregroundStyle(Theme.ink.opacity(0.58))
                     .multilineTextAlignment(centred ? .center : .leading)
@@ -302,7 +305,7 @@ struct LetterView: View {
             }
             ForEach(Array((piece.body ?? []).enumerated()), id: \.offset) { _, text in
                 Text(text.plainDashes)
-                    .font(Face.roman(piece.kind == "opening" ? 21 : 19))
+                    .font(Face.roman(piece.kind == "opening" ? 18 : 16.5))
                     .foregroundStyle(Theme.ink)
                     .lineSpacing(piece.kind == "opening" ? 6 : 5)
                     .fixedSize(horizontal: false, vertical: true)
@@ -314,11 +317,11 @@ struct LetterView: View {
                 ForEach(Array(points.enumerated()), id: \.offset) { n, text in
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Text("\(n + 1)")
-                            .font(Face.roman(16, .callout))
+                            .font(Face.roman(14, .callout))
                             .foregroundStyle(Theme.gilt)
                             .frame(width: 18, alignment: .leading)
                         Text(text.plainDashes)
-                            .font(Face.roman(18))
+                            .font(Face.roman(16))
                             .foregroundStyle(Theme.ink)
                             .lineSpacing(6)
                             .fixedSize(horizontal: false, vertical: true)
@@ -328,7 +331,7 @@ struct LetterView: View {
             }
             ForEach(Array((piece.quotes ?? []).enumerated()), id: \.offset) { _, text in
                 Text("\u{201C}" + text.plainDashes + "\u{201D}")
-                    .font(Face.italic(18))
+                    .font(Face.italic(16))
                     .foregroundStyle(Theme.ink.opacity(0.82))
                     .lineSpacing(6)
                     .fixedSize(horizontal: false, vertical: true)
@@ -341,7 +344,7 @@ struct LetterView: View {
                 kicker("For you")
                     .padding(.top, 26)
                 Text(why.plainDashes)
-                    .font(Face.roman(18))
+                    .font(Face.roman(16.5))
                     .foregroundStyle(Theme.ink)
                     .lineSpacing(6)
                     .fixedSize(horizontal: false, vertical: true)
@@ -371,5 +374,12 @@ struct LetterView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: centred ? .center : .leading)
+        // His marks on the piece, quiet until touched; the opening is the letter's own voice.
+        if piece.kind != "opening" {
+            MarkRow(surface: "letter", thing: "\(issue.issue)|\(piece.id)",
+                    title: piece.title ?? piece.kicker ?? piece.kind, url: piece.links?.first?.url ?? "")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 6)
+        }
     }
 }
