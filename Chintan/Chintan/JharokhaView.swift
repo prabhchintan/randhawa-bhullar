@@ -33,8 +33,8 @@ struct JharokhaView: View {
     // on launch for the house's eyes, `--open kept` on its second face.
     @State private var showFeed = JharokhaView.eyes.map { $0.hasPrefix("feed") || $0 == "kept" } ?? false
     // The morning letter, opened from beside the feed (2026-11-21);
-    // `--open letter` opens it on launch for the house's eyes.
-    @State private var showLetter = JharokhaView.eyes == "letter"
+    // `--open letter` opens it on launch for the house's eyes, `--open letter-N` on its Nth piece.
+    @State private var showLetter = JharokhaView.eyes?.hasPrefix("letter") ?? false
     @ObservedObject private var letter = LetterStore.shared
     // How many have come to the site since he last opened the book.
     @State private var newcomers = 0
@@ -235,8 +235,9 @@ struct JharokhaView: View {
         // A tick as the thumb comes onto the word for the house.
         .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
         .sheet(isPresented: $showLetter) {
-            LetterView()
-                .presentationBackground(.ultraThinMaterial)
+            LetterView(eyes: Self.eyes)
+                // One sheet of paper: bone by day, lamp black by night.
+                .presentationBackground(Theme.plaque)
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showVisitors, onDismiss: { newcomers = GuestBook.newcomers(guests) }) {
