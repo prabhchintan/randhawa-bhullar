@@ -10,6 +10,10 @@ on:
         description: "the looks to take, as see.sh names them (empty: every tab)"
         default: ""
         type: string
+      widget:
+        description: "the widgets instead: the gallery at each size and one standing (widget.sh)"
+        default: false
+        type: boolean
 
 concurrency:
   group: chintan-yantar
@@ -27,7 +31,13 @@ jobs:
         env:
           CHINTAN_HOUSE: ${{ secrets.CHINTAN_HOUSE }}
           TABS: ${{ inputs.tabs }}
-        run: bash Chintan/scripts/see.sh "$RUNNER_TEMP/shots" $TABS
+          WIDGET: ${{ inputs.widget }}
+        run: |
+          if [ "$WIDGET" = "true" ]; then
+            bash Chintan/scripts/widget.sh "$RUNNER_TEMP/shots"
+          else
+            bash Chintan/scripts/see.sh "$RUNNER_TEMP/shots" $TABS
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: screens
