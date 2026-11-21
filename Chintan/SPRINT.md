@@ -1224,6 +1224,18 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 ## The ledger (newest first)
 
+- 2026-11-21, the afternoon · by hand from the study (his words 12:55 and
+  13:01). The letter redrawn as one sheet (Iowan Old Style, a masthead, gilt
+  ornaments, nothing boxed), then a size finer. His marks: Marks.swift, a
+  quiet row (more, less, keep, a pencil for his own words) under each piece
+  of the letter and under Home's line opened whole, told to `POST /v1/mark`
+  and held on the phone; a mark unheard waits. The large widget letters the
+  Imbox at the head's other end; a second widget, The day (medium), hangs a
+  work with his day in three lines; both read `GET /v1/glance`. Seen:
+  jharokha@letter, @letter-2, @line, and the widget gallery (large with
+  Imbox clear, the day). Not yet seen: the Imbox with mail in it, the pencil's
+  field open, the accessibility sizes. screens.yml takes `widget=true`.
+
 - 2026-11-21 · by hand from the study (his word 12:10, 'build it now'): the
   morning letter hung in the app. Letter.swift (the issue as the house's
   pieces from `GET /v1/letter`, else the feed's road at the worker's
