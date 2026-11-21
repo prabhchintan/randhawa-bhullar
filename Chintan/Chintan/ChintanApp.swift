@@ -221,7 +221,7 @@ final class HitchMeter: NSObject {
         await window("rest, no hand") { try? await Task.sleep(for: .seconds(3)) }
         await window("tabs, no hand") {
             for _ in 0..<3 {
-                for t in [Tab.board, .study, .jharokha] {
+                for t in [Tab.board, .mirror, .jharokha] {
                     turn(t)
                     try? await Task.sleep(for: .seconds(0.6))
                 }

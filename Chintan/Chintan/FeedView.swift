@@ -37,7 +37,12 @@ struct FeedView: View {
         var id: String { url.absoluteString }
     }
 
-    private var shown: [FeedRow] { face == .feed ? store.rows : store.kept }
+    // The feed opens on the day's few; the rest come when asked for.
+    @State private var whole = false
+    private var fewOnly: Bool { face == .feed && !whole && store.few > 0 && store.rows.count > store.few }
+    private var shown: [FeedRow] {
+        face == .feed ? (fewOnly ? Array(store.rows.prefix(store.few)) : store.rows) : store.kept
+    }
 
     // The walk's swipe folds a card on the phone alone (`--feed-staged`),
     // so the eyes never take a real row off his feed.
@@ -91,6 +96,29 @@ struct FeedView: View {
                     .onAppear { store.drew() }
                     .id(row.id)
             }
+            if fewOnly {
+                Button {
+                    withAnimation(.snappy) { whole = true }
+                    Taps.shared.note("feed.more")
+                } label: {
+                    HStack(spacing: 8) {
+                        Rectangle().fill(Theme.gilt.opacity(0.4)).frame(height: 0.5)
+                        Text("The rest, \(store.rows.count - store.few) more")
+                            .font(Theme.label(.caption))
+                            .tracking(1)
+                            .foregroundStyle(Theme.gilt)
+                            .fixedSize()
+                        Rectangle().fill(Theme.gilt.opacity(0.4)).frame(height: 0.5)
+                    }
+                    .padding(.vertical, 14)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .listRowInsets(EdgeInsets(top: 4, leading: 22, bottom: 4, trailing: 22))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .accessibilityIdentifier("feed-rest")
+            }
             Color.clear
                 .frame(height: 24 + pane.foot)
                 .listRowBackground(Color.clear)
@@ -112,6 +140,7 @@ struct FeedView: View {
             if pane.opened > 1 {
                 face = start
                 expanded = []
+                whole = false
             }
             await store.open()
             await look(proxy)
@@ -189,6 +218,7 @@ struct FeedView: View {
 
     private func open(_ row: FeedRow) {
         store.seen(row)
+        Taps.shared.note("feed.card", id: row.id)
         if let s = row.url, let url = URL(string: s) {
             link = Link(url: url)
         } else {

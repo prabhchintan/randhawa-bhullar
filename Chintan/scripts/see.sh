@@ -190,7 +190,7 @@ if [ "${1:-}" = "--large" ]; then
   shift
 fi
 OUT=${1:?usage: see.sh OUTDIR [tab ...]}; shift
-TABS=${*:-jharokha board study}
+TABS=${*:-jharokha board mirror}
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 DD=${SEE_DERIVED:-$HOME/Library/Developer/Xcode/DerivedData/chintan-see}
 DEVICE=${SEE_DEVICE:-iPhone 16 Pro}
@@ -274,10 +274,10 @@ for mode in light dark; do
     xcrun simctl terminate "$UDID" Prabhchintan.Chintan 2>/dev/null || true
     # A tab written board@N is the board with its Nth thing opened on launch.
     EXTRA=()
-    # settings is the study with its Settings sheet open.
+    # settings is the mirror with its Settings sheet open (the study's, until 2026-11-20).
     NAME=${tab%@*}
     case "$tab" in *@*) EXTRA=(--open "${tab#*@}") ;; esac
-    [ "$NAME" = settings ] && NAME=study && EXTRA=(--settings)
+    [ "$NAME" = settings ] && NAME=mirror && EXTRA=(--settings)
     # settings@senses: as settings@on, the sheet opened on The senses;
     # settings@quiet: opened there with nothing on.
     case "$tab" in settings@senses|settings@quiet) EXTRA=(--settings --open senses) ;; esac

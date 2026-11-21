@@ -27,6 +27,15 @@ struct Hung: TimelineEntry {
     let date: Date
     let record: Record?
     let picture: UIImage?
+    var line: Said? = nil
+}
+
+// Home's one line as the house gives it (GET /v1/mirror, since 2026-11-20):
+// whose it is, and a dozen words at most. The widget is where a three second
+// look lands first, so the line hangs here too, on the larger frames.
+struct Said: Codable {
+    let kicker: String
+    let text: String
 }
 
 // The house's record, the fields the widget letters.
@@ -57,7 +66,20 @@ enum Shared {
         guard let data = try? Data(contentsOf: folder.appendingPathComponent(frame + ".json")),
               let record = try? JSONDecoder().decode(Record.self, from: data),
               let picture = UIImage(contentsOfFile: folder.appendingPathComponent(frame + ".jpg").path) else { return nil }
-        return Hung(date: .now, record: record, picture: picture)
+        return Hung(date: .now, record: record, picture: picture, line: keptLine())
+    }
+
+    // The line as last heard, good for a day; an older one is left off.
+    static func keptLine() -> Said? {
+        let file = folder.appendingPathComponent("line.json")
+        guard let made = (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date,
+              Date.now.timeIntervalSince(made) < 86400,
+              let data = try? Data(contentsOf: file) else { return nil }
+        return try? JSONDecoder().decode(Said.self, from: data)
+    }
+
+    static func keep(_ line: Said) {
+        try? JSONEncoder().encode(line).write(to: folder.appendingPathComponent("line.json"), options: .atomic)
     }
 
     static func keep(_ record: Record, _ jpeg: Data, _ frame: String) {
@@ -116,7 +138,15 @@ struct Hanger: TimelineProvider {
               let picture = fitted(jpeg) else { return nil }
         let small = picture.jpegData(compressionQuality: 0.88) ?? jpeg
         Shared.keep(record, small, frame)
-        return Hung(date: .now, record: record, picture: picture)
+        // The day's line rides the same ask; a house without it leaves the last one.
+        struct Mirror: Decodable { let line: Said? }
+        if let asked = URL(string: address + "/v1/mirror"),
+           let (data, answer) = try? await session.data(from: asked),
+           (answer as? HTTPURLResponse)?.statusCode == 200,
+           let line = (try? JSONDecoder().decode(Mirror.self, from: data))?.line {
+            Shared.keep(line)
+        }
+        return Hung(date: .now, record: record, picture: picture, line: Shared.keptLine())
     }
 
     // Decoded at no more than the large frame's own size: a widget that
@@ -157,6 +187,31 @@ struct WallFace: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        // The day's line at the head, on the frames with room for it.
+        .overlay(alignment: .topLeading) {
+            if family != .systemSmall, work.picture != nil, letters != "off", let line = work.line {
+                ZStack(alignment: .topLeading) {
+                    RadialGradient(colors: [Self.lampBlack.opacity(0.66), Self.lampBlack.opacity(0)],
+                                   center: .topLeading, startRadius: 0, endRadius: 220)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(plain(line.kicker))
+                            .font(.system(size: 9, design: .serif).smallCaps())
+                            .tracking(0.8)
+                            .foregroundStyle(Self.gilt)
+                            .lineLimit(1)
+                        Text(plain(line.text))
+                            .font(.system(size: 12.5, design: .serif).italic())
+                            .foregroundStyle(Self.bone)
+                            .lineLimit(3)
+                    }
+                    .multilineTextAlignment(.leading)
+                    .shadow(color: .black.opacity(0.5), radius: 3)
+                    .frame(maxWidth: 210, alignment: .leading)
+                    .padding(.leading, margin)
+                    .padding(.top, margin)
+                }
+            }
+        }
         .containerBackground(for: .widget) {
             if let picture = work.picture {
                 Image(uiImage: picture)

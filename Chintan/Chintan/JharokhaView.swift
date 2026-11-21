@@ -20,8 +20,14 @@ struct JharokhaView: View {
     // How tall the names at the head stand, so the date starts under them.
     @State private var headHeight: CGFloat = 0
     @State private var showCredit = false
-    // `--open raised` opens the raised mark's line for the house's eyes.
-    @State private var openMeter: String? = JharokhaView.eyes == "raised" ? "raised" : nil
+    // `--open yours` opens the mark's own words for the house's eyes.
+    @State private var openMeter: String? = JharokhaView.eyes == "yours" ? "yours" : nil
+    // The mirror as the house last gave it: Home's one line, and what waits
+    // on his word. `--open line` opens the line whole.
+    @ObservedObject private var mirror = MirrorStore.shared
+    @State private var lineOpen = JharokhaView.eyes == "line"
+    // When the painting on the wall was hung, so a turn past it knows how long it had.
+    @State private var shownAt = Date.now
     @State private var showVisitors = false
     // The feed, opened from beside the guest book; `--open feed...` opens it
     // on launch for the house's eyes, `--open kept` on its second face.
@@ -184,6 +190,7 @@ struct JharokhaView: View {
         #if !targetEnvironment(macCatalyst)
         .onChange(of: phase) { _, now in
             if now == .active, Date.now.timeIntervalSince(readAt) > 60 { Task { await refresh() } }
+            if now == .active, let id = gallery.painting?.id { Taps.shared.begin("painting", id: id) }
         }
         #endif
         // The feed's pane, its copy and first cards made ready before it is
@@ -194,6 +201,14 @@ struct JharokhaView: View {
         }
         // The hitch meter's walk with no hand opens and lets go the feed.
         .onReceive(NotificationCenter.default.publisher(for: HitchMeter.feed)) { showFeed = ($0.object as? Bool) ?? false }
+        // The tap ledger: the feed and the book while they are open, and each
+        // painting for as long as it leads the wall.
+        .onChange(of: showFeed) { _, now in if now { Taps.shared.begin("feed") } else { Taps.shared.end("feed") } }
+        .onChange(of: showVisitors) { _, now in if now { Taps.shared.begin("book") } else { Taps.shared.end("book") } }
+        .onChange(of: gallery.painting?.id, initial: true) { _, now in
+            Taps.shared.end("painting")
+            if let now { Taps.shared.begin("painting", id: now) }
+        }
         #if targetEnvironment(macCatalyst)
         // The wall reads the board again every minute while it is in view,
         // and rests while the window is hidden or the Mac sleeps.
@@ -291,17 +306,25 @@ struct JharokhaView: View {
                     .font(.system(.footnote, design: .serif).italic())
                     .foregroundStyle(Theme.bone.opacity(0.85))
                     .transition(.opacity)
-            } else if openMeter == Self.raisedKey {
+            } else if openMeter == Self.yoursKey {
+                // What waits on his word, plainly; the house's own chores
+                // are never lettered here.
                 VStack(alignment: .leading, spacing: 3) {
-                    ForEach(day.raisedLines.isEmpty ? [day.raised ? "Something is raised." : "Nothing raised."] : day.raisedLines, id: \.self) {
-                        Text($0)
-                            .fixedSize(horizontal: false, vertical: true)
+                    if mirror.yours.isEmpty {
+                        Text("Nothing waits on you.")
+                    } else {
+                        ForEach(Array(mirror.yours.enumerated()), id: \.offset) { _, one in
+                            Text(one.text.plainDashes)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
                 }
                 .font(.system(.footnote, design: .serif).italic())
                 .foregroundStyle(Theme.bone.opacity(0.85))
                 .transition(.opacity)
-                .accessibilityIdentifier("raised said")
+                .accessibilityIdentifier("yours said")
+            } else if let line = mirror.mirror?.line {
+                theLine(line)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -423,6 +446,7 @@ struct JharokhaView: View {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 openMeter = openMeter == meter.key ? nil : meter.key
                             }
+                            if openMeter == meter.key { Taps.shared.note("ring", id: meter.key) }
                         }
                         // Pressed and held, the ring grows a plaque with the
                         // whole of it; let go, the plaque folds back.
@@ -433,22 +457,24 @@ struct JharokhaView: View {
                         }
                 }
                 Circle()
-                    .fill(day.raised ? Theme.saffron : Theme.giltOnArt)
+                    .fill(mirror.yours.isEmpty ? Theme.giltOnArt : Theme.saffron)
                     .frame(width: 7, height: 7)
                     .padding(.top, 9)
                     // The mark is small; what a finger or VoiceOver finds is not.
                     .frame(width: 44, height: 44, alignment: .top)
                     .contentShape(Rectangle())
                     .accessibilityElement()
-                    .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
+                    .accessibilityLabel(mirror.yours.isEmpty ? "Nothing waits on you" : "Something waits on your word")
                     .accessibilityAddTraits(.isButton)
-                    .accessibilityIdentifier("raised")
-                    // Tapped, the mark says what is raised, where a ring says
-                    // its window; tapped again, it folds.
+                    .accessibilityIdentifier("yours")
+                    // The mark is his: gold while nothing waits on him, saffron
+                    // when a decision or a thing past its day does. Tapped, it
+                    // says which, where a ring says its window; again, it folds.
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.2)) {
-                            openMeter = openMeter == Self.raisedKey ? nil : Self.raisedKey
+                            openMeter = openMeter == Self.yoursKey ? nil : Self.yoursKey
                         }
+                        if openMeter == Self.yoursKey { Taps.shared.note("yours", id: mirror.yours.isEmpty ? "gold" : "saffron") }
                     }
             }
             .dynamicTypeSize(...DynamicTypeSize.accessibility1)
@@ -578,7 +604,13 @@ struct JharokhaView: View {
     private var nextMark: some View {
         Button {
             Task {
-                if await gallery.next() { turned += 1 }
+                let past = gallery.painting?.id
+                let hung = Date.now
+                if await gallery.next() {
+                    turned += 1
+                    Taps.shared.note("painting.next", id: past, secs: hung.timeIntervalSince(shownAt))
+                    shownAt = .now
+                }
             }
         } label: {
             HStack(spacing: 4) {
@@ -616,8 +648,45 @@ struct JharokhaView: View {
 
     // The pulse's meters when the house serves them, else the cockpit's.
     private var meters: [CockpitDay.Meter] { pulse.isEmpty ? day.meters : pulse }
-    // The raised mark's place among the rings' keys: one line open at a time.
-    private static let raisedKey = "raised"
+    // The mark's place among the rings' keys: one line open at a time.
+    private static let yoursKey = "yours"
+
+    // Home's one line: a dozen words at most under the day's things, whose it
+    // is lettered small over it (a teacher, a reader, his own week). Tapped,
+    // the whole of it stands on a plaque; again, it folds. It turns twice a
+    // day at the house, and the kind changes when there is a choice.
+    private func theLine(_ line: HouseClient.Mirror.Line) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(line.kicker.plainDashes)
+                .font(Theme.label(.caption2))
+                .tracking(1)
+                .foregroundStyle(lineOpen ? Theme.gilt : Theme.giltOnArt)
+            Text((lineOpen ? line.more : line.text).plainDashes)
+                .font(lineOpen ? .system(.footnote, design: .serif) : .system(.callout, design: .serif).italic())
+                .foregroundStyle(lineOpen ? Theme.ink : Theme.bone.opacity(0.92))
+                .lineSpacing(lineOpen ? 3 : 0)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, lineOpen ? 16 : 0)
+        .padding(.vertical, lineOpen ? 13 : 0)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            if lineOpen {
+                RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.plaque.opacity(0.97))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Theme.gilt.opacity(0.55), lineWidth: 0.5))
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.snappy) { lineOpen.toggle() }
+            if lineOpen { Taps.shared.begin("line", id: line.kind) } else { Taps.shared.end("line") }
+        }
+        .transition(.opacity)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(lineOpen ? "Folds it" : "Opens the whole of it")
+        .accessibilityIdentifier("line")
+    }
 
     private func refresh() async {
         today = .now
@@ -634,6 +703,7 @@ struct JharokhaView: View {
         // picture (on the Mac, each wall cut made on first ask), so the
         // pictures come down on their own.
         Task { await gallery.load() }
+        Task { await MirrorStore.shared.read() }
         async let cockpit = try? house.cockpit()
         async let board = try? house.board()
         async let beat = try? house.pulse()
@@ -1005,8 +1075,6 @@ struct CockpitDay {
     var headline: String?
     var meters: [Meter] = []
     var raised = false
-    // What is raised, a line each, in the house's own words.
-    var raisedLines: [String] = []
 
     init() {}
 
@@ -1029,13 +1097,6 @@ struct CockpitDay {
             }
         }
         raised = !text.contains("nothing raised")
-        // The raised stand between the headline and the first empty line,
-        // each "WATCH name: words"; the round's own line is not his.
-        for line in lines.dropFirst().prefix(while: { !$0.isEmpty }) {
-            guard let match = line.firstMatch(of: /^(?:WATCH|ACT|STALE)\s+([^:]+):\s*(.+)$/) else { continue }
-            let name = String(match.1), words = String(match.2).plainDashes
-            raisedLines.append(name.prefix(1).uppercased() + name.dropFirst() + ": " + words)
-        }
         if let match = text.firstMatch(of: /meters s(\d+) w(\d+) f(\d+)/) {
             meters = [("session", "hours", match.1), ("weekly", "week", match.2), ("fable", "fable", match.3)]
                 .compactMap { key, label, value in

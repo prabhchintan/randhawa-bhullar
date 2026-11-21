@@ -4,7 +4,7 @@ import UIKit
 // The raw values are the names the house's screenshots pass on the command
 // line, so they stay as they are even where the tab's own name has moved on.
 enum Tab: String, CaseIterable {
-    case jharokha, board, study
+    case jharokha, board, mirror
 
     // The tab named on the command line, for the house's screenshots.
     static var launch: Tab {
@@ -28,7 +28,16 @@ enum Tab: String, CaseIterable {
         switch self {
         case .jharokha: return "Home"
         case .board: return "Board"
-        case .study: return "Study"
+        case .mirror: return "Mirror"
+        }
+    }
+
+    // The page's name on the tap ledger.
+    var ledger: String {
+        switch self {
+        case .jharokha: return "home"
+        case .board: return "board"
+        case .mirror: return "mirror"
         }
     }
 
@@ -36,7 +45,8 @@ enum Tab: String, CaseIterable {
         switch self {
         case .jharokha: return "house"
         case .board: return "checklist"
-        case .study: return "bubble.left.and.text.bubble.right"
+        // A portrait's own frame: the page is him.
+        case .mirror: return "oval.portrait"
         }
     }
 }
@@ -45,9 +55,9 @@ enum Tab: String, CaseIterable {
 // over it, a thumb's swipe or a tap on the bar moving between them, the
 // picture staying still behind. A tick of the selection haptic on each arrival.
 struct ContentView: View {
-    @StateObject private var store = ConversationStore()
     @StateObject private var gallery = Gallery()
     @State private var page: Tab? = Tab.launch
+    @Environment(\.scenePhase) private var phase
     @State private var keyboard = false
     // The painting alone, asked for by a tap on Home's bare picture.
     @State private var alone = Tab.launch == .jharokha && ContentView.eyes?.hasPrefix("alone") == true
@@ -152,8 +162,24 @@ struct ContentView: View {
         }
         .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
+        // The tap ledger: each visit front to back, each page while it is in
+        // view, the painting alone; handed to the house as the app leaves.
+        .onChange(of: phase, initial: true) { _, now in
+            if now == .active {
+                Taps.shared.begin("app")
+                Taps.shared.begin("tab", id: tab.ledger)
+            } else if now == .background {
+                Taps.shared.leave()
+            }
+        }
+        .onChange(of: tab) { _, now in
+            Taps.shared.end("tab")
+            Taps.shared.begin("tab", id: now.ledger)
+        }
+        .onChange(of: alone) { _, now in
+            if now { Taps.shared.begin("painting.alone", id: gallery.painting?.id) } else { Taps.shared.end("painting.alone") }
+        }
         .tint(Theme.giltOnArt)
-        .environmentObject(store)
         .environmentObject(gallery)
         .task { await gallery.load() }
         // A tap on the widget (chintan://painting/ID) opens on the painting
@@ -231,7 +257,8 @@ struct ContentView: View {
         // Each page says when it is unchanged, so a turn letters only what moved.
         case .jharokha: JharokhaView().equatable()
         case .board: BoardView(shown: tab == .board).equatable()
-        case .study: StudyView(open: tab == .study).equatable()
+        // The chat he did not use gave its page to the mirror (2026-11-20).
+        case .mirror: MirrorView(shown: tab == .mirror).equatable()
         }
     }
 
@@ -322,6 +349,7 @@ struct ContentView: View {
     private func keep(staged: Bool = false) {
         Task {
             let answer = await gallery.keep(staged: staged)
+            if case .kept = answer { Taps.shared.note("painting.keep", id: gallery.painting?.id) }
             withAnimation(.smooth) { kept = answer }
             keeping += 1
             let said = switch answer {

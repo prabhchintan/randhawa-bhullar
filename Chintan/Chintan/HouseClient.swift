@@ -252,6 +252,9 @@ struct HouseClient {
         guard http.statusCode == 200,
               let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let rows = object[key] as? [[String: Any]] else { throw HouseError.unreachable }
+        // The day's few lead the feed (since 2026-11-20): how many, kept for
+        // the pane; a house that does not say leaves the feed whole.
+        if key == "feed" { UserDefaults.standard.set(object["few"] as? Int ?? 0, forKey: FeedStore.fewKey) }
         return rows.compactMap(FeedRow.init)
     }
 

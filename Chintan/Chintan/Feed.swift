@@ -188,6 +188,10 @@ final class FeedStore: ObservableObject {
     @Published private(set) var kept: [FeedRow] = []
     @Published private(set) var liked: Set<String> = []
     @Published private(set) var loaded = false
+    // How many rows at the head are the day's few, picked by the house; none
+    // from a house that does not pick, or on the road.
+    @Published private(set) var few = UserDefaults.standard.integer(forKey: FeedStore.fewKey)
+    nonisolated static let fewKey = "feed.few"
     @Published var word: String?
     // Set while the feed came by the road: whether the house's last push is
     // old, and when it was.
@@ -334,6 +338,8 @@ final class FeedStore: ObservableObject {
             switch f {
             case .success(let fresh):
                 await take(fresh, profile: try? p.get())
+                let picked = UserDefaults.standard.integer(forKey: Self.fewKey)
+                if few != picked { few = picked }
                 away = nil
                 answered = true
                 if !askedRoad {
@@ -353,6 +359,7 @@ final class FeedStore: ObservableObject {
                 // the road says is kept that the phone did not hold yet.
                 let more = read.rows.filter { row in row.kept && !kept.contains { $0.id == row.id } }
                 await take(read.rows, profile: kept + more)
+                if few != 0 { few = 0 }
                 away = read.stale || Self.staleEyes ? .stale(read.pushed) : .road
             } else {
                 away = nil

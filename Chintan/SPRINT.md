@@ -10,6 +10,10 @@ the backlog, the ledger. One read before every sprint, one ledger line after.
 
 ## The vision
 
+RE-CUT 2026-11-20 (his word, the study line; the ledger's entry of that day):
+three pages, Home, Board, Mirror. The study (the chat) is unhung: he did not
+use it. Where this section still says study, read it as history.
+
 The house in his pocket. Not a chat wrapper and not a dashboard: a warm,
 quiet place that shows the household alive (what the day holds, what the
 house is doing, what needs him) and lets him talk to chintan when he wants
@@ -1219,6 +1223,32 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   letter the caption under the tile, not inside it.
 
 ## The ledger (newest first)
+
+- 2026-11-20 · the ground up (chintan, by hand, on his word of 17:36 and
+  17:42 the same evening: the raised line was meaningless to him, "I don't
+  think I'm the end user for it"; think the app from the ground up, an arm of
+  the portrait and the teachers; drop the chat). Read first: 508 visits in a
+  month at a median of three seconds, 34 marks on 6,350 feed rows, no word
+  from the chat since 09-22. So five rules now govern every screen: three
+  seconds pays; he is the subject, never the operator; one thing in one
+  place; the house learns by watching and never asks him to rate what it can
+  see; nothing served daily goes stale. Built: the Study tab gave its page to
+  the Mirror (Mirror.swift: his days as sentences with a line over thirty
+  days, the day's lesson whole with three marks, the day's teacher; Settings
+  hangs from its head now). Home carries one line under the day's things,
+  whose it is lettered over it, the whole of it on a tap (`--open line`). The
+  mark beside the rings is his: gold while nothing waits on him, saffron for a
+  decision or a thing past its day, never the house's upkeep (`--open yours`).
+  The feed opens on the day's few, the rest one tap under them. The tap ledger
+  (Taps, POST /v1/taps) notes what he opens and for how long and goes as the
+  app leaves the front; the house's eyes and the walk leave none. The widget
+  letters the line at its head on the larger frames (compiled, not yet seen).
+  The feed's door is named to every rising (the dead tap of that afternoon).
+  StudyView.swift and ConversationStore.swift stay in the tree unhung for one
+  release, his to call back. LEFT: the walk (ChintanWalk) still walks the
+  Study and will fail there until it is turned to the Mirror; see.sh's study@
+  looks are dead; the widget's look unseen. The house side: mirror.py,
+  taps.py, feed.py few() in the chintan repo.
 
 - 2026-11-08 · sprint 88 (60aec4f and the commit carrying this line): his
   steer, the faisla shelf, three looks of three. Before this, a decision the

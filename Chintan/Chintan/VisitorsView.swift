@@ -94,6 +94,7 @@ struct VisitorsView: View {
             .scrollIndicators(.hidden)
             .navigationDestination(for: String.self) { id in
                 VisitorDetailView(person: people.first { $0.id == id })
+                    .onAppear { Taps.shared.note("book.person") }
             }
             .toolbar(.hidden, for: .navigationBar)
         }
