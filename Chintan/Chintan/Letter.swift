@@ -124,7 +124,7 @@ struct LetterView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 heading
-                    .padding(.top, 34)
+                    .padding(.top, 14)
                 if let issue = store.issue {
                     ForEach(issue.pieces) { piece in
                         VStack(alignment: .leading, spacing: 0) {
@@ -151,6 +151,8 @@ struct LetterView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
+        // The sheet's own handle keeps a clear band; no line runs under it.
+        .padding(.top, 26)
         .task(id: store.issue?.issue) {
             guard let word = eyes, word.hasPrefix("letter-"), let n = Int(word.dropFirst(7)),
                   let pieces = store.issue?.pieces, pieces.indices.contains(n) else { return }
@@ -302,7 +304,7 @@ struct LetterView: View {
                 Text(text.plainDashes)
                     .font(Face.roman(piece.kind == "opening" ? 21 : 19))
                     .foregroundStyle(Theme.ink)
-                    .lineSpacing(piece.kind == "opening" ? 8 : 7)
+                    .lineSpacing(piece.kind == "opening" ? 6 : 5)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, piece.kind == "opening" ? 0 : 14)
             }
