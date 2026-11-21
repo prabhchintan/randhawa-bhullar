@@ -1224,6 +1224,16 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 ## The ledger (newest first)
 
+- 2026-11-21 · by hand from the study (his word 12:10, 'build it now'): the
+  morning letter hung in the app. Letter.swift (the issue as the house's
+  pieces from `GET /v1/letter`, else the feed's road at the worker's
+  /chintan/letter, else the phone's kept copy), opened from a third mount at
+  Home's head (`--open letter`), a gilt point for an issue not yet opened.
+  The tap ledger gains `letter`, `letter.piece` (ISSUE|PIECE with seconds on
+  the screen) and `letter.link`. Seen: jharokha and jharokha@letter, light
+  and dark, the three mounts fit one row. Not yet seen: the lower pieces
+  scrolled, and the accessibility sizes with three mounts.
+
 - 2026-11-20 · the ground up (chintan, by hand, on his word of 17:36 and
   17:42 the same evening: the raised line was meaningless to him, "I don't
   think I'm the end user for it"; think the app from the ground up, an arm of
