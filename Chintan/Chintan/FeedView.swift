@@ -635,7 +635,9 @@ struct FeedDoor: UIViewControllerRepresentable {
         override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
             FeedStore.shared.rise()
-            state.opened += 1
+            // A link read over the pane and closed brings it back as it was
+            // left; only a rising is an opening.
+            if isBeingPresented { state.opened += 1 }
         }
 
         // The fresh read waits for the rise to finish. The sheet's own size
@@ -648,9 +650,14 @@ struct FeedDoor: UIViewControllerRepresentable {
 
         var risen: (CGSize) -> Void = { _ in }
 
+        var fallen: () -> Void = {}
+
+        // Put away, by a pull or by the door: the door hears of it here too,
+        // whoever its delegate was.
         override func viewDidDisappear(_ animated: Bool) {
             super.viewDidDisappear(animated)
             FeedStore.shared.fall()
+            if isBeingDismissed || presentingViewController == nil { fallen() }
         }
     }
 
@@ -666,8 +673,8 @@ struct FeedDoor: UIViewControllerRepresentable {
         init(face: FeedView.Face, eyes: String?) {
             pane = Pane(face: face, eyes: eyes)
             super.init()
-            pane.presentationController?.delegate = self
             pane.risen = { [weak self] in self?.size = $0 }
+            pane.fallen = { [weak self] in self?.fell() }
             // New rows while the pane is put away are laid out then, not as
             // it next rises.
             watch = FeedStore.shared.objectWillChange
@@ -718,6 +725,15 @@ struct FeedDoor: UIViewControllerRepresentable {
                 guard anchor.view.window != nil else { return }
                 var top: UIViewController = anchor
                 while let next = top.presentedViewController { top = next }
+                // Every rising has a presentation controller of its own, so
+                // the door is named to each. Named once, only the first pull
+                // down was heard: after the second the door still read open,
+                // and the next tap on the feed did nothing.
+                pane.presentationController?.delegate = self
+                if let sheet = pane.sheetPresentationController {
+                    sheet.detents = [.large()]
+                    sheet.prefersGrabberVisible = true
+                }
                 top.present(pane, animated: true)
             } else if !want, up, !pane.isBeingDismissed {
                 pane.dismiss(animated: true)
@@ -725,6 +741,11 @@ struct FeedDoor: UIViewControllerRepresentable {
         }
 
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+            fell()
+        }
+
+        private func fell() {
+            guard want else { return }
             want = false
             closed()
         }

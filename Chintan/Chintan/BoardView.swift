@@ -431,7 +431,9 @@ struct BoardView: View {
                 _ = gone.insert(item.line)
                 open.remove(item.id)
             }
-            // And read from the house, so the thing is seen gone there too.
+            // And read from the house, so the thing is seen gone there too;
+            // the next Done does not wait on that read.
+            sending = nil
             await refresh()
         } catch HouseError.noDoor {
             withAnimation { refused[item.id] = "The house cannot take this from the phone yet." }

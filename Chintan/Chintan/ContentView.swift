@@ -370,7 +370,8 @@ struct ContentView: View {
             #if targetEnvironment(macCatalyst)
             handLetters = nil
             #endif
-        } completion: { clockAway = false }
+        // Put away again before this ends, the clock stays away.
+        } completion: { if !alone { clockAway = false } }
     }
 
     // For the house's eyes: `--open alone` on Home opens on the painting alone.

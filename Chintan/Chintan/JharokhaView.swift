@@ -20,7 +20,8 @@ struct JharokhaView: View {
     // How tall the names at the head stand, so the date starts under them.
     @State private var headHeight: CGFloat = 0
     @State private var showCredit = false
-    @State private var openMeter: String?
+    // `--open raised` opens the raised mark's line for the house's eyes.
+    @State private var openMeter: String? = JharokhaView.eyes == "raised" ? "raised" : nil
     @State private var showVisitors = false
     // The feed, opened from beside the guest book; `--open feed...` opens it
     // on launch for the house's eyes, `--open kept` on its second face.
@@ -40,8 +41,14 @@ struct JharokhaView: View {
     @State private var wordLine = CGRect.zero
     // A word for the house being written, on its plaque above the keyboard.
     @State private var wording = JharokhaView.eyes == "word"
-    #if targetEnvironment(macCatalyst)
     @Environment(\.scenePhase) private var phase
+    // The day Home letters, and when it last read the house: back at the
+    // front after a minute or more, it reads again, as the Board does. Read
+    // only on open, it kept yesterday's date and things through a morning.
+    @State private var today = Date.now
+    @State private var readAt = Date.distantPast
+    @State private var reading = false
+    #if targetEnvironment(macCatalyst)
     // The board as last read, so a minute's read that finds it unchanged
     // moves nothing on the wall; and its days, the wall's column.
     @State private var boardText: String?
@@ -174,6 +181,11 @@ struct JharokhaView: View {
         .environment(\.colorScheme, .dark)
         .refreshable { await refresh() }
         .task { await refresh() }
+        #if !targetEnvironment(macCatalyst)
+        .onChange(of: phase) { _, now in
+            if now == .active, Date.now.timeIntervalSince(readAt) > 60 { Task { await refresh() } }
+        }
+        #endif
         // The feed's pane, its copy and first cards made ready before it is
         // opened, and risen from here.
         .background {
@@ -202,7 +214,7 @@ struct JharokhaView: View {
         // A tick as the thumb comes onto the word for the house.
         .sensoryFeedback(.selection, trigger: onWord) { _, now in now }
         .sheet(isPresented: $showVisitors, onDismiss: { newcomers = GuestBook.newcomers(guests) }) {
-            VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked, openBusiest: Self.eyes == "person")
+            VisitorsView(since: Self.eyes == "book" ? GuestBook.monthAgo : GuestBook.looked, openBusiest: Self.eyes == "person", seed: guests)
                 .presentationBackground(.ultraThinMaterial)
                 .presentationDragIndicator(.visible)
         }
@@ -279,6 +291,17 @@ struct JharokhaView: View {
                     .font(.system(.footnote, design: .serif).italic())
                     .foregroundStyle(Theme.bone.opacity(0.85))
                     .transition(.opacity)
+            } else if openMeter == Self.raisedKey {
+                VStack(alignment: .leading, spacing: 3) {
+                    ForEach(day.raisedLines.isEmpty ? [day.raised ? "Something is raised." : "Nothing raised."] : day.raisedLines, id: \.self) {
+                        Text($0)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .font(.system(.footnote, design: .serif).italic())
+                .foregroundStyle(Theme.bone.opacity(0.85))
+                .transition(.opacity)
+                .accessibilityIdentifier("raised said")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -291,7 +314,7 @@ struct JharokhaView: View {
             // The date alone leads the wall (Prab, 2026-09-25 08:29 and 08:52:
             // the day's sentence, "2 raised this morning", goes entirely; the
             // date and today's things, blank when none).
-            Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+            Text(today.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                 .font(.system(.title2, design: .serif).weight(.medium).smallCaps())
                 .tracking(0.4)
                 .foregroundStyle(Theme.bone)
@@ -299,7 +322,7 @@ struct JharokhaView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("date")
                 // A thing held names its own day; the date steps aside.
-                .opacity(heldThing == nil ? 1 : 0)
+                .opacity(dated.contains { $0.id == heldThing } ? 0 : 1)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottom) {
                 if !typeSize.isAccessibilitySize, let item = dated.first(where: { $0.id == heldThing }) {
@@ -418,6 +441,15 @@ struct JharokhaView: View {
                     .contentShape(Rectangle())
                     .accessibilityElement()
                     .accessibilityLabel(day.raised ? "something raised" : "nothing raised")
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityIdentifier("raised")
+                    // Tapped, the mark says what is raised, where a ring says
+                    // its window; tapped again, it folds.
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            openMeter = openMeter == Self.raisedKey ? nil : Self.raisedKey
+                        }
+                    }
             }
             .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             .overlay(alignment: .bottomLeading) {
@@ -584,12 +616,19 @@ struct JharokhaView: View {
 
     // The pulse's meters when the house serves them, else the cockpit's.
     private var meters: [CockpitDay.Meter] { pulse.isEmpty ? day.meters : pulse }
+    // The raised mark's place among the rings' keys: one line open at a time.
+    private static let raisedKey = "raised"
 
     private func refresh() async {
+        today = .now
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errorText = "No house address yet. Add it in Settings."
             return
         }
+        // One read at a time: a pull over a read under way waits on nothing.
+        guard !reading else { return }
+        reading = true
+        defer { reading = false; readAt = .now }
         let house = HouseClient(baseAddress: address)
         // The day never waits on the shelf: a first open fetches every
         // picture (on the Mac, each wall cut made on first ask), so the
@@ -966,6 +1005,8 @@ struct CockpitDay {
     var headline: String?
     var meters: [Meter] = []
     var raised = false
+    // What is raised, a line each, in the house's own words.
+    var raisedLines: [String] = []
 
     init() {}
 
@@ -988,6 +1029,13 @@ struct CockpitDay {
             }
         }
         raised = !text.contains("nothing raised")
+        // The raised stand between the headline and the first empty line,
+        // each "WATCH name: words"; the round's own line is not his.
+        for line in lines.dropFirst().prefix(while: { !$0.isEmpty }) {
+            guard let match = line.firstMatch(of: /^(?:WATCH|ACT|STALE)\s+([^:]+):\s*(.+)$/) else { continue }
+            let name = String(match.1), words = String(match.2).plainDashes
+            raisedLines.append(name.prefix(1).uppercased() + name.dropFirst() + ": " + words)
+        }
         if let match = text.firstMatch(of: /meters s(\d+) w(\d+) f(\d+)/) {
             meters = [("session", "hours", match.1), ("weekly", "week", match.2), ("fable", "fable", match.3)]
                 .compactMap { key, label, value in

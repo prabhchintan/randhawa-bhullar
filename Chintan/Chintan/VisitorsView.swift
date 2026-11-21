@@ -31,8 +31,13 @@ struct VisitorsView: View {
     @State private var people: [HouseClient.Visitor] = []
     // The last look before this one: who came since wears a gilt point.
     var since = GuestBook.looked
+    // That look as it stood when the book opened: reading the book sets a new
+    // one, and Home drawn again under the sheet must not rub the points out.
+    @State private var before: Int?
     // For the house's eyes: opened on the person who read the most pages.
     var openBusiest = false
+    // The book as Home last read it, so it opens full and reads again quietly.
+    var seed: [HouseClient.Visitor] = []
     @State private var path: [String] = []
     @State private var errorText: String?
     @State private var loaded = false
@@ -77,7 +82,7 @@ struct VisitorsView: View {
                             .padding(.top, 12)
                         ForEach(shelf.rows) { person in
                             NavigationLink(value: person.id) {
-                                VisitorLeaf(person: person, new: since > 0 && person.last > since)
+                                VisitorLeaf(person: person, new: (before ?? since) > 0 && person.last > (before ?? since))
                             }
                             .buttonStyle(.plain)
                         }
@@ -129,6 +134,11 @@ struct VisitorsView: View {
     }
 
     private func refresh() async {
+        if before == nil { before = since }
+        if people.isEmpty, !seed.isEmpty {
+            people = seed
+            loaded = true
+        }
         guard let address = Keychain.loadHouseAddress(), !address.isEmpty else {
             errorText = "No house address yet. Add it in Settings."
             loaded = true

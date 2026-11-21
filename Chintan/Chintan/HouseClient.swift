@@ -26,6 +26,15 @@ struct HouseClient {
         return URLSession(configuration: config)
     }()
 
+    // A plain read of the house: every door answers inside a second, so off
+    // the tailnet a read gives up in twelve, never the five minutes a reply
+    // is given (the guest book once sat on "Reading the book." that long).
+    private static func read(_ url: URL, seconds: TimeInterval = 12) async throws -> (Data, URLResponse) {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = seconds
+        return try await session.data(for: request)
+    }
+
     private func url(_ path: String) -> URL? {
         var address = baseAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         if !address.contains("://") { address = "http://" + address }
@@ -35,13 +44,13 @@ struct HouseClient {
 
     func health() async throws -> HouseHealth {
         guard let url = url("/v1/health") else { throw HouseError.noAddress }
-        let (data, _) = try await Self.session.data(from: url)
+        let (data, _) = try await Self.read(url)
         return try JSONDecoder().decode(HouseHealth.self, from: data)
     }
 
     func cockpit() async throws -> String {
         guard let url = url("/v1/cockpit") else { throw HouseError.noAddress }
-        let (data, _) = try await Self.session.data(from: url)
+        let (data, _) = try await Self.read(url)
         struct Cockpit: Decodable { let text: String }
         return try JSONDecoder().decode(Cockpit.self, from: data).text
     }
@@ -83,7 +92,7 @@ struct HouseClient {
 
     func painting() async throws -> Painting {
         guard let url = url("/v1/painting") else { throw HouseError.noAddress }
-        let (data, _) = try await Self.session.data(from: url)
+        let (data, _) = try await Self.read(url)
         return try JSONDecoder().decode(Painting.self, from: data)
     }
 
@@ -92,7 +101,7 @@ struct HouseClient {
     // landscape works cut for 16:9, each picture at /v1/paintings/ID.wall.jpg.
     func paintings(frame: String? = nil) async throws -> [Painting] {
         guard let url = url("/v1/paintings" + (frame.map { "?frame=" + $0 } ?? "")) else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
         struct Shelf: Decodable { let paintings: [Painting] }
         return try JSONDecoder().decode(Shelf.self, from: data).paintings
@@ -118,13 +127,13 @@ struct HouseClient {
         // the work whole at the frame's height, its reflections on the open
         // sides); a house without it answers 404 and the phone's cut is shown.
         if let id = painting?.id, let url = url("/v1/paintings/\(id).wall.jpg"),
-           let answer = try? await Self.session.data(from: url),
+           let answer = try? await Self.read(url, seconds: 60),
            (answer.1 as? HTTPURLResponse)?.statusCode == 200 {
             return answer.0
         }
         #endif
         guard let url = url(painting?.imagePath ?? "/v1/painting.jpg") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url, seconds: 60)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
         return data
     }
@@ -189,7 +198,7 @@ struct HouseClient {
 
     func visitors() async throws -> [Visitor] {
         guard let url = url("/v1/visitors") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         if http.statusCode == 404 { throw HouseError.noDoor }
         guard http.statusCode == 200 else { throw HouseError.unreachable }
@@ -199,7 +208,7 @@ struct HouseClient {
 
     func visitor(_ id: String) async throws -> Visitor {
         guard let url = url("/v1/visitors/\(id)") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
         struct One: Decodable { let visitor: Visitor }
         return try JSONDecoder().decode(One.self, from: data).visitor
@@ -275,14 +284,14 @@ struct HouseClient {
 
     func pulse() async throws -> Pulse {
         guard let url = url("/v1/pulse") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.unreachable }
         return try JSONDecoder().decode(Pulse.self, from: data)
     }
 
     func board() async throws -> String {
         guard let url = url("/v1/board") else { throw HouseError.noAddress }
-        let (data, _) = try await Self.session.data(from: url)
+        let (data, _) = try await Self.read(url)
         struct Board: Decodable { let text: String }
         return try JSONDecoder().decode(Board.self, from: data).text
     }
@@ -292,7 +301,7 @@ struct HouseClient {
     // this door answers 404 and the phone cuts its own.
     func titles() async throws -> [String: BoardItem.Short] {
         guard let url = url("/v1/titles") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
         struct Entry: Decodable { let line: String; let title: String; let hour: String? }
         struct Titles: Decodable { let titles: [Entry] }
@@ -345,7 +354,7 @@ struct HouseClient {
 
     func mail() async throws -> Mail {
         guard let url = url("/v1/mail") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         if http.statusCode == 404 || http.statusCode == 405 { throw HouseError.noDoor }
         guard http.statusCode == 200 else { throw HouseError.unreachable }
@@ -356,7 +365,7 @@ struct HouseClient {
     // from a house without the door, so the shipped look stands.
     func look() async throws -> Data? {
         guard let url = url("/v1/look") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard let http = response as? HTTPURLResponse else { throw HouseError.unreachable }
         if http.statusCode == 404 || http.statusCode == 405 { return nil }
         guard http.statusCode == 200 else { throw HouseError.unreachable }
@@ -521,7 +530,7 @@ struct HouseClient {
 
     func voices() async throws -> Voices {
         guard let url = url("/v1/voices") else { throw HouseError.noAddress }
-        let (data, response) = try await Self.session.data(from: url)
+        let (data, response) = try await Self.read(url)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw HouseError.noDoor }
         return try JSONDecoder().decode(Voices.self, from: data)
     }
