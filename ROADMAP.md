@@ -136,6 +136,13 @@ item is written so a session can tell when it is done.
    that the two halves go out together as one release candidate, which
    waits on the shipping gate in LOOP.md, not on more code. Shipped
    2026-10-14 as Bhullar 2.7 (12), with FUNNEL cut 2, on chintan's word. Done.
+6. **Xcode 27 before April 2027.** From April 2027 App Store Connect takes
+   uploads only when built with the iOS 27 SDK (ITMS-90725, chintan,
+   2026-11-21). On 2026-11-22 yantar and the loop's runner (`macos-15`,
+   newest Xcode 26.3) both had Xcode 26.3. Done when yantar runs Xcode 27,
+   `loop.yml` and `build.yml` sit on a runner image that carries it, and
+   one clean simulator build of each app has passed on each, well before
+   April 2027.
 
 ## Both, eventually
 
