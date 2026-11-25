@@ -36,6 +36,12 @@
 #                                                    held, the house's yes staged;
 #                                                    jharokha@alone-keep: so, the
 #                                                    house asked for real;
+#                                                    jharokha@alone-liked: alone,
+#                                                    liked, the house's yes staged;
+#                                                    jharokha@alone-unliked: so,
+#                                                    then the like taken back;
+#                                                    jharokha@alone-like-away: a
+#                                                    like with no house to hear it;
 #                                                    study@held: darban's name held;
 #                                                    study@onword: held, the thumb
 #                                                    on its word for the house;

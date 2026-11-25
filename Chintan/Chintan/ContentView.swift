@@ -67,9 +67,13 @@ struct ContentView: View {
     @GestureState(resetTransaction: Transaction(animation: .smooth)) private var pinch = Pinch()
     // A turn along the paintings while the painting stands alone.
     @State private var turned = 0
-    // What the last hold on the painting alone came to, said for a moment.
-    @State private var kept: Gallery.Kept?
-    @State private var keeping = 0
+    // What the last hold or like on the painting alone came to, said for a moment.
+    @State private var foot: Foot?
+    @State private var footSaid = 0
+    // Just after a tap brought the day back: a second tap this soon is his
+    // like on the work that stood alone, so the first tap never waits for it.
+    @State private var lingering = false
+    @ObservedObject private var marks = Marks.shared
     // How often the Mac wall turns to the next painting, from its menu.
     @AppStorage(WallPace.key) private var paceMinutes = WallPace.standard
     #if targetEnvironment(macCatalyst)
@@ -79,6 +83,11 @@ struct ContentView: View {
     // Whether the opening step, the house's word, has been taken.
     @State private var opened = false
     #endif
+
+    private struct Foot: Equatable {
+        let words: String
+        let gilt: Bool
+    }
 
     private struct Pinch: Equatable {
         var zoom: CGFloat = 1
@@ -127,7 +136,17 @@ struct ContentView: View {
         // Alone, every page, its shade and the bar step away; the picture stays.
         .opacity(alone ? 0 : 1)
         .allowsHitTesting(!alone)
-        .overlay { if alone { looking } }
+        .overlay {
+            if alone {
+                looking
+            } else if lingering {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .ignoresSafeArea()
+                    .onTapGesture { lingering = false; like() }
+                    .accessibilityHidden(true)
+            }
+        }
         #if targetEnvironment(macCatalyst)
         // On the wall the label never leaves: only the rest of the wall does.
         .overlay { WallLabel(letters: alone ? handLetters ?? WallLetters.of(gallery) : WallLetters.of(gallery)) }
@@ -152,13 +171,10 @@ struct ContentView: View {
         .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
         .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
         .sensoryFeedback(.impact(weight: .light), trigger: turned)
-        // Success when the house takes the painting, a warning when it cannot.
-        .sensoryFeedback(trigger: keeping) { _, _ in
-            switch kept {
-            case .kept, .already: return .success
-            case .noDoor, .unheard: return .warning
-            case nil: return nil
-            }
+        // Success when the house takes the painting or the like, a warning when it cannot.
+        .sensoryFeedback(trigger: footSaid) { _, _ in
+            guard let foot else { return nil }
+            return foot.gilt ? .success : .warning
         }
         .environment(\.paintingAlone, $alone)
         .sensoryFeedback(.selection, trigger: tab)
@@ -232,6 +248,18 @@ struct ContentView: View {
                 keep(staged: eyes == "alone-kept")
                 return
             }
+            // `alone-liked` likes the work as if the house had heard,
+            // `alone-unliked` likes it and takes it back so, both unasked;
+            // `alone-like` asks the house for real (with `-away`, a dead one).
+            if eyes == "alone-liked" || eyes == "alone-unliked" || eyes == "alone-like" {
+                if eyes == "alone-like" { like(); return }
+                if eyes == "alone-unliked" {
+                    like(staged: true, to: true, quietly: true)
+                    try? await Task.sleep(for: .seconds(0.5))
+                }
+                like(staged: true, to: eyes == "alone-liked")
+                return
+            }
             if eyes.hasPrefix("alone-yesterday") {
                 walk(-1)
                 try? await Task.sleep(for: .seconds(1.5))
@@ -274,7 +302,18 @@ struct ContentView: View {
             .onLongPressGesture(minimumDuration: 0.6, maximumDistance: 12) {
                 keep(staged: ProcessInfo.processInfo.arguments.contains("--keep-staged"))
             }
-            .onTapGesture { click() }
+            .onTapGesture {
+                click()
+                #if !targetEnvironment(macCatalyst)
+                // The day starts back at once; a second tap in the next
+                // moment, the span of the system's double tap, is the like.
+                lingering = true
+                Task {
+                    try? await Task.sleep(for: .seconds(0.35))
+                    lingering = false
+                }
+                #endif
+            }
             .gesture(
                 MagnifyGesture()
                     .updating($pinch) { value, state, _ in
@@ -292,11 +331,13 @@ struct ContentView: View {
             )
             .accessibilityElement()
             .accessibilityLabel(gallery.painting?.title ?? "The painting")
-            .accessibilityValue(gallery.showingYesterday ? "Yesterday's" : "")
+            .accessibilityValue([gallery.showingYesterday ? "Yesterday's" : "", likedNow ? "Liked" : ""]
+                .filter { !$0.isEmpty }.joined(separator: ", "))
             .accessibilityHint("Double tap to bring the day back. Swipe up or down to turn.")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction { back() }
             .accessibilityAction(named: "Keep this painting") { keep() }
+            .accessibilityAction(named: likedNow ? "Take back the like" : "More like this") { like() }
             .accessibilityAdjustableAction { direction in
                 switch direction {
                 case .increment: walk(1)
@@ -312,19 +353,13 @@ struct ContentView: View {
     private var keptLine: some View {
         GeometryReader { g in
             let foot = max(g.safeAreaInsets.bottom, 20)
-            if let kept {
-                let (words, gilt): (String, Bool) = switch kept {
-                case .kept: ("Kept, in the baithak", true)
-                case .already: ("Already in the baithak", true)
-                case .noDoor: ("The house cannot keep it yet", false)
-                case .unheard: ("The house is not answering", false)
-                }
+            if let line = self.foot {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
-                    Text(words)
+                    Text(line.words)
                         .font(Theme.label(.caption))
                         .tracking(1)
-                        .foregroundStyle(gilt ? Theme.giltOnArt : Theme.saffron)
+                        .foregroundStyle(line.gilt ? Theme.giltOnArt : Theme.saffron)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
@@ -350,19 +385,54 @@ struct ContentView: View {
         Task {
             let answer = await gallery.keep(staged: staged)
             if case .kept = answer { Taps.shared.note("painting.keep", id: gallery.painting?.id) }
-            withAnimation(.smooth) { kept = answer }
-            keeping += 1
+            let (words, gilt): (String, Bool) = switch answer {
+            case .kept: ("Kept, in the baithak", true)
+            case .already: ("Already in the baithak", true)
+            case .noDoor: ("The house cannot keep it yet", false)
+            case .unheard: ("The house is not answering", false)
+            }
             let said = switch answer {
-            case .kept: "Kept, in the baithak"
-            case .already: "Already in the baithak"
+            case .kept, .already: words
             case .noDoor: "Not kept. The house cannot keep paintings yet"
             case .unheard: "Not kept. The house is not answering"
             }
-            UIAccessibility.post(notification: .announcement, argument: said)
-            let shown = keeping
-            try? await Task.sleep(for: .seconds(3.5))
-            if keeping == shown { withAnimation(.smooth) { kept = nil } }
+            await say(Foot(words: words, gilt: gilt), aloud: said)
         }
+    }
+
+    // Whether the work on the wall is one he has liked, by the shelf's own id.
+    private var likedNow: Bool {
+        guard let id = gallery.painting?.id else { return false }
+        return marks.has("painting", id, "more")
+    }
+
+    // His like on the work: "more" told to the house under the work's own
+    // id, so the house leans the days toward its hand and school; liked
+    // already, the same act takes it back. Held on the phone only once heard.
+    private func like(staged: Bool = false, to: Bool? = nil, quietly: Bool = false) {
+        guard let p = gallery.painting, let id = p.id else { return }
+        let on = to ?? !marks.has("painting", id, "more")
+        Task {
+            let told = await marks.tell("painting", id, "more", on: on, title: p.title ?? "", staged: staged)
+            if quietly { return }
+            if told == .heard { Taps.shared.note(on ? "painting.like" : "painting.unlike", id: id) }
+            let (words, gilt, said): (String, Bool, String) = switch told {
+            case .heard: on ? ("More like this", true, "Liked. More like this") : ("Taken back", true, "Like taken back")
+            case .refused: ("The house cannot take it yet", false, "Not liked. The house cannot take it yet")
+            case .unheard: ("The house is not answering", false, "Not liked. The house is not answering")
+            }
+            await say(Foot(words: words, gilt: gilt), aloud: said)
+        }
+    }
+
+    // A line risen in the foot, said aloud, and let go after a few seconds.
+    private func say(_ line: Foot, aloud: String) async {
+        withAnimation(.smooth) { foot = line }
+        footSaid += 1
+        UIAccessibility.post(notification: .announcement, argument: aloud)
+        let shown = footSaid
+        try? await Task.sleep(for: .seconds(3.5))
+        if footSaid == shown { withAnimation(.smooth) { foot = nil } }
     }
 
     private func walk(_ by: Int) {

@@ -56,6 +56,25 @@ import SwiftUI
         send(Body(surface: surface, thing: thing, mark: mark, on: on, title: title, words: "", url: url))
     }
 
+    // A mark told at once and its answer awaited, for a gesture that must say
+    // what came of it (the like on the painting alone). Held only once the
+    // house has heard, so the phone never shows a mark the house lacks.
+    // `staged` answers as the house would, unasked, for the house's own eyes.
+    func tell(_ surface: String, _ thing: String, _ mark: String, on: Bool, title: String, staged: Bool = false) async -> HouseClient.Told {
+        if !staged {
+            guard !Self.quiet, let address = Keychain.loadHouseAddress(), !address.isEmpty,
+                  let data = try? JSONEncoder().encode(Body(surface: surface, thing: thing, mark: mark, on: on, title: title, words: "", url: ""))
+            else { return .unheard }
+            let told = await HouseClient(baseAddress: address).mark(data)
+            guard told == .heard else { return told }
+        }
+        let k = Self.key(surface, thing, mark)
+        if on { held.insert(k) } else { held.remove(k) }
+        if on, mark == "more" { held.remove(Self.key(surface, thing, "less")) }
+        UserDefaults.standard.set(Array(held.prefix(2000)), forKey: Self.heldKey)
+        return .heard
+    }
+
     func say(_ surface: String, _ thing: String, title: String, words: String) {
         let text = words.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
