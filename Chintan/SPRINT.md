@@ -1224,6 +1224,23 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
 
 ## The ledger (newest first)
 
+- 2026-11-25 · a like on the work itself (the house's steer, his yes of the
+  day). d26d49f: on the painting alone a double tap likes the work, `POST
+  /v1/mark {"surface": "painting", "thing": the shelf's id, "mark": "more",
+  "on": true, "title"}` (Marks.tell, told at once and held on the phone only
+  once heard), and on a work already liked takes it back (`"on": false`). A
+  gilt line rises in the foot where the kept line stands, "More like this" or
+  "Taken back", gone after 3.5 s; a house that does not answer says so in
+  saffron and nothing is held. The single tap is not slowed: it brings the
+  day back at once, and a tap within 0.35 s after it, while the day fades in,
+  is the like, so a double tap likes the work and lets the day return under
+  the line (a long press stays Keep). VoiceOver: "More like this" or "Take
+  back the like" beside Keep, and "Liked" in the painting's value. Seen:
+  jharokha@alone-liked, @alone-unliked, @alone-like-away, light and dark
+  (the painting alone draws the same in both). Not yet seen: a real double
+  tap filmed by the walk, and the line over the day returning. No new door.
+  Funnel: nothing
+
 - 2026-11-21, the afternoon · by hand from the study (his words 12:55 and
   13:01). The letter redrawn as one sheet (Iowan Old Style, a masthead, gilt
   ornaments, nothing boxed), then a size finer. His marks: Marks.swift, a
