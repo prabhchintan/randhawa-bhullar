@@ -1238,7 +1238,12 @@ Q. The widget (Prab, 2026-09-27 19:26, verbatim: "i like this so much that
   back the like" beside Keep, and "Liked" in the painting's value. Seen:
   jharokha@alone-liked, @alone-unliked, @alone-like-away, light and dark
   (the painting alone draws the same in both). Not yet seen: a real double
-  tap filmed by the walk, and the line over the day returning. No new door.
+  tap filmed by the walk, and the line over the day returning. 61f98e6: with
+  this change the Mac wall's ContentView body no longer type-checked in time
+  (Debug, x86_64), so the body is read in three parts (pages, hung, body);
+  the wall draws again (/tmp/see/9/wall). The walk's tests still reach for
+  the unhung Study tab and fail there, an older break than this sprint.
+  No new door.
   Funnel: nothing
 
 - 2026-11-21, the afternoon · by hand from the study (his words 12:55 and
