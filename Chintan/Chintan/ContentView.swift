@@ -97,6 +97,126 @@ struct ContentView: View {
     private var tab: Tab { page ?? .jharokha }
 
     var body: some View {
+        hung
+        // The tap ledger: each visit front to back, each page while it is in
+        // view, the painting alone; handed to the house as the app leaves.
+        .onChange(of: phase, initial: true) { _, now in
+            if now == .active {
+                Taps.shared.begin("app")
+                Taps.shared.begin("tab", id: tab.ledger)
+            } else if now == .background {
+                Taps.shared.leave()
+            }
+        }
+        .onChange(of: tab) { _, now in
+            Taps.shared.end("tab")
+            Taps.shared.begin("tab", id: now.ledger)
+        }
+        .onChange(of: alone) { _, now in
+            if now { Taps.shared.begin("painting.alone", id: gallery.painting?.id) } else { Taps.shared.end("painting.alone") }
+        }
+        .tint(Theme.giltOnArt)
+        .environmentObject(gallery)
+        .task { await gallery.load() }
+        // A tap on the widget (chintan://painting/ID) opens on the painting
+        // alone: its work when the phone holds it, else Home's own.
+        .onOpenURL { url in
+            guard url.scheme == "chintan", url.host == "painting" else { return }
+            let id = url.lastPathComponent
+            withAnimation(.snappy) { page = .jharokha }
+            Task {
+                if !id.isEmpty, id != "/" { await gallery.choose(id: id) }
+                withAnimation(.smooth) { alone = true }
+            }
+        }
+        #if targetEnvironment(macCatalyst)
+        // The wall turns on its own, at the pace set in its menu, each turn a
+        // fresh work from the house; a turn by hand starts the wait again.
+        .task(id: WallPace.Turn(minutes: paceMinutes, turned: turned)) { await turnWall() }
+        .task { await clicks() }
+        #endif
+        .task { await aloneEyes() }
+        .task {
+            // The hitch meter's walk with no hand; a phone never passes this.
+            guard ProcessInfo.processInfo.arguments.contains("--self-walk") else { return }
+            await HitchMeter.shared.walk { t in withAnimation(.snappy) { page = t } }
+        }
+        // Hidden only under a keyboard tall enough to cover it, not a
+        // hardware keyboard's thin strip.
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
+            guard let end = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            keyboard = UIScreen.main.bounds.height - end.minY > 120
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboard = false }
+    }
+
+    // The pages hung: the wall's own layers, the foot line, the painting
+    // under all, and the touches; the body adds the ledger and the tasks.
+    private var hung: some View {
+        pages
+        #if targetEnvironment(macCatalyst)
+        // On the wall the label never leaves: only the rest of the wall does.
+        .overlay { WallLabel(letters: alone ? handLetters ?? WallLetters.of(gallery) : WallLetters.of(gallery)) }
+        // The wall opens on the step the house's word names: off, the
+        // painting alone and bare; basic or detailed, alone and so lettered.
+        // A house that has said nothing opens on the wall.
+        .onChange(of: gallery.painting?.key, initial: true) { _, key in
+            guard !opened, key != nil else { return }
+            opened = true
+            guard !WallLetters.onWall, let word = WallLetters.word(gallery) else { return }
+            handLetters = WallLetters(word)
+            alone = true
+        }
+        // Onto the painting alone from the wall, bare first.
+        .onChange(of: alone) { _, now in if now && handLetters == nil { handLetters = .off } }
+        #endif
+        .overlay { keptLine }
+        // Alone, the home indicator steps back with the clock.
+        .persistentSystemOverlays(alone ? .hidden : .automatic)
+        .background { Painting(zoom: pinch.zoom, anchor: pinch.anchor) }
+        .onChange(of: alone) { _, now in if now { clockAway = true } }
+        .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
+        .sensoryFeedback(.impact(weight: .light), trigger: turned)
+        // Success when the house takes the painting or the like, a warning when it cannot.
+        .sensoryFeedback(trigger: footSaid) { _, _ in footFeel }
+        .environment(\.paintingAlone, $alone)
+        .sensoryFeedback(.selection, trigger: tab)
+    }
+
+    // The foot line's touch: success for a yes, a warning for a no.
+    private var footFeel: SensoryFeedback? {
+        guard let foot else { return nil }
+        return foot.gilt ? .success : .warning
+    }
+
+    #if targetEnvironment(macCatalyst)
+    private func turnWall() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(WallPace.seconds(paceMinutes)))
+            guard !Task.isCancelled else { return }
+            await gallery.turnWall()
+        }
+    }
+
+    // For the house's eyes: `--clicks S` clicks the art every S
+    // seconds, the way his hand would, round the four steps.
+    private func clicks() async {
+        let args = ProcessInfo.processInfo.arguments
+        guard let i = args.firstIndex(of: "--clicks"), i + 1 < args.count,
+              let every = Double(args[i + 1]), every > 0 else { return }
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(every))
+            if alone { click() } else { withAnimation(.smooth) { alone = true } }
+            print("wall-step", alone ? "\(handLetters ?? .off)" : "wall")
+            fflush(stdout)
+        }
+    }
+    #endif
+
+    // The pages and the painting alone over them; apart from the body so
+    // the Mac wall's compiler reads each half in time.
+    private var pages: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 // All three built at launch, so a first visit is a slide, not a fetch.
@@ -136,148 +256,7 @@ struct ContentView: View {
         // Alone, every page, its shade and the bar step away; the picture stays.
         .opacity(alone ? 0 : 1)
         .allowsHitTesting(!alone)
-        .overlay {
-            if alone {
-                looking
-            } else if lingering {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .ignoresSafeArea()
-                    .onTapGesture { lingering = false; like() }
-                    .accessibilityHidden(true)
-            }
-        }
-        #if targetEnvironment(macCatalyst)
-        // On the wall the label never leaves: only the rest of the wall does.
-        .overlay { WallLabel(letters: alone ? handLetters ?? WallLetters.of(gallery) : WallLetters.of(gallery)) }
-        // The wall opens on the step the house's word names: off, the
-        // painting alone and bare; basic or detailed, alone and so lettered.
-        // A house that has said nothing opens on the wall.
-        .onChange(of: gallery.painting?.key, initial: true) { _, key in
-            guard !opened, key != nil else { return }
-            opened = true
-            guard !WallLetters.onWall, let word = WallLetters.word(gallery) else { return }
-            handLetters = WallLetters(word)
-            alone = true
-        }
-        // Onto the painting alone from the wall, bare first.
-        .onChange(of: alone) { _, now in if now && handLetters == nil { handLetters = .off } }
-        #endif
-        .overlay { keptLine }
-        // Alone, the home indicator steps back with the clock.
-        .persistentSystemOverlays(alone ? .hidden : .automatic)
-        .background { Painting(zoom: pinch.zoom, anchor: pinch.anchor) }
-        .onChange(of: alone) { _, now in if now { clockAway = true } }
-        .onChange(of: clockAway, initial: true) { _, away in Clock.hide(away) }
-        .sensoryFeedback(.impact(flexibility: .soft), trigger: alone)
-        .sensoryFeedback(.impact(weight: .light), trigger: turned)
-        // Success when the house takes the painting or the like, a warning when it cannot.
-        .sensoryFeedback(trigger: footSaid) { _, _ in
-            guard let foot else { return nil }
-            return foot.gilt ? .success : .warning
-        }
-        .environment(\.paintingAlone, $alone)
-        .sensoryFeedback(.selection, trigger: tab)
-        // The tap ledger: each visit front to back, each page while it is in
-        // view, the painting alone; handed to the house as the app leaves.
-        .onChange(of: phase, initial: true) { _, now in
-            if now == .active {
-                Taps.shared.begin("app")
-                Taps.shared.begin("tab", id: tab.ledger)
-            } else if now == .background {
-                Taps.shared.leave()
-            }
-        }
-        .onChange(of: tab) { _, now in
-            Taps.shared.end("tab")
-            Taps.shared.begin("tab", id: now.ledger)
-        }
-        .onChange(of: alone) { _, now in
-            if now { Taps.shared.begin("painting.alone", id: gallery.painting?.id) } else { Taps.shared.end("painting.alone") }
-        }
-        .tint(Theme.giltOnArt)
-        .environmentObject(gallery)
-        .task { await gallery.load() }
-        // A tap on the widget (chintan://painting/ID) opens on the painting
-        // alone: its work when the phone holds it, else Home's own.
-        .onOpenURL { url in
-            guard url.scheme == "chintan", url.host == "painting" else { return }
-            let id = url.lastPathComponent
-            withAnimation(.snappy) { page = .jharokha }
-            Task {
-                if !id.isEmpty, id != "/" { await gallery.choose(id: id) }
-                withAnimation(.smooth) { alone = true }
-            }
-        }
-        #if targetEnvironment(macCatalyst)
-        // The wall turns on its own, at the pace set in its menu, each turn a
-        // fresh work from the house; a turn by hand starts the wait again.
-        .task(id: WallPace.Turn(minutes: paceMinutes, turned: turned)) {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(WallPace.seconds(paceMinutes)))
-                guard !Task.isCancelled else { return }
-                await gallery.turnWall()
-            }
-        }
-        .task {
-            // For the house's eyes: `--clicks S` clicks the art every S
-            // seconds, the way his hand would, round the four steps.
-            let args = ProcessInfo.processInfo.arguments
-            guard let i = args.firstIndex(of: "--clicks"), i + 1 < args.count,
-                  let every = Double(args[i + 1]), every > 0 else { return }
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(every))
-                if alone { click() } else { withAnimation(.smooth) { alone = true } }
-                print("wall-step", alone ? "\(handLetters ?? .off)" : "wall")
-                fflush(stdout)
-            }
-        }
-        #endif
-        .task {
-            // For the house's eyes: `--open alone-back` leaves the painting
-            // alone, then brings the wall back, as a tap would;
-            // `--open alone-yesterday` swipes back a painting instead, and
-            // `alone-yesterday-back` then brings the wall back over it.
-            guard let eyes = ContentView.eyes, eyes.hasPrefix("alone-") else { return }
-            try? await Task.sleep(for: .seconds(2))
-            // `alone-kept` holds the painting as if the house had taken it,
-            // asking nothing of the house; `alone-keep` asks it for real.
-            // Held at four seconds, so the answer stands when the eyes look at six.
-            if eyes == "alone-keep" || eyes == "alone-kept" {
-                try? await Task.sleep(for: .seconds(2))
-                keep(staged: eyes == "alone-kept")
-                return
-            }
-            // `alone-liked` likes the work as if the house had heard,
-            // `alone-unliked` likes it and takes it back so, both unasked;
-            // `alone-like` asks the house for real (with `-away`, a dead one).
-            if eyes == "alone-liked" || eyes == "alone-unliked" || eyes == "alone-like" {
-                if eyes == "alone-like" { like(); return }
-                if eyes == "alone-unliked" {
-                    like(staged: true, to: true, quietly: true)
-                    try? await Task.sleep(for: .seconds(0.5))
-                }
-                like(staged: true, to: eyes == "alone-liked")
-                return
-            }
-            if eyes.hasPrefix("alone-yesterday") {
-                walk(-1)
-                try? await Task.sleep(for: .seconds(1.5))
-            }
-            if eyes.hasSuffix("back") { back() }
-        }
-        .task {
-            // The hitch meter's walk with no hand; a phone never passes this.
-            guard ProcessInfo.processInfo.arguments.contains("--self-walk") else { return }
-            await HitchMeter.shared.walk { t in withAnimation(.snappy) { page = t } }
-        }
-        // Hidden only under a keyboard tall enough to cover it, not a
-        // hardware keyboard's thin strip.
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
-            guard let end = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-            keyboard = UIScreen.main.bounds.height - end.minY > 120
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboard = false }
+        .overlay { aloneLayer }
     }
 
     @ViewBuilder private func screen(_ t: Tab) -> some View {
@@ -287,6 +266,56 @@ struct ContentView: View {
         case .board: BoardView(shown: tab == .board).equatable()
         // The chat he did not use gave its page to the mirror (2026-11-20).
         case .mirror: MirrorView(shown: tab == .mirror).equatable()
+        }
+    }
+
+    // For the house's eyes, on the painting alone; out of the body so the
+    // Mac wall's compiler can still read the body in time.
+    private func aloneEyes() async {
+        // For the house's eyes: `--open alone-back` leaves the painting
+        // alone, then brings the wall back, as a tap would;
+        // `--open alone-yesterday` swipes back a painting instead, and
+        // `alone-yesterday-back` then brings the wall back over it.
+        guard let eyes = ContentView.eyes, eyes.hasPrefix("alone-") else { return }
+        try? await Task.sleep(for: .seconds(2))
+        // `alone-kept` holds the painting as if the house had taken it,
+        // asking nothing of the house; `alone-keep` asks it for real.
+        // Held at four seconds, so the answer stands when the eyes look at six.
+        if eyes == "alone-keep" || eyes == "alone-kept" {
+            try? await Task.sleep(for: .seconds(2))
+            keep(staged: eyes == "alone-kept")
+            return
+        }
+        // `alone-liked` likes the work as if the house had heard,
+        // `alone-unliked` likes it and takes it back so, both unasked;
+        // `alone-like` asks the house for real (with `-away`, a dead one).
+        if eyes == "alone-liked" || eyes == "alone-unliked" || eyes == "alone-like" {
+            if eyes == "alone-like" { like(); return }
+            if eyes == "alone-unliked" {
+                like(staged: true, to: true, quietly: true)
+                try? await Task.sleep(for: .seconds(0.5))
+            }
+            like(staged: true, to: eyes == "alone-liked")
+            return
+        }
+        if eyes.hasPrefix("alone-yesterday") {
+            walk(-1)
+            try? await Task.sleep(for: .seconds(1.5))
+        }
+        if eyes.hasSuffix("back") { back() }
+    }
+
+    // Over the pages: the painting alone, or for a moment after a tap brought
+    // the day back, the catch for the second tap that likes the work.
+    @ViewBuilder private var aloneLayer: some View {
+        if alone {
+            looking
+        } else if lingering {
+            Color.clear
+                .contentShape(Rectangle())
+                .ignoresSafeArea()
+                .onTapGesture { lingering = false; like() }
+                .accessibilityHidden(true)
         }
     }
 
