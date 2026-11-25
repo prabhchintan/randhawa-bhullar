@@ -142,7 +142,12 @@ item is written so a session can tell when it is done.
    newest Xcode 26.3) both had Xcode 26.3. Done when yantar runs Xcode 27,
    `loop.yml` and `build.yml` sit on a runner image that carries it, and
    one clean simulator build of each app has passed on each, well before
-   April 2027.
+   April 2027. 2026-11-25: GitHub's `xcode-27` image label (macOS 27, still
+   a preview) carries it; `macos-26` stops at Xcode 26.6. The loop's token
+   cannot push workflow files (no `workflows` permission), so the first
+   step, a second job in `build.yml` on `runs-on: xcode-27` with
+   `continue-on-error: true` running the same two builds, waits for a push
+   from a machine that can.
 
 ## Both, eventually
 
